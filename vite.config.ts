@@ -14,10 +14,12 @@ export default defineConfig({
         short_name: 'OpenTWQR',
         description: 'Generate Taiwan Pay (TWQR) personal transfer QR codes safely and locally.',
         start_url: '/',
+        scope: '/',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
+        lang: 'zh-TW',
         icons: [
           {
             src: 'pwa-192x192.svg',

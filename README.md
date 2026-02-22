@@ -1,5 +1,7 @@
 # OpenTWQR
 
+**線上使用：https://pay.garyellow.app**
+
 OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 支援 PWA 安裝、本地資料儲存、離線開啟與顯示已存在帳戶資料。
 
@@ -16,6 +18,14 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 - 安裝後可離線開啟 App Shell 與使用已快取資源
 - 帳戶資料為本機儲存，無後端依賴
 - 銀行清單內建於前端資源，無網路時自動使用內建清單（Fallback）
+
+## 部署
+
+部署至 GitHub Pages，自定義網域 `pay.garyellow.app`。
+
+- 自動部署：push to `main` 觸發 `.github/workflows/deploy.yml`
+- `public/CNAME` 確保每次部署後自定義網域不被重置
+- `public/404.html` 處理 GitHub Pages SPA 路由（直接進入子路徑 / 重新整理）
 
 ## 銀行資料更新策略
 
