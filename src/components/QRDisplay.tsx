@@ -27,6 +27,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
         <button
           type="button"
           onClick={onClose}
+          aria-label="Close QR screen"
           className="p-3 rounded-full bg-zinc-800/50 text-white hover:bg-zinc-700 transition-colors border border-zinc-700/50"
         >
           <X size={24} />
@@ -35,6 +36,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
           <button
             type="button"
             onClick={() => setIsBright(!isBright)}
+            aria-label={isBright ? 'Switch to dim mode' : 'Switch to bright mode'}
             className={`p-3 rounded-full transition-all border ${
               isBright 
                 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 shadow-[0_0_15px_rgba(250,204,21,0.2)]' 

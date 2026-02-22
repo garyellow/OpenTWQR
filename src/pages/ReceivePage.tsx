@@ -70,6 +70,7 @@ export const ReceivePage = () => {
           </div>
           <Link
             to="/accounts"
+            aria-label="Manage bank accounts"
             className="w-11 h-11 bg-zinc-900 rounded-full flex items-center justify-center hover:bg-zinc-800 transition-colors border border-zinc-800 active:scale-95"
           >
             <Settings size={20} className="text-zinc-400" />

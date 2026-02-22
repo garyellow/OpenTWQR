@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# OpenTWQR
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
+支援 PWA 安裝、本地資料儲存、離線開啟與顯示已存在帳戶資料。
 
-Currently, two official plugins are available:
+## 核心功能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 只保留收款流程：輸入金額 → 產生 QR → 對方掃碼轉帳
+- 帳戶管理（新增 / 編輯 / 刪除 / 選擇預設帳戶）
+- 使用 `zustand + persist` 將帳戶資料存在本機 `localStorage`
+- TWQRP 字串由 `src/utils/twqr.ts` 生成（含 16 碼帳號補零、金額 * 100）
 
-## React Compiler
+## PWA / 離線
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 透過 `vite-plugin-pwa` 產生 `sw.js` 與 `manifest.webmanifest`
+- 安裝後可離線開啟 App Shell 與使用已快取資源
+- 帳戶資料為本機儲存，無後端依賴
 
-## Expanding the ESLint configuration
+## 開發指令
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 技術堆疊
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- React 19 + TypeScript + Vite
+- Tailwind CSS
+- React Router
+- Zustand
+- qrcode.react
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 專案結構
+
+- `src/pages`：主要頁面（收款頁 / 帳戶頁）
+- `src/components`：UI 元件
+- `src/stores`：狀態管理與本地持久化
+- `src/utils/twqr.ts`：TWQRP 產生邏輯
+
+## 注意事項
+
+- 本專案不儲存密碼或任何伺服器端資料

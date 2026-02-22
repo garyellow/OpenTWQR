@@ -63,6 +63,7 @@ export const AccountCard = ({
         {onEdit && (
           <button
             type="button"
+            aria-label="Edit account"
             onClick={(e) => {
               e.stopPropagation();
               onEdit(e);
@@ -75,6 +76,7 @@ export const AccountCard = ({
         {onDelete && (
           <button
             type="button"
+            aria-label="Delete account"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(e);
