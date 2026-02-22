@@ -40,7 +40,3 @@ npm run preview
 - `src/components`：UI 元件
 - `src/stores`：狀態管理與本地持久化
 - `src/utils/twqr.ts`：TWQRP 產生邏輯
-
-## 注意事項
-
-- 本專案不儲存密碼或任何伺服器端資料

@@ -38,8 +38,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
             onClick={() => setIsBright(!isBright)}
             aria-label={isBright ? 'Switch to dim mode' : 'Switch to bright mode'}
             className={`p-3 rounded-full transition-all border ${
-              isBright 
-                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 shadow-[0_0_15px_rgba(250,204,21,0.2)]' 
+              isBright
+                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 shadow-[0_0_15px_rgba(250,204,21,0.2)]'
                 : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50'
             }`}
           >
