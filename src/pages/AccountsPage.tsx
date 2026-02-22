@@ -95,7 +95,7 @@ export const AccountsPage = () => {
 
       {(isAdding || editingId) && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div 
+          <div
             className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-zinc-900 rounded-t-[2rem] sm:rounded-[2rem] flex flex-col shadow-2xl border border-zinc-800 animate-in slide-in-from-bottom-10 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
@@ -114,8 +114,8 @@ export const AccountsPage = () => {
               />
             </div>
           </div>
-          <div 
-             className="absolute inset-0 -z-10" 
+          <div
+             className="absolute inset-0 -z-10"
              onClick={() => {
                setIsAdding(false);
                setEditingId(null);

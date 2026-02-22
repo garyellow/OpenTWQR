@@ -10,12 +10,12 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
   const handleDigit = (digit: string) => {
     let current = value;
     if (current === '0') current = '';
-    
+
     // Check length to avoid extremely large numbers that break layout or math
     if (current.length >= 9) return;
-    
+
     const newValue = current + digit;
-    
+
     // Limit amount
     if (parseInt(newValue, 10) > maxAmount) return;
     onChange(newValue);

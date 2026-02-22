@@ -68,8 +68,8 @@ export const ReceivePage = () => {
               Receive Money
             </h1>
           </div>
-          <Link 
-            to="/accounts" 
+          <Link
+            to="/accounts"
             className="w-11 h-11 bg-zinc-900 rounded-full flex items-center justify-center hover:bg-zinc-800 transition-colors border border-zinc-800 active:scale-95"
           >
             <Settings size={20} className="text-zinc-400" />
@@ -96,7 +96,7 @@ export const ReceivePage = () => {
 
         <section className="flex-1 flex flex-col justify-end space-y-6">
           <AmountInput value={amount} onChange={setAmount} />
-          
+
           <div className="pt-2 pb-6">
             <button
               type="button"
@@ -111,12 +111,12 @@ export const ReceivePage = () => {
       </div>
 
       {showQR && qrString && (
-        <QRDisplay 
-          value={qrString} 
+        <QRDisplay
+          value={qrString}
           amount={amount ? parseInt(amount, 10) : undefined}
           bankName={bankName}
           accountNumber={selectedAccount?.accountNumber}
-          onClose={() => setShowQR(false)} 
+          onClose={() => setShowQR(false)}
         />
       )}
     </div>

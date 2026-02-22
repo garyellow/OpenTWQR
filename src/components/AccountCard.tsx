@@ -30,8 +30,8 @@ export const AccountCard = ({
         }
       }}
       className={`relative p-5 rounded-2xl transition-all duration-300 border cursor-pointer group outline-none focus:ring-2 focus:ring-emerald-500/50
-        ${isSelected 
-          ? 'bg-zinc-800 border-emerald-500 shadow-[0_0_30px_-5px_rgba(16,185,129,0.3)]' 
+        ${isSelected
+          ? 'bg-zinc-800 border-emerald-500 shadow-[0_0_30px_-5px_rgba(16,185,129,0.3)]'
           : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
         }
       `}
@@ -54,7 +54,7 @@ export const AccountCard = ({
       <div className="font-mono text-xl tracking-wider text-zinc-300 mb-1">
         {account.accountNumber.replace(/(.{4})/g, '$1 ').trim()}
       </div>
-      
+
       {account.note && (
         <p className="text-zinc-500 text-sm truncate">{account.note}</p>
       )}
