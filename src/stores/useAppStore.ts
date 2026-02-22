@@ -22,10 +22,18 @@ export const useAppStore = create<AppState>()(
           selectedAccountId: state.accounts.length === 0 ? account.id : state.selectedAccountId,
         })),
       removeAccount: (id) =>
-        set((state) => ({
-          accounts: state.accounts.filter((a) => a.id !== id),
-          selectedAccountId: state.selectedAccountId === id ? null : state.selectedAccountId,
-        })),
+        set((state) => {
+          const nextAccounts = state.accounts.filter((a) => a.id !== id);
+          const nextSelectedId =
+            state.selectedAccountId === id
+              ? (nextAccounts[0]?.id ?? null)
+              : state.selectedAccountId;
+
+          return {
+            accounts: nextAccounts,
+            selectedAccountId: nextSelectedId,
+          };
+        }),
       updateAccount: (id, updatedAccount) =>
         set((state) => ({
           accounts: state.accounts.map((a) => (a.id === id ? { ...a, ...updatedAccount } : a)),

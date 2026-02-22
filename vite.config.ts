@@ -7,14 +7,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vite.svg', 'pwa-192x192.svg', 'pwa-512x512.svg'],
+      includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg'],
       manifest: {
+        id: '/',
         name: 'OpenTWQR',
         short_name: 'OpenTWQR',
         description: 'Generate Taiwan Pay (TWQR) personal transfer QR codes safely and locally.',
+        start_url: '/',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
+        orientation: 'portrait',
         icons: [
           {
             src: 'pwa-192x192.svg',

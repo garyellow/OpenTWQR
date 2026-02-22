@@ -18,7 +18,7 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!bankCode) {
       setError('Please select a bank');
       return;
@@ -57,12 +57,17 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
         <div className="relative">
           <input
             id="account-number"
+            name="accountNumber"
             type="tel"
             inputMode="numeric"
-            placeholder="0000000000000000"
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="0000000000000000…"
             value={accountNumber}
             onChange={handleAccountChange}
-            className="w-full bg-black/40 border border-zinc-700/50 rounded-2xl p-4 text-xl font-mono tracking-widest text-white placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all shadow-inner"
+            aria-invalid={Boolean(error && !isValidAccount(accountNumber))}
+            aria-describedby={error && !isValidAccount(accountNumber) ? 'account-form-error' : undefined}
+            className="w-full bg-black/40 border border-zinc-700/50 rounded-2xl p-4 text-xl font-mono tracking-widest text-white placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-[border-color,box-shadow] shadow-inner"
           />
         </div>
         <p className="text-zinc-500 text-xs mt-2 ml-1 flex items-center gap-1">
@@ -77,16 +82,18 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
         </label>
         <input
           id="account-note"
+          name="note"
           type="text"
-          placeholder="e.g. Rent, Salary"
+          autoComplete="off"
+          placeholder="e.g. Rent, Salary…"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="w-full bg-black/40 border border-zinc-700/50 rounded-2xl p-4 text-white placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all shadow-inner"
+          className="w-full bg-black/40 border border-zinc-700/50 rounded-2xl p-4 text-white placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-[border-color,box-shadow] shadow-inner"
         />
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 text-red-400 bg-red-500/10 p-4 rounded-2xl border border-red-500/20 animate-in fade-in slide-in-from-top-2">
+        <div id="account-form-error" role="alert" aria-live="polite" className="flex items-center gap-3 text-red-400 bg-red-500/10 p-4 rounded-2xl border border-red-500/20 animate-in fade-in slide-in-from-top-2">
           <AlertCircle size={20} className="shrink-0" />
           <span className="font-medium text-sm">{error}</span>
         </div>
@@ -102,7 +109,7 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
         </button>
         <button
           type="submit"
-          className="flex-[2] py-4 rounded-2xl font-bold text-black bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+          className="flex-[2] py-4 rounded-2xl font-bold text-black bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] transition-[background-color,transform] flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
         >
           <Save size={20} />
           Save Account

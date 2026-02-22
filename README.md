@@ -15,6 +15,27 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 - 透過 `vite-plugin-pwa` 產生 `sw.js` 與 `manifest.webmanifest`
 - 安裝後可離線開啟 App Shell 與使用已快取資源
 - 帳戶資料為本機儲存，無後端依賴
+- 銀行清單內建於前端資源，無網路時自動使用內建清單（Fallback）
+
+## 銀行資料更新策略
+
+- 官方來源：財金資訊股份有限公司 OpenData XML
+	- `https://www.fisc.com.tw/TC/OPENDATA/Comm1_MEMBER.xml`
+- 擷取範圍：`跨行自動化服務機器業務(金融卡)`（收款情境較不會出現意外選項）
+- 自動更新：透過 GitHub Actions 每週排程更新一次
+	- Workflow：`.github/workflows/update-banks.yml`
+	- 排程：每週一 `00:00 UTC`（台灣時間週一 `08:00`）
+- 產出檔案：
+	- `src/data/banks.generated.ts`（App 內建資料，離線可用）
+	- `public/data/banks.latest.json`（可對外檢視版本）
+- 手動更新指令：`npm run update:banks`
+
+## 銀行清單生命週期
+
+- 啟動 App 時：先使用內建銀行清單，確保離線可立即使用。
+- 有網路時：背景抓取 `/data/banks.latest.json`，成功後即更新 App 清單與本機快取。
+- 重新連網時：自動再次同步，降低長時間離線造成的資料落差。
+- 無網路或抓取失敗時：維持既有清單，不中斷收款操作。
 
 ## 開發指令
 

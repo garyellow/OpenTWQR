@@ -26,10 +26,6 @@ export const isValidAccount = (account: string): boolean => {
   return /^\d{10,16}$/.test(account);
 };
 
-export const isValidBank = (code: string): boolean => {
-  return /^\d{3}$/.test(code);
-};
-
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('zh-TW', {
     style: 'currency',

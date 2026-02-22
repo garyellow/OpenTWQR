@@ -5,12 +5,13 @@ import { QRDisplay } from '../components/QRDisplay';
 import { generateTWQR } from '../utils/twqr';
 import { Settings, Wallet, QrCode, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BANKS } from '../data/banks';
+import { useBanksStore } from '../stores/useBanksStore';
 
 export const ReceivePage = () => {
   const [amount, setAmount] = useState<string>('');
   const [showQR, setShowQR] = useState(false);
   const { accounts, selectedAccountId } = useAppStore();
+  const banks = useBanksStore((state) => state.banks);
   const navigate = useNavigate();
 
   const selectedAccount = useMemo(
@@ -19,8 +20,8 @@ export const ReceivePage = () => {
   );
 
   const bankName = useMemo(() => {
-    return BANKS.find((b) => b.code === selectedAccount?.bankCode)?.name || '';
-  }, [selectedAccount]);
+    return banks.find((bank) => bank.code === selectedAccount?.bankCode)?.name || '';
+  }, [banks, selectedAccount]);
 
   const qrString = useMemo(() => {
     if (!selectedAccount) return null;
@@ -48,7 +49,7 @@ export const ReceivePage = () => {
         <button
           type="button"
           onClick={() => navigate('/accounts')}
-          className="w-full max-w-xs py-4 bg-emerald-500 text-black font-bold rounded-2xl text-lg hover:bg-emerald-400 active:scale-95 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+          className="w-full max-w-xs py-4 bg-emerald-500 text-black font-bold rounded-2xl text-lg hover:bg-emerald-400 active:scale-95 transition-[background-color,transform] shadow-[0_0_20px_rgba(16,185,129,0.3)]"
         >
           Add Bank Account
         </button>
@@ -57,8 +58,11 @@ export const ReceivePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col font-sans">
-      <div className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full space-y-6 pb-safe">
+    <div className="min-h-screen bg-black text-white flex flex-col font-sans px-safe">
+      <a href="#receive-main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-900 focus:text-white">
+        Skip to main content
+      </a>
+      <main id="receive-main" className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full space-y-6 pb-safe">
         <header className="flex justify-between items-center pt-2">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
@@ -71,14 +75,14 @@ export const ReceivePage = () => {
           <Link
             to="/accounts"
             aria-label="Manage bank accounts"
-            className="w-11 h-11 bg-zinc-900 rounded-full flex items-center justify-center hover:bg-zinc-800 transition-colors border border-zinc-800 active:scale-95"
+            className="w-11 h-11 bg-zinc-900 rounded-full flex items-center justify-center hover:bg-zinc-800 transition-colors border border-zinc-800 active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500/50"
           >
             <Settings size={20} className="text-zinc-400" />
           </Link>
         </header>
 
         <section className="bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800/50 rounded-3xl p-1 shadow-lg">
-          <Link to="/accounts" className="flex items-center p-4 hover:bg-zinc-800/50 rounded-2xl transition-colors group">
+          <Link to="/accounts" className="flex items-center p-4 hover:bg-zinc-800/50 rounded-2xl transition-colors group focus-visible:ring-2 focus-visible:ring-emerald-500/50">
             <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center font-bold text-lg border border-zinc-700 text-zinc-300 group-hover:border-zinc-600 transition-colors">
               {selectedAccount?.bankCode.substring(0, 1)}
             </div>
@@ -102,14 +106,14 @@ export const ReceivePage = () => {
             <button
               type="button"
               onClick={() => setShowQR(true)}
-              className="group w-full flex items-center justify-center gap-3 py-4 bg-emerald-500 text-black font-bold rounded-[20px] text-xl hover:bg-emerald-400 active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)]"
+              className="group w-full flex items-center justify-center gap-3 py-4 bg-emerald-500 text-black font-bold rounded-[20px] text-xl hover:bg-emerald-400 active:scale-[0.98] transition-[background-color,box-shadow,transform] shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] focus-visible:ring-2 focus-visible:ring-emerald-500/50"
             >
               <QrCode size={24} className="transition-transform group-hover:scale-110" />
               Generate QR Code
             </button>
           </div>
         </section>
-      </div>
+      </main>
 
       {showQR && qrString && (
         <QRDisplay
