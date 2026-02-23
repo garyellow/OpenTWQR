@@ -337,21 +337,21 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                       onClick={handleToggleReveal}
                       aria-label={accountRevealed ? '隱藏帳號' : '顯示帳號'}
                       aria-pressed={accountRevealed}
-                      className="p-2 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
                       <span key={accountRevealed ? 'eye-off' : 'eye-on'} className="block animate-in fade-in zoom-in-75 duration-150">
                         {accountRevealed
-                          ? <EyeOff size={16} aria-hidden="true" />
-                          : <Eye size={16} aria-hidden="true" />}
+                          ? <EyeOff size={18} aria-hidden="true" />
+                          : <Eye size={18} aria-hidden="true" />}
                       </span>
                     </button>
                     <button
                       type="button"
                       onClick={handleCopyAccount}
                       aria-label="複製帳號"
-                      className="p-2 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
-                      <Copy size={16} aria-hidden="true" />
+                      <Copy size={18} aria-hidden="true" />
                     </button>
                   </div>
                 )}
