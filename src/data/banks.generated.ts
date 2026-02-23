@@ -4,7 +4,7 @@ export const BANKS_SOURCE = {
   provider: '財金資訊股份有限公司（FISC）',
   url: 'https://www.fisc.com.tw/TC/OPENDATA/Comm1_MEMBER.xml',
   business: '跨行自動化服務機器業務(金融卡)',
-  generatedAt: '2026-02-22T17:59:28.518Z',
+  generatedAt: '2026-02-23T00:35:13.505Z',
   count: 70,
 } as const;
 
