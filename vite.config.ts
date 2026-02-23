@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg'],
+      includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg', 'pwa-maskable.svg'],
       manifest: {
         id: '/',
         name: 'OpenTWQR',
@@ -18,24 +18,28 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone'],
         orientation: 'portrait',
         lang: 'zh-TW',
+        categories: ['finance', 'utilities'],
         icons: [
           {
             src: 'pwa-192x192.svg',
             sizes: '192x192',
-            type: 'image/svg+xml'
-          },
-          {
-            src: 'pwa-512x512.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml'
+            type: 'image/svg+xml',
+            purpose: 'any'
           },
           {
             src: 'pwa-512x512.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: 'pwa-maskable.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
           }
         ]
       }

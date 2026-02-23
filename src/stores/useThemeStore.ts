@@ -19,10 +19,10 @@ export const applyTheme = (mode: ThemeMode) => {
   const resolved = getResolvedTheme(mode);
   document.documentElement.classList.toggle('dark', resolved === 'dark');
 
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) {
-    meta.setAttribute('content', resolved === 'dark' ? '#09090b' : '#ffffff');
-  }
+  const color = resolved === 'dark' ? '#09090b' : '#ffffff';
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+    meta.setAttribute('content', color);
+  });
 };
 
 export const useThemeStore = create<ThemeState>()(
