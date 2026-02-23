@@ -57,12 +57,12 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
   const formattedAmount = value ? new Intl.NumberFormat().format(parseInt(value, 10)) : '';
 
   const digitBtnClass =
-    'h-16 sm:h-14 rounded-2xl text-3xl sm:text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center';
+    'h-14 rounded-2xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center';
 
   return (
-    <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
+    <div className="w-full max-w-sm mx-auto flex flex-col gap-3">
       {/* Amount display */}
-      <div className="flex flex-col items-center justify-center min-h-[120px] relative">
+      <div className="flex flex-col items-center justify-center relative">
         <span className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-2">轉帳金額</span>
         <div className="flex items-center justify-center w-full relative" aria-live="polite" aria-atomic="true">
           <div className="flex items-baseline gap-1">
@@ -93,7 +93,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
       </div>
 
       {/* Keypad */}
-      <div className="grid grid-cols-3 gap-x-4 gap-y-2 select-none px-4">
+      <div className="grid grid-cols-3 gap-x-4 gap-y-1.5 select-none px-4 shrink-0">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}
@@ -114,7 +114,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
           type="button"
           onClick={handleBackspace}
           aria-label="刪除一位數字"
-          className="h-16 sm:h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center"
+          className="h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center"
         >
           <Delete size={28} aria-hidden="true" />
         </button>
