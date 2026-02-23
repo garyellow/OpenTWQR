@@ -106,7 +106,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="bank-title"
-            className="w-full h-[85vh] sm:h-[75vh] max-w-md bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl flex flex-col shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full h-[85dvh] sm:h-[75dvh] max-w-md bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl flex flex-col shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -140,10 +140,11 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                   type="text"
                   autoComplete="off"
                   spellCheck={false}
+                  aria-label="搜尋銀行名稱或代碼"
                   placeholder="搜尋銀行名稱或代碼…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl py-3.5 pl-11 pr-4 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-[border-color,box-shadow,background-color,color] shadow-sm"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-[border-color,box-shadow,background-color,color] shadow-sm"
                 />
               </div>
             </div>

@@ -65,7 +65,7 @@ export const AccountsPage = () => {
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
   return (
-    <div className="min-h-screen flex flex-col px-safe pb-safe bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-dvh flex flex-col px-safe pb-safe bg-zinc-50 dark:bg-zinc-950">
       <a
         href="#accounts-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -153,7 +153,7 @@ export const AccountsPage = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="account-form-title"
-            className="w-full max-w-lg max-h-[90vh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 sm:p-8">
@@ -200,7 +200,7 @@ export const AccountsPage = () => {
             <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed">
               此帳戶將永久從此裝置上移除。
             </p>
-            <div className="mt-6 font-mono text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-800/50 text-center">
+            <div className="mt-6 font-mono text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-700/50 text-center">
               {deletingAccount.bankCode} · {deletingAccount.accountNumber}
             </div>
             <div className="mt-8 flex gap-3">

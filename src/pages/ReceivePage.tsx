@@ -120,7 +120,7 @@ export const ReceivePage = () => {
   /* ---------- Empty state ---------- */
   if (accounts.length === 0 && !isSharedMode) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 gap-8 bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-dvh flex flex-col items-center justify-center p-8 gap-8 bg-zinc-50 dark:bg-zinc-950">
         <div className="w-24 h-24 rounded-3xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
           <Wallet size={48} className="text-zinc-300 dark:text-zinc-600" aria-hidden="true" />
         </div>
@@ -143,7 +143,7 @@ export const ReceivePage = () => {
 
   /* ---------- Main layout ---------- */
   return (
-    <div className="min-h-screen flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-dvh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950">
       <a
         href="#receive-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-white dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -214,7 +214,7 @@ export const ReceivePage = () => {
                       autoFocus
                       autoComplete="off"
                       maxLength={20}
-                      className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 transition-[border-color,box-shadow,background-color,color] shadow-sm"
+                      className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl px-4 py-3 text-base text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 transition-[border-color,box-shadow,background-color,color] shadow-sm"
                     />
                     {note && (
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">
@@ -229,7 +229,7 @@ export const ReceivePage = () => {
                       setShowNoteInput(false);
                     }}
                     aria-label="取消備註"
-                    className="p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                    className="p-3 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
                   >
                     <X size={18} aria-hidden="true" />
                   </button>
@@ -238,7 +238,7 @@ export const ReceivePage = () => {
                 <button
                   type="button"
                   onClick={() => setShowNoteInput(true)}
-                  className="flex items-center gap-2 mx-auto text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors py-2"
+                  className="flex items-center gap-2 mx-auto text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors py-3 min-h-[44px]"
                 >
                   <MessageSquare size={16} aria-hidden="true" />
                   <span>{note ? `備註：${note}` : '新增交易備註'}</span>
