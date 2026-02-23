@@ -10,7 +10,7 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 - 帳戶名稱（`label`）：用於 App 內辨識帳戶，不寫入 QR 字串
 - 交易備註（`note`）：對應 TWQR D9 參數，寫入 QR 字串讓收付雙方確認交易用途
 - QR Code 點擊可全螢幕顯示（純黑底，方便對方掃碼）
-- 分享選單（3 種方式）：分享連結、分享圖片、下載圖片
+- 分享選單（4 種方式）：複製連結、分享連結、分享圖片、下載圖片
 - URL 分享機制：透過 URL hash 將帳戶與金額資訊以 base64url 編碼，收到連結可直接顯示 QR
 - 白天 / 夜間 / 跟隨系統 三種主題模式切換
 - 使用 `zustand + persist` 將帳戶資料與主題偏好存在本機 `localStorage`
@@ -18,6 +18,7 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 
 ## 分享機制
 
+- **複製連結**：直接複製收款頁面 URL 至剪貼簿
 - **分享連結**：透過 Web Share API 或複製至剪貼簿，URL 格式為 `origin/#base64url(JSON)`
 - **分享圖片**：將 QR Code SVG 轉為 PNG，透過 `navigator.share({ files })` 傳送
 - **下載圖片**：直接下載 QR Code PNG 檔案至裝置

@@ -52,10 +52,25 @@ export const formatAmount = (amount: number): string => {
 };
 
 /**
- * 遮罩帳號：保留末 4 碼，前面以等比例圓點取代。
- * 例如 10 碼 → `•••••• 1234`，14 碼 → `•••••••••• 1234`。
+ * 遮罩帳號：四個一組，位數不足四的倍數時補齊，僅顯示末 4 碼明文。
+ * 例如：10 碼 → `•••• •••• 1234`，14 碼 → `•••• •••• •••• 1234`
  */
 export const maskAccount = (accountNumber: string): string => {
   if (accountNumber.length <= 4) return accountNumber;
-  return '•'.repeat(accountNumber.length - 4) + ' ' + accountNumber.slice(-4);
+  const paddedLen = Math.ceil(accountNumber.length / 4) * 4;
+  const maskedGroups = (paddedLen - 4) / 4;
+  const parts = Array.from({ length: maskedGroups }, () => '••••');
+  parts.push(accountNumber.slice(-4));
+  return parts.join(' ');
+};
+
+/**
+ * 顯示完整帳號（已揭露）：補齊至四的倍數後四個一組呈現。
+ * 例如：10 碼 `1234567890` → `0012 3456 7890`
+ */
+export const formatAccountDisplay = (accountNumber: string): string => {
+  if (!accountNumber) return '';
+  const paddedLen = Math.ceil(accountNumber.length / 4) * 4;
+  const padded = accountNumber.padStart(paddedLen, '0');
+  return padded.replace(/(.{4})/g, '$1 ').trim();
 };

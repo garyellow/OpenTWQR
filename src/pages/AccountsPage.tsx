@@ -143,7 +143,7 @@ export const AccountsPage = () => {
       {/* ---------- Add / Edit Form Modal — centered card ---------- */}
       {(isAdding || editingId) && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 transition-opacity"
+          className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200"
           onClick={() => {
             setIsAdding(false);
             setEditingId(null);
@@ -179,7 +179,7 @@ export const AccountsPage = () => {
       {/* ---------- Delete Confirmation — centered card ---------- */}
       {deletingAccount && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 transition-opacity"
+          className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200"
           onClick={() => setDeletingId(null)}
         >
           <div

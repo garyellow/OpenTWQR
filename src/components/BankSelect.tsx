@@ -99,7 +99,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 transition-opacity"
+          className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200"
           onClick={() => setIsOpen(false)}
         >
           <div

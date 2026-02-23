@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff } from 'lucide-react';
-import { formatCurrency, formatAmount, maskAccount } from '../utils/twqr';
+import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff, Copy, Clipboard } from 'lucide-react';
+import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../utils/twqr';
 
 interface QRDisplayProps {
   value: string;
@@ -30,7 +30,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
 
   const handleCopyAccount = useCallback(async () => {
     if (!accountNumber) return;
-    setAccountRevealed(true);
     try {
       await navigator.clipboard.writeText(accountNumber);
       showFeedback('已複製帳號');
@@ -38,6 +37,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
       showFeedback('複製失敗');
     }
   }, [accountNumber, showFeedback]);
+
+  const handleToggleReveal = useCallback(() => {
+    setAccountRevealed((prev) => !prev);
+  }, []);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -72,6 +75,17 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
   }, []);
 
   /* --- Share actions --- */
+  const handleCopyLink = async () => {
+    const url = shareUrl || window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      showFeedback('已複製連結');
+    } catch {
+      showFeedback('複製失敗');
+    }
+    setShowShareMenu(false);
+  };
+
   const handleShareLink = async () => {
     const url = shareUrl || window.location.href;
     const shareData = {
@@ -241,7 +255,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
       role="dialog"
       aria-modal="true"
       aria-labelledby="qr-modal-title"
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 transition-opacity"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -297,33 +311,52 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                 金額由付款方輸入
               </div>
             )}
-            <button
-              type="button"
-              onClick={handleCopyAccount}
-              disabled={!accountNumber}
-              aria-label={accountRevealed ? '點擊複製帳號' : '點擊複製並顯示帳號'}
-              className="w-full bg-white dark:bg-zinc-900/50 rounded-xl p-3 border border-zinc-200 dark:border-zinc-800 text-left group transition-all hover:bg-zinc-50 dark:hover:bg-zinc-900 active:scale-[0.99] disabled:cursor-default disabled:hover:bg-white dark:disabled:hover:bg-zinc-900/50 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
-            >
+            <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl p-3 border border-zinc-200 dark:border-zinc-800 shadow-sm">
               <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   {bankName && (
                     <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">{bankName}</p>
                   )}
                   {accountNumber && (
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
-                      {accountRevealed
-                        ? accountNumber.replace(/(.{4})/g, '$1 ').trim()
-                        : maskAccount(accountNumber)}
+                      <span
+                        key={accountRevealed ? 'revealed' : 'masked'}
+                        className="animate-in fade-in duration-200"
+                      >
+                        {accountRevealed
+                          ? formatAccountDisplay(accountNumber)
+                          : maskAccount(accountNumber)}
+                      </span>
                     </p>
                   )}
                 </div>
                 {accountNumber && (
-                  accountRevealed
-                    ? <EyeOff size={14} className="shrink-0 text-zinc-400 dark:text-zinc-500 transition-colors" aria-hidden="true" />
-                    : <Eye size={14} className="shrink-0 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400 dark:group-hover:text-zinc-400 transition-colors" aria-hidden="true" />
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleToggleReveal}
+                      aria-label={accountRevealed ? '隱藏帳號' : '顯示帳號'}
+                      aria-pressed={accountRevealed}
+                      className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                    >
+                      <span key={accountRevealed ? 'eye-off' : 'eye-on'} className="block animate-in fade-in zoom-in-75 duration-150">
+                        {accountRevealed
+                          ? <EyeOff size={14} aria-hidden="true" />
+                          : <Eye size={14} aria-hidden="true" />}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyAccount}
+                      aria-label="複製帳號"
+                      className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                    >
+                      <Copy size={14} aria-hidden="true" />
+                    </button>
+                  </div>
                 )}
               </div>
-            </button>
+            </div>
             {note && (
               <p className="text-xs text-zinc-400 dark:text-zinc-500">備註：{note}</p>
             )}
@@ -359,7 +392,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
       {/* Share menu overlay — centered card */}
       {showShareMenu && (
         <div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-5"
+          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150"
           onClick={() => setShowShareMenu(false)}
         >
           <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
@@ -370,6 +403,20 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
             <div className="p-2 pt-3">
               <button
                 type="button"
+                onClick={handleCopyLink}
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              >
+                <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Clipboard size={20} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">複製連結</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">複製收款頁面連結到剪貼簿</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleShareLink}
                 className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
@@ -378,9 +425,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                 </div>
                 <div>
                   <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">分享連結</p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">傳送收款頁面連結給對方</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">透過系統分享模組傳送連結</p>
                 </div>
               </button>
+
+              <div className="my-1 mx-2 border-t border-zinc-100 dark:border-zinc-800" />
 
               <button
                 type="button"
