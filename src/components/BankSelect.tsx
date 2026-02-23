@@ -59,7 +59,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           onClick={() => setIsOpen(true)}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          className="w-full flex items-center justify-between px-4 py-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm group"
+          className="w-full flex items-center justify-between px-4 py-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-[background-color,border-color,box-shadow] shadow-sm group"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0 shadow-sm border border-zinc-100 dark:border-zinc-700/50">
@@ -71,7 +71,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
             </div>
             {selectedBank ? (
               <div className="min-w-0">
-                <div className="font-semibold text-zinc-900 dark:text-white truncate text-base">
+                <div className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-base">
                   {selectedBank.name}
                 </div>
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">{selectedBank.code}</div>
@@ -84,7 +84,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">{value}</div>
               </div>
             ) : (
-              <span className="text-zinc-400 dark:text-zinc-500 text-base">請選擇銀行...</span>
+              <span className="text-zinc-400 dark:text-zinc-500 text-base">請選擇銀行…</span>
             )}
           </div>
           <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
@@ -106,14 +106,14 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="bank-title"
-            className="w-full h-[85vh] sm:h-[75vh] max-w-md bg-white dark:bg-zinc-950 rounded-t-[2rem] sm:rounded-3xl flex flex-col shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full h-[85vh] sm:h-[75vh] max-w-md bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl flex flex-col shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="p-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/50 flex flex-col gap-4 shrink-0">
               <div className="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto sm:hidden" />
               <div className="flex items-center justify-between">
-                <h2 id="bank-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                <h2 id="bank-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                   選擇銀行
                 </h2>
                 <button
@@ -140,10 +140,10 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                   type="text"
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder="搜尋銀行名稱或代碼..."
+                  placeholder="搜尋銀行名稱或代碼…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl py-3.5 pl-11 pr-4 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all shadow-sm"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl py-3.5 pl-11 pr-4 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-[border-color,box-shadow,background-color,color] shadow-sm"
                 />
               </div>
             </div>
@@ -160,10 +160,10 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                       setIsOpen(false);
                       setSearch('');
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all ${
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-[background-color,color,box-shadow] ${
                       value === bank.code
-                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                        ? 'bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                     }`}
                   >
                     <span className="font-medium truncate text-base">{bank.name}</span>

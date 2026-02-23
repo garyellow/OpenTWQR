@@ -13,7 +13,7 @@ interface AccountFormProps {
 export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProps) => {
   const [bankCode, setBankCode] = useState(initialData?.bankCode || '');
   const [accountNumber, setAccountNumber] = useState(initialData?.accountNumber || '');
-  const [note, setNote] = useState(initialData?.note || '');
+  const [label, setLabel] = useState(initialData?.label || '');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -29,11 +29,11 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
       return;
     }
 
-    onSubmit({ bankCode, accountNumber, note });
+    onSubmit({ bankCode, accountNumber, label: label || undefined });
   };
 
   const inputClass =
-    'w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl px-4 py-4 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all shadow-sm';
+    'w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl px-4 py-4 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-[border-color,box-shadow,background-color,color] shadow-sm';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -59,7 +59,7 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
           inputMode="numeric"
           autoComplete="off"
           spellCheck={false}
-          placeholder="0000000000000000..."
+          placeholder="0000000000000000…"
           value={accountNumber}
           onChange={(e) => {
             setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 16));
@@ -74,19 +74,19 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
 
       <div>
         <label
-          htmlFor="account-note"
+          htmlFor="account-label"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          備註（選填）
+          帳戶名稱（選填）
         </label>
         <input
-          id="account-note"
-          name="note"
+          id="account-label"
+          name="label"
           type="text"
           autoComplete="off"
-          placeholder="例如：房租、薪資..."
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
+          placeholder="例如：郵局、薪轉戶…"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
           className={inputClass}
         />
       </div>
@@ -113,7 +113,7 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
         </button>
         <button
           type="submit"
-          className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm"
+          className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-800 dark:bg-zinc-100 hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color,box-shadow] shadow-sm"
         >
           儲存帳戶
         </button>

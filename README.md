@@ -1,16 +1,28 @@
 # OpenTWQR
 
 OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
-支援 PWA 安裝、本地資料儲存、離線開啟與顯示已存在帳戶資料。
+支援 PWA 安裝、本地資料儲存、離線使用，以及透過連結或圖片分享收款碼。
 
 ## 核心功能
 
-- 收款流程：選擇帳戶 → 輸入金額 → 產生 QR → 對方掃碼轉帳
+- 收款流程：選擇帳戶 → 輸入金額 → 選填交易備註 → 產生 QR → 對方掃碼轉帳
 - 帳戶管理（新增 / 編輯 / 刪除 / 選擇帳戶）
+- 帳戶名稱（`label`）：用於 App 內辨識帳戶，不寫入 QR 字串
+- 交易備註（`note`）：對應 TWQR D9 參數，寫入 QR 字串讓收付雙方確認交易用途
+- QR Code 點擊可全螢幕顯示（純黑底，方便對方掃碼）
+- 分享選單（3 種方式）：分享連結、分享圖片、下載圖片
+- URL 分享機制：透過 URL hash 將帳戶與金額資訊以 base64url 編碼，收到連結可直接顯示 QR
 - 白天 / 夜間 / 跟隨系統 三種主題模式切換
-- QR Code 固定採用黑底白碼，確保任何主題模式下皆有最佳掃描對比
 - 使用 `zustand + persist` 將帳戶資料與主題偏好存在本機 `localStorage`
 - TWQRP 字串由 `src/utils/twqr.ts` 生成（含 16 碼帳號補零、金額 × 100）
+
+## 分享機制
+
+- **分享連結**：透過 Web Share API 或複製至剪貼簿，URL 格式為 `origin/#base64url(JSON)`
+- **分享圖片**：將 QR Code SVG 轉為 PNG，透過 `navigator.share({ files })` 傳送
+- **下載圖片**：直接下載 QR Code PNG 檔案至裝置
+- 共享連結攜帶資訊：銀行代碼 (`b`)、帳號 (`a`)、金額 (`m`，選填)、備註 (`n`，選填)
+- 編解碼邏輯：`src/utils/share.ts`
 
 ## PWA / 離線
 
@@ -25,6 +37,7 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 - 主題偏好持久化於 `localStorage`（key: `opentwqr-theme`）
 - `index.html` 內含防止主題閃爍（FOUC）的同步腳本
 - `<meta name="theme-color">` 隨主題動態更新，確保瀏覽器 UI 與 PWA 頂部列顏色一致
+- UI 採柔和對比度設計，避免純黑純白造成視覺疲勞
 
 ## 部署
 
@@ -80,5 +93,6 @@ npm run preview
 - `src/components/`：UI 元件（QR 顯示、金額鍵盤、帳戶卡片、銀行選擇器、主題切換）
 - `src/stores/`：狀態管理與本地持久化（帳戶、銀行、主題）
 - `src/utils/twqr.ts`：TWQRP 產生邏輯
+- `src/utils/share.ts`：URL 分享編解碼（base64url）
 - `src/data/`：銀行清單（內建 + 自動產生）
-- `src/types/`：TypeScript 型別定義
+- `src/types/`：TypeScript 型別定義（含 `ShareData` 介面）

@@ -26,7 +26,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
   const formattedAmount = value ? new Intl.NumberFormat().format(parseInt(value, 10)) : '';
 
   const digitBtnClass =
-    'h-16 sm:h-14 rounded-2xl text-3xl sm:text-2xl font-medium text-zinc-900 dark:text-white active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center';
+    'h-16 sm:h-14 rounded-2xl text-3xl sm:text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center';
 
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
@@ -51,7 +51,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
               type="button"
               onClick={() => onChange('')}
               aria-label="清除金額"
-              className={`p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all ${
+              className={`p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-[opacity,transform,background-color,color] ${
                 value ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
               }`}
             >
@@ -83,7 +83,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
           type="button"
           onClick={handleBackspace}
           aria-label="刪除一位數字"
-          className="h-16 sm:h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center"
+          className="h-16 sm:h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center"
         >
           <Delete size={28} aria-hidden="true" />
         </button>

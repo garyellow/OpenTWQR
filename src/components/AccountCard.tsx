@@ -22,9 +22,9 @@ export const AccountCard = ({
 
   return (
     <article
-      className={`relative p-5 rounded-2xl transition-all border cursor-pointer group ${
+      className={`relative min-w-0 p-5 rounded-2xl transition-[background-color,border-color,box-shadow,transform] border cursor-pointer group ${
         isSelected
-          ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white shadow-md'
+          ? 'bg-zinc-800 dark:bg-zinc-100 border-zinc-800 dark:border-zinc-100 shadow-md'
           : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
       }`}
     >
@@ -33,19 +33,19 @@ export const AccountCard = ({
         onClick={onSelect}
         aria-pressed={isSelected}
         aria-label={`選擇 ${bankName} 帳戶`}
-        className="w-full text-left pr-24"
+        className="min-w-0 w-full text-left pr-24"
       >
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-3 min-w-0">
           {isSelected && (
-            <div className="w-6 h-6 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0">
               <Check
                 size={14}
-                className="text-zinc-900 dark:text-white"
+                className="text-zinc-900 dark:text-zinc-100"
                 aria-hidden="true"
               />
             </div>
           )}
-          <h3 className={`font-semibold truncate text-lg ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-white'}`}>
+          <h3 className={`font-semibold truncate text-lg ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'}`}>
             {bankName}
           </h3>
           <span className={`text-xs font-mono shrink-0 px-2 py-0.5 rounded-md ${isSelected ? 'bg-white/20 dark:bg-black/10 text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
@@ -57,9 +57,9 @@ export const AccountCard = ({
           {account.accountNumber.replace(/(.{4})/g, '$1 ').trim()}
         </p>
 
-        {account.note && (
+        {account.label && (
           <p className={`text-sm mt-2 truncate ${isSelected ? 'text-white/70 dark:text-zinc-900/70' : 'text-zinc-500 dark:text-zinc-400'}`}>
-            {account.note}
+            {account.label}
           </p>
         )}
       </button>

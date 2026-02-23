@@ -7,12 +7,19 @@ export interface BankAccount {
   id: string;
   bankCode: string;
   accountNumber: string;
-  note?: string;
+  label?: string;
 }
 
 export interface TWQRParams {
   bankCode: string;
   accountNumber: string;
   amount: number;
+  note?: string;
+}
+
+export interface ShareData {
+  bankCode: string;
+  accountNumber: string;
+  amount?: number;
   note?: string;
 }

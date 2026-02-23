@@ -84,7 +84,7 @@ export const AccountsPage = () => {
             >
               <ChevronLeft size={24} aria-hidden="true" />
             </Link>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">帳戶管理</h1>
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">帳戶管理</h1>
           </div>
           <button
             type="button"
@@ -105,7 +105,7 @@ export const AccountsPage = () => {
               <Wallet size={48} aria-hidden="true" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">尚無帳戶</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">尚無帳戶</h2>
               <p className="text-zinc-500 dark:text-zinc-400 max-w-[260px] mx-auto leading-relaxed">
                 新增銀行帳戶即可開始透過 TWQR 收款。
               </p>
@@ -113,7 +113,7 @@ export const AccountsPage = () => {
             <button
               type="button"
               onClick={() => setIsAdding(true)}
-              className="mt-4 px-8 py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm"
+              className="mt-4 px-8 py-4 rounded-2xl bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color,box-shadow] shadow-sm"
             >
               新增第一個帳戶
             </button>
@@ -153,14 +153,14 @@ export const AccountsPage = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="account-form-title"
-            className="w-full max-w-lg max-h-[90vh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-950 rounded-t-[2rem] sm:rounded-3xl shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 sm:p-8">
               <div className="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto mb-8 sm:hidden" />
               <h2
                 id="account-form-title"
-                className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white mb-8 text-center"
+                className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-8 text-center"
               >
                 {editingId ? '編輯帳戶' : '新增帳戶'}
               </h2>
@@ -188,13 +188,13 @@ export const AccountsPage = () => {
             aria-modal="true"
             aria-labelledby="delete-title"
             aria-describedby="delete-desc"
-            className="w-full max-w-sm bg-white dark:bg-zinc-950 rounded-t-[2rem] sm:rounded-3xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border p-6 sm:p-8 shadow-2xl overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border p-6 sm:p-8 shadow-2xl overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-5 mx-auto">
               <Trash2 size={24} className="text-red-600 dark:text-red-400" aria-hidden="true" />
             </div>
-            <h2 id="delete-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white text-center">
+            <h2 id="delete-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-center">
               刪除帳戶
             </h2>
             <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed">
@@ -214,7 +214,7 @@ export const AccountsPage = () => {
               <button
                 type="button"
                 onClick={handleDeleteConfirm}
-                className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 transition-colors shadow-sm"
+                className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-[transform,background-color,box-shadow] shadow-sm"
               >
                 刪除
               </button>
