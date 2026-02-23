@@ -159,7 +159,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
 
       // Fallback to download
       downloadBlob(pngBlob, 'opentwqr.png');
-      showFeedback('已下載 QR Code');
+      showFeedback('已下載圖片');
       setShowShareMenu(false);
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
@@ -298,7 +298,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
           </button>
 
           {/* Amount & account info */}
-          <div className="text-center space-y-2.5 w-full">
+          <div className="space-y-2.5 w-full">
             {amount != null && amount > 0 ? (
               <div className="flex items-baseline justify-center gap-0.5">
                 <span className="text-xl font-semibold text-zinc-400 dark:text-zinc-500">NT$</span>
@@ -307,12 +307,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                 </span>
               </div>
             ) : (
-              <div className="text-lg font-medium text-zinc-400 dark:text-zinc-500">
+              <div className="text-lg font-medium text-zinc-400 dark:text-zinc-500 text-center">
                 金額由付款方輸入
               </div>
             )}
-            <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl p-3 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-              <div className="flex items-center justify-between gap-2">
+            <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   {bankName && (
                     <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">{bankName}</p>
@@ -331,36 +331,36 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                   )}
                 </div>
                 {accountNumber && (
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-0.5 shrink-0">
                     <button
                       type="button"
                       onClick={handleToggleReveal}
                       aria-label={accountRevealed ? '隱藏帳號' : '顯示帳號'}
                       aria-pressed={accountRevealed}
-                      className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
                       <span key={accountRevealed ? 'eye-off' : 'eye-on'} className="block animate-in fade-in zoom-in-75 duration-150">
                         {accountRevealed
-                          ? <EyeOff size={14} aria-hidden="true" />
-                          : <Eye size={14} aria-hidden="true" />}
+                          ? <EyeOff size={16} aria-hidden="true" />
+                          : <Eye size={16} aria-hidden="true" />}
                       </span>
                     </button>
                     <button
                       type="button"
                       onClick={handleCopyAccount}
                       aria-label="複製帳號"
-                      className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
-                      <Copy size={14} aria-hidden="true" />
+                      <Copy size={16} aria-hidden="true" />
                     </button>
                   </div>
                 )}
               </div>
             </div>
             {note && (
-              <p className="text-xs text-zinc-400 dark:text-zinc-500">備註：{note}</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center">備註：{note}</p>
             )}
-            <p className="text-xs text-zinc-300 dark:text-zinc-600">請於銀行 App 核對帳號及戶名後再轉帳</p>
+            <p className="text-xs text-zinc-300 dark:text-zinc-600 text-center">請於銀行 App 核對帳號及戶名後再轉帳</p>
           </div>
         </div>
 
