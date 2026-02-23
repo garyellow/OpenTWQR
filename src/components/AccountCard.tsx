@@ -32,7 +32,7 @@ export const AccountCard = ({
         type="button"
         onClick={onSelect}
         aria-pressed={isSelected}
-        aria-label={`Select ${bankName} account`}
+        aria-label={`選擇 ${bankName} 帳戶`}
         className="w-full text-left pr-24"
       >
         <div className="flex items-center gap-3 mb-3">
@@ -68,7 +68,7 @@ export const AccountCard = ({
         {onEdit && (
           <button
             type="button"
-            aria-label="Edit account"
+            aria-label="編輯帳戶"
             onClick={onEdit}
             className={`p-2.5 rounded-xl transition-colors ${
               isSelected
@@ -82,7 +82,7 @@ export const AccountCard = ({
         {onDelete && (
           <button
             type="button"
-            aria-label="Delete account"
+            aria-label="刪除帳戶"
             onClick={onDelete}
             className={`p-2.5 rounded-xl transition-colors ${
               isSelected

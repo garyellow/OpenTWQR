@@ -20,12 +20,12 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
     e.preventDefault();
 
     if (!bankCode) {
-      setError('Please select a bank');
+      setError('請選擇銀行');
       return;
     }
 
     if (!isValidAccount(accountNumber)) {
-      setError('Account number must be 10\u201316 digits');
+      setError('帳號必須為 10–16 位數字');
       return;
     }
 
@@ -50,7 +50,7 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
           htmlFor="account-number"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          Account Number
+          帳號
         </label>
         <input
           id="account-number"
@@ -59,7 +59,7 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
           inputMode="numeric"
           autoComplete="off"
           spellCheck={false}
-          placeholder="0000000000000000\u2026"
+          placeholder="0000000000000000..."
           value={accountNumber}
           onChange={(e) => {
             setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 16));
@@ -69,7 +69,7 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
           aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
           className={`${inputClass} text-lg font-mono tracking-widest`}
         />
-        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">10\u201316 digits</p>
+        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">10–16 位數字</p>
       </div>
 
       <div>
@@ -77,14 +77,14 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
           htmlFor="account-note"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          Note (Optional)
+          備註（選填）
         </label>
         <input
           id="account-note"
           name="note"
           type="text"
           autoComplete="off"
-          placeholder="e.g. Rent, Salary\u2026"
+          placeholder="例如：房租、薪資..."
           value={note}
           onChange={(e) => setNote(e.target.value)}
           className={inputClass}
@@ -109,13 +109,13 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
           onClick={onCancel}
           className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
         >
-          Cancel
+          取消
         </button>
         <button
           type="submit"
           className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm"
         >
-          Save Account
+          儲存帳戶
         </button>
       </div>
     </form>

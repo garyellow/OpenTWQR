@@ -11,9 +11,9 @@ const ICONS: Record<ThemeMode, typeof Sun> = {
 };
 
 const LABELS: Record<ThemeMode, string> = {
-  system: 'System theme',
-  light: 'Light mode',
-  dark: 'Dark mode',
+  system: '跟隨系統',
+  light: '淺色模式',
+  dark: '深色模式',
 };
 
 export const ThemeToggle = () => {

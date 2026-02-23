@@ -70,29 +70,31 @@ export const AccountsPage = () => {
         href="#accounts-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
       >
-        Skip to main content
+        跳至主要內容
       </a>
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 p-4 flex items-center justify-between pt-safe">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/"
-            aria-label="Back"
-            className="p-2.5 -ml-2 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+      <div className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-[env(safe-area-inset-top)]">
+        <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              aria-label="返回"
+              className="p-2.5 -ml-2 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+            >
+              <ChevronLeft size={24} aria-hidden="true" />
+            </Link>
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">帳戶管理</h1>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsAdding(true)}
+            aria-label="新增帳戶"
+            className="p-2.5 rounded-full text-zinc-900 dark:text-white bg-zinc-200/50 dark:bg-zinc-800/50 hover:bg-zinc-300/50 dark:hover:bg-zinc-700/50 transition-colors"
           >
-            <ChevronLeft size={24} aria-hidden="true" />
-          </Link>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">Accounts</h1>
+            <Plus size={22} aria-hidden="true" />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsAdding(true)}
-          aria-label="Add account"
-          className="p-2.5 rounded-full text-zinc-900 dark:text-white bg-zinc-200/50 dark:bg-zinc-800/50 hover:bg-zinc-300/50 dark:hover:bg-zinc-700/50 transition-colors"
-        >
-          <Plus size={22} aria-hidden="true" />
-        </button>
       </div>
 
       {/* Content */}
@@ -103,9 +105,9 @@ export const AccountsPage = () => {
               <Wallet size={48} aria-hidden="true" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">No Accounts Yet</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">尚無帳戶</h2>
               <p className="text-zinc-500 dark:text-zinc-400 max-w-[260px] mx-auto leading-relaxed">
-                Add a bank account to start receiving payments via TWQR.
+                新增銀行帳戶即可開始透過 TWQR 收款。
               </p>
             </div>
             <button
@@ -113,7 +115,7 @@ export const AccountsPage = () => {
               onClick={() => setIsAdding(true)}
               className="mt-4 px-8 py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm"
             >
-              Add First Account
+              新增第一個帳戶
             </button>
           </div>
         ) : (
@@ -160,7 +162,7 @@ export const AccountsPage = () => {
                 id="account-form-title"
                 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white mb-8 text-center"
               >
-                {editingId ? 'Edit Account' : 'Add Account'}
+                {editingId ? '編輯帳戶' : '新增帳戶'}
               </h2>
               <AccountForm
                 initialData={editingId ? accounts.find((a) => a.id === editingId) : undefined}
@@ -193,10 +195,10 @@ export const AccountsPage = () => {
               <Trash2 size={24} className="text-red-600 dark:text-red-400" aria-hidden="true" />
             </div>
             <h2 id="delete-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white text-center">
-              Delete Account
+              刪除帳戶
             </h2>
             <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed">
-              This account will be permanently removed from this device.
+              此帳戶將永久從此裝置上移除。
             </p>
             <div className="mt-6 font-mono text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-800/50 text-center">
               {deletingAccount.bankCode} · {deletingAccount.accountNumber}
@@ -207,14 +209,14 @@ export const AccountsPage = () => {
                 onClick={() => setDeletingId(null)}
                 className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
               >
-                Cancel
+                取消
               </button>
               <button
                 type="button"
                 onClick={handleDeleteConfirm}
                 className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 transition-colors shadow-sm"
               >
-                Delete
+                刪除
               </button>
             </div>
           </div>

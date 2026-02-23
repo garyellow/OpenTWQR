@@ -32,7 +32,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
     <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
       {/* Amount display */}
       <div className="flex flex-col items-center justify-center min-h-[120px] relative">
-        <span className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-2">Transfer Amount</span>
+        <span className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-2">轉帳金額</span>
         <div className="flex items-center justify-center w-full relative" aria-live="polite" aria-atomic="true">
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-semibold text-emerald-600 dark:text-emerald-400">$</span>
@@ -46,16 +46,18 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
             </span>
           </div>
           {/* Clear button - absolute positioned to avoid layout shift */}
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            aria-label="Clear amount"
-            className={`absolute right-0 p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all ${
-              value ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
-            }`}
-          >
-            <X size={24} aria-hidden="true" />
-          </button>
+          <div className="absolute right-0 flex items-center justify-center w-12 h-12">
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              aria-label="清除金額"
+              className={`p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all ${
+                value ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+              }`}
+            >
+              <X size={24} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -80,7 +82,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
         <button
           type="button"
           onClick={handleBackspace}
-          aria-label="Delete one digit"
+          aria-label="刪除一位數字"
           className="h-16 sm:h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center"
         >
           <Delete size={28} aria-hidden="true" />

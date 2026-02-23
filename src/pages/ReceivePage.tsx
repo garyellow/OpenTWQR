@@ -43,9 +43,9 @@ export const ReceivePage = () => {
           <Wallet size={48} className="text-zinc-300 dark:text-zinc-700" aria-hidden="true" />
         </div>
         <div className="text-center space-y-3">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Welcome to OpenTWQR</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">歡迎使用 OpenTWQR</h1>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-[260px] mx-auto leading-relaxed text-lg">
-            Add a bank account to start generating payment QR codes.
+            新增銀行帳戶即可開始產生收款 QR Code。
           </p>
         </div>
         <button
@@ -53,7 +53,7 @@ export const ReceivePage = () => {
           onClick={() => navigate('/accounts')}
           className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm mt-4"
         >
-          Add Bank Account
+          新增銀行帳戶
         </button>
       </div>
     );
@@ -66,13 +66,13 @@ export const ReceivePage = () => {
         href="#receive-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
       >
-        Skip to main content
+        跳至主要內容
       </a>
 
       <main id="receive-main" className="flex-1 flex flex-col max-w-md mx-auto w-full pb-safe">
         {/* Header */}
-        <header className="flex justify-between items-center p-5 pt-safe">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">Receive</h1>
+        <header className="flex justify-between items-center p-5 pt-[calc(1.25rem+env(safe-area-inset-top))]">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">收款</h1>
           <ThemeToggle />
         </header>
 
@@ -87,7 +87,7 @@ export const ReceivePage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-zinc-900 dark:text-white truncate text-base">
-                {bankName || 'My Account'}
+                {bankName || '我的帳戶'}
               </p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
                 {selectedAccount?.accountNumber
@@ -118,7 +118,7 @@ export const ReceivePage = () => {
               className="w-full flex items-center justify-center gap-2.5 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm"
             >
               <QrCode size={22} aria-hidden="true" />
-              Generate QR Code
+              產生 QR Code
             </button>
           </div>
         </div>

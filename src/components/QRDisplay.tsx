@@ -68,12 +68,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4">
           <h2 id="qr-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Payment QR
+            付款 QR Code
           </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label="關閉"
             className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <X size={20} aria-hidden="true" />
@@ -126,11 +126,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
               <Copy size={20} aria-hidden="true" />
             )}
             <span>
-              {copyState === 'success' ? 'Copied to Clipboard' : 'Copy QR Text'}
+              {copyState === 'success' ? '已複製到剪貼簿' : '複製 QR 字串'}
             </span>
           </button>
           <span className="sr-only" aria-live="polite">
-            {copyState === 'success' ? 'QR text copied' : ''}
+            {copyState === 'success' ? 'QR 字串已複製' : ''}
           </span>
         </div>
       </div>

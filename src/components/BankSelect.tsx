@@ -51,7 +51,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           htmlFor="bank-select-trigger"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          Bank
+          銀行
         </label>
         <button
           id="bank-select-trigger"
@@ -79,12 +79,12 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
             ) : value ? (
               <div className="min-w-0">
                 <div className="font-semibold text-amber-600 dark:text-amber-400 truncate text-base">
-                  Legacy bank code
+                  舊版銀行代碼
                 </div>
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">{value}</div>
               </div>
             ) : (
-              <span className="text-zinc-400 dark:text-zinc-500 text-base">Select a bank\u2026</span>
+              <span className="text-zinc-400 dark:text-zinc-500 text-base">請選擇銀行...</span>
             )}
           </div>
           <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
@@ -114,12 +114,12 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
               <div className="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto sm:hidden" />
               <div className="flex items-center justify-between">
                 <h2 id="bank-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-                  Select Bank
+                  選擇銀行
                 </h2>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  aria-label="Close"
+                  aria-label="關閉"
                   className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <X size={20} aria-hidden="true" />
@@ -140,7 +140,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                   type="text"
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder="Search by name or code\u2026"
+                  placeholder="搜尋銀行名稱或代碼..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl py-3.5 pl-11 pr-4 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all shadow-sm"
@@ -184,7 +184,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                     <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
                       <Search size={24} aria-hidden="true" />
                     </div>
-                    <p>No banks found for &ldquo;{search}&rdquo;</p>
+                    <p>找不到「{search}」的搜尋結果</p>
                   </div>
                 )}
               </div>
