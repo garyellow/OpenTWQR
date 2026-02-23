@@ -106,7 +106,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="bank-title"
-            className="w-full h-[85svh] sm:h-[75svh] max-w-md bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl flex flex-col shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full max-h-[85svh] sm:max-h-[75svh] max-w-md bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl flex flex-col shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

@@ -319,7 +319,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
             {note && (
               <p className="text-xs text-zinc-400 dark:text-zinc-500">備註：{note}</p>
             )}
-            <p className="text-xs text-zinc-300 dark:text-zinc-600">請於銀行 App 核對帳號後再轉帳</p>
+            <p className="text-xs text-zinc-300 dark:text-zinc-600">請於銀行 App 核對帳號及戶名後再轉帳</p>
           </div>
         </div>
 

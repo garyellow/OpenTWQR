@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/AmountInput';
 import { QRDisplay } from '../components/QRDisplay';
@@ -117,6 +117,21 @@ export const ReceivePage = () => {
     }
   }, [isSharedMode]);
 
+  /* Lock body scroll and handle Escape when note modal is open */
+  useEffect(() => {
+    if (!showNoteInput) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowNoteInput(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [showNoteInput]);
+
   /* ---------- Empty state ---------- */
   if (accounts.length === 0 && !isSharedMode) {
     return (
@@ -192,58 +207,16 @@ export const ReceivePage = () => {
           <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
             <AmountInput value={amount} onChange={setAmount} />
 
-            {/* Transaction note toggle & input */}
+            {/* Transaction note toggle */}
             <div className="w-full max-w-sm mx-auto px-4">
-              {showNoteInput ? (
-                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      id="note-input"
-                      name="note"
-                      aria-label="交易備註"
-                      value={note}
-                      onChange={(e) => setNote(e.target.value.slice(0, 20))}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          setShowNoteInput(false);
-                        }
-                      }}
-                      placeholder="最多 20 字…"
-                      autoFocus
-                      autoComplete="off"
-                      maxLength={20}
-                      className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl px-4 py-3 text-base text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 transition-[border-color,box-shadow,background-color,color] shadow-sm"
-                    />
-                    {note && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">
-                        {note.length}/20
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNote('');
-                      setShowNoteInput(false);
-                    }}
-                    aria-label="取消備註"
-                    className="p-3 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
-                  >
-                    <X size={18} aria-hidden="true" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowNoteInput(true)}
-                  className="flex items-center gap-2 mx-auto text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors py-3 min-h-[44px]"
-                >
-                  <MessageSquare size={16} aria-hidden="true" />
-                  <span>{note ? `備註：${note}` : '新增交易備註'}</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setShowNoteInput(true)}
+                className="flex items-center gap-2 mx-auto text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors py-3 min-h-[44px]"
+              >
+                <MessageSquare size={16} aria-hidden="true" />
+                <span>{note ? `備註：${note}` : '新增交易備註'}</span>
+              </button>
             </div>
           </div>
 
@@ -259,6 +232,77 @@ export const ReceivePage = () => {
           </div>
         </div>
       </main>
+
+      {/* Note input modal */}
+      {showNoteInput && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center px-5 pt-[20svh] bg-black/30 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setShowNoteInput(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200/50 dark:border-zinc-800/50 p-5 overscroll-contain animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <label htmlFor="note-modal-input" className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                交易備註
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowNoteInput(false)}
+                aria-label="關閉"
+                className="p-2 -mr-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                id="note-modal-input"
+                aria-label="交易備註"
+                value={note}
+                onChange={(e) => setNote(e.target.value.slice(0, 20))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    setShowNoteInput(false);
+                  }
+                }}
+                placeholder="輸入備註，最多 20 字…"
+                autoFocus
+                autoComplete="off"
+                maxLength={20}
+                className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/80 rounded-xl px-4 py-3 pr-14 text-base text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 transition-[border-color,box-shadow] shadow-sm"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 dark:text-zinc-500 pointer-events-none">
+                {note.length}/20
+              </span>
+            </div>
+            <div className="flex gap-3 mt-4">
+              {note && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNote('');
+                    setShowNoteInput(false);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-[transform,background-color,color]"
+                >
+                  清除備註
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowNoteInput(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white dark:text-zinc-900 bg-zinc-800 dark:bg-zinc-100 hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color]"
+              >
+                確認
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showQR && qrString && (
         <QRDisplay
