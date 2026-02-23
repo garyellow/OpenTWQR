@@ -66,7 +66,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
         <span className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-2">轉帳金額</span>
         <div className="flex items-center justify-center w-full relative" aria-live="polite" aria-atomic="true">
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-semibold text-emerald-600 dark:text-emerald-400">$</span>
+            <span className="text-[2.5rem] font-semibold text-emerald-600 dark:text-emerald-400">NT$</span>
             <span
               className={`text-6xl font-semibold tracking-tight ${
                 value ? 'text-zinc-900 dark:text-white' : 'text-zinc-300 dark:text-zinc-700'

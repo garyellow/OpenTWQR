@@ -230,7 +230,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
         <div className="mt-8 text-center space-y-2">
           {amount != null && amount > 0 ? (
             <div className="flex items-baseline justify-center gap-0.5">
-              <span className="text-lg font-semibold text-white/50">NT$</span>
+              <span className="text-xl font-semibold text-emerald-400">NT$</span>
               <span className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {formatAmount(amount)}
               </span>
@@ -301,7 +301,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
           <div className="space-y-2.5 w-full">
             {amount != null && amount > 0 ? (
               <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-xl font-semibold text-zinc-400 dark:text-zinc-500">NT$</span>
+                <span className="text-2xl font-semibold text-emerald-500 dark:text-emerald-400">NT$</span>
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatAmount(amount)}
                 </span>
@@ -339,10 +339,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                       aria-pressed={accountRevealed}
                       className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
-                      <span key={accountRevealed ? 'eye-off' : 'eye-on'} className="block animate-in fade-in zoom-in-75 duration-150">
+                      <span key={accountRevealed ? 'eye-on' : 'eye-off'} className="block animate-in fade-in zoom-in-75 duration-150">
                         {accountRevealed
-                          ? <EyeOff size={18} aria-hidden="true" />
-                          : <Eye size={18} aria-hidden="true" />}
+                          ? <Eye size={18} aria-hidden="true" />
+                          : <EyeOff size={18} aria-hidden="true" />}
                       </span>
                     </button>
                     <button
