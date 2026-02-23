@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff } from 'lucide-react';
-import { formatCurrency } from '../utils/twqr';
+import { formatCurrency, formatAmount, maskAccount } from '../utils/twqr';
 
 interface QRDisplayProps {
   value: string;
@@ -215,9 +215,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
         {/* Info below QR */}
         <div className="mt-8 text-center space-y-2">
           {amount != null && amount > 0 ? (
-            <p className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {formatCurrency(amount)}
-            </p>
+            <div className="flex items-baseline justify-center gap-0.5">
+              <span className="text-lg font-semibold text-white/50">NT$</span>
+              <span className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {formatAmount(amount)}
+              </span>
+            </div>
           ) : (
             <p className="text-lg font-medium text-white/50">
               金額由付款方輸入
@@ -283,8 +286,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
           {/* Amount & account info */}
           <div className="text-center space-y-2.5 w-full">
             {amount != null && amount > 0 ? (
-              <div className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {formatCurrency(amount)}
+              <div className="flex items-baseline justify-center gap-0.5">
+                <span className="text-xl font-semibold text-zinc-400 dark:text-zinc-500">NT$</span>
+                <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {formatAmount(amount)}
+                </span>
               </div>
             ) : (
               <div className="text-lg font-medium text-zinc-400 dark:text-zinc-500">
@@ -307,7 +313,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
                       {accountRevealed
                         ? accountNumber.replace(/(.{4})/g, '$1 ').trim()
-                        : `•••• ${accountNumber.slice(-4)}`}
+                        : maskAccount(accountNumber)}
                     </p>
                   )}
                 </div>

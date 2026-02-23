@@ -40,3 +40,22 @@ export const formatCurrency = (amount: number): string => {
     maximumFractionDigits: 0,
   }).format(amount);
 };
+
+/**
+ * 格式化金額數字部分（不含貨幣符號），用於獨立渲染數字。
+ */
+export const formatAmount = (amount: number): string => {
+  return new Intl.NumberFormat('zh-TW', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+/**
+ * 遮罩帳號：保留末 4 碼，前面以等比例圓點取代。
+ * 例如 10 碼 → `•••••• 1234`，14 碼 → `•••••••••• 1234`。
+ */
+export const maskAccount = (accountNumber: string): string => {
+  if (accountNumber.length <= 4) return accountNumber;
+  return '•'.repeat(accountNumber.length - 4) + ' ' + accountNumber.slice(-4);
+};

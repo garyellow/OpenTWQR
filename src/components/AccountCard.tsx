@@ -1,6 +1,7 @@
 import type { BankAccount } from '../types';
 import { Trash2, Pencil, Check } from 'lucide-react';
 import { useBanksStore } from '../stores/useBanksStore';
+import { maskAccount } from '../utils/twqr';
 
 interface AccountCardProps {
   account: BankAccount;
@@ -54,7 +55,7 @@ export const AccountCard = ({
         </div>
 
         <p className={`font-mono text-xl tracking-widest ${isSelected ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-700 dark:text-zinc-300'}`}>
-          {`•••• ${account.accountNumber.slice(-4)}`}
+          {maskAccount(account.accountNumber)}
         </p>
 
         {account.label && (

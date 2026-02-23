@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/AmountInput';
 import { QRDisplay } from '../components/QRDisplay';
-import { generateTWQR } from '../utils/twqr';
+import { generateTWQR, maskAccount } from '../utils/twqr';
 import { buildShareUrl, parseShareHash } from '../utils/share';
 import { Wallet, QrCode, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -187,7 +187,7 @@ export const ReceivePage = () => {
                 {selectedAccount?.label || bankName || '我的帳戶'}
               </p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
-                {`•••• ${selectedAccount.accountNumber.slice(-4)}`}
+                {maskAccount(selectedAccount.accountNumber)}
               </p>
             </div>
             <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
