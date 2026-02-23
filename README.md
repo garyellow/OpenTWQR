@@ -1,16 +1,16 @@
 # OpenTWQR
 
-**線上使用：https://pay.garyellow.app**
-
 OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 支援 PWA 安裝、本地資料儲存、離線開啟與顯示已存在帳戶資料。
 
 ## 核心功能
 
-- 只保留收款流程：輸入金額 → 產生 QR → 對方掃碼轉帳
-- 帳戶管理（新增 / 編輯 / 刪除 / 選擇預設帳戶）
-- 使用 `zustand + persist` 將帳戶資料存在本機 `localStorage`
-- TWQRP 字串由 `src/utils/twqr.ts` 生成（含 16 碼帳號補零、金額 * 100）
+- 收款流程：選擇帳戶 → 輸入金額 → 產生 QR → 對方掃碼轉帳
+- 帳戶管理（新增 / 編輯 / 刪除 / 選擇帳戶）
+- 白天 / 夜間 / 跟隨系統 三種主題模式切換
+- QR Code 固定採用黑底白碼，確保任何主題模式下皆有最佳掃描對比
+- 使用 `zustand + persist` 將帳戶資料與主題偏好存在本機 `localStorage`
+- TWQRP 字串由 `src/utils/twqr.ts` 生成（含 16 碼帳號補零、金額 × 100）
 
 ## PWA / 離線
 
@@ -19,9 +19,16 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 - 帳戶資料為本機儲存，無後端依賴
 - 銀行清單內建於前端資源，無網路時自動使用內建清單（Fallback）
 
+## 主題模式
+
+- 支援 Light / Dark / System 三種模式，透過 Tailwind `darkMode: 'class'` 實作
+- 主題偏好持久化於 `localStorage`（key: `opentwqr-theme`）
+- `index.html` 內含防止主題閃爍（FOUC）的同步腳本
+- `<meta name="theme-color">` 隨主題動態更新，確保瀏覽器 UI 與 PWA 頂部列顏色一致
+
 ## 部署
 
-部署至 GitHub Pages，自定義網域 `pay.garyellow.app`。
+部署至 GitHub Pages，搭配自定義網域。
 
 - 自動部署：push to `main` 觸發 `.github/workflows/deploy.yml`
 - `public/CNAME` 確保每次部署後自定義網域不被重置
@@ -60,14 +67,18 @@ npm run preview
 ## 技術堆疊
 
 - React 19 + TypeScript + Vite
-- Tailwind CSS
+- Tailwind CSS（darkMode: class）
 - React Router
-- Zustand
+- Zustand（含 persist middleware）
 - qrcode.react
+- Lucide React（圖示）
+- vite-plugin-pwa
 
 ## 專案結構
 
-- `src/pages`：主要頁面（收款頁 / 帳戶頁）
-- `src/components`：UI 元件
-- `src/stores`：狀態管理與本地持久化
+- `src/pages/`：主要頁面（收款頁 / 帳戶管理頁）
+- `src/components/`：UI 元件（QR 顯示、金額鍵盤、帳戶卡片、銀行選擇器、主題切換）
+- `src/stores/`：狀態管理與本地持久化（帳戶、銀行、主題）
 - `src/utils/twqr.ts`：TWQRP 產生邏輯
+- `src/data/`：銀行清單（內建 + 自動產生）
+- `src/types/`：TypeScript 型別定義

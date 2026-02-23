@@ -11,49 +11,43 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
     const newValue = value + digit;
     const numericValue = parseInt(newValue, 10);
 
-    // Ignore input that results in zero (prevents leading zeros)
     if (Number.isNaN(numericValue) || numericValue === 0) return;
 
     const normalized = numericValue.toString();
-
-    // Limit length and amount
-    if (normalized.length > 9) return;
-    if (numericValue > maxAmount) return;
+    if (normalized.length > 9 || numericValue > maxAmount) return;
 
     onChange(normalized);
   };
 
   const handleBackspace = () => {
-    if (value.length <= 1) {
-      onChange('');
-    } else {
-      onChange(value.slice(0, -1));
-    }
-  };
-
-  const handleClear = () => {
-    onChange('');
+    onChange(value.length <= 1 ? '' : value.slice(0, -1));
   };
 
   const formattedAmount = value ? new Intl.NumberFormat().format(parseInt(value, 10)) : '';
 
+  const digitBtnClass =
+    'h-16 rounded-xl text-2xl font-medium text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 active:bg-zinc-300 dark:active:bg-zinc-700 active:scale-95 transition-[background-color,transform] border border-zinc-200 dark:border-zinc-800';
+
   return (
-    <div className="space-y-4 w-full max-w-xs mx-auto">
-      {/* Amount Display */}
-      <div className="flex flex-col items-center justify-center py-8">
-        <span className="text-zinc-500 font-medium mb-3 text-sm uppercase tracking-wider">Transfer Amount</span>
-        <div className="flex items-baseline justify-center gap-1 w-full overflow-hidden" aria-live="polite" aria-atomic="true">
-          <span className="text-4xl text-emerald-500 font-bold">$</span>
-          <span className={`text-6xl font-bold tracking-tighter ${value ? 'text-white' : 'text-zinc-700'}`}>
+    <div className="w-full max-w-xs mx-auto space-y-3">
+      {/* Amount display */}
+      <div className="flex flex-col items-center py-6">
+        <span className="text-zinc-500 text-sm font-medium mb-2">Transfer Amount</span>
+        <div className="flex items-baseline gap-1" aria-live="polite" aria-atomic="true">
+          <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">$</span>
+          <span
+            className={`text-5xl font-bold ${value ? 'text-zinc-900 dark:text-white' : 'text-zinc-300 dark:text-zinc-700'}`}
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
             {formattedAmount || '0'}
           </span>
         </div>
         {value && (
           <button
             type="button"
-            onClick={handleClear}
+            onClick={() => onChange('')}
             aria-label="Clear amount"
-            className="mt-4 h-11 px-4 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors border border-zinc-800/60"
+            className="mt-3 px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
           >
             Clear
           </button>
@@ -61,38 +55,30 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
       </div>
 
       {/* Keypad */}
-      <div className="grid grid-cols-3 gap-3 select-none px-2 pb-6">
+      <div className="grid grid-cols-3 gap-2 select-none">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}
             type="button"
             onClick={() => handleDigit(num.toString())}
-            className="h-20 w-full rounded-2xl bg-zinc-900/50 hover:bg-zinc-800 text-3xl font-medium text-white active:bg-zinc-700 active:scale-95 transition-[background-color,color,transform] border border-zinc-800/50 flex items-center justify-center shadow-sm"
+            className={digitBtnClass}
           >
             {num}
           </button>
         ))}
-        <button
-          type="button"
-          onClick={() => handleDigit('00')}
-          className="h-20 w-full rounded-2xl bg-zinc-900/50 hover:bg-zinc-800 text-3xl font-medium text-white active:bg-zinc-700 active:scale-95 transition-[background-color,color,transform] border border-zinc-800/50 flex items-center justify-center shadow-sm"
-        >
+        <button type="button" onClick={() => handleDigit('00')} className={digitBtnClass}>
           00
         </button>
-        <button
-          type="button"
-          onClick={() => handleDigit('0')}
-          className="h-20 w-full rounded-2xl bg-zinc-900/50 hover:bg-zinc-800 text-3xl font-medium text-white active:bg-zinc-700 active:scale-95 transition-[background-color,color,transform] border border-zinc-800/50 flex items-center justify-center shadow-sm"
-        >
+        <button type="button" onClick={() => handleDigit('0')} className={digitBtnClass}>
           0
         </button>
         <button
           type="button"
           onClick={handleBackspace}
           aria-label="Delete one digit"
-          className="h-20 w-full rounded-2xl bg-zinc-900/30 hover:bg-zinc-800/50 text-zinc-400 active:bg-zinc-700 active:text-white active:scale-95 transition-[background-color,color,transform] border border-zinc-800/30 flex items-center justify-center shadow-sm"
+          className="h-16 rounded-xl text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 transition-[background-color,transform] border border-zinc-200 dark:border-zinc-800 flex items-center justify-center"
         >
-          <Delete size={28} />
+          <Delete size={24} aria-hidden="true" />
         </button>
       </div>
     </div>

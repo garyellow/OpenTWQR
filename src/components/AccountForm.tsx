@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BankSelect } from './BankSelect';
 import type { BankAccount } from '../types';
 import { isValidAccount } from '../utils/twqr';
-import { Save, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
@@ -25,59 +25,58 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
     }
 
     if (!isValidAccount(accountNumber)) {
-      setError('Account number must be 10-16 digits');
+      setError('Account number must be 10\u201316 digits');
       return;
     }
 
-    onSubmit({
-      bankCode,
-      accountNumber,
-      note,
-    });
+    onSubmit({ bankCode, accountNumber, note });
   };
 
-  const handleBankChange = (code: string) => {
-    setBankCode(code);
-    setError('');
-  };
-
-  const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 16));
-    setError('');
-  };
+  const inputClass =
+    'w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3.5 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-[border-color,box-shadow]';
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <BankSelect value={bankCode} onChange={handleBankChange} />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <BankSelect
+        value={bankCode}
+        onChange={(code) => {
+          setBankCode(code);
+          setError('');
+        }}
+      />
 
       <div>
-        <label htmlFor="account-number" className="block text-zinc-400 text-sm font-medium mb-2 ml-1">
+        <label
+          htmlFor="account-number"
+          className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1.5"
+        >
           Account Number
         </label>
-        <div className="relative">
-          <input
-            id="account-number"
-            name="accountNumber"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="off"
-            spellCheck={false}
-            placeholder="0000000000000000…"
-            value={accountNumber}
-            onChange={handleAccountChange}
-            aria-invalid={Boolean(error && !isValidAccount(accountNumber))}
-            aria-describedby={error && !isValidAccount(accountNumber) ? 'account-form-error' : undefined}
-            className="w-full bg-black/40 border border-zinc-700/50 rounded-2xl p-4 text-xl font-mono tracking-widest text-white placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-[border-color,box-shadow] shadow-inner"
-          />
-        </div>
-        <p className="text-zinc-500 text-xs mt-2 ml-1 flex items-center gap-1">
-          <span className="w-1 h-1 rounded-full bg-zinc-600"></span>
-          10-16 digits
-        </p>
+        <input
+          id="account-number"
+          name="accountNumber"
+          type="tel"
+          inputMode="numeric"
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="0000000000000000\u2026"
+          value={accountNumber}
+          onChange={(e) => {
+            setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 16));
+            setError('');
+          }}
+          aria-invalid={Boolean(error && !isValidAccount(accountNumber))}
+          aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
+          className={`${inputClass} text-lg font-mono tracking-widest`}
+        />
+        <p className="text-zinc-400 text-xs mt-1.5">10\u201316 digits</p>
       </div>
 
       <div>
-        <label htmlFor="account-note" className="block text-zinc-400 text-sm font-medium mb-2 ml-1">
+        <label
+          htmlFor="account-note"
+          className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1.5"
+        >
           Note (Optional)
         </label>
         <input
@@ -85,33 +84,37 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
           name="note"
           type="text"
           autoComplete="off"
-          placeholder="e.g. Rent, Salary…"
+          placeholder="e.g. Rent, Salary\u2026"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="w-full bg-black/40 border border-zinc-700/50 rounded-2xl p-4 text-white placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-[border-color,box-shadow] shadow-inner"
+          className={inputClass}
         />
       </div>
 
       {error && (
-        <div id="account-form-error" role="alert" aria-live="polite" className="flex items-center gap-3 text-red-400 bg-red-500/10 p-4 rounded-2xl border border-red-500/20 animate-in fade-in slide-in-from-top-2">
-          <AlertCircle size={20} className="shrink-0" />
-          <span className="font-medium text-sm">{error}</span>
+        <div
+          id="form-error"
+          role="alert"
+          aria-live="polite"
+          className="flex items-center gap-2.5 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200 dark:border-red-500/20 text-sm"
+        >
+          <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
-      <div className="flex gap-4 pt-4">
+      <div className="flex gap-3 pt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-4 rounded-2xl font-medium text-zinc-400 bg-zinc-800/50 hover:bg-zinc-800 hover:text-white transition-colors border border-zinc-700/50"
+          className="flex-1 py-3.5 rounded-xl font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="flex-[2] py-4 rounded-2xl font-bold text-black bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] transition-[background-color,transform] flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+          className="flex-[2] py-3.5 rounded-xl font-semibold text-white dark:text-black bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-400 active:scale-[0.98] transition-[background-color,transform]"
         >
-          <Save size={20} />
           Save Account
         </button>
       </div>

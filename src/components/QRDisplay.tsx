@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Sun, SunDim, Copy, Check } from 'lucide-react';
+import { X, Copy, Check } from 'lucide-react';
 import { formatCurrency } from '../utils/twqr';
 
 interface QRDisplayProps {
@@ -12,40 +12,32 @@ interface QRDisplayProps {
 }
 
 export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: QRDisplayProps) => {
-  const [isBright, setIsBright] = useState(true);
-  const [copyState, setCopyState] = useState<'idle' | 'success' | 'error'>('idle');
+  const [copyState, setCopyState] = useState<'idle' | 'success'>('idle');
   const [qrSize, setQrSize] = useState(280);
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
+    const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
     };
 
     window.addEventListener('keydown', onKeyDown);
-
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [onClose]);
 
   useEffect(() => {
-    const updateQrSize = () => {
-      const nextSize = Math.max(220, Math.min(320, Math.floor(window.innerWidth * 0.68)));
-      setQrSize(nextSize);
+    const update = () => {
+      setQrSize(Math.max(200, Math.min(300, Math.floor(window.innerWidth * 0.65))));
     };
 
-    updateQrSize();
-    window.addEventListener('resize', updateQrSize);
-
-    return () => {
-      window.removeEventListener('resize', updateQrSize);
-    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
   }, []);
 
   const handleCopy = async () => {
@@ -53,93 +45,83 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
       await navigator.clipboard.writeText(value);
       setCopyState('success');
     } catch {
-      setCopyState('error');
+      /* clipboard not available */
     }
-
     setTimeout(() => setCopyState('idle'), 2000);
   };
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="qr-modal-title" className="fixed inset-0 z-50 flex flex-col bg-black/95 backdrop-blur-xl animate-in fade-in duration-300 px-safe">
-      <div className="flex items-center justify-between p-6">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="qr-modal-title"
+      className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-950 px-safe overscroll-contain"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 pt-safe">
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close QR screen"
-          className="p-3 rounded-full bg-zinc-800/50 text-white hover:bg-zinc-700 transition-colors border border-zinc-700/50 focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+          aria-label="Close"
+          className="p-2.5 rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
         >
-          <X size={24} />
+          <X size={24} aria-hidden="true" />
         </button>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setIsBright(!isBright)}
-            aria-label={isBright ? 'Switch to dim mode' : 'Switch to bright mode'}
-            className={`p-3 rounded-full transition-[background-color,color,border-color,box-shadow] border focus-visible:ring-2 focus-visible:ring-emerald-500/50 ${
-              isBright
-                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 shadow-[0_0_15px_rgba(250,204,21,0.2)]'
-                : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50'
-            }`}
-          >
-            {isBright ? <Sun size={24} /> : <SunDim size={24} />}
-          </button>
-        </div>
+        <h2 id="qr-modal-title" className="text-lg font-semibold text-zinc-900 dark:text-white">
+          Payment QR Code
+        </h2>
+        <div className="w-11" aria-hidden="true" />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-10">
-        <h2 id="qr-modal-title" className="sr-only">QR code payment</h2>
-        <div className={`relative p-6 rounded-[2.5rem] bg-white shadow-2xl transition-[transform,box-shadow] duration-500 transform ${
-          isBright ? 'scale-105 shadow-[0_0_80px_rgba(255,255,255,0.25)]' : 'scale-100'
-        }`}>
-          <div className="absolute inset-0 border-[6px] border-emerald-500/10 rounded-[2.5rem] pointer-events-none"></div>
+      {/* QR Code — always black-on-white for maximum scan contrast */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-8">
+        <div className="bg-white p-5 rounded-2xl border border-zinc-200 dark:border-zinc-700">
           <QRCodeSVG
             value={value}
             size={qrSize}
             level="H"
-            includeMargin={true}
-            className="rounded-2xl"
+            includeMargin
+            bgColor="#ffffff"
+            fgColor="#000000"
           />
-          <div className="absolute -bottom-14 left-0 right-0 flex justify-center">
-             <div className="bg-zinc-900 text-emerald-400 font-bold px-6 py-2.5 rounded-full border border-zinc-800 shadow-xl flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-sm tracking-wider font-medium text-white">TWQR PAY</span>
-             </div>
-          </div>
         </div>
 
-        <div className="text-center space-y-3 mt-8">
-          {amount != null && (
-            <div className="flex flex-col items-center">
-              <span className="text-zinc-500 text-xs uppercase tracking-widest mb-1">Total Amount</span>
-              <div className="text-5xl font-bold text-white tracking-tight">
-                {formatCurrency(amount)}
-              </div>
+        {/* Amount & account info */}
+        <div className="text-center space-y-2">
+          {amount != null && amount > 0 && (
+            <div className="text-4xl font-bold text-zinc-900 dark:text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {formatCurrency(amount)}
             </div>
           )}
-          <div className="space-y-1 pt-2">
-            <div className="text-zinc-300 font-medium text-lg">
-              {bankName}
-            </div>
-            <div className="font-mono text-zinc-500 tracking-wider bg-zinc-900/50 px-3 py-1 rounded-lg inline-block border border-zinc-800/50">
-              {accountNumber?.replace(/(.{4})/g, '$1 ').trim()}
-            </div>
-          </div>
+          {bankName && (
+            <p className="text-zinc-600 dark:text-zinc-400 font-medium">{bankName}</p>
+          )}
+          {accountNumber && (
+            <p className="font-mono text-sm text-zinc-500 tracking-wider">
+              {accountNumber.replace(/(.{4})/g, '$1 ').trim()}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="p-8 pb-12 flex justify-center">
+      {/* Footer */}
+      <div className="p-6 pb-safe flex justify-center">
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-3 px-8 py-4 rounded-full bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-[background-color,color,transform] active:scale-95 border border-zinc-800 focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+          className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors border border-zinc-200 dark:border-zinc-800"
         >
-          {copyState === 'success' ? <Check size={20} className="text-emerald-500" /> : <Copy size={20} />}
-          <span className="font-medium text-base">
-            {copyState === 'success' ? 'Copied QR Text' : 'Copy QR Text'}
+          {copyState === 'success' ? (
+            <Check size={18} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+          ) : (
+            <Copy size={18} aria-hidden="true" />
+          )}
+          <span className="font-medium text-sm">
+            {copyState === 'success' ? 'Copied' : 'Copy QR Text'}
           </span>
         </button>
         <span className="sr-only" aria-live="polite">
-          {copyState === 'success' ? 'QR text copied' : copyState === 'error' ? 'Unable to copy QR text' : ''}
+          {copyState === 'success' ? 'QR text copied' : ''}
         </span>
       </div>
     </div>

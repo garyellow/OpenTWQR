@@ -6,10 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>OpenTWQR</title>
     <meta name="description" content="Generate Taiwan TWQR transfer QR codes locally and securely." />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="/pwa-192x192.svg" />
+    <!-- Prevent theme flash -->
+    <script>
+      (function () {
+        try {
+          var s = JSON.parse(localStorage.getItem('opentwqr-theme') || '{}');
+          var m = (s.state && s.state.mode) || 'system';
+          var d = m === 'dark' || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          if (d) {
+            document.documentElement.classList.add('dark');
+            document.querySelector('meta[name="theme-color"]').content = '#09090b';
+          }
+        } catch (e) {}
+      })();
+    </script>
     <!--
       Restore URL encoded by 404.html for SPA routing on GitHub Pages.
       https://github.com/rafgraph/spa-github-pages
