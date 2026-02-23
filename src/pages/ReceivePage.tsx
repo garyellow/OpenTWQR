@@ -148,7 +148,7 @@ export const ReceivePage = () => {
         <button
           type="button"
           onClick={() => navigate('/accounts')}
-          className="w-full max-w-xs py-4 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color,box-shadow] shadow-sm mt-4"
+          className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           新增銀行帳戶
         </button>
@@ -177,7 +177,7 @@ export const ReceivePage = () => {
         <div className="shrink-0 px-5 mb-2">
           <Link
             to="/accounts"
-            className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors group active:scale-[0.98] shadow-sm"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all group active:scale-[0.98] shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
           >
             <div className="w-12 h-12 rounded-xl flex items-center justify-center font-semibold text-sm bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-700/50">
               {selectedAccount?.bankCode.substring(0, 3)}
@@ -187,9 +187,7 @@ export const ReceivePage = () => {
                 {selectedAccount?.label || bankName || '我的帳戶'}
               </p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
-                {selectedAccount?.accountNumber
-                  .slice(-4)
-                  .padStart(selectedAccount.accountNumber.length, '•')}
+                {`•••• ${selectedAccount.accountNumber.slice(-4)}`}
               </p>
             </div>
             <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
@@ -224,7 +222,7 @@ export const ReceivePage = () => {
             <button
               type="button"
               onClick={() => setShowQR(true)}
-              className="w-full flex items-center justify-center gap-2.5 py-4 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color,box-shadow] shadow-sm"
+              className="w-full flex items-center justify-center gap-2.5 py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <QrCode size={22} aria-hidden="true" />
               產生 QR Code
@@ -233,27 +231,30 @@ export const ReceivePage = () => {
         </div>
       </main>
 
-      {/* Note input modal */}
+      {/* Note input modal — centered card */}
       {showNoteInput && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center px-5 pt-[20svh] bg-black/30 backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
           onClick={() => setShowNoteInput(false)}
         >
           <div
-            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200/50 dark:border-zinc-800/50 p-5 overscroll-contain animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="note-modal-title"
+            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 overscroll-contain animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <label htmlFor="note-modal-input" className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+            <div className="flex items-center justify-between mb-5">
+              <h2 id="note-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                 交易備註
-              </label>
+              </h2>
               <button
                 type="button"
                 onClick={() => setShowNoteInput(false)}
                 aria-label="關閉"
-                className="p-2 -mr-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
-                <X size={18} aria-hidden="true" />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
             <div className="relative">
@@ -273,7 +274,7 @@ export const ReceivePage = () => {
                 autoFocus
                 autoComplete="off"
                 maxLength={20}
-                className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/80 rounded-xl px-4 py-3 pr-14 text-base text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 transition-[border-color,box-shadow] shadow-sm"
+                className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 dark:text-zinc-500 pointer-events-none">
                 {note.length}/20
@@ -287,7 +288,7 @@ export const ReceivePage = () => {
                     setNote('');
                     setShowNoteInput(false);
                   }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-[transform,background-color,color]"
+                  className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   清除備註
                 </button>
@@ -295,7 +296,7 @@ export const ReceivePage = () => {
               <button
                 type="button"
                 onClick={() => setShowNoteInput(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white dark:text-zinc-900 bg-zinc-800 dark:bg-zinc-100 hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color]"
+                className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 確認
               </button>

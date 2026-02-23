@@ -113,7 +113,7 @@ export const AccountsPage = () => {
             <button
               type="button"
               onClick={() => setIsAdding(true)}
-              className="mt-4 px-8 py-4 rounded-2xl bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color,box-shadow] shadow-sm"
+              className="mt-4 px-8 py-4 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               新增第一個帳戶
             </button>
@@ -140,10 +140,10 @@ export const AccountsPage = () => {
         )}
       </main>
 
-      {/* ---------- Add / Edit Form Modal ---------- */}
+      {/* ---------- Add / Edit Form Modal — centered card ---------- */}
       {(isAdding || editingId) && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity"
+          className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 transition-opacity"
           onClick={() => {
             setIsAdding(false);
             setEditingId(null);
@@ -153,11 +153,10 @@ export const AccountsPage = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="account-form-title"
-            className="w-full max-w-lg max-h-[90svh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full max-w-lg max-h-[90svh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 sm:p-8">
-              <div className="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto mb-8 sm:hidden" />
               <h2
                 id="account-form-title"
                 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-8 text-center"
@@ -177,10 +176,10 @@ export const AccountsPage = () => {
         </div>
       )}
 
-      {/* ---------- Delete Confirmation ---------- */}
+      {/* ---------- Delete Confirmation — centered card ---------- */}
       {deletingAccount && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity"
+          className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 transition-opacity"
           onClick={() => setDeletingId(null)}
         >
           <div
@@ -188,7 +187,7 @@ export const AccountsPage = () => {
             aria-modal="true"
             aria-labelledby="delete-title"
             aria-describedby="delete-desc"
-            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border p-6 sm:p-8 shadow-2xl overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl overscroll-contain animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-5 mx-auto">
@@ -207,14 +206,14 @@ export const AccountsPage = () => {
               <button
                 type="button"
                 onClick={() => setDeletingId(null)}
-                className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 取消
               </button>
               <button
                 type="button"
                 onClick={handleDeleteConfirm}
-                className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-[transform,background-color,box-shadow] shadow-sm"
+                className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 刪除
               </button>

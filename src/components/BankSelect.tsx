@@ -59,7 +59,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           onClick={() => setIsOpen(true)}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          className="w-full flex items-center justify-between px-4 py-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-[background-color,border-color,box-shadow] shadow-sm group"
+          className="w-full flex items-center justify-between px-4 py-4 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all shadow-sm group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0 shadow-sm border border-zinc-100 dark:border-zinc-700/50">
@@ -99,19 +99,18 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity"
+          className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 transition-opacity"
           onClick={() => setIsOpen(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="bank-title"
-            className="w-full max-h-[85svh] sm:max-h-[75svh] max-w-md bg-white dark:bg-zinc-900 rounded-t-[2rem] sm:rounded-3xl flex flex-col shadow-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border overscroll-contain animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+            className="w-full max-h-[85svh] max-w-md bg-white dark:bg-zinc-900 rounded-[2rem] flex flex-col shadow-2xl border border-zinc-200 dark:border-zinc-800 overscroll-contain animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="p-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/50 flex flex-col gap-4 shrink-0">
-              <div className="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto sm:hidden" />
               <div className="flex items-center justify-between">
                 <h2 id="bank-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                   選擇銀行
@@ -144,7 +143,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                   placeholder="搜尋銀行名稱或代碼…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white focus-visible:border-zinc-900 dark:focus-visible:border-white transition-[border-color,box-shadow,background-color,color] shadow-sm"
+                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -168,9 +167,9 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                       setIsOpen(false);
                       setSearch('');
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-[background-color,color,box-shadow] ${
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                       value === bank.code
-                        ? 'bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
                         : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                     }`}
                   >

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Share2, Link2, Image, Download, Check, Copy } from 'lucide-react';
+import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff } from 'lucide-react';
 import { formatCurrency } from '../utils/twqr';
 
 interface QRDisplayProps {
@@ -18,6 +18,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [accountRevealed, setAccountRevealed] = useState(false);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +30,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
 
   const handleCopyAccount = useCallback(async () => {
     if (!accountNumber) return;
+    setAccountRevealed(true);
     try {
       await navigator.clipboard.writeText(accountNumber);
       showFeedback('已複製帳號');
@@ -240,7 +242,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -293,8 +295,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
               type="button"
               onClick={handleCopyAccount}
               disabled={!accountNumber}
-              aria-label="點擊複製帳號"
-              className="w-full bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-zinc-100 dark:border-zinc-800/50 text-left group transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-[0.99] disabled:cursor-default disabled:hover:bg-zinc-50 dark:disabled:hover:bg-zinc-800/50"
+              aria-label={accountRevealed ? '點擊複製帳號' : '點擊複製並顯示帳號'}
+              className="w-full bg-white dark:bg-zinc-900/50 rounded-xl p-3 border border-zinc-200 dark:border-zinc-800 text-left group transition-all hover:bg-zinc-50 dark:hover:bg-zinc-900 active:scale-[0.99] disabled:cursor-default disabled:hover:bg-white dark:disabled:hover:bg-zinc-900/50 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
@@ -303,16 +305,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                   )}
                   {accountNumber && (
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
-                      {accountNumber.replace(/(.{4})/g, '$1 ').trim()}
+                      {accountRevealed
+                        ? accountNumber.replace(/(.{4})/g, '$1 ').trim()
+                        : `•••• ${accountNumber.slice(-4)}`}
                     </p>
                   )}
                 </div>
                 {accountNumber && (
-                  <Copy
-                    size={14}
-                    className="shrink-0 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400 dark:group-hover:text-zinc-400 transition-colors"
-                    aria-hidden="true"
-                  />
+                  accountRevealed
+                    ? <EyeOff size={14} className="shrink-0 text-zinc-400 dark:text-zinc-500 transition-colors" aria-hidden="true" />
+                    : <Eye size={14} className="shrink-0 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400 dark:group-hover:text-zinc-400 transition-colors" aria-hidden="true" />
                 )}
               </div>
             </button>
@@ -340,7 +342,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
           <button
             type="button"
             onClick={() => setShowShareMenu(true)}
-            className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-200 active:scale-[0.98] transition-[transform,background-color,color,box-shadow] shadow-sm font-semibold"
+            className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
             <Share2 size={18} aria-hidden="true" />
             <span>分享</span>
@@ -348,23 +350,22 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
         </div>
       </div>
 
-      {/* Share menu overlay */}
+      {/* Share menu overlay — centered card */}
       {showShareMenu && (
         <div
-          className="fixed inset-0 z-[85] flex items-end sm:items-center justify-center"
+          className="fixed inset-0 z-[85] flex items-center justify-center p-5"
           onClick={() => setShowShareMenu(false)}
         >
           <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
           <div
-            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl border-t border-zinc-200/50 dark:border-zinc-800/50 sm:border shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200"
+            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto mt-3 sm:hidden" />
-            <div className="p-2 pt-4 sm:pt-2">
+            <div className="p-2 pt-3">
               <button
                 type="button"
                 onClick={handleShareLink}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
                   <Link2 size={20} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
@@ -378,7 +379,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
               <button
                 type="button"
                 onClick={handleShareImage}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
                   <Image size={20} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
@@ -392,7 +393,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
               <button
                 type="button"
                 onClick={handleDownloadImage}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 <div className="w-10 h-10 rounded-full bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center shrink-0">
                   <Download size={20} className="text-violet-600 dark:text-violet-400" aria-hidden="true" />
@@ -404,11 +405,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
               </button>
             </div>
 
-            <div className="p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+            <div className="p-2 pb-3">
               <button
                 type="button"
                 onClick={() => setShowShareMenu(false)}
-                className="w-full py-3 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-colors"
+                className="w-full py-3 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 取消
               </button>
