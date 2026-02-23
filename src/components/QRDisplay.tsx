@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Copy, Check } from 'lucide-react';
 import { formatCurrency } from '../utils/twqr';
@@ -14,6 +14,7 @@ interface QRDisplayProps {
 export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: QRDisplayProps) => {
   const [copyState, setCopyState] = useState<'idle' | 'success'>('idle');
   const [qrSize, setQrSize] = useState(280);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -27,6 +28,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKeyDown);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     };
   }, [onClose]);
 
@@ -47,7 +49,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
     } catch {
       /* clipboard not available */
     }
-    setTimeout(() => setCopyState('idle'), 2000);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopyState('idle'), 2000);
   };
 
   return (

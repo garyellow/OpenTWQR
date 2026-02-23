@@ -1,12 +1,10 @@
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 const SOURCE_URL = 'https://www.fisc.com.tw/TC/OPENDATA/Comm1_MEMBER.xml';
 const OUTPUT_TS = 'src/data/banks.generated.ts';
 const OUTPUT_JSON = 'public/data/banks.latest.json';
 const TARGET_BUSINESS = '跨行自動化服務機器業務(金融卡)';
 const REQUIRED_CODES = ['004', '700', '822'];
-
-const nowIso = new Date().toISOString();
 
 const readTag = (xml, tagName) => {
   const escapedTag = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -69,7 +67,7 @@ const parseBanks = (xml) => {
   return banks.sort((left, right) => Number(left.code) - Number(right.code));
 };
 
-const toTypeScript = (banks) => {
+const toTypeScript = (banks, nowIso) => {
   const bankLines = banks.map((bank) => `  { code: '${bank.code}', name: '${bank.name}' },`);
 
   return `import type { Bank } from '../types';
@@ -116,7 +114,28 @@ const main = async () => {
     }
   }
 
-  const tsContent = toTypeScript(banks);
+  // Read existing JSON to check if banks data has actually changed
+  let existingBanks = null;
+
+  try {
+    const existingJson = JSON.parse(await readFile(OUTPUT_JSON, 'utf8'));
+    existingBanks = existingJson.banks ?? null;
+  } catch {
+    // File doesn't exist yet, proceed with write
+  }
+
+  const hasChanged =
+    existingBanks === null ||
+    JSON.stringify(banks) !== JSON.stringify(existingBanks);
+
+  if (!hasChanged) {
+    console.log(`No changes detected (${banks.length} entries). Skipping update.`);
+    return;
+  }
+
+  const nowIso = new Date().toISOString();
+
+  const tsContent = toTypeScript(banks, nowIso);
   const jsonContent = JSON.stringify(
     {
       source: {
