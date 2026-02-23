@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Share2, Link2, Image, Download, Check } from 'lucide-react';
+import { X, Share2, Link2, Image, Download, Check, Copy } from 'lucide-react';
 import { formatCurrency } from '../utils/twqr';
 
 interface QRDisplayProps {
@@ -26,6 +26,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     feedbackTimerRef.current = setTimeout(() => setFeedback(null), 2000);
   }, []);
+
+  const handleCopyAccount = useCallback(async () => {
+    if (!accountNumber) return;
+    try {
+      await navigator.clipboard.writeText(accountNumber);
+      showFeedback('已複製帳號');
+    } catch {
+      showFeedback('複製失敗');
+    }
+  }, [accountNumber, showFeedback]);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -202,9 +212,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
 
         {/* Info below QR */}
         <div className="mt-8 text-center space-y-2">
-          {amount != null && amount > 0 && (
+          {amount != null && amount > 0 ? (
             <p className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {formatCurrency(amount)}
+            </p>
+          ) : (
+            <p className="text-lg font-medium text-white/50">
+              金額由付款方輸入
             </p>
           )}
           {bankName && <p className="text-white/60 text-sm">{bankName}</p>}
@@ -266,24 +280,46 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
 
           {/* Amount & account info */}
           <div className="text-center space-y-2.5 w-full">
-            {amount != null && amount > 0 && (
+            {amount != null && amount > 0 ? (
               <div className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {formatCurrency(amount)}
               </div>
+            ) : (
+              <div className="text-lg font-medium text-zinc-400 dark:text-zinc-500">
+                金額由付款方輸入
+              </div>
             )}
-            <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-zinc-100 dark:border-zinc-800/50">
-              {bankName && (
-                <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">{bankName}</p>
-              )}
-              {accountNumber && (
-                <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
-                  {accountNumber.replace(/(.{4})/g, '$1 ').trim()}
-                </p>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={handleCopyAccount}
+              disabled={!accountNumber}
+              aria-label="點擊複製帳號"
+              className="w-full bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-zinc-100 dark:border-zinc-800/50 text-left group transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-[0.99] disabled:cursor-default disabled:hover:bg-zinc-50 dark:disabled:hover:bg-zinc-800/50"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  {bankName && (
+                    <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">{bankName}</p>
+                  )}
+                  {accountNumber && (
+                    <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
+                      {accountNumber.replace(/(.{4})/g, '$1 ').trim()}
+                    </p>
+                  )}
+                </div>
+                {accountNumber && (
+                  <Copy
+                    size={14}
+                    className="shrink-0 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400 dark:group-hover:text-zinc-400 transition-colors"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+            </button>
             {note && (
               <p className="text-xs text-zinc-400 dark:text-zinc-500">備註：{note}</p>
             )}
+            <p className="text-xs text-zinc-300 dark:text-zinc-600">請於銀行 App 核對帳號後再轉帳</p>
           </div>
         </div>
 

@@ -204,7 +204,14 @@ export const ReceivePage = () => {
                       aria-label="交易備註"
                       value={note}
                       onChange={(e) => setNote(e.target.value.slice(0, 20))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          setShowNoteInput(false);
+                        }
+                      }}
                       placeholder="最多 20 字…"
+                      autoFocus
                       autoComplete="off"
                       maxLength={20}
                       className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 transition-[border-color,box-shadow,background-color,color] shadow-sm"

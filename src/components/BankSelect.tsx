@@ -151,6 +151,13 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
             {/* Bank list */}
             <div className="flex-1 overflow-y-auto p-3 overscroll-contain">
               <div className="space-y-1 pb-safe">
+                {search && (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2 pb-2">
+                    {filteredBanks.length > 0
+                      ? `找到 ${filteredBanks.length} 家銀行`
+                      : null}
+                  </p>
+                )}
                 {filteredBanks.map((bank) => (
                   <button
                     key={bank.code}

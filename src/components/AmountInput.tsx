@@ -1,3 +1,4 @@
+import { useEffect, useCallback } from 'react';
 import { Delete, X } from 'lucide-react';
 
 interface AmountInputProps {
@@ -7,21 +8,51 @@ interface AmountInputProps {
 }
 
 export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInputProps) => {
-  const handleDigit = (digit: string) => {
-    const newValue = value + digit;
-    const numericValue = parseInt(newValue, 10);
+  const handleDigit = useCallback(
+    (digit: string) => {
+      const newValue = value + digit;
+      const numericValue = parseInt(newValue, 10);
 
-    if (Number.isNaN(numericValue) || numericValue === 0) return;
+      if (Number.isNaN(numericValue) || numericValue <= 0) return;
 
-    const normalized = numericValue.toString();
-    if (normalized.length > 9 || numericValue > maxAmount) return;
+      const normalized = numericValue.toString();
+      if (normalized.length > 9 || numericValue > maxAmount) return;
 
-    onChange(normalized);
-  };
+      onChange(normalized);
+    },
+    [value, onChange, maxAmount],
+  );
 
-  const handleBackspace = () => {
+  const handleBackspace = useCallback(() => {
     onChange(value.length <= 1 ? '' : value.slice(0, -1));
-  };
+  }, [value, onChange]);
+
+  const handleClear = useCallback(() => {
+    onChange('');
+  }, [onChange]);
+
+  /* Physical keyboard support */
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Ignore when focus is on an input/textarea (e.g. note field)
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        handleDigit(e.key);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        handleBackspace();
+      } else if (e.key === 'Delete' || e.key === 'Escape') {
+        e.preventDefault();
+        handleClear();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleDigit, handleBackspace, handleClear]);
 
   const formattedAmount = value ? new Intl.NumberFormat().format(parseInt(value, 10)) : '';
 
@@ -49,7 +80,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
           <div className="absolute right-0 flex items-center justify-center w-12 h-12">
             <button
               type="button"
-              onClick={() => onChange('')}
+              onClick={handleClear}
               aria-label="清除金額"
               className={`p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-[opacity,transform,background-color,color] ${
                 value ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'

@@ -5,14 +5,20 @@ const BASE_URI = 'TWQRP://xn--gmqw5ax42ad01c/158/02/V1';
 export const generateTWQR = (params: TWQRParams): string => {
   const { bankCode, accountNumber, amount, note } = params;
 
-  const d1_amountCents = Math.round(amount * 100);
   const d6_paddedAccount = accountNumber.padStart(16, '0');
   const d10_currency = '901';
 
   const queryParams = new URLSearchParams();
   queryParams.append('D5', bankCode);
   queryParams.append('D6', d6_paddedAccount);
-  queryParams.append('D1', d1_amountCents.toString());
+
+  // Only include D1 when a positive amount is specified.
+  // Omitting D1 lets the payer's banking app prompt for the amount.
+  if (amount > 0) {
+    const d1_amountCents = Math.round(amount * 100);
+    queryParams.append('D1', d1_amountCents.toString());
+  }
+
   queryParams.append('D10', d10_currency);
 
   if (note) {
