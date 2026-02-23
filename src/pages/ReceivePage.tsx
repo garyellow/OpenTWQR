@@ -3,25 +3,17 @@ import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/AmountInput';
 import { QRDisplay } from '../components/QRDisplay';
 import { generateTWQR, maskAccount } from '../utils/twqr';
-import { buildShareUrl, parseShareHash } from '../utils/share';
+import { buildShareUrl } from '../utils/share';
 import { Wallet, QrCode, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { ThemeToggle } from '../components/ThemeToggle';
 
 export const ReceivePage = () => {
-  const [initialShared] = useState(() => {
-    const hash = window.location.hash;
-    if (!hash || hash.length < 2) return null;
-    const parsed = parseShareHash(hash);
-    if (parsed) window.history.replaceState(null, '', window.location.pathname);
-    return parsed;
-  });
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [showNoteInput, setShowNoteInput] = useState(false);
-  const [showQR, setShowQR] = useState(initialShared !== null);
-  const [sharedDismissed, setSharedDismissed] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const { accounts, selectedAccountId } = useAppStore();
   const banks = useBanksStore((state) => state.banks);
   const navigate = useNavigate();
@@ -35,32 +27,8 @@ export const ReceivePage = () => {
     return banks.find((b) => b.code === selectedAccount?.bankCode)?.name || '';
   }, [banks, selectedAccount]);
 
-  /* ---------- Shared link handling (pure derivation, no useEffect) ---------- */
-  const sharedData = useMemo(() => {
-    if (!initialShared || sharedDismissed) return null;
-    const bank = banks.find((b) => b.code === initialShared.bankCode);
-    return {
-      bankCode: initialShared.bankCode,
-      accountNumber: initialShared.accountNumber,
-      bankName: bank?.name || initialShared.bankCode,
-      amount: initialShared.amount,
-      note: initialShared.note,
-    };
-  }, [initialShared, banks, sharedDismissed]);
-
-  const isSharedMode = sharedData !== null && showQR;
-
   /* ---------- QR string generation ---------- */
   const qrString = useMemo(() => {
-    if (isSharedMode && sharedData) {
-      return generateTWQR({
-        bankCode: sharedData.bankCode,
-        accountNumber: sharedData.accountNumber,
-        amount: sharedData.amount ?? 0,
-        note: sharedData.note,
-      });
-    }
-
     if (!selectedAccount) return null;
     const numAmount = amount ? parseInt(amount, 10) : 0;
     return generateTWQR({
@@ -69,19 +37,10 @@ export const ReceivePage = () => {
       amount: numAmount,
       note: note || undefined,
     });
-  }, [selectedAccount, amount, note, isSharedMode, sharedData]);
+  }, [selectedAccount, amount, note]);
 
   /* ---------- Share URL for current settings ---------- */
   const shareUrl = useMemo(() => {
-    if (isSharedMode && sharedData) {
-      return buildShareUrl({
-        bankCode: sharedData.bankCode,
-        accountNumber: sharedData.accountNumber,
-        amount: sharedData.amount,
-        note: sharedData.note,
-      });
-    }
-
     if (!selectedAccount) return '';
     const numAmount = amount ? parseInt(amount, 10) : 0;
     return buildShareUrl({
@@ -90,32 +49,11 @@ export const ReceivePage = () => {
       amount: numAmount > 0 ? numAmount : undefined,
       note: note || undefined,
     });
-  }, [isSharedMode, sharedData, selectedAccount, amount, note]);
-
-  /* ---------- QR display props ---------- */
-  const qrDisplayProps = useMemo(() => {
-    if (isSharedMode && sharedData) {
-      return {
-        bankName: sharedData.bankName,
-        accountNumber: sharedData.accountNumber,
-        amount: sharedData.amount,
-        note: sharedData.note,
-      };
-    }
-    return {
-      bankName,
-      accountNumber: selectedAccount?.accountNumber,
-      amount: amount ? parseInt(amount, 10) : undefined,
-      note: note || undefined,
-    };
-  }, [isSharedMode, sharedData, bankName, selectedAccount, amount, note]);
+  }, [selectedAccount, amount, note]);
 
   const handleCloseQR = useCallback(() => {
     setShowQR(false);
-    if (isSharedMode) {
-      setSharedDismissed(true);
-    }
-  }, [isSharedMode]);
+  }, []);
 
   /* Lock body scroll and handle Escape when note modal is open */
   useEffect(() => {
@@ -133,7 +71,7 @@ export const ReceivePage = () => {
   }, [showNoteInput]);
 
   /* ---------- Empty state ---------- */
-  if (accounts.length === 0 && !isSharedMode) {
+  if (accounts.length === 0) {
     return (
       <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-8 bg-zinc-50 dark:bg-zinc-950">
         <div className="w-24 h-24 rounded-3xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
@@ -180,11 +118,11 @@ export const ReceivePage = () => {
             className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all group active:scale-[0.98] shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
           >
             <div className="w-12 h-12 rounded-xl flex items-center justify-center font-semibold text-sm bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-700/50">
-              {selectedAccount?.bankCode.substring(0, 3)}
+              {selectedAccount.bankCode.substring(0, 3)}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-base">
-                {selectedAccount?.label || bankName || '我的帳戶'}
+                {selectedAccount.label || bankName || '我的帳戶'}
               </p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
                 {maskAccount(selectedAccount.accountNumber)}
@@ -308,10 +246,10 @@ export const ReceivePage = () => {
       {showQR && qrString && (
         <QRDisplay
           value={qrString}
-          amount={qrDisplayProps.amount}
-          bankName={qrDisplayProps.bankName}
-          accountNumber={qrDisplayProps.accountNumber}
-          note={qrDisplayProps.note}
+          amount={amount ? parseInt(amount, 10) : undefined}
+          bankName={bankName}
+          accountNumber={selectedAccount.accountNumber}
+          note={note || undefined}
           shareUrl={shareUrl}
           onClose={handleCloseQR}
         />

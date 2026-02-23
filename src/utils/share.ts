@@ -1,11 +1,10 @@
 import type { ShareData } from '../types';
 
 /**
- * Encode share data into a URL hash fragment.
- * Uses base64url encoding of a compact JSON payload.
- * Keys: b=bankCode, a=accountNumber, m=amount, n=note
+ * Encode share data into a base64url string.
+ * Compact JSON payload keys: b=bankCode, a=accountNumber, m=amount, n=note
  */
-export const buildShareUrl = (data: ShareData): string => {
+const encodeShareData = (data: ShareData): string => {
   const payload: Record<string, string | number> = {
     b: data.bankCode,
     a: data.accountNumber,
@@ -20,21 +19,27 @@ export const buildShareUrl = (data: ShareData): string => {
   }
 
   const json = JSON.stringify(payload);
-  const encoded = btoa(unescape(encodeURIComponent(json)))
+  return btoa(unescape(encodeURIComponent(json)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
-
-  const origin = window.location.origin;
-  return `${origin}/#${encoded}`;
 };
 
 /**
- * Parse a share hash from the URL.
- * Returns null if the hash is empty or invalid.
+ * Build a share URL for the given data.
+ * Format: https://domain/s/BASE64URL_DATA
  */
-export const parseShareHash = (hash: string): ShareData | null => {
-  const raw = hash.replace(/^#/, '');
+export const buildShareUrl = (data: ShareData): string => {
+  const encoded = encodeShareData(data);
+  const origin = window.location.origin;
+  return `${origin}/s/${encoded}`;
+};
+
+/**
+ * Parse a base64url-encoded share data string.
+ * Returns null if the data is empty or invalid.
+ */
+export const parseShareData = (raw: string): ShareData | null => {
   if (!raw) return null;
 
   try {

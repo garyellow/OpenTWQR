@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ReceivePage } from './pages/ReceivePage';
 import { AccountsPage } from './pages/AccountsPage';
+import { SharedPage } from './pages/SharedPage';
 import { useEffect } from 'react';
 import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme } from './stores/useThemeStore';
@@ -37,6 +38,7 @@ function App() {
     <Routes>
       <Route path="/" element={<ReceivePage />} />
       <Route path="/accounts" element={<AccountsPage />} />
+      <Route path="/s/:data" element={<SharedPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
