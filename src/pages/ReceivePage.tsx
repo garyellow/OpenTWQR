@@ -38,20 +38,20 @@ export const ReceivePage = () => {
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 gap-6">
-        <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-          <Wallet size={36} className="text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 gap-8 bg-white dark:bg-zinc-950">
+        <div className="w-24 h-24 rounded-3xl flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
+          <Wallet size={48} className="text-zinc-300 dark:text-zinc-700" aria-hidden="true" />
         </div>
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Welcome to OpenTWQR</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 max-w-xs mx-auto">
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Welcome to OpenTWQR</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-[260px] mx-auto leading-relaxed text-lg">
             Add a bank account to start generating payment QR codes.
           </p>
         </div>
         <button
           type="button"
           onClick={() => navigate('/accounts')}
-          className="w-full max-w-xs py-3.5 bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black font-semibold rounded-xl text-lg hover:bg-emerald-700 dark:hover:bg-emerald-400 active:scale-[0.98] transition-[background-color,transform]"
+          className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm mt-4"
         >
           Add Bank Account
         </button>
@@ -61,7 +61,7 @@ export const ReceivePage = () => {
 
   /* ---------- Main layout ---------- */
   return (
-    <div className="min-h-screen flex flex-col px-safe">
+    <div className="min-h-screen flex flex-col px-safe bg-white dark:bg-zinc-950">
       <a
         href="#receive-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -69,47 +69,53 @@ export const ReceivePage = () => {
         Skip to main content
       </a>
 
-      <main id="receive-main" className="flex-1 flex flex-col p-5 max-w-md mx-auto w-full gap-5 pb-safe">
+      <main id="receive-main" className="flex-1 flex flex-col max-w-md mx-auto w-full pb-safe">
         {/* Header */}
-        <header className="flex justify-between items-center pt-safe">
-          <h1 className="text-xl font-bold text-zinc-900 dark:text-white">Receive</h1>
+        <header className="flex justify-between items-center p-5 pt-safe">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">Receive</h1>
           <ThemeToggle />
         </header>
 
         {/* Account selector */}
-        <Link
-          to="/accounts"
-          className="flex items-center gap-4 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
-        >
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center font-semibold text-sm bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
-            {selectedAccount?.bankCode.substring(0, 3)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-zinc-900 dark:text-white truncate">
-              {bankName || 'My Account'}
-            </p>
-            <p className="text-sm text-zinc-500 font-mono mt-0.5 tracking-wider">
-              {selectedAccount?.accountNumber
-                .slice(-4)
-                .padStart(selectedAccount.accountNumber.length, '•')}
-            </p>
-          </div>
-          <ChevronRight
-            size={18}
-            className="text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors shrink-0"
-            aria-hidden="true"
-          />
-        </Link>
+        <div className="px-5 mb-2">
+          <Link
+            to="/accounts"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors group active:scale-[0.98]"
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-semibold text-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 shadow-sm border border-zinc-100 dark:border-zinc-700/50">
+              {selectedAccount?.bankCode.substring(0, 3)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-zinc-900 dark:text-white truncate text-base">
+                {bankName || 'My Account'}
+              </p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
+                {selectedAccount?.accountNumber
+                  .slice(-4)
+                  .padStart(selectedAccount.accountNumber.length, '•')}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
+              <ChevronRight
+                size={18}
+                className="text-zinc-500 dark:text-zinc-400"
+                aria-hidden="true"
+              />
+            </div>
+          </Link>
+        </div>
 
         {/* Amount input & generate button */}
-        <div className="flex-1 flex flex-col justify-end gap-4">
-          <AmountInput value={amount} onChange={setAmount} />
+        <div className="flex-1 flex flex-col justify-between">
+          <div className="flex-1 flex items-center justify-center">
+            <AmountInput value={amount} onChange={setAmount} />
+          </div>
 
-          <div className="pb-4">
+          <div className="p-5 pt-2">
             <button
               type="button"
               onClick={() => setShowQR(true)}
-              className="w-full flex items-center justify-center gap-2.5 py-4 bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black font-semibold rounded-xl text-lg hover:bg-emerald-700 dark:hover:bg-emerald-400 active:scale-[0.98] transition-[background-color,transform]"
+              className="w-full flex items-center justify-center gap-2.5 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm"
             >
               <QrCode size={22} aria-hidden="true" />
               Generate QR Code

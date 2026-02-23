@@ -22,10 +22,10 @@ export const AccountCard = ({
 
   return (
     <article
-      className={`relative p-4 rounded-xl transition-colors border cursor-pointer group ${
+      className={`relative p-5 rounded-2xl transition-all border cursor-pointer group ${
         isSelected
-          ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/30'
-          : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+          ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white shadow-md'
+          : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
       }`}
     >
       <button
@@ -33,38 +33,50 @@ export const AccountCard = ({
         onClick={onSelect}
         aria-pressed={isSelected}
         aria-label={`Select ${bankName} account`}
-        className="w-full text-left pr-20"
+        className="w-full text-left pr-24"
       >
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-3 mb-3">
           {isSelected && (
-            <Check
-              size={16}
-              className="text-emerald-600 dark:text-emerald-400 shrink-0"
-              aria-hidden="true"
-            />
+            <div className="w-6 h-6 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0">
+              <Check
+                size={14}
+                className="text-zinc-900 dark:text-white"
+                aria-hidden="true"
+              />
+            </div>
           )}
-          <h3 className="font-semibold text-zinc-900 dark:text-white truncate">{bankName}</h3>
-          <span className="text-xs text-zinc-500 font-mono shrink-0">{account.bankCode}</span>
+          <h3 className={`font-semibold truncate text-lg ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-white'}`}>
+            {bankName}
+          </h3>
+          <span className={`text-xs font-mono shrink-0 px-2 py-0.5 rounded-md ${isSelected ? 'bg-white/20 dark:bg-black/10 text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+            {account.bankCode}
+          </span>
         </div>
 
-        <p className="font-mono text-lg tracking-wider text-zinc-700 dark:text-zinc-300">
+        <p className={`font-mono text-xl tracking-widest ${isSelected ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-700 dark:text-zinc-300'}`}>
           {account.accountNumber.replace(/(.{4})/g, '$1 ').trim()}
         </p>
 
         {account.note && (
-          <p className="text-zinc-500 text-sm mt-1 truncate">{account.note}</p>
+          <p className={`text-sm mt-2 truncate ${isSelected ? 'text-white/70 dark:text-zinc-900/70' : 'text-zinc-500 dark:text-zinc-400'}`}>
+            {account.note}
+          </p>
         )}
       </button>
 
-      <div className="absolute top-3 right-3 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 transition-opacity">
+      <div className="absolute top-4 right-4 flex gap-1.5">
         {onEdit && (
           <button
             type="button"
             aria-label="Edit account"
             onClick={onEdit}
-            className="p-2.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className={`p-2.5 rounded-xl transition-colors ${
+              isSelected
+                ? 'text-white/70 hover:text-white hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-zinc-900 dark:hover:bg-black/10'
+                : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            }`}
           >
-            <Pencil size={15} aria-hidden="true" />
+            <Pencil size={18} aria-hidden="true" />
           </button>
         )}
         {onDelete && (
@@ -72,9 +84,13 @@ export const AccountCard = ({
             type="button"
             aria-label="Delete account"
             onClick={onDelete}
-            className="p-2.5 rounded-lg text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+            className={`p-2.5 rounded-xl transition-colors ${
+              isSelected
+                ? 'text-white/70 hover:text-red-300 hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-red-600 dark:hover:bg-black/10'
+                : 'text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10'
+            }`}
           >
-            <Trash2 size={15} aria-hidden="true" />
+            <Trash2 size={18} aria-hidden="true" />
           </button>
         )}
       </div>

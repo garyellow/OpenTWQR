@@ -58,74 +58,81 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, onClose }: Q
       role="dialog"
       aria-modal="true"
       aria-labelledby="qr-modal-title"
-      className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-950 px-safe overscroll-contain"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4 sm:p-6 transition-opacity"
+      onClick={onClose}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 pt-safe">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="p-2.5 rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-        >
-          <X size={24} aria-hidden="true" />
-        </button>
-        <h2 id="qr-modal-title" className="text-lg font-semibold text-zinc-900 dark:text-white">
-          Payment QR Code
-        </h2>
-        <div className="w-11" aria-hidden="true" />
-      </div>
-
-      {/* QR Code — always black-on-white for maximum scan contrast */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-8">
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 dark:border-zinc-700">
-          <QRCodeSVG
-            value={value}
-            size={qrSize}
-            level="H"
-            includeMargin
-            bgColor="#ffffff"
-            fgColor="#000000"
-          />
+      <div
+        className="w-full max-w-sm bg-white dark:bg-zinc-950 rounded-[2rem] shadow-2xl border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 pb-4">
+          <h2 id="qr-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            Payment QR
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          >
+            <X size={20} aria-hidden="true" />
+          </button>
         </div>
 
-        {/* Amount & account info */}
-        <div className="text-center space-y-2">
-          {amount != null && amount > 0 && (
-            <div className="text-4xl font-bold text-zinc-900 dark:text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {formatCurrency(amount)}
+        {/* QR Code — always black-on-white for maximum scan contrast */}
+        <div className="flex flex-col items-center justify-center px-8 gap-8">
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800">
+            <QRCodeSVG
+              value={value}
+              size={qrSize}
+              level="H"
+              includeMargin={false}
+              bgColor="#ffffff"
+              fgColor="#000000"
+            />
+          </div>
+
+          {/* Amount & account info */}
+          <div className="text-center space-y-3 w-full">
+            {amount != null && amount > 0 && (
+              <div className="text-5xl font-bold tracking-tight text-zinc-900 dark:text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {formatCurrency(amount)}
+              </div>
+            )}
+            <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800/50">
+              {bankName && (
+                <p className="text-zinc-900 dark:text-white font-semibold text-base mb-1">{bankName}</p>
+              )}
+              {accountNumber && (
+                <p className="font-mono text-sm text-zinc-500 dark:text-zinc-400 tracking-widest">
+                  {accountNumber.replace(/(.{4})/g, '$1 ').trim()}
+                </p>
+              )}
             </div>
-          )}
-          {bankName && (
-            <p className="text-zinc-600 dark:text-zinc-400 font-medium">{bankName}</p>
-          )}
-          {accountNumber && (
-            <p className="font-mono text-sm text-zinc-500 tracking-wider">
-              {accountNumber.replace(/(.{4})/g, '$1 ').trim()}
-            </p>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* Footer */}
-      <div className="p-6 pb-safe flex justify-center">
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors border border-zinc-200 dark:border-zinc-800"
-        >
-          {copyState === 'success' ? (
-            <Check size={18} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-          ) : (
-            <Copy size={18} aria-hidden="true" />
-          )}
-          <span className="font-medium text-sm">
-            {copyState === 'success' ? 'Copied' : 'Copy QR Text'}
+        {/* Footer */}
+        <div className="p-6 pt-8">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all shadow-sm font-semibold"
+          >
+            {copyState === 'success' ? (
+              <Check size={20} className="text-emerald-400 dark:text-emerald-600" aria-hidden="true" />
+            ) : (
+              <Copy size={20} aria-hidden="true" />
+            )}
+            <span>
+              {copyState === 'success' ? 'Copied to Clipboard' : 'Copy QR Text'}
+            </span>
+          </button>
+          <span className="sr-only" aria-live="polite">
+            {copyState === 'success' ? 'QR text copied' : ''}
           </span>
-        </button>
-        <span className="sr-only" aria-live="polite">
-          {copyState === 'success' ? 'QR text copied' : ''}
-        </span>
+        </div>
       </div>
     </div>
   );
