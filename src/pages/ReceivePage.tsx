@@ -3,7 +3,6 @@ import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/AmountInput';
 import { QRDisplay } from '../components/QRDisplay';
 import { generateTWQR, maskAccount } from '../utils/twqr';
-import { buildShareUrl } from '../utils/share';
 import { Wallet, QrCode, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
@@ -39,16 +38,16 @@ export const ReceivePage = () => {
     });
   }, [selectedAccount, amount, note]);
 
-  /* ---------- Share URL for current settings ---------- */
-  const shareUrl = useMemo(() => {
-    if (!selectedAccount) return '';
+  /* ---------- Share data for encrypted sharing ---------- */
+  const shareData = useMemo(() => {
+    if (!selectedAccount) return undefined;
     const numAmount = amount ? parseInt(amount, 10) : 0;
-    return buildShareUrl({
+    return {
       bankCode: selectedAccount.bankCode,
       accountNumber: selectedAccount.accountNumber,
       amount: numAmount > 0 ? numAmount : undefined,
       note: note || undefined,
-    });
+    };
   }, [selectedAccount, amount, note]);
 
   const handleCloseQR = useCallback(() => {
@@ -243,14 +242,14 @@ export const ReceivePage = () => {
         </div>
       )}
 
-      {showQR && qrString && (
+      {showQR && qrString && shareData && (
         <QRDisplay
           value={qrString}
           amount={amount ? parseInt(amount, 10) : undefined}
           bankName={bankName}
           accountNumber={selectedAccount.accountNumber}
           note={note || undefined}
-          shareUrl={shareUrl}
+          shareData={shareData}
           onClose={handleCloseQR}
         />
       )}

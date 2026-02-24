@@ -2,17 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BankAccount } from '../types';
 
-/** Migrate legacy `note` field to `label` */
-const migrateAccounts = (accounts: BankAccount[]): BankAccount[] =>
-  accounts.map((a) => {
-    const legacy = a as BankAccount & { note?: string };
-    if (legacy.note !== undefined && a.label === undefined) {
-      const { note, ...rest } = legacy;
-      return { ...rest, label: note };
-    }
-    return a;
-  });
-
 interface AppState {
   accounts: BankAccount[];
   selectedAccountId: string | null;
@@ -54,10 +43,6 @@ export const useAppStore = create<AppState>()(
     {
       name: 'opentwqr-storage',
       version: 1,
-      migrate: (persisted: unknown) => {
-        const state = persisted as AppState;
-        return { ...state, accounts: migrateAccounts(state.accounts ?? []) };
-      },
     }
   )
 );

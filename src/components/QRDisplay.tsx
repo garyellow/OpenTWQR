@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff, Copy, Clipboard } from 'lucide-react';
+import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff, Copy, Clipboard, Lock, Clock, Loader2 } from 'lucide-react';
 import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../utils/twqr';
+import { buildShareUrl } from '../utils/share';
+import type { ShareData, ExpiryOption } from '../types';
 
 interface QRDisplayProps {
   value: string;
@@ -9,14 +11,18 @@ interface QRDisplayProps {
   bankName?: string;
   accountNumber?: string;
   note?: string;
-  shareUrl?: string;
+  shareData: ShareData;
   onClose: () => void;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareUrl, onClose }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareData, onClose }: QRDisplayProps) => {
   const [qrSize, setQrSize] = useState(240);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [linkAction, setLinkAction] = useState<'copy' | 'share' | null>(null);
+  const [linkExpiry, setLinkExpiry] = useState<ExpiryOption>(0);
+  const [linkPassword, setLinkPassword] = useState('');
+  const [isEncrypting, setIsEncrypting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [accountRevealed, setAccountRevealed] = useState(false);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,6 +55,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (isFullscreen) setIsFullscreen(false);
+        else if (isEncrypting) { /* ignore while encrypting */ }
+        else if (linkAction) setLinkAction(null);
         else if (showShareMenu) setShowShareMenu(false);
         else onClose();
       }
@@ -60,7 +68,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
       window.removeEventListener('keydown', onKeyDown);
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     };
-  }, [onClose, isFullscreen, showShareMenu]);
+  }, [onClose, isFullscreen, showShareMenu, linkAction, isEncrypting]);
 
   useEffect(() => {
     const update = () => {
@@ -75,43 +83,61 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
   }, []);
 
   /* --- Share actions --- */
-  const handleCopyLink = async () => {
-    const url = shareUrl || window.location.href;
+  const copyToClipboard = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
       showFeedback('已複製連結');
     } catch {
       showFeedback('複製失敗');
     }
-    setShowShareMenu(false);
   };
 
-  const handleShareLink = async () => {
-    const url = shareUrl || window.location.href;
-    const shareData = {
+  const shareViaSystem = async (url: string) => {
+    const payload = {
       title: 'OpenTWQR 收款',
       text: `收款${amount && amount > 0 ? ` ${formatCurrency(amount)}` : ''}${bankName ? ` — ${bankName}` : ''}`,
       url,
     };
-
     if (navigator.share) {
       try {
-        await navigator.share(shareData);
-        setShowShareMenu(false);
+        await navigator.share(payload);
         return;
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
       }
     }
+    await copyToClipboard(url);
+  };
 
-    // Fallback: copy to clipboard
-    try {
-      await navigator.clipboard.writeText(url);
-      showFeedback('已複製連結');
-    } catch {
-      showFeedback('複製失敗');
-    }
+  const handleCopyLink = async () => {
     setShowShareMenu(false);
+    setLinkAction('copy');
+    setLinkExpiry(0);
+    setLinkPassword('');
+  };
+
+  const handleShareLink = () => {
+    setShowShareMenu(false);
+    setLinkAction('share');
+    setLinkExpiry(0);
+    setLinkPassword('');
+  };
+
+  const handleLinkConfirm = async () => {
+    if (!linkAction) return;
+    setIsEncrypting(true);
+    try {
+      const url = await buildShareUrl(shareData, { expiry: linkExpiry, password: linkPassword });
+      if (linkAction === 'copy') {
+        await copyToClipboard(url);
+      } else {
+        await shareViaSystem(url);
+      }
+    } catch {
+      showFeedback('加密失敗');
+    }
+    setIsEncrypting(false);
+    setLinkAction(null);
   };
 
   const handleShareImage = async () => {
@@ -469,6 +495,114 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareU
                 取消
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Link settings dialog — expiry & password */}
+      {linkAction && (
+        <div
+          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150"
+          onClick={() => !isEncrypting && setLinkAction(null)}
+        >
+          <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="link-settings-title"
+            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl animate-in zoom-in-95 duration-200 p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-5">
+              <h3 id="link-settings-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                分享連結設定
+              </h3>
+              <button
+                type="button"
+                onClick={() => setLinkAction(null)}
+                disabled={isEncrypting}
+                aria-label="關閉"
+                className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Expiry options */}
+            <div className="mb-5">
+              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
+                <Clock size={16} aria-hidden="true" />
+                連結到期時間
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  [0, '永久'],
+                  [3600, '1 小時'],
+                  [86400, '1 天'],
+                  [604800, '1 週'],
+                ] as const).map(([val, label]) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setLinkExpiry(val)}
+                    disabled={isEncrypting}
+                    className={`py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${
+                      linkExpiry === val
+                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                    } disabled:opacity-50`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="mb-6">
+              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3" htmlFor="link-password-input">
+                <Lock size={16} aria-hidden="true" />
+                連結密碼
+                <span className="font-normal text-zinc-400 dark:text-zinc-500">（選填）</span>
+              </label>
+              <input
+                type="password"
+                id="link-password-input"
+                value={linkPassword}
+                onChange={(e) => setLinkPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isEncrypting) {
+                    e.preventDefault();
+                    handleLinkConfirm();
+                  }
+                }}
+                disabled={isEncrypting}
+                placeholder="不設定密碼則留空"
+                autoComplete="new-password"
+                className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm disabled:opacity-50"
+              />
+            </div>
+
+            {/* Confirm button */}
+            <button
+              type="button"
+              onClick={handleLinkConfirm}
+              disabled={isEncrypting}
+              className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+            >
+              {isEncrypting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                  加密中…
+                </>
+              ) : (
+                <>
+                  {linkAction === 'copy' ? <Clipboard size={18} aria-hidden="true" /> : <Link2 size={18} aria-hidden="true" />}
+                  {linkAction === 'copy' ? '複製連結' : '分享連結'}
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}

@@ -11,18 +11,36 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 - 交易備註（`note`）：對應 TWQR D9 參數，寫入 QR 字串讓收付雙方確認交易用途
 - QR Code 點擊可全螢幕顯示（純黑底，方便對方掃碼）
 - 分享選單（4 種方式）：複製連結、分享連結、分享圖片、下載圖片
-- URL 分享機制：透過獨立路由 `/s/:data` 將帳戶與金額資訊以 base64url 編碼，收到連結可直接顯示 QR
+- **加密分享機制**：透過獨立路由 `/s/:data#key` 將帳戶資訊以 AES-256-GCM 加密後分享，金鑰保留在 URL 片段（`#` 後），伺服器永遠看不到明文；支援設定密碼保護與連結有效期
 - 白天 / 夜間 / 跟隨系統 三種主題模式切換
 - 使用 `zustand + persist` 將帳戶資料與主題偏好存在本機 `localStorage`
 - TWQRP 字串由 `src/utils/twqr.ts` 生成（含 16 碼帳號補零、金額 × 100）
 
 ## 分享機制
 
-- **複製連結**：直接複製收款頁面 URL 至剪貼簿
-- **分享連結**：透過 Web Share API 或複製至剪貼簿，URL 格式為 `origin/s/base64url(JSON)`
-- **分享圖片**：將 QR Code SVG 轉為 PNG，透過 `navigator.share({ files })` 傳送
+- **複製連結 / 分享連結**：點擊後彈出設定面板，可選擇到期時間（永久 / 1 小時 / 1 天 / 1 週）與選填密碼，確認後生成加密連結
+- **分享圖片**：將 QR Code SVG 轉為 PNG，透過 `navigator.share({ files })` 傳送（不觸發連結設定面板）
 - **下載圖片**：直接下載 QR Code PNG 檔案至裝置
-- 共享連結攜帶資訊：銀行代碼 (`b`)、帳號 (`a`)、金額 (`m`，選填)、備註 (`n`，選填)
+
+### 加密連結格式
+
+```
+https://example.com/s/{path}#{fragment}
+```
+
+- `{path}`：Base64URL 編碼的加密資料，格式為 `[version:1][flags:1][iv:12][salt?:16][ciphertext+tag]`
+- `{fragment}`：URL 片段（片段不會傳送至伺服器），無密碼模式為原始 32 位元組金鑰，有密碼模式為 `[iv2:12][加密後金鑰+tag:48]`
+
+### 安全設計
+
+| 特性 | 說明 |
+|------|------|
+| 加密演算法 | AES-256-GCM（帶認證標籤，防止竄改） |
+| 金鑰存放 | URL 片段（`#` 後），HTTP 規格規定不傳到伺服器 |
+| 密碼保護 | PBKDF2（600,000 次迭代，SHA-256）從密碼衍生金鑰，隨機 salt 保護 |
+| 有效期限 | 到期時間戳記寫入加密資料，過期連結開啟後顯示已失效提示 |
+| 加密酬載 | `{b, a, m, n, exp}` 約 70 bytes，整個 URL 約 200–250 字元 |
+
 - 編解碼邏輯：`src/utils/share.ts`
 
 ## PWA / 離線
@@ -94,6 +112,6 @@ npm run preview
 - `src/components/`：UI 元件（QR 顯示、金額鍵盤、帳戶卡片、銀行選擇器、主題切換）
 - `src/stores/`：狀態管理與本地持久化（帳戶、銀行、主題）
 - `src/utils/twqr.ts`：TWQRP 產生邏輯
-- `src/utils/share.ts`：URL 分享編解碼（base64url）
+- `src/utils/share.ts`：加密分享連結的建立與解析（AES-256-GCM + PBKDF2）
 - `src/data/`：銀行清單（內建 + 自動產生）
-- `src/types/`：TypeScript 型別定義（含 `ShareData` 介面）
+- `src/types/`：TypeScript 型別定義（含 `ShareData`、`ShareOptions`、`ExpiryOption`、`ParseShareResult` 等介面）
