@@ -53,13 +53,6 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                 </div>
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">{selectedBank.code}</div>
               </div>
-            ) : value ? (
-              <div className="min-w-0">
-                <div className="font-semibold text-amber-600 dark:text-amber-400 truncate text-base">
-                  舊版銀行代碼
-                </div>
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">{value}</div>
-              </div>
             ) : (
               <span className="text-zinc-400 dark:text-zinc-500 text-base">請選擇銀行…</span>
             )}
@@ -76,7 +69,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
 
       {isOpen && (
         <AnimatedModal
-          onClose={() => setIsOpen(false)}
+          onClose={() => { setIsOpen(false); setSearch(''); }}
           overlayClass="z-[70]"
           cardClass="max-h-[85svh] max-w-md flex flex-col"
           ariaLabelledby="bank-title"
@@ -137,8 +130,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                       type="button"
                       onClick={() => {
                         onChange(bank.code);
-                        setIsOpen(false);
-                        setSearch('');
+                        requestClose();
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                         value === bank.code

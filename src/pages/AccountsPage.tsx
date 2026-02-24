@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AccountCard } from '../components/AccountCard';
 import { AccountForm } from '../components/AccountForm';
@@ -30,24 +30,16 @@ export const AccountsPage = () => {
     navigate('/', { viewTransition: true });
   };
 
-  const handleUpdate = (data: Omit<BankAccount, 'id'>) => {
-    if (editingId) {
-      updateAccount(editingId, data);
-      closeFormModal();
-    }
-  };
-
   /** Selecting an account always navigates back to the receive page. */
   const handleSelect = (id: string) => {
     selectAccount(id);
     navigate('/', { viewTransition: true });
   };
 
-  const handleDeleteConfirm = () => {
-    if (!deletingId) return;
-    removeAccount(deletingId);
-    setDeletingId(null);
-  };
+  const sortedAccounts = useMemo(
+    () => [...accounts].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
+    [accounts],
+  );
 
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
@@ -108,7 +100,7 @@ export const AccountsPage = () => {
           </div>
         ) : (
           <div className="grid gap-4 pb-24">
-            {accounts.map((account) => (
+            {sortedAccounts.map((account) => (
               <AccountCard
                 key={account.id}
                 account={account}
@@ -147,7 +139,14 @@ export const AccountsPage = () => {
               <AccountForm
                 initialData={editingId ? accounts.find((a) => a.id === editingId) : undefined}
                 editingId={editingId ?? undefined}
-                onSubmit={editingId ? handleUpdate : handleAdd}
+                onSubmit={
+                  editingId
+                    ? (data) => {
+                        updateAccount(editingId, data);
+                        requestClose();
+                      }
+                    : handleAdd
+                }
                 onCancel={requestClose}
               />
             </div>
@@ -188,7 +187,10 @@ export const AccountsPage = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={handleDeleteConfirm}
+                  onClick={() => {
+                    removeAccount(deletingId!);
+                    requestClose();
+                  }}
                   className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   刪除
