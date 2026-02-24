@@ -16,10 +16,10 @@ export const SharedPage = () => {
   const [password, setPassword] = useState('');
   const [isDecrypting, setIsDecrypting] = useState(false);
 
-  const fragment = useMemo(() => {
+  const [fragment] = useState(() => {
     const hash = window.location.hash;
     return hash.startsWith('#') ? hash.slice(1) : '';
-  }, []);
+  });
 
   // Initial parse (without password)
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/AmountInput';
 import { QRDisplay } from '../components/QRDisplay';
@@ -7,12 +7,15 @@ import { Wallet, QrCode, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 export const ReceivePage = () => {
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const noteModalRef = useRef<HTMLDivElement>(null);
   const { accounts, selectedAccountId } = useAppStore();
   const banks = useBanksStore((state) => state.banks);
   const navigate = useNavigate();
@@ -54,17 +57,17 @@ export const ReceivePage = () => {
     setShowQR(false);
   }, []);
 
-  /* Lock body scroll and handle Escape when note modal is open */
+  useScrollLock(showNoteInput);
+  useFocusTrap(noteModalRef, showNoteInput);
+
+  /* Handle Escape when note modal is open */
   useEffect(() => {
     if (!showNoteInput) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setShowNoteInput(false);
     };
     window.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKey);
     };
   }, [showNoteInput]);
@@ -171,14 +174,15 @@ export const ReceivePage = () => {
       {/* Note input modal — centered card */}
       {showNoteInput && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-150 motion-reduce:animate-none"
           onClick={() => setShowNoteInput(false)}
         >
           <div
+            ref={noteModalRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="note-modal-title"
-            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 overscroll-contain animate-in zoom-in-95 duration-200"
+            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 overscroll-contain animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">

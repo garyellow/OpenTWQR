@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AccountCard } from '../components/AccountCard';
 import { AccountForm } from '../components/AccountForm';
 import { Plus, ChevronLeft, Wallet, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useScrollLock } from '../hooks/useScrollLock';
 import type { BankAccount } from '../types';
 
 export const AccountsPage = () => {
@@ -13,6 +15,13 @@ export const AccountsPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const formModalRef = useRef<HTMLDivElement>(null);
+  const deleteModalRef = useRef<HTMLDivElement>(null);
+
+  const anyModalOpen = isAdding || !!editingId || !!deletingId;
+  useScrollLock(anyModalOpen);
+  useFocusTrap(deleteModalRef, !!deletingId);
+  useFocusTrap(formModalRef, (isAdding || !!editingId) && !deletingId);
 
   const handleAdd = (data: Omit<BankAccount, 'id'>) => {
     addAccount({ id: crypto.randomUUID(), ...data });
@@ -39,12 +48,9 @@ export const AccountsPage = () => {
     setDeletingId(null);
   };
 
-  /* Escape key closes whichever modal is open; also locks body scroll. */
+  /* Escape key closes whichever modal is open. */
   useEffect(() => {
-    if (!isAdding && !editingId && !deletingId) return;
-
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (!anyModalOpen) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
@@ -57,10 +63,9 @@ export const AccountsPage = () => {
 
     window.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKey);
     };
-  }, [isAdding, editingId, deletingId]);
+  }, [anyModalOpen, deletingId]);
 
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
@@ -143,17 +148,18 @@ export const AccountsPage = () => {
       {/* ---------- Add / Edit Form Modal — centered card ---------- */}
       {(isAdding || editingId) && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200 motion-reduce:animate-none"
           onClick={() => {
             setIsAdding(false);
             setEditingId(null);
           }}
         >
           <div
+            ref={formModalRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="account-form-title"
-            className="w-full max-w-lg max-h-[90svh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200"
+            className="w-full max-w-lg max-h-[90svh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 sm:p-8">
@@ -165,6 +171,7 @@ export const AccountsPage = () => {
               </h2>
               <AccountForm
                 initialData={editingId ? accounts.find((a) => a.id === editingId) : undefined}
+                editingId={editingId ?? undefined}
                 onSubmit={editingId ? handleUpdate : handleAdd}
                 onCancel={() => {
                   setIsAdding(false);
@@ -179,15 +186,16 @@ export const AccountsPage = () => {
       {/* ---------- Delete Confirmation — centered card ---------- */}
       {deletingAccount && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200 motion-reduce:animate-none"
           onClick={() => setDeletingId(null)}
         >
           <div
+            ref={deleteModalRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-title"
             aria-describedby="delete-desc"
-            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl overscroll-contain animate-in zoom-in-95 duration-200"
+            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl overscroll-contain animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-5 mx-auto">

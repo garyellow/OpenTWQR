@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { idbStorage } from './idbStorage';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -36,6 +37,7 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'opentwqr-theme',
+      storage: createJSONStorage(() => idbStorage),
       onRehydrateStorage: () => (state) => {
         if (state) {
           applyTheme(state.mode);

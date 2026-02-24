@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Bank } from '../types';
 import { BANKS, BANKS_SOURCE } from '../data/banks';
+import { idbStorage } from './idbStorage';
 
 interface RemoteBankPayload {
   source?: {
@@ -71,15 +72,14 @@ const toTimestamp = (value?: string): number => {
 
 export const useBanksStore = create<BanksState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       banks: FALLBACK_BANKS,
       source: FALLBACK_SOURCE,
       lastSyncedAt: null,
       isRefreshing: false,
       refreshBanks: async () => {
-        if (typeof navigator !== 'undefined' && !navigator.onLine) {
-          return;
-        }
+        if (get().isRefreshing) return;
+        if (!navigator.onLine) return;
 
         set({ isRefreshing: true });
 
@@ -133,6 +133,7 @@ export const useBanksStore = create<BanksState>()(
     }),
     {
       name: 'opentwqr-bank-catalog',
+      storage: createJSONStorage(() => idbStorage),
       partialize: (state) => ({
         banks: state.banks,
         source: state.source,

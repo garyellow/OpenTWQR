@@ -7,7 +7,19 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg', 'pwa-maskable.svg'],
+      includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg', 'pwa-maskable.svg', 'apple-touch-icon.png'],
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /\/data\/banks\.latest\.json/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'banks-data',
+              expiration: { maxEntries: 1, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            },
+          },
+        ],
+      },
       manifest: {
         id: '/',
         name: 'OpenTWQR',
@@ -22,27 +34,53 @@ export default defineConfig({
         orientation: 'portrait',
         lang: 'zh-TW',
         categories: ['finance', 'utilities'],
+        launch_handler: {
+          client_mode: 'navigate-existing',
+        },
         icons: [
           {
             src: 'pwa-192x192.svg',
             sizes: '192x192',
             type: 'image/svg+xml',
-            purpose: 'any'
+            purpose: 'any',
           },
           {
             src: 'pwa-512x512.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
-            purpose: 'any'
+            purpose: 'any',
           },
           {
             src: 'pwa-maskable.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
-            purpose: 'maskable'
-          }
-        ]
-      }
-    })
-  ]
+            purpose: 'maskable',
+          },
+        ],
+        shortcuts: [
+          {
+            name: '帳戶管理',
+            short_name: '帳戶',
+            url: '/accounts',
+          },
+        ],
+        screenshots: [
+          {
+            src: 'screenshots/receive-light.png',
+            sizes: '390x844',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: '收款頁面',
+          },
+          {
+            src: 'screenshots/receive-dark.png',
+            sizes: '390x844',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: '收款頁面（深色模式）',
+          },
+        ],
+      },
+    }),
+  ],
 })

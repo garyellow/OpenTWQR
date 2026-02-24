@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { BankAccount } from '../types';
+import { idbStorage } from './idbStorage';
 
 interface AppState {
   accounts: BankAccount[];
@@ -9,11 +10,12 @@ interface AppState {
   removeAccount: (id: string) => void;
   updateAccount: (id: string, account: Partial<BankAccount>) => void;
   selectAccount: (id: string | null) => void;
+  isDuplicate: (bankCode: string, accountNumber: string, excludeId?: string) => boolean;
 }
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       accounts: [],
       selectedAccountId: null,
       addAccount: (account) =>
@@ -39,10 +41,16 @@ export const useAppStore = create<AppState>()(
           accounts: state.accounts.map((a) => (a.id === id ? { ...a, ...updatedAccount } : a)),
         })),
       selectAccount: (id) => set({ selectedAccountId: id }),
+      isDuplicate: (bankCode, accountNumber, excludeId) => {
+        return get().accounts.some(
+          (a) => a.bankCode === bankCode && a.accountNumber === accountNumber && a.id !== excludeId,
+        );
+      },
     }),
     {
       name: 'opentwqr-storage',
       version: 1,
-    }
-  )
+      storage: createJSONStorage(() => idbStorage),
+    },
+  ),
 );

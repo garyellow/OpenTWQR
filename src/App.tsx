@@ -5,6 +5,7 @@ import { SharedPage } from './pages/SharedPage';
 import { useEffect } from 'react';
 import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme } from './stores/useThemeStore';
+import { ReloadPrompt } from './components/ReloadPrompt';
 
 function App() {
   const refreshBanks = useBanksStore((state) => state.refreshBanks);
@@ -25,22 +26,30 @@ function App() {
     refreshBanks();
 
     const onOnline = () => refreshBanks();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refreshBanks();
+    };
     const intervalId = window.setInterval(() => refreshBanks(), 60 * 60 * 1000);
 
     window.addEventListener('online', onOnline);
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
       window.removeEventListener('online', onOnline);
+      document.removeEventListener('visibilitychange', onVisible);
       window.clearInterval(intervalId);
     };
   }, [refreshBanks]);
 
   return (
-    <Routes>
-      <Route path="/" element={<ReceivePage />} />
-      <Route path="/accounts" element={<AccountsPage />} />
-      <Route path="/s/:data" element={<SharedPage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<ReceivePage />} />
+        <Route path="/accounts" element={<AccountsPage />} />
+        <Route path="/s/:data" element={<SharedPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <ReloadPrompt />
+    </>
   );
 }
 

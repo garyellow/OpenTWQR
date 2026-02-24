@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { BankSelect } from './BankSelect';
+import { useAppStore } from '../stores/useAppStore';
 import type { BankAccount } from '../types';
 import { isValidAccount } from '../utils/twqr';
 import { AlertCircle } from 'lucide-react';
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
+  /** When editing, pass the account id to exclude self from duplicate check */
+  editingId?: string;
   onSubmit: (data: Omit<BankAccount, 'id'>) => void;
   onCancel: () => void;
 }
 
-export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProps) => {
+export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: AccountFormProps) => {
   const [bankCode, setBankCode] = useState(initialData?.bankCode || '');
   const [accountNumber, setAccountNumber] = useState(initialData?.accountNumber || '');
   const [label, setLabel] = useState(initialData?.label || '');
@@ -26,6 +29,11 @@ export const AccountForm = ({ initialData, onSubmit, onCancel }: AccountFormProp
 
     if (!isValidAccount(accountNumber)) {
       setError('帳號必須為 10–16 位數字');
+      return;
+    }
+
+    if (useAppStore.getState().isDuplicate(bankCode, accountNumber, editingId)) {
+      setError('此銀行帳號已存在');
       return;
     }
 

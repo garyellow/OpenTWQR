@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, X, ChevronDown, Building2 } from 'lucide-react';
 import { useBanksStore } from '../stores/useBanksStore';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface BankSelectProps {
   value: string;
@@ -11,7 +13,11 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const banks = useBanksStore((state) => state.banks);
+
+  useScrollLock(isOpen);
+  useFocusTrap(dialogRef, isOpen, inputRef);
 
   const selectedBank = useMemo(() => banks.find((b) => b.code === value), [banks, value]);
 
@@ -21,17 +27,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
   }, [banks, search]);
 
   useEffect(() => {
-    if (isOpen) {
-      const id = requestAnimationFrame(() => inputRef.current?.focus());
-      return () => cancelAnimationFrame(id);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
     if (!isOpen) return;
-
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsOpen(false);
@@ -39,7 +35,6 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
 
     window.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKey);
     };
   }, [isOpen]);
@@ -99,14 +94,15 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200 motion-reduce:animate-none"
           onClick={() => setIsOpen(false)}
         >
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="bank-title"
-            className="w-full max-h-[85svh] max-w-md bg-white dark:bg-zinc-900 rounded-[2rem] flex flex-col shadow-2xl border border-zinc-200 dark:border-zinc-800 overscroll-contain animate-in zoom-in-95 duration-200"
+            className="w-full max-h-[85svh] max-w-md bg-white dark:bg-zinc-900 rounded-[2rem] flex flex-col shadow-2xl border border-zinc-200 dark:border-zinc-800 overscroll-contain animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

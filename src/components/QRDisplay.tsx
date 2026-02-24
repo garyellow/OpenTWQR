@@ -3,6 +3,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff, Copy, Clipboard, Lock, Clock, Loader2 } from 'lucide-react';
 import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../utils/twqr';
 import { buildShareUrl } from '../utils/share';
+import { svgToBlob, downloadBlob } from '../utils/qrImage';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useScrollLock } from '../hooks/useScrollLock';
 import type { ShareData, ExpiryOption } from '../types';
 
 interface QRDisplayProps {
@@ -27,13 +30,28 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [accountRevealed, setAccountRevealed] = useState(false);
-  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackTimerRef = useRef<number | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
+
+  // Refs for focus trap containers
+  const modalRef = useRef<HTMLDivElement>(null);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
+  const linkSettingsRef = useRef<HTMLDivElement>(null);
+  const fullscreenRef = useRef<HTMLDivElement>(null);
+
+  // Determine which layer is active for focus trap
+  const activeLayer = isFullscreen ? 'fullscreen' : linkAction ? 'linkSettings' : showShareMenu ? 'shareMenu' : 'modal';
+
+  useScrollLock(true);
+  useFocusTrap(fullscreenRef, activeLayer === 'fullscreen');
+  useFocusTrap(linkSettingsRef, activeLayer === 'linkSettings');
+  useFocusTrap(shareMenuRef, activeLayer === 'shareMenu');
+  useFocusTrap(modalRef, activeLayer === 'modal');
 
   const showFeedback = useCallback((msg: string) => {
     setFeedback(msg);
-    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-    feedbackTimerRef.current = setTimeout(() => setFeedback(null), 2000);
+    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = window.setTimeout(() => setFeedback(null), 2000);
   }, []);
 
   const handleCopyAccount = useCallback(async () => {
@@ -51,9 +69,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   }, []);
 
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (isFullscreen) setIsFullscreen(false);
@@ -66,9 +81,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
 
     window.addEventListener('keydown', onKeyDown);
     return () => {
-      document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKeyDown);
-      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
     };
   }, [onClose, isFullscreen, showShareMenu, linkAction, isEncrypting]);
 
@@ -147,33 +161,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       const svgEl = qrRef.current?.querySelector('svg');
       if (!svgEl) return;
 
-      const canvas = document.createElement('canvas');
-      const padding = 32;
-      const size = qrSize + padding * 2;
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d')!;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
-
-      const svgData = new XMLSerializer().serializeToString(svgEl);
-      const img = new window.Image();
-      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => {
-          ctx.drawImage(img, padding, padding, qrSize, qrSize);
-          URL.revokeObjectURL(url);
-          resolve();
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
-
-      const pngBlob = await new Promise<Blob>((resolve) =>
-        canvas.toBlob((b) => resolve(b!), 'image/png'),
-      );
+      const pngBlob = await svgToBlob(svgEl, qrSize);
       const file = new File([pngBlob], 'opentwqr.png', { type: 'image/png' });
 
       if (navigator.canShare?.({ files: [file] })) {
@@ -201,33 +189,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       const svgEl = qrRef.current?.querySelector('svg');
       if (!svgEl) return;
 
-      const canvas = document.createElement('canvas');
-      const padding = 32;
-      const size = qrSize + padding * 2;
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d')!;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
-
-      const svgData = new XMLSerializer().serializeToString(svgEl);
-      const img = new window.Image();
-      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => {
-          ctx.drawImage(img, padding, padding, qrSize, qrSize);
-          URL.revokeObjectURL(url);
-          resolve();
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
-
-      const pngBlob = await new Promise<Blob>((resolve) =>
-        canvas.toBlob((b) => resolve(b!), 'image/png'),
-      );
+      const pngBlob = await svgToBlob(svgEl, qrSize);
       downloadBlob(pngBlob, 'opentwqr.png');
       showFeedback('已下載圖片');
     } catch {
@@ -240,15 +202,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   if (isFullscreen) {
     return (
       <div
-        className="fixed inset-0 z-[90] bg-black flex flex-col items-center justify-center cursor-pointer animate-in fade-in duration-200"
+        ref={fullscreenRef}
+        className="fixed inset-0 z-[90] bg-black flex flex-col items-center justify-center cursor-pointer animate-in fade-in duration-200 motion-reduce:animate-none"
         onClick={() => setIsFullscreen(false)}
       >
         <div className="bg-white p-8 rounded-3xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
           <QRCodeSVG
             value={value}
             size={Math.min(320, Math.floor(window.innerWidth * 0.75))}
-            level="H"
-            includeMargin={false}
+            level="Q"
+            marginSize={4}
             bgColor="#ffffff"
             fgColor="#000000"
           />
@@ -272,7 +235,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           {note && <p className="text-white/40 text-xs">{note}</p>}
         </div>
 
-        <p className="mt-10 text-white/30 text-xs animate-pulse">點擊任意處返回</p>
+        <button
+          type="button"
+          onClick={() => setIsFullscreen(false)}
+          className="mt-10 text-white/30 text-xs transition-opacity hover:text-white/50"
+        >
+          點擊任意處返回
+        </button>
       </div>
     );
   }
@@ -280,14 +249,15 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   /* --- Main modal --- */
   return (
     <div
+      ref={modalRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="qr-modal-title"
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200 motion-reduce:animate-none"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -317,8 +287,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               <QRCodeSVG
                 value={value}
                 size={qrSize}
-                level="H"
-                includeMargin={false}
+                level="Q"
+                marginSize={4}
                 bgColor="#ffffff"
                 fgColor="#000000"
               />
@@ -349,7 +319,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
                       <span
                         key={accountRevealed ? 'revealed' : 'masked'}
-                        className="animate-in fade-in duration-200"
+                        className="animate-in fade-in duration-200 motion-reduce:animate-none"
                       >
                         {accountRevealed
                           ? formatAccountDisplay(accountNumber)
@@ -367,7 +337,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       aria-pressed={accountRevealed}
                       className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
-                      <span key={accountRevealed ? 'eye-on' : 'eye-off'} className="block animate-in fade-in zoom-in-75 duration-150">
+                      <span key={accountRevealed ? 'eye-on' : 'eye-off'} className="block animate-in fade-in zoom-in-75 duration-150 motion-reduce:animate-none">
                         {accountRevealed
                           ? <Eye size={18} aria-hidden="true" />
                           : <EyeOff size={18} aria-hidden="true" />}
@@ -399,7 +369,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             <div
               role="status"
               aria-live="polite"
-              className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-medium shadow-lg animate-in fade-in zoom-in-95 duration-150"
+              className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-medium shadow-lg animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
             >
               <Check size={14} aria-hidden="true" />
               {feedback}
@@ -422,12 +392,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       {/* Share menu overlay — centered card */}
       {!isSharedView && showShareMenu && (
         <div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150 motion-reduce:animate-none"
           onClick={() => setShowShareMenu(false)}
         >
           <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
           <div
-            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+            ref={shareMenuRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="分享方式"
+            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-2 pt-3">
@@ -506,15 +480,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       {/* Link settings dialog — expiry & password */}
       {!isSharedView && linkAction && (
         <div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150 motion-reduce:animate-none"
           onClick={() => !isEncrypting && setLinkAction(null)}
         >
           <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
           <div
+            ref={linkSettingsRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="link-settings-title"
-            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl animate-in zoom-in-95 duration-200 p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)]"
+            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl animate-in zoom-in-95 duration-200 motion-reduce:animate-none p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -613,12 +588,3 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     </div>
   );
 };
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
