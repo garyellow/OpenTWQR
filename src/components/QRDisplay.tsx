@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useDelayedClose } from '../hooks/useDelayedClose';
 import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff, Copy, Clipboard, Lock, Clock, Loader2 } from 'lucide-react';
 import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../utils/twqr';
 import { buildShareUrl } from '../utils/share';
@@ -32,6 +33,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   const [accountRevealed, setAccountRevealed] = useState(false);
   const feedbackTimerRef = useRef<number | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
+
+  const { isClosing, requestClose } = useDelayedClose(onClose);
+  const [isShareMenuClosing, setIsShareMenuClosing] = useState(false);
+  const [isLinkActionClosing, setIsLinkActionClosing] = useState(false);
+
+  /** `navigator.share` is only available in secure contexts (HTTPS / PWA). */
+  const supportsNativeShare = typeof navigator.share === 'function';
 
   // Refs for focus trap containers
   const modalRef = useRef<HTMLDivElement>(null);
@@ -68,14 +76,30 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     setAccountRevealed((prev) => !prev);
   }, []);
 
+  const closeShareMenu = useCallback(() => {
+    setIsShareMenuClosing(true);
+    setTimeout(() => {
+      setShowShareMenu(false);
+      setIsShareMenuClosing(false);
+    }, 150);
+  }, []);
+
+  const closeLinkAction = useCallback(() => {
+    setIsLinkActionClosing(true);
+    setTimeout(() => {
+      setLinkAction(null);
+      setIsLinkActionClosing(false);
+    }, 150);
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (isFullscreen) setIsFullscreen(false);
         else if (isEncrypting) { /* ignore while encrypting */ }
-        else if (linkAction) setLinkAction(null);
-        else if (showShareMenu) setShowShareMenu(false);
-        else onClose();
+        else if (linkAction) closeLinkAction();
+        else if (showShareMenu) closeShareMenu();
+        else requestClose();
       }
     };
 
@@ -84,7 +108,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       window.removeEventListener('keydown', onKeyDown);
       if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
     };
-  }, [onClose, isFullscreen, showShareMenu, linkAction, isEncrypting]);
+  }, [requestClose, closeShareMenu, closeLinkAction, isFullscreen, showShareMenu, linkAction, isEncrypting]);
 
   useEffect(() => {
     const update = () => {
@@ -125,18 +149,26 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     await copyToClipboard(url);
   };
 
-  const handleCopyLink = async () => {
-    setShowShareMenu(false);
-    setLinkAction('copy');
-    setLinkExpiry(0);
-    setLinkPassword('');
+  const handleCopyLink = () => {
+    setIsShareMenuClosing(true);
+    setTimeout(() => {
+      setShowShareMenu(false);
+      setIsShareMenuClosing(false);
+      setLinkAction('copy');
+      setLinkExpiry(0);
+      setLinkPassword('');
+    }, 150);
   };
 
   const handleShareLink = () => {
-    setShowShareMenu(false);
-    setLinkAction('share');
-    setLinkExpiry(0);
-    setLinkPassword('');
+    setIsShareMenuClosing(true);
+    setTimeout(() => {
+      setShowShareMenu(false);
+      setIsShareMenuClosing(false);
+      setLinkAction('share');
+      setLinkExpiry(0);
+      setLinkPassword('');
+    }, 150);
   };
 
   const handleLinkConfirm = async () => {
@@ -169,18 +201,18 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           files: [file],
           title: 'OpenTWQR 收款碼',
         });
-        setShowShareMenu(false);
+        closeShareMenu();
         return;
       }
 
       // Fallback to download
       downloadBlob(pngBlob, 'opentwqr.png');
       showFeedback('已下載圖片');
-      setShowShareMenu(false);
+      closeShareMenu();
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
       showFeedback('分享失敗');
-      setShowShareMenu(false);
+      closeShareMenu();
     }
   };
 
@@ -195,7 +227,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     } catch {
       showFeedback('下載失敗');
     }
-    setShowShareMenu(false);
+    closeShareMenu();
   };
 
   /* --- Fullscreen QR view --- */
@@ -253,11 +285,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       role="dialog"
       aria-modal="true"
       aria-labelledby="qr-modal-title"
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200 motion-reduce:animate-none"
-      onClick={onClose}
+      className={`fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 motion-reduce:animate-none ${isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'}`}
+      onClick={requestClose}
     >
       <div
-        className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
+        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -267,7 +299,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="關閉"
             className="p-2 -mr-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
@@ -392,8 +424,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       {/* Share menu overlay — centered card */}
       {!isSharedView && showShareMenu && (
         <div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150 motion-reduce:animate-none"
-          onClick={() => setShowShareMenu(false)}
+          className={`fixed inset-0 z-[85] flex items-center justify-center p-5 motion-reduce:animate-none ${isShareMenuClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'}`}
+          onClick={closeShareMenu}
         >
           <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
           <div
@@ -401,7 +433,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             role="dialog"
             aria-modal="true"
             aria-label="分享方式"
-            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
+            className={`relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden motion-reduce:animate-none ${isShareMenuClosing ? 'animate-out zoom-out-95 fade-out duration-150' : 'animate-in zoom-in-95 duration-200'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-2 pt-3">
@@ -419,6 +451,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                 </div>
               </button>
 
+              {supportsNativeShare && (
               <button
                 type="button"
                 onClick={handleShareLink}
@@ -432,6 +465,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">透過系統分享模組傳送連結</p>
                 </div>
               </button>
+              )}
 
               <div className="my-1 mx-2 border-t border-zinc-100 dark:border-zinc-800" />
 
@@ -467,7 +501,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             <div className="p-2 pb-3">
               <button
                 type="button"
-                onClick={() => setShowShareMenu(false)}
+                onClick={closeShareMenu}
                 className="w-full py-3 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 取消
@@ -480,8 +514,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       {/* Link settings dialog — expiry & password */}
       {!isSharedView && linkAction && (
         <div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150 motion-reduce:animate-none"
-          onClick={() => !isEncrypting && setLinkAction(null)}
+          className={`fixed inset-0 z-[85] flex items-center justify-center p-5 motion-reduce:animate-none ${isLinkActionClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'}`}
+          onClick={() => !isEncrypting && closeLinkAction()}
         >
           <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
           <div
@@ -489,7 +523,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             role="dialog"
             aria-modal="true"
             aria-labelledby="link-settings-title"
-            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl animate-in zoom-in-95 duration-200 motion-reduce:animate-none p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)]"
+            className={`relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl motion-reduce:animate-none p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)] ${isLinkActionClosing ? 'animate-out zoom-out-95 fade-out duration-150' : 'animate-in zoom-in-95 duration-200'}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -499,7 +533,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               </h3>
               <button
                 type="button"
-                onClick={() => setLinkAction(null)}
+                onClick={closeLinkAction}
                 disabled={isEncrypting}
                 aria-label="關閉"
                 className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"

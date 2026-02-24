@@ -72,9 +72,9 @@ https://example.com/s/{path}#{fragment}
 - 官方來源：財金資訊股份有限公司 OpenData XML
 	- `https://www.fisc.com.tw/TC/OPENDATA/Comm1_MEMBER.xml`
 - 擷取範圍：`跨行自動化服務機器業務(金融卡)`（收款情境較不會出現意外選項）
-- 自動更新：透過 GitHub Actions 每週排程更新一次
+- 自動更新：透過 GitHub Actions 每日排程更新一次
 	- Workflow：`.github/workflows/update-banks.yml`
-	- 排程：每週一 `00:00 UTC`（台灣時間週一 `08:00`）
+	- 排程：每日 `00:00 UTC`（台灣時間 `08:00`）
 - 產出檔案：
 	- `src/data/banks.generated.ts`（App 內建資料，離線可用）
 	- `public/data/banks.latest.json`（可對外檢視版本）

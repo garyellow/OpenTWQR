@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { idbStorage } from './idbStorage';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -26,6 +25,11 @@ export const applyTheme = (mode: ThemeMode) => {
   });
 };
 
+/**
+ * Theme store intentionally uses localStorage (not IndexedDB) so that the
+ * inline FOUC-prevention script in index.html can read the persisted mode
+ * synchronously before any JS bundle executes.
+ */
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
@@ -37,11 +41,9 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'opentwqr-theme',
-      storage: createJSONStorage(() => idbStorage),
+      storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          applyTheme(state.mode);
-        }
+        if (state) applyTheme(state.mode);
       },
     },
   ),

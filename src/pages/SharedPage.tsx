@@ -105,7 +105,7 @@ export const SharedPage = () => {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/', { viewTransition: true })}
           className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors mt-2"
         >
           前往首頁
@@ -131,7 +131,7 @@ export const SharedPage = () => {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/', { viewTransition: true })}
           className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           前往首頁
@@ -157,7 +157,7 @@ export const SharedPage = () => {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/', { viewTransition: true })}
           className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           前往首頁
@@ -175,7 +175,7 @@ export const SharedPage = () => {
       accountNumber={shareData.accountNumber}
       note={shareData.note}
       shareData={shareData}
-      onClose={() => navigate('/')}
+      onClose={() => navigate('/', { viewTransition: true })}
       isSharedView
     />
   );

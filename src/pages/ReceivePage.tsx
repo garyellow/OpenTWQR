@@ -14,6 +14,7 @@ export const ReceivePage = () => {
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [showNoteInput, setShowNoteInput] = useState(false);
+  const [isNoteClosing, setIsNoteClosing] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const noteModalRef = useRef<HTMLDivElement>(null);
   const { accounts, selectedAccountId } = useAppStore();
@@ -57,6 +58,14 @@ export const ReceivePage = () => {
     setShowQR(false);
   }, []);
 
+  const closeNoteInput = useCallback(() => {
+    setIsNoteClosing(true);
+    setTimeout(() => {
+      setShowNoteInput(false);
+      setIsNoteClosing(false);
+    }, 150);
+  }, []);
+
   useScrollLock(showNoteInput);
   useFocusTrap(noteModalRef, showNoteInput);
 
@@ -64,13 +73,13 @@ export const ReceivePage = () => {
   useEffect(() => {
     if (!showNoteInput) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowNoteInput(false);
+      if (e.key === 'Escape') closeNoteInput();
     };
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
     };
-  }, [showNoteInput]);
+  }, [showNoteInput, closeNoteInput]);
 
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
@@ -87,7 +96,7 @@ export const ReceivePage = () => {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/accounts')}
+          onClick={() => navigate('/accounts', { viewTransition: true })}
           className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           新增銀行帳戶
@@ -117,6 +126,7 @@ export const ReceivePage = () => {
         <div className="shrink-0 px-5 mb-2">
           <Link
             to="/accounts"
+            viewTransition
             className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all group active:scale-[0.98] shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
           >
             <div className="w-12 h-12 rounded-xl flex items-center justify-center font-semibold text-sm bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-700/50">
@@ -174,15 +184,15 @@ export const ReceivePage = () => {
       {/* Note input modal — centered card */}
       {showNoteInput && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-150 motion-reduce:animate-none"
-          onClick={() => setShowNoteInput(false)}
+          className={`fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${isNoteClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'}`}
+          onClick={closeNoteInput}
         >
           <div
             ref={noteModalRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="note-modal-title"
-            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 overscroll-contain animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
+            className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 overscroll-contain motion-reduce:animate-none ${isNoteClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
@@ -191,7 +201,7 @@ export const ReceivePage = () => {
               </h2>
               <button
                 type="button"
-                onClick={() => setShowNoteInput(false)}
+                onClick={closeNoteInput}
                 aria-label="關閉"
                 className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
@@ -208,7 +218,7 @@ export const ReceivePage = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    setShowNoteInput(false);
+                    closeNoteInput();
                   }
                 }}
                 placeholder="輸入備註，最多 20 字…"
@@ -227,7 +237,7 @@ export const ReceivePage = () => {
                   type="button"
                   onClick={() => {
                     setNote('');
-                    setShowNoteInput(false);
+                    closeNoteInput();
                   }}
                   className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
@@ -236,7 +246,7 @@ export const ReceivePage = () => {
               )}
               <button
                 type="button"
-                onClick={() => setShowNoteInput(false)}
+                onClick={closeNoteInput}
                 className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 確認

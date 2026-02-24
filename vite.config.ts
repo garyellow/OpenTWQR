@@ -9,6 +9,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg', 'pwa-maskable.svg', 'apple-touch-icon.png'],
       workbox: {
+        // Ensure SPA routing works offline: any navigation request not
+        // matching a precached asset falls back to index.html.
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/data\//, /^\/api\//],
         runtimeCaching: [
           {
             urlPattern: /\/data\/banks\.latest\.json/,
@@ -16,6 +20,16 @@ export default defineConfig({
             options: {
               cacheName: 'banks-data',
               expiration: { maxEntries: 1, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            },
+          },
+          {
+            // Cache PWA icon assets long-term (they're content-hashed or
+            // change infrequently).
+            urlPattern: /\.(?:png|svg|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: { maxEntries: 30, maxAgeSeconds: 30 * 24 * 60 * 60 },
             },
           },
         ],
@@ -34,6 +48,7 @@ export default defineConfig({
         orientation: 'portrait',
         lang: 'zh-TW',
         categories: ['finance', 'utilities'],
+        prefer_related_applications: false,
         launch_handler: {
           client_mode: 'navigate-existing',
         },
@@ -55,6 +70,12 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'maskable',
+          },
+          {
+            src: 'apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png',
+            purpose: 'any',
           },
         ],
         shortcuts: [
@@ -83,4 +104,16 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Split heavy vendor libraries into separate chunks so the browser
+        // can cache them independently from application code.
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-qr': ['qrcode.react'],
+        },
+      },
+    },
+  },
 })

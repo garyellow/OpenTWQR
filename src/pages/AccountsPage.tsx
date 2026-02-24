@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AccountCard } from '../components/AccountCard';
 import { AccountForm } from '../components/AccountForm';
@@ -15,6 +15,8 @@ export const AccountsPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isFormClosing, setIsFormClosing] = useState(false);
+  const [isDeleteClosing, setIsDeleteClosing] = useState(false);
   const formModalRef = useRef<HTMLDivElement>(null);
   const deleteModalRef = useRef<HTMLDivElement>(null);
 
@@ -23,23 +25,40 @@ export const AccountsPage = () => {
   useFocusTrap(deleteModalRef, !!deletingId);
   useFocusTrap(formModalRef, (isAdding || !!editingId) && !deletingId);
 
+  const closeFormModal = useCallback(() => {
+    setIsFormClosing(true);
+    setTimeout(() => {
+      setIsAdding(false);
+      setEditingId(null);
+      setIsFormClosing(false);
+    }, 150);
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    setIsDeleteClosing(true);
+    setTimeout(() => {
+      setDeletingId(null);
+      setIsDeleteClosing(false);
+    }, 150);
+  }, []);
+
   const handleAdd = (data: Omit<BankAccount, 'id'>) => {
     addAccount({ id: crypto.randomUUID(), ...data });
     setIsAdding(false);
-    navigate('/');
+    navigate('/', { viewTransition: true });
   };
 
   const handleUpdate = (data: Omit<BankAccount, 'id'>) => {
     if (editingId) {
       updateAccount(editingId, data);
-      setEditingId(null);
+      closeFormModal();
     }
   };
 
   /** Selecting an account always navigates back to the receive page. */
   const handleSelect = (id: string) => {
     selectAccount(id);
-    navigate('/');
+    navigate('/', { viewTransition: true });
   };
 
   const handleDeleteConfirm = () => {
@@ -54,18 +73,15 @@ export const AccountsPage = () => {
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (deletingId) setDeletingId(null);
-      else {
-        setIsAdding(false);
-        setEditingId(null);
-      }
+      if (deletingId) closeDeleteModal();
+      else closeFormModal();
     };
 
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
     };
-  }, [anyModalOpen, deletingId]);
+  }, [anyModalOpen, deletingId, closeFormModal, closeDeleteModal]);
 
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
@@ -84,6 +100,7 @@ export const AccountsPage = () => {
           <div className="flex items-center gap-3">
             <Link
               to="/"
+              viewTransition
               aria-label="返回"
               className="p-2.5 -ml-2 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
@@ -148,18 +165,15 @@ export const AccountsPage = () => {
       {/* ---------- Add / Edit Form Modal — centered card ---------- */}
       {(isAdding || editingId) && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200 motion-reduce:animate-none"
-          onClick={() => {
-            setIsAdding(false);
-            setEditingId(null);
-          }}
+          className={`fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 motion-reduce:animate-none ${isFormClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'}`}
+          onClick={closeFormModal}
         >
           <div
             ref={formModalRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="account-form-title"
-            className="w-full max-w-lg max-h-[90svh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
+            className={`w-full max-w-lg max-h-[90svh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 motion-reduce:animate-none ${isFormClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 sm:p-8">
@@ -173,10 +187,7 @@ export const AccountsPage = () => {
                 initialData={editingId ? accounts.find((a) => a.id === editingId) : undefined}
                 editingId={editingId ?? undefined}
                 onSubmit={editingId ? handleUpdate : handleAdd}
-                onCancel={() => {
-                  setIsAdding(false);
-                  setEditingId(null);
-                }}
+                onCancel={closeFormModal}
               />
             </div>
           </div>
@@ -186,8 +197,8 @@ export const AccountsPage = () => {
       {/* ---------- Delete Confirmation — centered card ---------- */}
       {deletingAccount && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200 motion-reduce:animate-none"
-          onClick={() => setDeletingId(null)}
+          className={`fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 motion-reduce:animate-none ${isDeleteClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'}`}
+          onClick={closeDeleteModal}
         >
           <div
             ref={deleteModalRef}
@@ -195,7 +206,7 @@ export const AccountsPage = () => {
             aria-modal="true"
             aria-labelledby="delete-title"
             aria-describedby="delete-desc"
-            className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl overscroll-contain animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
+            className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl overscroll-contain motion-reduce:animate-none ${isDeleteClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-5 mx-auto">
@@ -213,7 +224,7 @@ export const AccountsPage = () => {
             <div className="mt-8 flex gap-3">
               <button
                 type="button"
-                onClick={() => setDeletingId(null)}
+                onClick={closeDeleteModal}
                 className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 取消

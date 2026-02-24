@@ -84,7 +84,10 @@ export const useBanksStore = create<BanksState>()(
         set({ isRefreshing: true });
 
         try {
-          const response = await fetch(`${BANKS_JSON_PATH}?t=${Date.now()}`, {
+          // Omit cache-busting timestamp so Workbox StaleWhileRevalidate can
+          // use a stable cache key. `cache: 'no-store'` bypasses the HTTP
+          // browser cache; the service worker handles its own caching layer.
+          const response = await fetch(BANKS_JSON_PATH, {
             cache: 'no-store',
           });
 
