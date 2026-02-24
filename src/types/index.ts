@@ -25,7 +25,7 @@ export interface ShareData {
 }
 
 /** Expiry duration in seconds; 0 means no expiration */
-export type ExpiryOption = 0 | 3600 | 86400 | 604800;
+export type ExpiryOption = 0 | 600 | 3600 | 86400;
 
 export interface ShareOptions {
   expiry: ExpiryOption;

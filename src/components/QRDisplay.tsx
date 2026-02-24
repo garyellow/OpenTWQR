@@ -13,9 +13,11 @@ interface QRDisplayProps {
   note?: string;
   shareData: ShareData;
   onClose: () => void;
+  /** When true (SharedPage), hide re-link options to prevent expiry bypass */
+  isSharedView?: boolean;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareData, onClose }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareData, onClose, isSharedView = false }: QRDisplayProps) => {
   const [qrSize, setQrSize] = useState(240);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -404,19 +406,21 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => setShowShareMenu(true)}
-            className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-          >
-            <Share2 size={18} aria-hidden="true" />
-            <span>分享</span>
-          </button>
+          {!isSharedView && (
+            <button
+              type="button"
+              onClick={() => setShowShareMenu(true)}
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+            >
+              <Share2 size={18} aria-hidden="true" />
+              <span>分享</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Share menu overlay — centered card */}
-      {showShareMenu && (
+      {!isSharedView && showShareMenu && (
         <div
           className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150"
           onClick={() => setShowShareMenu(false)}
@@ -500,7 +504,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       )}
 
       {/* Link settings dialog — expiry & password */}
-      {linkAction && (
+      {!isSharedView && linkAction && (
         <div
           className="fixed inset-0 z-[85] flex items-center justify-center p-5 animate-in fade-in duration-150"
           onClick={() => !isEncrypting && setLinkAction(null)}
@@ -537,10 +541,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {([
-                  [0, '永久'],
+                  [0, '不限制'],
+                  [600, '10 分鐘'],
                   [3600, '1 小時'],
                   [86400, '1 天'],
-                  [604800, '1 週'],
                 ] as const).map(([val, label]) => (
                   <button
                     key={val}

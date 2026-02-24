@@ -176,6 +176,7 @@ export const SharedPage = () => {
       note={shareData.note}
       shareData={shareData}
       onClose={() => navigate('/')}
+      isSharedView
     />
   );
 };
