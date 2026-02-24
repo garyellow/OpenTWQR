@@ -93,7 +93,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
       </div>
 
       {/* Keypad */}
-      <div className="grid grid-cols-3 gap-x-4 gap-y-1.5 select-none px-4 shrink-0">
+      <div role="group" aria-label="數字鍵盤" className="grid grid-cols-3 gap-x-4 gap-y-1.5 select-none px-4 shrink-0">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}

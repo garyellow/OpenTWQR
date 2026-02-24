@@ -1,11 +1,10 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AccountCard } from '../components/AccountCard';
 import { AccountForm } from '../components/AccountForm';
+import { AnimatedModal } from '../components/AnimatedModal';
 import { Plus, ChevronLeft, Wallet, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useScrollLock } from '../hooks/useScrollLock';
 import type { BankAccount } from '../types';
 
 export const AccountsPage = () => {
@@ -15,31 +14,14 @@ export const AccountsPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isFormClosing, setIsFormClosing] = useState(false);
-  const [isDeleteClosing, setIsDeleteClosing] = useState(false);
-  const formModalRef = useRef<HTMLDivElement>(null);
-  const deleteModalRef = useRef<HTMLDivElement>(null);
-
-  const anyModalOpen = isAdding || !!editingId || !!deletingId;
-  useScrollLock(anyModalOpen);
-  useFocusTrap(deleteModalRef, !!deletingId);
-  useFocusTrap(formModalRef, (isAdding || !!editingId) && !deletingId);
 
   const closeFormModal = useCallback(() => {
-    setIsFormClosing(true);
-    setTimeout(() => {
-      setIsAdding(false);
-      setEditingId(null);
-      setIsFormClosing(false);
-    }, 150);
+    setIsAdding(false);
+    setEditingId(null);
   }, []);
 
   const closeDeleteModal = useCallback(() => {
-    setIsDeleteClosing(true);
-    setTimeout(() => {
-      setDeletingId(null);
-      setIsDeleteClosing(false);
-    }, 150);
+    setDeletingId(null);
   }, []);
 
   const handleAdd = (data: Omit<BankAccount, 'id'>) => {
@@ -66,22 +48,6 @@ export const AccountsPage = () => {
     removeAccount(deletingId);
     setDeletingId(null);
   };
-
-  /* Escape key closes whichever modal is open. */
-  useEffect(() => {
-    if (!anyModalOpen) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      if (deletingId) closeDeleteModal();
-      else closeFormModal();
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [anyModalOpen, deletingId, closeFormModal, closeDeleteModal]);
 
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
@@ -162,20 +128,15 @@ export const AccountsPage = () => {
         )}
       </main>
 
-      {/* ---------- Add / Edit Form Modal — centered card ---------- */}
+      {/* ---------- Add / Edit Form Modal ---------- */}
       {(isAdding || editingId) && (
-        <div
-          className={`fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 motion-reduce:animate-none ${isFormClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'}`}
-          onClick={closeFormModal}
+        <AnimatedModal
+          onClose={closeFormModal}
+          overlayClass="z-50"
+          cardClass="max-w-lg max-h-[90svh] overflow-y-auto"
+          ariaLabelledby="account-form-title"
         >
-          <div
-            ref={formModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="account-form-title"
-            className={`w-full max-w-lg max-h-[90svh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 motion-reduce:animate-none ${isFormClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
-            onClick={(e) => e.stopPropagation()}
-          >
+          {(requestClose) => (
             <div className="p-6 sm:p-8">
               <h2
                 id="account-form-title"
@@ -187,58 +148,55 @@ export const AccountsPage = () => {
                 initialData={editingId ? accounts.find((a) => a.id === editingId) : undefined}
                 editingId={editingId ?? undefined}
                 onSubmit={editingId ? handleUpdate : handleAdd}
-                onCancel={closeFormModal}
+                onCancel={requestClose}
               />
             </div>
-          </div>
-        </div>
+          )}
+        </AnimatedModal>
       )}
 
-      {/* ---------- Delete Confirmation — centered card ---------- */}
+      {/* ---------- Delete Confirmation ---------- */}
       {deletingAccount && (
-        <div
-          className={`fixed inset-0 z-[60] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 motion-reduce:animate-none ${isDeleteClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'}`}
-          onClick={closeDeleteModal}
+        <AnimatedModal
+          onClose={closeDeleteModal}
+          overlayClass="z-[60]"
+          cardClass="max-w-sm p-6"
+          ariaLabelledby="delete-title"
+          ariaDescribedby="delete-desc"
         >
-          <div
-            ref={deleteModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-title"
-            aria-describedby="delete-desc"
-            className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl overscroll-contain motion-reduce:animate-none ${isDeleteClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-5 mx-auto">
-              <Trash2 size={24} className="text-red-600 dark:text-red-400" aria-hidden="true" />
-            </div>
-            <h2 id="delete-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-center">
-              刪除帳戶
-            </h2>
-            <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed">
-              此帳戶將永久從此裝置上移除。
-            </p>
-            <div className="mt-6 font-mono text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-700/50 text-center">
-              {deletingAccount.bankCode} · {deletingAccount.accountNumber}
-            </div>
-            <div className="mt-8 flex gap-3">
-              <button
-                type="button"
-                onClick={closeDeleteModal}
-                className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                刪除
-              </button>
-            </div>
-          </div>
-        </div>
+          {(requestClose) => (
+            <>
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-5 mx-auto">
+                <Trash2 size={24} className="text-red-600 dark:text-red-400" aria-hidden="true" />
+              </div>
+              <h2 id="delete-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-center">
+                刪除帳戶
+              </h2>
+              <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed">
+                此帳戶將永久從此裝置上移除。
+              </p>
+              <div className="mt-6 font-mono text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-700/50 text-center">
+                {deletingAccount.bankCode} · {deletingAccount.accountNumber}
+              </div>
+              <div className="mt-8 flex gap-3">
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteConfirm}
+                  className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  刪除
+                </button>
+              </div>
+            </>
+          )}
+        </AnimatedModal>
       )}
     </div>
   );

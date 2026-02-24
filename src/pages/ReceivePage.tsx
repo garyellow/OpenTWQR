@@ -1,22 +1,19 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/AmountInput';
 import { QRDisplay } from '../components/QRDisplay';
+import { AnimatedModal } from '../components/AnimatedModal';
 import { generateTWQR, maskAccount } from '../utils/twqr';
 import { Wallet, QrCode, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useScrollLock } from '../hooks/useScrollLock';
 
 export const ReceivePage = () => {
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [showNoteInput, setShowNoteInput] = useState(false);
-  const [isNoteClosing, setIsNoteClosing] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const noteModalRef = useRef<HTMLDivElement>(null);
   const { accounts, selectedAccountId } = useAppStore();
   const banks = useBanksStore((state) => state.banks);
   const navigate = useNavigate();
@@ -57,29 +54,6 @@ export const ReceivePage = () => {
   const handleCloseQR = useCallback(() => {
     setShowQR(false);
   }, []);
-
-  const closeNoteInput = useCallback(() => {
-    setIsNoteClosing(true);
-    setTimeout(() => {
-      setShowNoteInput(false);
-      setIsNoteClosing(false);
-    }, 150);
-  }, []);
-
-  useScrollLock(showNoteInput);
-  useFocusTrap(noteModalRef, showNoteInput);
-
-  /* Handle Escape when note modal is open */
-  useEffect(() => {
-    if (!showNoteInput) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeNoteInput();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [showNoteInput, closeNoteInput]);
 
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
@@ -181,79 +155,76 @@ export const ReceivePage = () => {
         </div>
       </main>
 
-      {/* Note input modal — centered card */}
+      {/* Note input modal — AnimatedModal */}
       {showNoteInput && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${isNoteClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'}`}
-          onClick={closeNoteInput}
+        <AnimatedModal
+          onClose={() => setShowNoteInput(false)}
+          overlayClass="z-50"
+          cardClass="max-w-sm p-6"
+          ariaLabelledby="note-modal-title"
         >
-          <div
-            ref={noteModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="note-modal-title"
-            className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 overscroll-contain motion-reduce:animate-none ${isNoteClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-5">
-              <h2 id="note-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                交易備註
-              </h2>
-              <button
-                type="button"
-                onClick={closeNoteInput}
-                aria-label="關閉"
-                className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <X size={20} aria-hidden="true" />
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                id="note-modal-input"
-                aria-label="交易備註"
-                value={note}
-                onChange={(e) => setNote(e.target.value.slice(0, 20))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    closeNoteInput();
-                  }
-                }}
-                placeholder="輸入備註，最多 20 字…"
-                autoFocus
-                autoComplete="off"
-                maxLength={20}
-                className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 dark:text-zinc-500 pointer-events-none">
-                {note.length}/20
-              </span>
-            </div>
-            <div className="flex gap-3 mt-4">
-              {note && (
+          {(requestClose) => (
+            <>
+              <div className="flex items-center justify-between mb-5">
+                <h2 id="note-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  交易備註
+                </h2>
                 <button
                   type="button"
-                  onClick={() => {
-                    setNote('');
-                    closeNoteInput();
-                  }}
-                  className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  onClick={requestClose}
+                  aria-label="關閉"
+                  className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
-                  清除備註
+                  <X size={20} aria-hidden="true" />
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={closeNoteInput}
-                className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                確認
-              </button>
-            </div>
-          </div>
-        </div>
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="note-modal-input"
+                  aria-label="交易備註"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value.slice(0, 20))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      requestClose();
+                    }
+                  }}
+                  placeholder="輸入備註，最多 20 字…"
+                  autoFocus
+                  autoComplete="off"
+                  maxLength={20}
+                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 dark:text-zinc-500 pointer-events-none">
+                  {note.length}/20
+                </span>
+              </div>
+              <div className="flex gap-3 mt-4">
+                {note && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNote('');
+                      requestClose();
+                    }}
+                    className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  >
+                    清除備註
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  確認
+                </button>
+              </div>
+            </>
+          )}
+        </AnimatedModal>
       )}
 
       {showQR && qrString && shareData && (

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 /**
  * Adds a short "closing" phase before the consumer's `onClose` is called,
@@ -11,6 +11,12 @@ import { useState, useCallback, useEffect } from 'react';
  */
 export const useDelayedClose = (onClose: () => void, delay = 150) => {
   const [isClosing, setIsClosing] = useState(false);
+  // Sync the latest onClose into a ref so the timer callback is never stale,
+  // and the timer itself doesn't restart when the parent re-renders.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   const requestClose = useCallback(() => {
     setIsClosing(true);
@@ -18,9 +24,9 @@ export const useDelayedClose = (onClose: () => void, delay = 150) => {
 
   useEffect(() => {
     if (!isClosing) return;
-    const id = setTimeout(onClose, delay);
+    const id = setTimeout(() => onCloseRef.current(), delay);
     return () => clearTimeout(id);
-  }, [isClosing, onClose, delay]);
+  }, [isClosing, delay]);
 
   return { isClosing, requestClose };
 };

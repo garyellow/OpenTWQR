@@ -1,4 +1,5 @@
 import type { ShareData, ShareOptions, ParseShareResult } from '../types';
+import { isValidAccount } from './twqr';
 
 /* ------------------------------------------------------------------ */
 /*  Base64url helpers                                                  */
@@ -212,7 +213,7 @@ export const parseShareUrl = async (
     if (!plaintext) return { status: 'invalid' };
 
     const parsed = JSON.parse(new TextDecoder().decode(plaintext));
-    if (typeof parsed.b !== 'string' || typeof parsed.a !== 'string') {
+    if (typeof parsed.b !== 'string' || typeof parsed.a !== 'string' || !isValidAccount(parsed.a)) {
       return { status: 'invalid' };
     }
 

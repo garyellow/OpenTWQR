@@ -44,7 +44,6 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
-        display_override: ['window-controls-overlay', 'standalone'],
         orientation: 'portrait',
         lang: 'zh-TW',
         categories: ['finance', 'utilities'],
@@ -110,7 +109,7 @@ export default defineConfig({
         // Split heavy vendor libraries into separate chunks so the browser
         // can cache them independently from application code.
         manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-router': ['react-router-dom'],
           'vendor-qr': ['qrcode.react'],
         },
       },

@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Search, X, ChevronDown, Building2 } from 'lucide-react';
 import { useBanksStore } from '../stores/useBanksStore';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useScrollLock } from '../hooks/useScrollLock';
+import { AnimatedModal } from './AnimatedModal';
 
 interface BankSelectProps {
   value: string;
@@ -13,11 +12,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
   const banks = useBanksStore((state) => state.banks);
-
-  useScrollLock(isOpen);
-  useFocusTrap(dialogRef, isOpen, inputRef);
 
   const selectedBank = useMemo(() => banks.find((b) => b.code === value), [banks, value]);
 
@@ -25,19 +20,6 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
     const q = search.toLowerCase();
     return banks.filter((b) => b.name.toLowerCase().includes(q) || b.code.includes(q));
   }, [banks, search]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [isOpen]);
 
   return (
     <>
@@ -93,107 +75,103 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
       </div>
 
       {isOpen && (
-        <div
-          className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-in fade-in duration-200 motion-reduce:animate-none"
-          onClick={() => setIsOpen(false)}
+        <AnimatedModal
+          onClose={() => setIsOpen(false)}
+          overlayClass="z-[70]"
+          cardClass="max-h-[85svh] max-w-md flex flex-col"
+          ariaLabelledby="bank-title"
+          initialFocusRef={inputRef}
         >
-          <div
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="bank-title"
-            className="w-full max-h-[85svh] max-w-md bg-white dark:bg-zinc-900 rounded-[2rem] flex flex-col shadow-2xl border border-zinc-200 dark:border-zinc-800 overscroll-contain animate-in zoom-in-95 duration-200 motion-reduce:animate-none"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="p-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/50 flex flex-col gap-4 shrink-0">
-              <div className="flex items-center justify-between">
-                <h2 id="bank-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                  選擇銀行
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  aria-label="關閉"
-                  className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                >
-                  <X size={20} aria-hidden="true" />
-                </button>
-              </div>
-
-              {/* Search */}
-              <div className="relative">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
-                  size={18}
-                  aria-hidden="true"
-                />
-                <input
-                  id="bank-search"
-                  ref={inputRef}
-                  name="bankSearch"
-                  type="text"
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-label="搜尋銀行名稱或代碼"
-                  placeholder="搜尋銀行名稱或代碼…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm"
-                />
-              </div>
-            </div>
-
-            {/* Bank list */}
-            <div className="flex-1 overflow-y-auto p-3 overscroll-contain">
-              <div className="space-y-1 pb-safe">
-                {search && (
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2 pb-2">
-                    {filteredBanks.length > 0
-                      ? `找到 ${filteredBanks.length} 家銀行`
-                      : null}
-                  </p>
-                )}
-                {filteredBanks.map((bank) => (
+          {(requestClose) => (
+            <>
+              {/* Header */}
+              <div className="p-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/50 flex flex-col gap-4 shrink-0">
+                <div className="flex items-center justify-between">
+                  <h2 id="bank-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    選擇銀行
+                  </h2>
                   <button
-                    key={bank.code}
                     type="button"
-                    onClick={() => {
-                      onChange(bank.code);
-                      setIsOpen(false);
-                      setSearch('');
-                    }}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
-                      value === bank.code
-                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                    }`}
+                    onClick={requestClose}
+                    aria-label="關閉"
+                    className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                   >
-                    <span className="font-medium truncate text-base">{bank.name}</span>
-                    <span
-                      className={`font-mono text-sm px-2.5 py-1 rounded-lg shrink-0 ml-3 ${
+                    <X size={20} aria-hidden="true" />
+                  </button>
+                </div>
+
+                {/* Search */}
+                <div className="relative">
+                  <Search
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                    size={18}
+                    aria-hidden="true"
+                  />
+                  <input
+                    id="bank-search"
+                    ref={inputRef}
+                    name="bankSearch"
+                    type="text"
+                    autoComplete="off"
+                    spellCheck={false}
+                    aria-label="搜尋銀行名稱或代碼"
+                    placeholder="搜尋銀行名稱或代碼…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Bank list */}
+              <div className="flex-1 overflow-y-auto p-3 overscroll-contain">
+                <div className="space-y-1 pb-safe">
+                  {search && filteredBanks.length > 0 && (
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2 pb-2">
+                      找到 {filteredBanks.length} 家銀行
+                    </p>
+                  )}
+                  {filteredBanks.map((bank) => (
+                    <button
+                      key={bank.code}
+                      type="button"
+                      onClick={() => {
+                        onChange(bank.code);
+                        setIsOpen(false);
+                        setSearch('');
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                         value === bank.code
-                          ? 'bg-white/20 dark:bg-black/10 text-white dark:text-zinc-900'
-                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                          ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                          : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                       }`}
                     >
-                      {bank.code}
-                    </span>
-                  </button>
-                ))}
+                      <span className="font-medium truncate text-base">{bank.name}</span>
+                      <span
+                        className={`font-mono text-sm px-2.5 py-1 rounded-lg shrink-0 ml-3 ${
+                          value === bank.code
+                            ? 'bg-white/20 dark:bg-black/10 text-white dark:text-zinc-900'
+                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                        }`}
+                      >
+                        {bank.code}
+                      </span>
+                    </button>
+                  ))}
 
-                {filteredBanks.length === 0 && (
-                  <div className="py-20 text-center text-zinc-400 dark:text-zinc-500 flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
-                      <Search size={24} aria-hidden="true" />
+                  {filteredBanks.length === 0 && (
+                    <div className="py-20 text-center text-zinc-400 dark:text-zinc-500 flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+                        <Search size={24} aria-hidden="true" />
+                      </div>
+                      <p>找不到「{search}」的搜尋結果</p>
                     </div>
-                    <p>找不到「{search}」的搜尋結果</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </>
+          )}
+        </AnimatedModal>
       )}
     </>
   );

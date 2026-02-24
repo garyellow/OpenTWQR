@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useDelayedClose } from '../hooks/useDelayedClose';
-import { X, Share2, Link2, Image, Download, Check, Eye, EyeOff, Copy, Clipboard, Lock, Clock, Loader2 } from 'lucide-react';
+import { useAnimatedToggle } from '../hooks/useAnimatedToggle';
+import { X, Share2, Check, Eye, EyeOff, Copy } from 'lucide-react';
 import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../utils/twqr';
 import { buildShareUrl } from '../utils/share';
 import { svgToBlob, downloadBlob } from '../utils/qrImage';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { QRFullscreen } from './QRFullscreen';
+import { ShareMenu } from './ShareMenu';
+import { LinkSettingsDialog } from './LinkSettingsDialog';
 import type { ShareData, ExpiryOption } from '../types';
 
 interface QRDisplayProps {
@@ -24,8 +28,9 @@ interface QRDisplayProps {
 export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareData, onClose, isSharedView = false }: QRDisplayProps) => {
   const [qrSize, setQrSize] = useState(240);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showShareMenu, setShowShareMenu] = useState(false);
-  const [linkAction, setLinkAction] = useState<'copy' | 'share' | null>(null);
+  const shareMenu = useAnimatedToggle();
+  const linkSettingsToggle = useAnimatedToggle();
+  const [linkAction, setLinkAction] = useState<'copy' | 'share'>('copy');
   const [linkExpiry, setLinkExpiry] = useState<ExpiryOption>(0);
   const [linkPassword, setLinkPassword] = useState('');
   const [isEncrypting, setIsEncrypting] = useState(false);
@@ -33,34 +38,56 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   const [accountRevealed, setAccountRevealed] = useState(false);
   const feedbackTimerRef = useRef<number | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const { isClosing, requestClose } = useDelayedClose(onClose);
-  const [isShareMenuClosing, setIsShareMenuClosing] = useState(false);
-  const [isLinkActionClosing, setIsLinkActionClosing] = useState(false);
 
   /** `navigator.share` is only available in secure contexts (HTTPS / PWA). */
   const supportsNativeShare = typeof navigator.share === 'function';
 
-  // Refs for focus trap containers
-  const modalRef = useRef<HTMLDivElement>(null);
-  const shareMenuRef = useRef<HTMLDivElement>(null);
-  const linkSettingsRef = useRef<HTMLDivElement>(null);
-  const fullscreenRef = useRef<HTMLDivElement>(null);
-
-  // Determine which layer is active for focus trap
-  const activeLayer = isFullscreen ? 'fullscreen' : linkAction ? 'linkSettings' : showShareMenu ? 'shareMenu' : 'modal';
-
+  // Focus trap: active only when no sub-overlay is on top
+  useFocusTrap(modalRef, !shareMenu.isOpen && !linkSettingsToggle.isOpen && !isFullscreen);
   useScrollLock(true);
-  useFocusTrap(fullscreenRef, activeLayer === 'fullscreen');
-  useFocusTrap(linkSettingsRef, activeLayer === 'linkSettings');
-  useFocusTrap(shareMenuRef, activeLayer === 'shareMenu');
-  useFocusTrap(modalRef, activeLayer === 'modal');
 
   const showFeedback = useCallback((msg: string) => {
     setFeedback(msg);
     if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
     feedbackTimerRef.current = window.setTimeout(() => setFeedback(null), 2000);
   }, []);
+
+  // Cleanup feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+    };
+  }, []);
+
+  // Escape handler — closes the topmost active layer
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (isFullscreen) return; // QRFullscreen has its own Escape handler
+      if (isEncrypting) return;
+      if (linkSettingsToggle.isOpen) { linkSettingsToggle.close(); return; }
+      if (shareMenu.isOpen) { shareMenu.close(); return; }
+      requestClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [requestClose, isFullscreen, shareMenu, linkSettingsToggle, isEncrypting]);
+
+  // Responsive QR size for the modal view
+  useEffect(() => {
+    const update = () => {
+      const vw = window.innerWidth;
+      setQrSize(Math.max(180, Math.min(260, Math.floor(vw * 0.55))));
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  /* --- Account actions --- */
 
   const handleCopyAccount = useCallback(async () => {
     if (!accountNumber) return;
@@ -76,53 +103,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     setAccountRevealed((prev) => !prev);
   }, []);
 
-  const closeShareMenu = useCallback(() => {
-    setIsShareMenuClosing(true);
-    setTimeout(() => {
-      setShowShareMenu(false);
-      setIsShareMenuClosing(false);
-    }, 150);
-  }, []);
+  /* --- Share helpers --- */
 
-  const closeLinkAction = useCallback(() => {
-    setIsLinkActionClosing(true);
-    setTimeout(() => {
-      setLinkAction(null);
-      setIsLinkActionClosing(false);
-    }, 150);
-  }, []);
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (isFullscreen) setIsFullscreen(false);
-        else if (isEncrypting) { /* ignore while encrypting */ }
-        else if (linkAction) closeLinkAction();
-        else if (showShareMenu) closeShareMenu();
-        else requestClose();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
-    };
-  }, [requestClose, closeShareMenu, closeLinkAction, isFullscreen, showShareMenu, linkAction, isEncrypting]);
-
-  useEffect(() => {
-    const update = () => {
-      // Responsive QR size: fit well on 320px–430px viewports
-      const vw = window.innerWidth;
-      setQrSize(Math.max(180, Math.min(260, Math.floor(vw * 0.55))));
-    };
-
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
-
-  /* --- Share actions --- */
   const copyToClipboard = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
@@ -149,30 +131,67 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     await copyToClipboard(url);
   };
 
-  const handleCopyLink = () => {
-    setIsShareMenuClosing(true);
-    setTimeout(() => {
-      setShowShareMenu(false);
-      setIsShareMenuClosing(false);
+  /* --- Share menu actions --- */
+
+  const handleCopyLink = useCallback(() => {
+    shareMenu.close(() => {
       setLinkAction('copy');
       setLinkExpiry(0);
       setLinkPassword('');
-    }, 150);
-  };
+      linkSettingsToggle.open();
+    });
+  }, [shareMenu, linkSettingsToggle]);
 
-  const handleShareLink = () => {
-    setIsShareMenuClosing(true);
-    setTimeout(() => {
-      setShowShareMenu(false);
-      setIsShareMenuClosing(false);
+  const handleShareLink = useCallback(() => {
+    shareMenu.close(() => {
       setLinkAction('share');
       setLinkExpiry(0);
       setLinkPassword('');
-    }, 150);
-  };
+      linkSettingsToggle.open();
+    });
+  }, [shareMenu, linkSettingsToggle]);
+
+  const handleShareImage = useCallback(async () => {
+    try {
+      const svgEl = qrRef.current?.querySelector('svg');
+      if (!svgEl) return;
+
+      const pngBlob = await svgToBlob(svgEl, qrSize);
+      const file = new File([pngBlob], 'opentwqr.png', { type: 'image/png' });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'OpenTWQR 收款碼' });
+        shareMenu.close();
+        return;
+      }
+
+      downloadBlob(pngBlob, 'opentwqr.png');
+      showFeedback('已下載圖片');
+      shareMenu.close();
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
+      showFeedback('分享失敗');
+      shareMenu.close();
+    }
+  }, [qrSize, shareMenu, showFeedback]);
+
+  const handleDownloadImage = useCallback(async () => {
+    try {
+      const svgEl = qrRef.current?.querySelector('svg');
+      if (!svgEl) return;
+
+      const pngBlob = await svgToBlob(svgEl, qrSize);
+      downloadBlob(pngBlob, 'opentwqr.png');
+      showFeedback('已下載圖片');
+    } catch {
+      showFeedback('下載失敗');
+    }
+    shareMenu.close();
+  }, [qrSize, shareMenu, showFeedback]);
+
+  /* --- Link settings actions --- */
 
   const handleLinkConfirm = async () => {
-    if (!linkAction) return;
     setIsEncrypting(true);
     try {
       const url = await buildShareUrl(shareData, { expiry: linkExpiry, password: linkPassword });
@@ -185,96 +204,19 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       showFeedback('加密失敗');
     }
     setIsEncrypting(false);
-    setLinkAction(null);
-  };
-
-  const handleShareImage = async () => {
-    try {
-      const svgEl = qrRef.current?.querySelector('svg');
-      if (!svgEl) return;
-
-      const pngBlob = await svgToBlob(svgEl, qrSize);
-      const file = new File([pngBlob], 'opentwqr.png', { type: 'image/png' });
-
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'OpenTWQR 收款碼',
-        });
-        closeShareMenu();
-        return;
-      }
-
-      // Fallback to download
-      downloadBlob(pngBlob, 'opentwqr.png');
-      showFeedback('已下載圖片');
-      closeShareMenu();
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
-      showFeedback('分享失敗');
-      closeShareMenu();
-    }
-  };
-
-  const handleDownloadImage = async () => {
-    try {
-      const svgEl = qrRef.current?.querySelector('svg');
-      if (!svgEl) return;
-
-      const pngBlob = await svgToBlob(svgEl, qrSize);
-      downloadBlob(pngBlob, 'opentwqr.png');
-      showFeedback('已下載圖片');
-    } catch {
-      showFeedback('下載失敗');
-    }
-    closeShareMenu();
+    linkSettingsToggle.close();
   };
 
   /* --- Fullscreen QR view --- */
   if (isFullscreen) {
     return (
-      <div
-        ref={fullscreenRef}
-        className="fixed inset-0 z-[90] bg-black flex flex-col items-center justify-center cursor-pointer animate-in fade-in duration-200 motion-reduce:animate-none"
-        onClick={() => setIsFullscreen(false)}
-      >
-        <div className="bg-white p-8 rounded-3xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
-          <QRCodeSVG
-            value={value}
-            size={Math.min(320, Math.floor(window.innerWidth * 0.75))}
-            level="Q"
-            marginSize={4}
-            bgColor="#ffffff"
-            fgColor="#000000"
-          />
-        </div>
-
-        {/* Info below QR */}
-        <div className="mt-8 text-center space-y-2">
-          {amount != null && amount > 0 ? (
-            <div className="flex items-baseline justify-center gap-0.5">
-              <span className="text-xl font-semibold text-emerald-400">NT$</span>
-              <span className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {formatAmount(amount)}
-              </span>
-            </div>
-          ) : (
-            <p className="text-lg font-medium text-white/50">
-              金額由付款方輸入
-            </p>
-          )}
-          {bankName && <p className="text-white/60 text-sm">{bankName}</p>}
-          {note && <p className="text-white/40 text-xs">{note}</p>}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setIsFullscreen(false)}
-          className="mt-10 text-white/30 text-xs transition-opacity hover:text-white/50"
-        >
-          點擊任意處返回
-        </button>
-      </div>
+      <QRFullscreen
+        value={value}
+        amount={amount}
+        bankName={bankName}
+        note={note}
+        onExit={() => setIsFullscreen(false)}
+      />
     );
   }
 
@@ -411,7 +353,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           {!isSharedView && (
             <button
               type="button"
-              onClick={() => setShowShareMenu(true)}
+              onClick={() => shareMenu.open()}
               className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <Share2 size={18} aria-hidden="true" />
@@ -421,203 +363,32 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         </div>
       </div>
 
-      {/* Share menu overlay — centered card */}
-      {!isSharedView && showShareMenu && (
-        <div
-          className={`fixed inset-0 z-[85] flex items-center justify-center p-5 motion-reduce:animate-none ${isShareMenuClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'}`}
-          onClick={closeShareMenu}
-        >
-          <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
-          <div
-            ref={shareMenuRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="分享方式"
-            className={`relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden motion-reduce:animate-none ${isShareMenuClosing ? 'animate-out zoom-out-95 fade-out duration-150' : 'animate-in zoom-in-95 duration-200'}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-2 pt-3">
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <Clipboard size={20} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">複製連結</p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">複製收款頁面連結到剪貼簿</p>
-                </div>
-              </button>
-
-              {supportsNativeShare && (
-              <button
-                type="button"
-                onClick={handleShareLink}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
-                  <Link2 size={20} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">分享連結</p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">透過系統分享模組傳送連結</p>
-                </div>
-              </button>
-              )}
-
-              <div className="my-1 mx-2 border-t border-zinc-100 dark:border-zinc-800" />
-
-              <button
-                type="button"
-                onClick={handleShareImage}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <Image size={20} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">分享圖片</p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">將 QR Code 圖片傳送給對方</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDownloadImage}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                <div className="w-10 h-10 rounded-full bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center shrink-0">
-                  <Download size={20} className="text-violet-600 dark:text-violet-400" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">下載圖片</p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">儲存 QR Code 至裝置</p>
-                </div>
-              </button>
-            </div>
-
-            <div className="p-2 pb-3">
-              <button
-                type="button"
-                onClick={closeShareMenu}
-                className="w-full py-3 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Share menu overlay */}
+      {!isSharedView && shareMenu.isOpen && (
+        <ShareMenu
+          isClosing={shareMenu.isClosing}
+          onClose={() => shareMenu.close()}
+          onCopyLink={handleCopyLink}
+          onShareLink={handleShareLink}
+          onShareImage={handleShareImage}
+          onDownloadImage={handleDownloadImage}
+          supportsNativeShare={supportsNativeShare}
+        />
       )}
 
-      {/* Link settings dialog — expiry & password */}
-      {!isSharedView && linkAction && (
-        <div
-          className={`fixed inset-0 z-[85] flex items-center justify-center p-5 motion-reduce:animate-none ${isLinkActionClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'}`}
-          onClick={() => !isEncrypting && closeLinkAction()}
-        >
-          <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
-          <div
-            ref={linkSettingsRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="link-settings-title"
-            className={`relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl motion-reduce:animate-none p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)] ${isLinkActionClosing ? 'animate-out zoom-out-95 fade-out duration-150' : 'animate-in zoom-in-95 duration-200'}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-5">
-              <h3 id="link-settings-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                分享連結設定
-              </h3>
-              <button
-                type="button"
-                onClick={closeLinkAction}
-                disabled={isEncrypting}
-                aria-label="關閉"
-                className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
-              >
-                <X size={20} aria-hidden="true" />
-              </button>
-            </div>
-
-            {/* Expiry options */}
-            <div className="mb-5">
-              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
-                <Clock size={16} aria-hidden="true" />
-                連結到期時間
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {([
-                  [0, '不限制'],
-                  [600, '10 分鐘'],
-                  [3600, '1 小時'],
-                  [86400, '1 天'],
-                ] as const).map(([val, label]) => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => setLinkExpiry(val)}
-                    disabled={isEncrypting}
-                    className={`py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${
-                      linkExpiry === val
-                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
-                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                    } disabled:opacity-50`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="mb-6">
-              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3" htmlFor="link-password-input">
-                <Lock size={16} aria-hidden="true" />
-                連結密碼
-                <span className="font-normal text-zinc-400 dark:text-zinc-500">（選填）</span>
-              </label>
-              <input
-                type="password"
-                id="link-password-input"
-                value={linkPassword}
-                onChange={(e) => setLinkPassword(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isEncrypting) {
-                    e.preventDefault();
-                    handleLinkConfirm();
-                  }
-                }}
-                disabled={isEncrypting}
-                placeholder="不設定密碼則留空"
-                autoComplete="new-password"
-                className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm disabled:opacity-50"
-              />
-            </div>
-
-            {/* Confirm button */}
-            <button
-              type="button"
-              onClick={handleLinkConfirm}
-              disabled={isEncrypting}
-              className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-            >
-              {isEncrypting ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-                  加密中…
-                </>
-              ) : (
-                <>
-                  {linkAction === 'copy' ? <Clipboard size={18} aria-hidden="true" /> : <Link2 size={18} aria-hidden="true" />}
-                  {linkAction === 'copy' ? '複製連結' : '分享連結'}
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+      {/* Link settings dialog */}
+      {!isSharedView && linkSettingsToggle.isOpen && (
+        <LinkSettingsDialog
+          isClosing={linkSettingsToggle.isClosing}
+          onClose={() => !isEncrypting && linkSettingsToggle.close()}
+          action={linkAction}
+          expiry={linkExpiry}
+          setExpiry={setLinkExpiry}
+          password={linkPassword}
+          setPassword={setLinkPassword}
+          isEncrypting={isEncrypting}
+          onConfirm={handleLinkConfirm}
+        />
       )}
     </div>
   );
