@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'react';
 
 /**
  * Adds a short "closing" phase before the consumer's `onClose` is called,
@@ -26,7 +26,9 @@ export const useDelayedClose = (onClose: () => void) => {
   }, []);
 
   /** Attach to the overlay's `onAnimationEnd` to finalise close. */
-  const handleAnimationEnd = useCallback(() => {
+  const handleAnimationEnd = useCallback((e: AnimationEvent) => {
+    // Ignore events bubbling up from child element animations
+    if (e.currentTarget !== e.target) return;
     if (!isClosing) return;
     onCloseRef.current();
   }, [isClosing]);

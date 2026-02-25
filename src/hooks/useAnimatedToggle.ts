@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'react';
 
 /**
  * Manages visibility + closing animation state for overlays.
@@ -52,7 +52,9 @@ export const useAnimatedToggle = () => {
   );
 
   /** Attach to the overlay's `onAnimationEnd` to finalise close. */
-  const onAnimationEnd = useCallback(() => {
+  const onAnimationEnd = useCallback((e: AnimationEvent) => {
+    // Ignore events bubbling up from child element animations
+    if (e.currentTarget !== e.target) return;
     if (!isClosing) return;
     finalise();
   }, [isClosing, finalise]);

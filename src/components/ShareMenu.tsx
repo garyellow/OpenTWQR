@@ -1,11 +1,11 @@
-import { useRef } from 'react';
+import { useRef, type AnimationEvent } from 'react';
 import { Clipboard, Link2, Image, Download } from 'lucide-react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ShareMenuProps {
   isClosing: boolean;
   onClose: () => void;
-  onAnimationEnd: () => void;
+  onAnimationEnd: (e: AnimationEvent) => void;
   onCopyLink: () => void;
   onShareLink: () => void;
   onShareImage: () => Promise<void>;

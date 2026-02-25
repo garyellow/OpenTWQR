@@ -212,21 +212,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     linkSettingsToggle.close();
   };
 
-  /* --- Fullscreen QR view --- */
-  if (isFullscreen) {
-    return (
-      <QRFullscreen
-        value={value}
-        amount={amount}
-        bankName={bankName}
-        note={note}
-        onExit={() => setIsFullscreen(false)}
-      />
-    );
-  }
-
   /* --- Main modal --- */
   return (
+    <>
     <div
       ref={modalRef}
       role="dialog"
@@ -297,14 +285,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                   )}
                   {accountNumber && (
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
-                      <span
-                        key={accountRevealed ? 'revealed' : 'masked'}
-                        className="animate-in fade-in duration-200 motion-reduce:animate-none"
-                      >
-                        {accountRevealed
-                          ? formatAccountDisplay(accountNumber)
-                          : maskAccount(accountNumber)}
-                      </span>
+                      {accountRevealed
+                        ? formatAccountDisplay(accountNumber)
+                        : maskAccount(accountNumber)}
                     </p>
                   )}
                 </div>
@@ -317,11 +300,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       aria-pressed={accountRevealed}
                       className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
-                      <span key={accountRevealed ? 'eye-on' : 'eye-off'} className="block animate-in fade-in zoom-in-75 duration-150 motion-reduce:animate-none">
-                        {accountRevealed
-                          ? <Eye size={18} aria-hidden="true" />
-                          : <EyeOff size={18} aria-hidden="true" />}
-                      </span>
+                      {accountRevealed
+                        ? <Eye size={18} aria-hidden="true" />
+                        : <EyeOff size={18} aria-hidden="true" />}
                     </button>
                     <button
                       type="button"
@@ -399,5 +380,17 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         />
       )}
     </div>
+
+    {/* Fullscreen QR view */}
+    {isFullscreen && (
+      <QRFullscreen
+        value={value}
+        amount={amount}
+        bankName={bankName}
+        note={note}
+        onExit={() => setIsFullscreen(false)}
+      />
+    )}
+    </>
   );
 };
