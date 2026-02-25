@@ -33,23 +33,27 @@ export const LinkSettingsDialog = ({
   useFocusTrap(ref, !isClosing);
 
   return (
-    <div
-      className={`fixed inset-0 z-[85] flex items-center justify-center p-5 motion-reduce:animate-none ${
-        isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'
-      }`}
-      onClick={() => !isEncrypting && onClose()}
-      onAnimationEnd={onAnimationEnd}
-    >
-      <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
+    <div className="fixed inset-0 z-[85]">
+      {/* Backdrop */}
+      <div
+        className={`absolute inset-0 bg-black/20 dark:bg-black/40 motion-reduce:animate-none ${
+          isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'
+        }`}
+        onClick={() => !isEncrypting && onClose()}
+        aria-hidden="true"
+      />
+
+      {/* Card centering */}
+      <div className="absolute inset-0 flex items-center justify-center p-5 pointer-events-none">
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-labelledby="link-settings-title"
-        className={`relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl motion-reduce:animate-none p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)] ${
-          isClosing ? 'animate-out zoom-out-95 fade-out duration-150' : 'animate-in zoom-in-95 duration-200'
+        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl motion-reduce:animate-none p-6 overflow-y-auto max-h-[calc(100svh-2.5rem)] ${
+          isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'
         }`}
-        onClick={(e) => e.stopPropagation()}
+        onAnimationEnd={onAnimationEnd}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
@@ -148,6 +152,7 @@ export const LinkSettingsDialog = ({
             </>
           )}
         </button>
+      </div>
       </div>
     </div>
   );

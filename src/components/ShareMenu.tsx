@@ -31,23 +31,27 @@ export const ShareMenu = ({
     'w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950';
 
   return (
-    <div
-      className={`fixed inset-0 z-[85] flex items-center justify-center p-5 motion-reduce:animate-none ${
-        isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'
-      }`}
-      onClick={onClose}
-      onAnimationEnd={onAnimationEnd}
-    >
-      <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
+    <div className="fixed inset-0 z-[85]">
+      {/* Backdrop */}
+      <div
+        className={`absolute inset-0 bg-black/20 dark:bg-black/40 motion-reduce:animate-none ${
+          isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'
+        }`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Card centering */}
+      <div className="absolute inset-0 flex items-center justify-center p-5 pointer-events-none">
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-label="分享方式"
-        className={`relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden motion-reduce:animate-none ${
-          isClosing ? 'animate-out zoom-out-95 fade-out duration-150' : 'animate-in zoom-in-95 duration-200'
+        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden motion-reduce:animate-none ${
+          isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'
         }`}
-        onClick={(e) => e.stopPropagation()}
+        onAnimationEnd={onAnimationEnd}
       >
         <div className="p-2 pt-3">
           <button type="button" onClick={onCopyLink} className={itemClass}>
@@ -104,6 +108,7 @@ export const ShareMenu = ({
             取消
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

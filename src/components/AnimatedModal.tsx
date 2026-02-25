@@ -26,6 +26,14 @@ interface AnimatedModalProps {
  * A self-contained modal component with backdrop, card entrance / exit
  * animation, scroll lock, focus trap and Escape-to-close.
  *
+ * Architecture:
+ *   - Backdrop is a sibling of the card (not a parent), so its animation
+ *     events never bubble into the card's `onAnimationEnd` handler.
+ *   - `onAnimationEnd` is attached **only** to the card, eliminating the
+ *     need to filter events from the overlay's own animation.
+ *   - The centering wrapper uses `pointer-events-none` so that clicks
+ *     outside the card fall through to the backdrop and trigger close.
+ *
  * Render it conditionally: `{showModal && <AnimatedModal ...>}`
  */
 export const AnimatedModal = ({
@@ -54,25 +62,33 @@ export const AnimatedModal = ({
   }, [requestClose, preventClose]);
 
   return (
-    <div
-      className={`fixed inset-0 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-5 motion-reduce:animate-none ${
-        isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
-      } ${overlayClass}`}
-      onClick={() => !preventClose && requestClose()}
-      onAnimationEnd={onAnimationEnd}
-    >
+    <div className={`fixed inset-0 ${overlayClass}`}>
+      {/* Backdrop — animated independently; clicks close the modal */}
       <div
-        ref={cardRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={ariaLabelledby}
-        aria-describedby={ariaDescribedby}
-        className={`w-full bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 overscroll-contain motion-reduce:animate-none ${
-          isClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'
-        } ${cardClass}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {children(requestClose)}
+        className={`absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${
+          isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
+        }`}
+        onClick={() => !preventClose && requestClose()}
+        aria-hidden="true"
+      />
+
+      {/* Card — all interaction lives here; onAnimationEnd drives close */}
+      <div className="absolute inset-0 flex items-center justify-center p-5 pointer-events-none">
+        <div
+          ref={cardRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={ariaLabelledby}
+          aria-describedby={ariaDescribedby}
+          className={`pointer-events-auto w-full bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 overscroll-contain motion-reduce:animate-none ${
+            isClosing
+              ? 'animate-out fade-out zoom-out-95 duration-150'
+              : 'animate-in fade-in zoom-in-95 duration-200'
+          } ${cardClass}`}
+          onAnimationEnd={onAnimationEnd}
+        >
+          {children(requestClose)}
+        </div>
       </div>
     </div>
   );

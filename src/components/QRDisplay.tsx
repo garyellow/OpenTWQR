@@ -215,18 +215,24 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   /* --- Main modal --- */
   return (
     <>
-    <div
-      ref={modalRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="qr-modal-title"
-      className={`fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 motion-reduce:animate-none ${isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'}`}
-      onClick={requestClose}
-      onAnimationEnd={onAnimationEnd}
-    >
+    <div ref={modalRef} className="fixed inset-0 z-[80]">
+      {/* Backdrop — animated independently; clicks close the modal */}
       <div
-        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
-        onClick={(e) => e.stopPropagation()}
+        className={`absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm motion-reduce:animate-none ${
+          isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
+        }`}
+        onClick={requestClose}
+        aria-hidden="true"
+      />
+
+      {/* Card centering — pointer-events-none lets clicks fall through to backdrop */}
+      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="qr-modal-title"
+        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        onAnimationEnd={onAnimationEnd}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-5 pb-3">
@@ -349,37 +355,41 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           )}
         </div>
       </div>
-
-      {/* Share menu overlay */}
-      {!isSharedView && shareMenu.isOpen && (
-        <ShareMenu
-          isClosing={shareMenu.isClosing}
-          onClose={() => shareMenu.close()}
-          onAnimationEnd={shareMenu.onAnimationEnd}
-          onCopyLink={handleCopyLink}
-          onShareLink={handleShareLink}
-          onShareImage={handleShareImage}
-          onDownloadImage={handleDownloadImage}
-          supportsNativeShare={supportsNativeShare}
-        />
-      )}
-
-      {/* Link settings dialog */}
-      {!isSharedView && linkSettingsToggle.isOpen && (
-        <LinkSettingsDialog
-          isClosing={linkSettingsToggle.isClosing}
-          onClose={() => !isEncrypting && linkSettingsToggle.close()}
-          onAnimationEnd={linkSettingsToggle.onAnimationEnd}
-          action={linkAction}
-          expiry={linkExpiry}
-          setExpiry={setLinkExpiry}
-          password={linkPassword}
-          setPassword={setLinkPassword}
-          isEncrypting={isEncrypting}
-          onConfirm={handleLinkConfirm}
-        />
-      )}
+      </div>
     </div>
+
+    {/* Sub-overlays — rendered outside the main modal to prevent
+        animationend events from bubbling into the QR card handler */}
+
+    {/* Share menu overlay */}
+    {!isSharedView && shareMenu.isOpen && (
+      <ShareMenu
+        isClosing={shareMenu.isClosing}
+        onClose={() => shareMenu.close()}
+        onAnimationEnd={shareMenu.onAnimationEnd}
+        onCopyLink={handleCopyLink}
+        onShareLink={handleShareLink}
+        onShareImage={handleShareImage}
+        onDownloadImage={handleDownloadImage}
+        supportsNativeShare={supportsNativeShare}
+      />
+    )}
+
+    {/* Link settings dialog */}
+    {!isSharedView && linkSettingsToggle.isOpen && (
+      <LinkSettingsDialog
+        isClosing={linkSettingsToggle.isClosing}
+        onClose={() => !isEncrypting && linkSettingsToggle.close()}
+        onAnimationEnd={linkSettingsToggle.onAnimationEnd}
+        action={linkAction}
+        expiry={linkExpiry}
+        setExpiry={setLinkExpiry}
+        password={linkPassword}
+        setPassword={setLinkPassword}
+        isEncrypting={isEncrypting}
+        onConfirm={handleLinkConfirm}
+      />
+    )}
 
     {/* Fullscreen QR view */}
     {isFullscreen && (

@@ -60,6 +60,18 @@ a {
   touch-action: manipulation;
 }
 
+/*
+ * tailwindcss-animate does NOT set animation-fill-mode by default.
+ * Without `both`, entrance animations flash the element's natural state
+ * for one frame before jumping to the "from" state; exit animations snap
+ * back to the natural state for one frame after finishing before React
+ * unmounts the element. `both` eliminates both artefacts.
+ */
+.animate-in,
+.animate-out {
+  animation-fill-mode: both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
