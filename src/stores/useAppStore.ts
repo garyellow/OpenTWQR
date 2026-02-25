@@ -6,6 +6,8 @@ import { idbStorage } from './idbStorage';
 interface AppState {
   accounts: BankAccount[];
   selectedAccountId: string | null;
+  /** Whether the store has been rehydrated from IndexedDB. */
+  isHydrated: boolean;
   addAccount: (account: BankAccount) => void;
   removeAccount: (id: string) => void;
   updateAccount: (id: string, account: Partial<BankAccount>) => void;
@@ -18,6 +20,7 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       accounts: [],
       selectedAccountId: null,
+      isHydrated: false,
       addAccount: (account) =>
         set((state) => ({
           accounts: [...state.accounts, account],
@@ -51,6 +54,13 @@ export const useAppStore = create<AppState>()(
       name: 'opentwqr-storage',
       version: 1,
       storage: createJSONStorage(() => idbStorage),
+      partialize: (state) => ({
+        accounts: state.accounts,
+        selectedAccountId: state.selectedAccountId,
+      }),
+      onRehydrateStorage: () => () => {
+        useAppStore.setState({ isHydrated: true });
+      },
     },
   ),
 );

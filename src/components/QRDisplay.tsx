@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useDelayedClose } from '../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../hooks/useAnimatedToggle';
@@ -6,12 +6,16 @@ import { X, Share2, Check, Eye, EyeOff, Copy } from 'lucide-react';
 import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../utils/twqr';
 import { buildShareUrl } from '../utils/share';
 import { svgToBlob, downloadBlob } from '../utils/qrImage';
+import { haptic } from '../utils/haptics';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { QRFullscreen } from './QRFullscreen';
 import { ShareMenu } from './ShareMenu';
 import { LinkSettingsDialog } from './LinkSettingsDialog';
 import type { ShareData, ExpiryOption } from '../types';
+
+/** Memoised QR Code to avoid re-rendering when parent state changes. */
+const MemoQRCode = memo(QRCodeSVG);
 
 interface QRDisplayProps {
   value: string;
@@ -40,7 +44,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   const qrRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const { isClosing, requestClose } = useDelayedClose(onClose);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
 
   /** `navigator.share` is only available in secure contexts (HTTPS / PWA). */
   const supportsNativeShare = typeof navigator.share === 'function';
@@ -50,6 +54,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   useScrollLock(true);
 
   const showFeedback = useCallback((msg: string) => {
+    haptic();
     setFeedback(msg);
     if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
     feedbackTimerRef.current = window.setTimeout(() => setFeedback(null), 2000);
@@ -229,6 +234,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       aria-labelledby="qr-modal-title"
       className={`fixed inset-0 z-[80] flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm p-4 sm:p-6 motion-reduce:animate-none ${isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'}`}
       onClick={requestClose}
+      onAnimationEnd={onAnimationEnd}
     >
       <div
         className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out zoom-out-95 duration-150' : 'animate-in zoom-in-95 duration-200'}`}
@@ -258,7 +264,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             className="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-[0.98] cursor-zoom-in"
           >
             <div ref={qrRef}>
-              <QRCodeSVG
+              <MemoQRCode
                 value={value}
                 size={qrSize}
                 level="Q"
@@ -368,6 +374,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         <ShareMenu
           isClosing={shareMenu.isClosing}
           onClose={() => shareMenu.close()}
+          onAnimationEnd={shareMenu.onAnimationEnd}
           onCopyLink={handleCopyLink}
           onShareLink={handleShareLink}
           onShareImage={handleShareImage}
@@ -381,6 +388,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         <LinkSettingsDialog
           isClosing={linkSettingsToggle.isClosing}
           onClose={() => !isEncrypting && linkSettingsToggle.close()}
+          onAnimationEnd={linkSettingsToggle.onAnimationEnd}
           action={linkAction}
           expiry={linkExpiry}
           setExpiry={setLinkExpiry}

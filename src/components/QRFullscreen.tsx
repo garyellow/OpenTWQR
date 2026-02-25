@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+
+/** Memoised QR Code to avoid re-rendering when parent state changes. */
+const MemoQRCode = memo(QRCodeSVG);
 import { formatAmount } from '../utils/twqr';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useDelayedClose } from '../hooks/useDelayedClose';
 
 interface QRFullscreenProps {
   value: string;
@@ -17,6 +21,7 @@ interface QRFullscreenProps {
  */
 export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullscreenProps) => {
   const ref = useRef<HTMLDivElement>(null);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
   const [qrSize, setQrSize] = useState(() =>
     Math.min(320, Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.75)),
   );
@@ -63,20 +68,23 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
   // Escape key exits fullscreen
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onExit();
+      if (e.key === 'Escape') requestClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onExit]);
+  }, [requestClose]);
 
   return (
     <div
       ref={ref}
-      className="fixed inset-0 z-[90] bg-black flex flex-col items-center justify-center cursor-pointer animate-in fade-in duration-200 motion-reduce:animate-none"
-      onClick={onExit}
+      className={`fixed inset-0 z-[90] bg-black flex flex-col items-center justify-center cursor-pointer motion-reduce:animate-none ${
+        isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
+      }`}
+      onClick={requestClose}
+      onAnimationEnd={onAnimationEnd}
     >
       <div className="bg-white p-8 rounded-3xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
-        <QRCodeSVG
+        <MemoQRCode
           value={value}
           size={qrSize}
           level="Q"
@@ -104,7 +112,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
 
       <button
         type="button"
-        onClick={onExit}
+        onClick={requestClose}
         className="mt-10 text-white/30 text-xs transition-opacity hover:text-white/50"
       >
         點擊任意處返回

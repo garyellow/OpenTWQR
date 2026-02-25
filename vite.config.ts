@@ -12,7 +12,7 @@ export default defineConfig({
         // Ensure SPA routing works offline: any navigation request not
         // matching a precached asset falls back to index.html.
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/data\//, /^\/api\//],
+        navigateFallbackDenylist: [/^\/data\//, /^\/api\//, /^\/screenshots\//],
         runtimeCaching: [
           {
             urlPattern: /\/data\/banks\.latest\.json/,
@@ -44,6 +44,7 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait',
         lang: 'zh-TW',
         categories: ['finance', 'utilities'],

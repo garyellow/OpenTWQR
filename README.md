@@ -13,7 +13,7 @@ OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
 - 分享選單（4 種方式）：複製連結、分享連結、分享圖片、下載圖片
 - **加密分享機制**：透過獨立路由 `/s/:data#key` 將帳戶資訊以 AES-256-GCM 加密後分享，金鑰保留在 URL 片段（`#` 後），伺服器永遠看不到明文；支援設定密碼保護與連結有效期
 - 白天 / 夜間 / 跟隨系統 三種主題模式切換
-- 使用 `zustand + persist` 將帳戶資料與主題偏好存在本機 `localStorage`
+- 使用 `zustand + persist` 將帳戶資料持久化至 IndexedDB（非同步、不阻塞主執行緒）；主題偏好存於 `localStorage`（供防閃爍腳本同步讀取）
 - TWQRP 字串由 `src/utils/twqr.ts` 生成（含 16 碼帳號補零、金額 × 100）
 
 ## 分享機制
@@ -100,19 +100,22 @@ npm run preview
 ## 技術堆疊
 
 - React 19 + TypeScript + Vite
-- Tailwind CSS（darkMode: class）
-- React Router
-- Zustand（含 persist middleware）
-- qrcode.react
+- Tailwind CSS（darkMode: class）+ tailwindcss-animate
+- React Router（含 View Transitions）
+- Zustand（含 persist middleware → IndexedDB / localStorage）
+- qrcode.react（memo 包裝避免多餘 re-render）
 - Lucide React（圖示）
 - vite-plugin-pwa
 
 ## 專案結構
 
-- `src/pages/`：主要頁面（收款頁 / 帳戶管理頁）
+- `src/pages/`：主要頁面（收款頁 / 帳戶管理頁 / 加密分享連結頁）
 - `src/components/`：UI 元件（QR 顯示、金額鍵盤、帳戶卡片、銀行選擇器、主題切換）
-- `src/stores/`：狀態管理與本地持久化（帳戶、銀行、主題）
+- `src/hooks/`：自訂 Hooks（動畫切換、動畫退場、焦點陷阱、滾動鎖定）
+- `src/stores/`：狀態管理與持久化（帳戶→IndexedDB、銀行清單→IndexedDB、主題→localStorage）
 - `src/utils/twqr.ts`：TWQRP 產生邏輯
 - `src/utils/share.ts`：加密分享連結的建立與解析（AES-256-GCM + PBKDF2）
+- `src/utils/haptics.ts`：觸覺反饋（`navigator.vibrate`）
+- `src/utils/qrImage.ts`：QR Code SVG → PNG 轉換與下載
 - `src/data/`：銀行清單（內建 + 自動產生）
 - `src/types/`：TypeScript 型別定義（含 `ShareData`、`ShareOptions`、`ExpiryOption`、`ParseShareResult` 等介面）

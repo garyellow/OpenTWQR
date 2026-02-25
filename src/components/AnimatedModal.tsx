@@ -39,7 +39,7 @@ export const AnimatedModal = ({
   scrollLock = true,
   initialFocusRef,
 }: AnimatedModalProps) => {
-  const { isClosing, requestClose } = useDelayedClose(onClose);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useScrollLock(scrollLock);
@@ -59,6 +59,7 @@ export const AnimatedModal = ({
         isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
       } ${overlayClass}`}
       onClick={() => !preventClose && requestClose()}
+      onAnimationEnd={onAnimationEnd}
     >
       <div
         ref={cardRef}

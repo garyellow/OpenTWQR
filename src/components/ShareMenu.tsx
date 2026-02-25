@@ -5,6 +5,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 interface ShareMenuProps {
   isClosing: boolean;
   onClose: () => void;
+  onAnimationEnd: () => void;
   onCopyLink: () => void;
   onShareLink: () => void;
   onShareImage: () => Promise<void>;
@@ -16,6 +17,7 @@ interface ShareMenuProps {
 export const ShareMenu = ({
   isClosing,
   onClose,
+  onAnimationEnd,
   onCopyLink,
   onShareLink,
   onShareImage,
@@ -34,6 +36,7 @@ export const ShareMenu = ({
         isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'
       }`}
       onClick={onClose}
+      onAnimationEnd={onAnimationEnd}
     >
       <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
       <div

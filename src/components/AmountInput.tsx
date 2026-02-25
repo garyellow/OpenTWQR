@@ -57,7 +57,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
   const formattedAmount = value ? new Intl.NumberFormat().format(parseInt(value, 10)) : '';
 
   const digitBtnClass =
-    'h-14 rounded-2xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center';
+    'h-14 rounded-2xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 active:scale-95 transition-all flex items-center justify-center';
 
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-3">
@@ -114,7 +114,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
           type="button"
           onClick={handleBackspace}
           aria-label="刪除一位數字"
-          className="h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 transition-colors flex items-center justify-center"
+          className="h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-800 active:scale-95 transition-all flex items-center justify-center"
         >
           <Delete size={28} aria-hidden="true" />
         </button>

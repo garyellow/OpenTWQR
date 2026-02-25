@@ -6,6 +6,7 @@ import type { ExpiryOption } from '../types';
 interface LinkSettingsDialogProps {
   isClosing: boolean;
   onClose: () => void;
+  onAnimationEnd: () => void;
   action: 'copy' | 'share';
   expiry: ExpiryOption;
   setExpiry: (v: ExpiryOption) => void;
@@ -19,6 +20,7 @@ interface LinkSettingsDialogProps {
 export const LinkSettingsDialog = ({
   isClosing,
   onClose,
+  onAnimationEnd,
   action,
   expiry,
   setExpiry,
@@ -36,6 +38,7 @@ export const LinkSettingsDialog = ({
         isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'
       }`}
       onClick={() => !isEncrypting && onClose()}
+      onAnimationEnd={onAnimationEnd}
     >
       <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
       <div

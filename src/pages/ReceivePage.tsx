@@ -8,13 +8,14 @@ import { Wallet, QrCode, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { haptic } from '../utils/haptics';
 
 export const ReceivePage = () => {
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const { accounts, selectedAccountId } = useAppStore();
+  const { accounts, selectedAccountId, isHydrated } = useAppStore();
   const banks = useBanksStore((state) => state.banks);
   const navigate = useNavigate();
 
@@ -54,6 +55,15 @@ export const ReceivePage = () => {
   const handleCloseQR = useCallback(() => {
     setShowQR(false);
   }, []);
+
+  /* ---------- Hydrating from IndexedDB ---------- */
+  if (!isHydrated) {
+    return (
+      <div className="min-h-svh flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+        <div className="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-600 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
@@ -145,7 +155,10 @@ export const ReceivePage = () => {
           <div className="shrink-0 p-5 pt-2">
             <button
               type="button"
-              onClick={() => setShowQR(true)}
+              onClick={() => {
+                haptic();
+                setShowQR(true);
+              }}
               className="w-full flex items-center justify-center gap-2.5 py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <QrCode size={22} aria-hidden="true" />

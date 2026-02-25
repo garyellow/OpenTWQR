@@ -12,9 +12,9 @@ export const generateTWQR = (params: TWQRParams): string => {
   queryParams.append('D5', bankCode);
   queryParams.append('D6', d6_paddedAccount);
 
-  // Only include D1 when a positive amount is specified.
+  // Only include D1 when a positive, finite amount is specified.
   // Omitting D1 lets the payer's banking app prompt for the amount.
-  if (amount > 0) {
+  if (Number.isFinite(amount) && amount > 0) {
     const d1_amountCents = Math.round(amount * 100);
     queryParams.append('D1', d1_amountCents.toString());
   }

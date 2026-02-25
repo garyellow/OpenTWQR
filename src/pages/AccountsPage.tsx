@@ -188,7 +188,7 @@ export const AccountsPage = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    removeAccount(deletingId!);
+                    if (deletingId) removeAccount(deletingId);
                     requestClose();
                   }}
                   className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
