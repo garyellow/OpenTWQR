@@ -1,121 +1,97 @@
 # OpenTWQR
 
-OpenTWQR 是一個純前端的台灣個人收款 QR 產生器（TWQRP://）。
-支援 PWA 安裝、本地資料儲存、離線使用，以及透過連結或圖片分享收款碼。
+**在你的手機上，即時產生台灣 Pay（TWQR）個人收款 QR Code。**
 
-## 核心功能
+完全免費、開放原始碼、不需註冊、不會上傳資料——你的帳戶資訊只儲存在你自己的裝置上。
 
-- 收款流程：選擇帳戶 → 輸入金額 → 選填交易備註 → 產生 QR → 對方掃碼轉帳
-- 帳戶管理（新增 / 編輯 / 刪除 / 選擇帳戶）
-- 帳戶名稱（`label`）：用於 App 內辨識帳戶，不寫入 QR 字串
-- 交易備註（`note`）：對應 TWQR D9 參數，寫入 QR 字串讓收付雙方確認交易用途
-- QR Code 點擊可全螢幕顯示（純黑底，方便對方掃碼）
-- 分享選單（4 種方式）：複製連結、分享連結、分享圖片、下載圖片
-- **加密分享機制**：透過獨立路由 `/s/:data#key` 將帳戶資訊以 AES-256-GCM 加密後分享，金鑰保留在 URL 片段（`#` 後），伺服器永遠看不到明文；支援設定密碼保護與連結有效期
-- 白天 / 夜間 / 跟隨系統 三種主題模式切換
-- 使用 `zustand + persist` 將帳戶資料持久化至 IndexedDB（非同步、不阻塞主執行緒）；主題偏好存於 `localStorage`（供防閃爍腳本同步讀取）
-- TWQRP 字串由 `src/utils/twqr.ts` 生成（含 16 碼帳號補零、金額 × 100）
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
+    <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面" width="320" />
+  </picture>
+</p>
 
-## 分享機制
+## 立即使用
 
-- **複製連結 / 分享連結**：點擊後彈出設定面板，可選擇到期時間（不限制 / 10 分鐘 / 1 小時 / 1 天）與選填密碼，確認後生成加密連結
-- **分享圖片**：將 QR Code SVG 轉為 PNG，透過 `navigator.share({ files })` 傳送（不觸發連結設定面板）
-- **下載圖片**：直接下載 QR Code PNG 檔案至裝置
-- **被分享頁限制**：`/s/:data` 開啟後不提供任何再分享入口，避免由收件方重建新連結繞過原始時效設定
+前往 **[pay.garyellow.app](https://pay.garyellow.app)** 開始使用，無需安裝。
 
-### 加密連結格式
+> 也可以將網頁「加入主畫面」，就像一般 App 一樣使用，離線也能產生收款碼。
 
-```
-https://example.com/s/{path}#{fragment}
-```
+## 功能特色
 
-- `{path}`：Base64URL 編碼的加密資料，格式為 `[version:1][flags:1][iv:12][salt?:16][ciphertext+tag]`
-- `{fragment}`：URL 片段（片段不會傳送至伺服器），無密碼模式為原始 32 位元組金鑰，有密碼模式為 `[iv2:12][加密後金鑰+tag:48]`
+### 快速收款
 
-### 安全設計
+1. 新增你的銀行帳戶
+2. 輸入收款金額（或留空讓對方自行輸入）
+3. 產生 QR Code，讓對方用任何支援台灣 Pay 的銀行 App 掃碼轉帳
 
-| 特性 | 說明 |
-|------|------|
-| 加密演算法 | AES-256-GCM（帶認證標籤，防止竄改） |
-| 金鑰存放 | URL 片段（`#` 後），HTTP 規格規定不傳到伺服器 |
-| 密碼保護 | PBKDF2（600,000 次迭代，SHA-256）從密碼衍生金鑰，隨機 salt 保護 |
-| 有效期限 | 到期時間戳記寫入加密資料，過期連結開啟後顯示已失效提示 |
-| 加密酬載 | `{b, a, m, n, exp}` 約 70 bytes，整個 URL 約 200–250 字元 |
+### 多帳戶管理
 
-- 編解碼邏輯：`src/utils/share.ts`
+可以新增多組銀行帳戶，並為每個帳戶設定暱稱（例如「郵局」、「薪轉戶」），一鍵切換收款帳戶。
 
-## PWA / 離線
+### 安全分享
 
-- 透過 `vite-plugin-pwa` 產生 `sw.js` 與 `manifest.webmanifest`
-- 安裝後可離線開啟 App Shell 與使用已快取資源
-- 帳戶資料為本機儲存，無後端依賴
-- 銀行清單內建於前端資源，無網路時自動使用內建清單（Fallback）
+透過加密連結將收款碼分享給對方，即使經由第三方通訊軟體傳送，帳戶資訊也受到端對端加密保護。可選擇設定密碼與連結有效期。
 
-## 主題模式
+### 離線可用
 
-- 支援 Light / Dark / System 三種模式，透過 Tailwind `darkMode: 'class'` 實作
-- 主題偏好持久化於 `localStorage`（key: `opentwqr-theme`）
-- `index.html` 內含防止主題閃爍（FOUC）的同步腳本
-- `<meta name="theme-color">` 隨主題動態更新，確保瀏覽器 UI 與 PWA 頂部列顏色一致
-- UI 採柔和對比度設計，避免純黑純白造成視覺疲勞
+安裝為 App 後，即使沒有網路也能產生收款 QR Code——適合市集、擺攤等行動收款場景。
 
-## 部署
+### 深色模式
 
-部署至 GitHub Pages，搭配自定義網域。
+支援淺色、深色與跟隨系統三種顯示模式。
 
-- 自動部署：push to `main` 觸發 `.github/workflows/deploy.yml`
-- `public/CNAME` 確保每次部署後自定義網域不被重置
-- `public/404.html` 處理 GitHub Pages SPA 路由（直接進入子路徑 / 重新整理）
+## 隱私與安全
 
-## 銀行資料更新策略
+| | |
+|---|---|
+| **資料在哪裡** | 所有帳戶資料只儲存在你的裝置上，不會傳到任何伺服器 |
+| **分享連結** | 使用 AES-256-GCM 端對端加密，解密金鑰保留在 URL 片段中（不會傳送至伺服器） |
+| **密碼保護** | 可為分享連結設定密碼，採用 PBKDF2 600,000 次迭代防止暴力破解 |
+| **連結有效期** | 可設定 10 分鐘、1 小時或 1 天自動失效 |
+| **開放原始碼** | 程式碼完全公開，歡迎檢視與貢獻 |
 
-- 官方來源：財金資訊股份有限公司 OpenData XML
-	- `https://www.fisc.com.tw/TC/OPENDATA/Comm1_MEMBER.xml`
-- 擷取範圍：`跨行自動化服務機器業務(金融卡)`（收款情境較不會出現意外選項）
-- 自動更新：透過 GitHub Actions 每日排程更新一次
-	- Workflow：`.github/workflows/update-banks.yml`
-	- 排程：每日 `00:00 UTC`（台灣時間 `08:00`）
-- 產出檔案：
-	- `src/data/banks.generated.ts`（App 內建資料，離線可用）
-	- `public/data/banks.latest.json`（可對外檢視版本）
-- 手動更新指令：`npm run update:banks`
+## 常見問題
 
-## 銀行清單生命週期
+<details>
+<summary><strong>這跟台灣 Pay App 有什麼不同？</strong></summary>
 
-- 啟動 App 時：先使用內建銀行清單，確保離線可立即使用。
-- 有網路時：背景抓取 `/data/banks.latest.json`，成功後即更新 App 清單與本機快取。
-- 重新連網時：自動再次同步，降低長時間離線造成的資料落差。
-- 無網路或抓取失敗時：維持既有清單，不中斷收款操作。
+OpenTWQR 只負責「產生收款 QR Code」，讓對方用自己的銀行 App 掃碼付款。它不是一個支付 App，不會處理金流，也不需要你登入任何銀行帳號。
+</details>
 
-## 開發指令
+<details>
+<summary><strong>對方需要安裝 OpenTWQR 嗎？</strong></summary>
+
+不需要。對方只要用任何支援台灣 Pay（TWQR）的銀行 App 掃描 QR Code 就能轉帳。
+</details>
+
+<details>
+<summary><strong>我的資料安全嗎？</strong></summary>
+
+所有帳戶資料完全儲存在你的裝置上（瀏覽器的 IndexedDB），不會上傳到伺服器。分享連結採用端對端加密，即使連結經過伺服器，伺服器也看不到你的帳戶資訊。
+</details>
+
+<details>
+<summary><strong>銀行清單多久更新一次？</strong></summary>
+
+銀行清單資料來自財金資訊股份有限公司的公開資料，每日自動更新。App 內建清單確保離線也能使用。
+</details>
+
+<details>
+<summary><strong>支援哪些瀏覽器？</strong></summary>
+
+支援所有主流瀏覽器，包括 Chrome、Safari、Edge、Firefox。在 iOS Safari 或 Android Chrome 上可安裝為 PWA App。
+</details>
+
+## 開發
 
 ```bash
-npm install
-npm run dev
-npm run lint
-npm run build
-npm run preview
+npm install     # 安裝依賴
+npm run dev     # 啟動開發伺服器
+npm run build   # 建置生產版本
+npm run lint    # 程式碼檢查
 ```
 
-## 技術堆疊
+## 授權
 
-- React 19 + TypeScript + Vite
-- Tailwind CSS（darkMode: class）+ tailwindcss-animate
-- React Router（含 View Transitions）
-- Zustand（含 persist middleware → IndexedDB / localStorage）
-- qrcode.react（memo 包裝避免多餘 re-render）
-- Lucide React（圖示）
-- vite-plugin-pwa
-
-## 專案結構
-
-- `src/pages/`：主要頁面（收款頁 / 帳戶管理頁 / 加密分享連結頁）
-- `src/components/`：UI 元件（QR 顯示、金額鍵盤、帳戶卡片、銀行選擇器、主題切換）
-- `src/hooks/`：自訂 Hooks（動畫切換、動畫退場、焦點陷阱、滾動鎖定）
-- `src/stores/`：狀態管理與持久化（帳戶→IndexedDB、銀行清單→IndexedDB、主題→localStorage）
-- `src/utils/twqr.ts`：TWQRP 產生邏輯
-- `src/utils/share.ts`：加密分享連結的建立與解析（AES-256-GCM + PBKDF2）
-- `src/utils/haptics.ts`：觸覺反饋（`navigator.vibrate`）
-- `src/utils/qrImage.ts`：QR Code SVG → PNG 轉換與下載
-- `src/data/`：銀行清單（內建 + 自動產生）
-- `src/types/`：TypeScript 型別定義（含 `ShareData`、`ShareOptions`、`ExpiryOption`、`ParseShareResult` 等介面）
+本專案為開放原始碼。

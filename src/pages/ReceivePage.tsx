@@ -11,11 +11,9 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { haptic } from '../utils/haptics';
 
 export const ReceivePage = () => {
-  const [amount, setAmount] = useState<string>('');
-  const [note, setNote] = useState<string>('');
+  const { accounts, selectedAccountId, isHydrated, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const { accounts, selectedAccountId, isHydrated } = useAppStore();
   const banks = useBanksStore((state) => state.banks);
   const navigate = useNavigate();
 
@@ -80,7 +78,7 @@ export const ReceivePage = () => {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/accounts', { viewTransition: true })}
+          onClick={() => navigate('/accounts', { viewTransition: true, state: { autoAdd: true } })}
           className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           新增銀行帳戶

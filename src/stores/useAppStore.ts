@@ -8,10 +8,15 @@ interface AppState {
   selectedAccountId: string | null;
   /** Whether the store has been rehydrated from IndexedDB. */
   isHydrated: boolean;
+  /** Transient receive-page state (not persisted). */
+  receiveAmount: string;
+  receiveNote: string;
   addAccount: (account: BankAccount) => void;
   removeAccount: (id: string) => void;
   updateAccount: (id: string, account: Partial<BankAccount>) => void;
   selectAccount: (id: string | null) => void;
+  setReceiveAmount: (amount: string) => void;
+  setReceiveNote: (note: string) => void;
   isDuplicate: (bankCode: string, accountNumber: string, excludeId?: string) => boolean;
 }
 
@@ -21,6 +26,8 @@ export const useAppStore = create<AppState>()(
       accounts: [],
       selectedAccountId: null,
       isHydrated: false,
+      receiveAmount: '',
+      receiveNote: '',
       addAccount: (account) =>
         set((state) => ({
           accounts: [...state.accounts, account],
@@ -44,6 +51,8 @@ export const useAppStore = create<AppState>()(
           accounts: state.accounts.map((a) => (a.id === id ? { ...a, ...updatedAccount } : a)),
         })),
       selectAccount: (id) => set({ selectedAccountId: id }),
+      setReceiveAmount: (amount) => set({ receiveAmount: amount }),
+      setReceiveNote: (note) => set({ receiveNote: note }),
       isDuplicate: (bankCode, accountNumber, excludeId) => {
         return get().accounts.some(
           (a) => a.bankCode === bankCode && a.accountNumber === accountNumber && a.id !== excludeId,
