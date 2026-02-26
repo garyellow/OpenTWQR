@@ -1,11 +1,13 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useAppStore } from '../stores/useAppStore';
+import { useAuthStore } from '../stores/useAuthStore';
 import { AccountCard } from '../components/AccountCard';
 import { AccountForm } from '../components/AccountForm';
 import { AnimatedModal } from '../components/AnimatedModal';
-import { Plus, ChevronLeft, Wallet, Trash2 } from 'lucide-react';
+import { Plus, ChevronLeft, Wallet, Trash2, Fingerprint } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import type { BankAccount } from '../types';
+import { isWebAuthnSupported, registerCredential } from '../utils/authLock';
 
 export const AccountsPage = () => {
   const { accounts, addAccount, removeAccount, updateAccount, selectAccount, selectedAccountId } =
@@ -27,6 +29,29 @@ export const AccountsPage = () => {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  /* ---------- App lock setting ---------- */
+  const authEnabled = useAuthStore((s) => s.isEnabled);
+  const enableAuth = useAuthStore((s) => s.enable);
+  const disableAuth = useAuthStore((s) => s.disable);
+  const [webAuthnAvailable, setWebAuthnAvailable] = useState<boolean | null>(null);
+  const [authBusy, setAuthBusy] = useState(false);
+
+  useEffect(() => {
+    isWebAuthnSupported().then(setWebAuthnAvailable);
+  }, []);
+
+  const handleToggleLock = useCallback(async () => {
+    if (authBusy) return;
+    if (authEnabled) {
+      disableAuth();
+      return;
+    }
+    setAuthBusy(true);
+    const credentialId = await registerCredential();
+    if (credentialId) enableAuth(credentialId);
+    setAuthBusy(false);
+  }, [authEnabled, authBusy, enableAuth, disableAuth]);
 
   const closeFormModal = useCallback(() => {
     setIsAdding(false);
@@ -112,23 +137,71 @@ export const AccountsPage = () => {
             </button>
           </div>
         ) : (
-          <div className="grid gap-4 pb-24">
-            {sortedAccounts.map((account) => (
-              <AccountCard
-                key={account.id}
-                account={account}
-                isSelected={selectedAccountId === account.id}
-                onSelect={() => handleSelect(account.id)}
-                onDelete={(e) => {
-                  e.stopPropagation();
-                  setDeletingId(account.id);
-                }}
-                onEdit={(e) => {
-                  e.stopPropagation();
-                  setEditingId(account.id);
-                }}
-              />
-            ))}
+          <div className="space-y-8 pb-24">
+            <div className="grid gap-4">
+              {sortedAccounts.map((account) => (
+                <AccountCard
+                  key={account.id}
+                  account={account}
+                  isSelected={selectedAccountId === account.id}
+                  onSelect={() => handleSelect(account.id)}
+                  onDelete={(e) => {
+                    e.stopPropagation();
+                    setDeletingId(account.id);
+                  }}
+                  onEdit={(e) => {
+                    e.stopPropagation();
+                    setEditingId(account.id);
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* ---------- Settings ---------- */}
+            {webAuthnAvailable && (
+              <div>
+                <h2 className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-1 mb-3">
+                  安全性
+                </h2>
+                <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={handleToggleLock}
+                    disabled={authBusy}
+                    className="w-full flex items-center justify-between p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-60"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                        <Fingerprint size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">App 鎖定</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                          使用生物辨識保護帳戶資料
+                        </p>
+                      </div>
+                    </div>
+                    {/* Toggle switch */}
+                    <div
+                      role="switch"
+                      aria-checked={authEnabled}
+                      aria-label="App 鎖定"
+                      className={`relative shrink-0 w-[44px] h-[26px] rounded-full transition-colors duration-200 ${
+                        authEnabled
+                          ? 'bg-green-500 dark:bg-green-500'
+                          : 'bg-zinc-300 dark:bg-zinc-600'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-[3px] w-[20px] h-[20px] bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                          authEnabled ? 'translate-x-[21px]' : 'translate-x-[3px]'
+                        }`}
+                      />
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

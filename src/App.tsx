@@ -1,7 +1,9 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme } from './stores/useThemeStore';
+import { useAuthStore } from './stores/useAuthStore';
+import { AuthLockScreen } from './components/AuthLockScreen';
 import { ReloadPrompt } from './components/ReloadPrompt';
 import { InstallPrompt } from './components/InstallPrompt';
 
@@ -18,6 +20,37 @@ const SharedPage = lazy(() =>
 function App() {
   const refreshBanks = useBanksStore((state) => state.refreshBanks);
   const mode = useThemeStore((state) => state.mode);
+
+  /* ---------- Auth lock state ---------- */
+  const location = useLocation();
+  const isSharedPage = location.pathname.startsWith('/s/');
+  const authHydrated = useAuthStore((s) => s.isHydrated);
+  const authEnabled = useAuthStore((s) => s.isEnabled);
+  const authUnlocked = useAuthStore((s) => s.isUnlocked);
+  const lock = useAuthStore((s) => s.lock);
+
+  const showLockScreen = authEnabled && !authUnlocked && !isSharedPage && authHydrated;
+
+  /* ---------- Auto-lock on visibility change ---------- */
+  const hiddenAtRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!authEnabled) return;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAtRef.current = Date.now();
+      } else if (document.visibilityState === 'visible' && hiddenAtRef.current !== null) {
+        const elapsed = Date.now() - hiddenAtRef.current;
+        hiddenAtRef.current = null;
+        // Re-lock after 10 seconds in the background
+        if (elapsed > 10_000) lock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [authEnabled, lock]);
 
   useEffect(() => {
     applyTheme(mode);
@@ -50,14 +83,20 @@ function App() {
 
   return (
     <>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<ReceivePage />} />
-          <Route path="/accounts" element={<AccountsPage />} />
-          <Route path="/s/:data" element={<SharedPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+      {!authHydrated && !isSharedPage ? (
+        <PageLoader />
+      ) : showLockScreen ? (
+        <AuthLockScreen />
+      ) : (
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<ReceivePage />} />
+            <Route path="/accounts" element={<AccountsPage />} />
+            <Route path="/s/:data" element={<SharedPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      )}
       <ReloadPrompt />
       <InstallPrompt />
     </>
