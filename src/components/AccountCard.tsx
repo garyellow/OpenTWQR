@@ -25,19 +25,23 @@ export const AccountCard = ({
 
   return (
     <article
-      className={`relative min-w-0 p-5 rounded-2xl transition-all border cursor-pointer group ${
+      className={`relative min-w-0 p-5 rounded-2xl transition-all border ${
         isSelected
           ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 shadow-md'
           : 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
       }`}
     >
+      {/* Full-card tap target */}
       <button
         type="button"
         onClick={onSelect}
         aria-pressed={isSelected}
         aria-label={`選擇 ${displayName} 帳戶`}
-        className="min-w-0 w-full text-left pr-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 rounded-xl"
-      >
+        className="absolute inset-0 w-full h-full rounded-2xl cursor-pointer z-[1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+      />
+
+      {/* Card content */}
+      <div className="relative pr-24 pointer-events-none">
         <div className="flex items-center gap-3 mb-1 min-w-0">
           {isSelected && (
             <div className="w-6 h-6 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0">
@@ -63,19 +67,19 @@ export const AccountCard = ({
               {bankName}
             </span>
           )}
-          <span className={`text-xs font-mono shrink-0 px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-white/15 dark:bg-black/8' : 'bg-zinc-100 dark:bg-zinc-800/50'}`}>
+          <span className={`text-xs font-mono shrink-0 px-1.5 py-0.5 rounded-md leading-none inline-flex items-center ${isSelected ? 'bg-white/15 dark:bg-black/8' : 'bg-zinc-100 dark:bg-zinc-800/50'}`}>
             {account.bankCode}
           </span>
         </div>
-      </button>
+      </div>
 
-      <div className="absolute top-4 right-4 flex gap-1.5">
+      <div className="absolute top-4 right-4 flex gap-1.5 z-10">
         {onEdit && (
           <button
             type="button"
             aria-label="編輯帳戶"
             onClick={onEdit}
-            className={`p-2.5 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
+            className={`p-2.5 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
               isSelected
                 ? 'text-white/70 hover:text-white hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-zinc-900 dark:hover:bg-black/10'
                 : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800'
@@ -89,7 +93,7 @@ export const AccountCard = ({
             type="button"
             aria-label="刪除帳戶"
             onClick={onDelete}
-            className={`p-2.5 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+            className={`p-2.5 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               isSelected
                 ? 'text-white/70 hover:text-red-300 hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-red-600 dark:hover:bg-black/10'
                 : 'text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10'

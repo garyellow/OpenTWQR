@@ -4,14 +4,27 @@ import { AccountCard } from '../components/AccountCard';
 import { AccountForm } from '../components/AccountForm';
 import { AnimatedModal } from '../components/AnimatedModal';
 import { Plus, ChevronLeft, Wallet, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import type { BankAccount } from '../types';
 
 export const AccountsPage = () => {
   const { accounts, addAccount, removeAccount, updateAccount, selectAccount, selectedAccountId } =
     useAppStore();
   const navigate = useNavigate();
-  const [isAdding, setIsAdding] = useState(false);
+  const location = useLocation();
+
+  /* Auto-open add form when navigated with autoAdd state (e.g. from empty ReceivePage).
+     Derive initial value from location.state so no effect / setState is needed. */
+  const [isAdding, setIsAdding] = useState(() => {
+    const state = location.state as { autoAdd?: boolean } | null;
+    if (state?.autoAdd) {
+      // Clear only the user state; preserve React Router's internal keys (key, idx)
+      const hs = window.history.state;
+      window.history.replaceState(hs ? { ...hs, usr: undefined } : {}, '');
+      return true;
+    }
+    return false;
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 

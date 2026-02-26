@@ -140,7 +140,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                     >
                       <span className="font-medium truncate text-base">{bank.name}</span>
                       <span
-                        className={`font-mono text-sm px-2.5 py-1 rounded-lg shrink-0 ml-3 ${
+                        className={`font-mono text-sm px-2.5 py-1 rounded-lg shrink-0 ml-3 leading-none inline-flex items-center ${
                           value === bank.code
                             ? 'bg-white/20 dark:bg-black/10 text-white dark:text-zinc-900'
                             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'

@@ -273,7 +273,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           <div className="space-y-2.5 w-full">
             {amount != null && amount > 0 ? (
               <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-2xl font-semibold text-emerald-500 dark:text-emerald-400">NT$</span>
+                <span className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">NT$</span>
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatAmount(amount)}
                 </span>
