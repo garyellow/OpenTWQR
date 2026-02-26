@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme } from './stores/useThemeStore';
 import { ReloadPrompt } from './components/ReloadPrompt';
+import { InstallPrompt } from './components/InstallPrompt';
 
 const ReceivePage = lazy(() =>
   import('./pages/ReceivePage').then((m) => ({ default: m.ReceivePage })),
@@ -58,6 +59,7 @@ function App() {
         </Routes>
       </Suspense>
       <ReloadPrompt />
+      <InstallPrompt />
     </>
   );
 }

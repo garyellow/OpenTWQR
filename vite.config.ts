@@ -46,12 +46,18 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait',
+        dir: 'ltr',
         lang: 'zh-TW',
         categories: ['finance', 'utilities'],
         prefer_related_applications: false,
         launch_handler: {
           client_mode: 'navigate-existing',
         },
+        // Chromium 121+: prefer opening in-scope links in the installed
+        // PWA instead of the browser. Browsers that don't support this
+        // member will silently ignore it.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...({ handle_links: 'preferred' } as any),
         icons: [
           {
             src: 'pwa-192x192.svg',
@@ -88,17 +94,31 @@ export default defineConfig({
         screenshots: [
           {
             src: 'screenshots/receive-light.png',
-            sizes: '390x844',
+            sizes: '780x1688',
             type: 'image/png',
             form_factor: 'narrow',
             label: '收款頁面',
           },
           {
             src: 'screenshots/receive-dark.png',
-            sizes: '390x844',
+            sizes: '780x1688',
             type: 'image/png',
             form_factor: 'narrow',
             label: '收款頁面（深色模式）',
+          },
+          {
+            src: 'screenshots/receive-desktop-light.png',
+            sizes: '2560x1600',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: '收款頁面（桌面版）',
+          },
+          {
+            src: 'screenshots/receive-desktop-dark.png',
+            sizes: '2560x1600',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: '收款頁面（桌面版深色模式）',
           },
         ],
       },
