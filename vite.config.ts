@@ -90,6 +90,11 @@ export default defineConfig({
             short_name: '帳戶',
             url: '/accounts',
           },
+          {
+            name: '設定',
+            short_name: '設定',
+            url: '/settings',
+          },
         ],
         screenshots: [
           {

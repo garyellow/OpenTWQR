@@ -1,7 +1,7 @@
-import type { BankAccount } from '../types';
+import type { BankAccount } from '../../types';
 import { Trash2, Pencil, Check } from 'lucide-react';
-import { useBanksStore } from '../stores/useBanksStore';
-import { maskAccount } from '../utils/twqr';
+import { useBanksStore } from '../../stores/useBanksStore';
+import { maskAccount } from '../../utils/twqr';
 
 interface AccountCardProps {
   account: BankAccount;

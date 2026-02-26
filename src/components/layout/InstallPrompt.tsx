@@ -1,5 +1,5 @@
 import { Download, X, Share } from 'lucide-react';
-import { useInstallPrompt } from '../hooks/useInstallPrompt';
+import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 import { useLocation } from 'react-router-dom';
 
 /**

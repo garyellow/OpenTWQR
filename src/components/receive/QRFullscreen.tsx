@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { formatAmount } from '../../utils/twqr';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useDelayedClose } from '../../hooks/useDelayedClose';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);
-import { formatAmount } from '../utils/twqr';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useDelayedClose } from '../hooks/useDelayedClose';
 
 interface QRFullscreenProps {
   value: string;

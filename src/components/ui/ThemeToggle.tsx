@@ -1,5 +1,5 @@
 import { Sun, Moon, Monitor } from 'lucide-react';
-import { useThemeStore } from '../stores/useThemeStore';
+import { useThemeStore } from '../../stores/useThemeStore';
 
 const MODES = ['system', 'light', 'dark'] as const;
 type ThemeMode = (typeof MODES)[number];

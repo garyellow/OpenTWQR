@@ -1,7 +1,7 @@
 import { useRef, type AnimationEvent } from 'react';
 import { X, Clipboard, Link2, Lock, Clock, Loader2 } from 'lucide-react';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import type { ExpiryOption } from '../types';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import type { ExpiryOption } from '../../types';
 
 interface LinkSettingsDialogProps {
   isClosing: boolean;

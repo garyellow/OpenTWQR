@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Lock, Fingerprint, AlertCircle } from 'lucide-react';
-import { useAuthStore } from '../stores/useAuthStore';
-import { authenticate } from '../utils/authLock';
-import { haptic } from '../utils/haptics';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { authenticate } from '../../utils/authLock';
+import { haptic } from '../../utils/haptics';
 
 /**
  * Full-screen lock screen shown when the app requires biometric

@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { useDelayedClose } from '../hooks/useDelayedClose';
-import { useAnimatedToggle } from '../hooks/useAnimatedToggle';
+import { useDelayedClose } from '../../hooks/useDelayedClose';
+import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { X, Share2, Check, Eye, EyeOff, Copy } from 'lucide-react';
-import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../utils/twqr';
-import { buildShareUrl } from '../utils/share';
-import { svgToBlob, downloadBlob } from '../utils/qrImage';
-import { haptic } from '../utils/haptics';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useScrollLock } from '../hooks/useScrollLock';
+import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
+import { buildShareUrl } from '../../utils/share';
+import { svgToBlob, downloadBlob } from '../../utils/qrImage';
+import { haptic } from '../../utils/haptics';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { QRFullscreen } from './QRFullscreen';
-import { ShareMenu } from './ShareMenu';
-import { LinkSettingsDialog } from './LinkSettingsDialog';
-import type { ShareData, ExpiryOption } from '../types';
+import { ShareMenu } from '../share/ShareMenu';
+import { LinkSettingsDialog } from '../share/LinkSettingsDialog';
+import type { ShareData, ExpiryOption } from '../../types';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);

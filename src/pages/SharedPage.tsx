@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { QRDisplay } from '../components/QRDisplay';
+import { QRDisplay } from '../components/receive/QRDisplay';
 import { parseShareUrl } from '../utils/share';
 import { generateTWQR } from '../utils/twqr';
 import { useBanksStore } from '../stores/useBanksStore';

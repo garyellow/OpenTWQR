@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
-import { useDelayedClose } from '../hooks/useDelayedClose';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useScrollLock } from '../hooks/useScrollLock';
+import { useDelayedClose } from '../../hooks/useDelayedClose';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface AnimatedModalProps {
   /** Called after the exit animation completes to remove the modal from the tree. */

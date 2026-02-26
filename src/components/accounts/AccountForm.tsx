@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { BankSelect } from './BankSelect';
-import { useAppStore } from '../stores/useAppStore';
-import type { BankAccount } from '../types';
-import { isValidAccount } from '../utils/twqr';
+import { useAppStore } from '../../stores/useAppStore';
+import type { BankAccount } from '../../types';
+import { isValidAccount } from '../../utils/twqr';
 import { AlertCircle } from 'lucide-react';
 
 interface AccountFormProps {

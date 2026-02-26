@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { Search, X, ChevronDown, Building2 } from 'lucide-react';
-import { useBanksStore } from '../stores/useBanksStore';
-import { AnimatedModal } from './AnimatedModal';
+import { useBanksStore } from '../../stores/useBanksStore';
+import { AnimatedModal } from '../ui/AnimatedModal';
 
 interface BankSelectProps {
   value: string;

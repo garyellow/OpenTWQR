@@ -1,19 +1,21 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAppStore } from '../stores/useAppStore';
-import { AmountInput } from '../components/AmountInput';
-import { QRDisplay } from '../components/QRDisplay';
-import { AnimatedModal } from '../components/AnimatedModal';
+import { AmountInput } from '../components/receive/AmountInput';
+import { QRDisplay } from '../components/receive/QRDisplay';
+import { AnimatedModal } from '../components/ui/AnimatedModal';
+import { ImportDialog } from '../components/settings/BackupSection';
 import { generateTWQR, maskAccount } from '../utils/twqr';
-import { Wallet, QrCode, ChevronRight, MessageSquare, X } from 'lucide-react';
+import { Wallet, QrCode, ChevronRight, MessageSquare, X, Settings, Download } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { haptic } from '../utils/haptics';
 
 export const ReceivePage = () => {
   const { accounts, selectedAccountId, isHydrated, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const banks = useBanksStore((state) => state.banks);
   const navigate = useNavigate();
 
@@ -76,13 +78,24 @@ export const ReceivePage = () => {
             新增銀行帳戶即可開始產生收款 QR Code。
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => navigate('/accounts', { viewTransition: true, state: { autoAdd: true } })}
-          className="w-full max-w-xs py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-        >
-          新增銀行帳戶
-        </button>
+        <div className="w-full max-w-xs space-y-3 mt-4">
+          <button
+            type="button"
+            onClick={() => navigate('/accounts', { viewTransition: true, state: { autoAdd: true } })}
+            className="w-full py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+          >
+            新增銀行帳戶
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowImport(true)}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-lg"
+          >
+            <Download size={20} aria-hidden="true" />
+            匯入帳戶
+          </button>
+        </div>
+        {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
       </div>
     );
   }
@@ -101,7 +114,17 @@ export const ReceivePage = () => {
         {/* Header */}
         <header className="shrink-0 flex justify-between items-center p-5 pt-[calc(1.25rem+env(safe-area-inset-top))]">
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">收款</h1>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Link
+              to="/settings"
+              viewTransition
+              aria-label="設定"
+              className="p-2.5 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <Settings size={20} aria-hidden="true" />
+            </Link>
+          </div>
         </header>
 
         {/* Account selector */}

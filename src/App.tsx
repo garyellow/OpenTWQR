@@ -3,15 +3,18 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme } from './stores/useThemeStore';
 import { useAuthStore } from './stores/useAuthStore';
-import { AuthLockScreen } from './components/AuthLockScreen';
-import { ReloadPrompt } from './components/ReloadPrompt';
-import { InstallPrompt } from './components/InstallPrompt';
+import { AuthLockScreen } from './components/auth/AuthLockScreen';
+import { ReloadPrompt } from './components/layout/ReloadPrompt';
+import { InstallPrompt } from './components/layout/InstallPrompt';
 
 const ReceivePage = lazy(() =>
   import('./pages/ReceivePage').then((m) => ({ default: m.ReceivePage })),
 );
 const AccountsPage = lazy(() =>
   import('./pages/AccountsPage').then((m) => ({ default: m.AccountsPage })),
+);
+const SettingsPage = lazy(() =>
+  import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
 const SharedPage = lazy(() =>
   import('./pages/SharedPage').then((m) => ({ default: m.SharedPage })),
@@ -27,6 +30,7 @@ function App() {
   const authHydrated = useAuthStore((s) => s.isHydrated);
   const authEnabled = useAuthStore((s) => s.isEnabled);
   const authUnlocked = useAuthStore((s) => s.isUnlocked);
+  const lockTimeout = useAuthStore((s) => s.lockTimeout);
   const lock = useAuthStore((s) => s.lock);
 
   const showLockScreen = authEnabled && !authUnlocked && !isSharedPage && authHydrated;
@@ -43,14 +47,14 @@ function App() {
       } else if (document.visibilityState === 'visible' && hiddenAtRef.current !== null) {
         const elapsed = Date.now() - hiddenAtRef.current;
         hiddenAtRef.current = null;
-        // Re-lock after 10 seconds in the background
-        if (elapsed > 10_000) lock();
+        // Re-lock after configured timeout in the background
+        if (elapsed > lockTimeout) lock();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [authEnabled, lock]);
+  }, [authEnabled, lock, lockTimeout]);
 
   useEffect(() => {
     applyTheme(mode);
@@ -92,6 +96,7 @@ function App() {
           <Routes>
             <Route path="/" element={<ReceivePage />} />
             <Route path="/accounts" element={<AccountsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/s/:data" element={<SharedPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
