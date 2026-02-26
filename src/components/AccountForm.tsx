@@ -85,7 +85,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           htmlFor="account-label"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          帳戶名稱（選填）
+          帳戶暱稱（選填）
         </label>
         <input
           id="account-label"

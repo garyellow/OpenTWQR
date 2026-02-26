@@ -20,6 +20,8 @@ export const AccountCard = ({
 }: AccountCardProps) => {
   const banks = useBanksStore((state) => state.banks);
   const bankName = banks.find((b) => b.code === account.bankCode)?.name || account.bankCode;
+  const displayName = account.label || bankName;
+  const showBankSubtitle = Boolean(account.label);
 
   return (
     <article
@@ -33,10 +35,10 @@ export const AccountCard = ({
         type="button"
         onClick={onSelect}
         aria-pressed={isSelected}
-        aria-label={`選擇 ${bankName} 帳戶`}
+        aria-label={`選擇 ${displayName} 帳戶`}
         className="min-w-0 w-full text-left pr-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 rounded-xl"
       >
-        <div className="flex items-center gap-3 mb-3 min-w-0">
+        <div className="flex items-center gap-3 mb-1 min-w-0">
           {isSelected && (
             <div className="w-6 h-6 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0">
               <Check
@@ -47,22 +49,24 @@ export const AccountCard = ({
             </div>
           )}
           <h3 className={`font-semibold truncate text-lg ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'}`}>
-            {bankName}
+            {displayName}
           </h3>
-          <span className={`text-xs font-mono shrink-0 px-2 py-0.5 rounded-md ${isSelected ? 'bg-white/20 dark:bg-black/10 text-white dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400'}`}>
-            {account.bankCode}
-          </span>
         </div>
 
-        <p className={`font-mono text-base tracking-widest ${isSelected ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-700 dark:text-zinc-300'}`}>
+        <p className={`font-mono text-base tracking-widest mt-2 ${isSelected ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-700 dark:text-zinc-300'}`}>
           {maskAccount(account.accountNumber)}
         </p>
 
-        {account.label && (
-          <p className={`text-sm mt-2 truncate ${isSelected ? 'text-white/70 dark:text-zinc-900/70' : 'text-zinc-500 dark:text-zinc-400'}`}>
-            {account.label}
-          </p>
-        )}
+        <div className={`flex items-center gap-2 mt-2 ${isSelected ? 'text-white/60 dark:text-zinc-900/60' : 'text-zinc-400 dark:text-zinc-500'}`}>
+          {showBankSubtitle && (
+            <span className="text-sm truncate">
+              {bankName}
+            </span>
+          )}
+          <span className={`text-xs font-mono shrink-0 px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-white/15 dark:bg-black/8' : 'bg-zinc-100 dark:bg-zinc-800/50'}`}>
+            {account.bankCode}
+          </span>
+        </div>
       </button>
 
       <div className="absolute top-4 right-4 flex gap-1.5">

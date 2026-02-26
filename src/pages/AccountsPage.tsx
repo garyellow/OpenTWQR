@@ -174,8 +174,11 @@ export const AccountsPage = () => {
               <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed">
                 此帳戶將永久從此裝置上移除。
               </p>
-              <div className="mt-6 font-mono text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-700/50 text-center">
-                {deletingAccount.bankCode} · {deletingAccount.accountNumber}
+              <div className="mt-6 text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-700/50 text-center space-y-1">
+                {deletingAccount.label && (
+                  <p className="font-semibold text-zinc-800 dark:text-zinc-200">{deletingAccount.label}</p>
+                )}
+                <p className="font-mono">{deletingAccount.bankCode} · {deletingAccount.accountNumber}</p>
               </div>
               <div className="mt-8 flex gap-3">
                 <button

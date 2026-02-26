@@ -123,6 +123,11 @@ export const ReceivePage = () => {
               <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
                 {maskAccount(selectedAccount.accountNumber)}
               </p>
+              {selectedAccount.label && bankName && (
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">
+                  {bankName}（{selectedAccount.bankCode}）
+                </p>
+              )}
             </div>
             <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
               <ChevronRight
