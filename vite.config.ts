@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg', 'pwa-maskable.svg', 'apple-touch-icon.png'],
+      includeAssets: ['pwa-icon.svg', 'pwa-maskable.svg', 'apple-touch-icon.png'],
       workbox: {
         // Ensure SPA routing works offline: any navigation request not
         // matching a precached asset falls back to index.html.
@@ -61,14 +61,8 @@ export default defineConfig({
         ...({ handle_links: 'preferred' } as Record<string, unknown>),
         icons: [
           {
-            src: 'pwa-192x192.svg',
-            sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'any',
-          },
-          {
-            src: 'pwa-512x512.svg',
-            sizes: '512x512',
+            src: 'pwa-icon.svg',
+            sizes: '192x192 512x512',
             type: 'image/svg+xml',
             purpose: 'any',
           },

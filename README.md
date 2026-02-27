@@ -13,10 +13,25 @@
 
 <br />
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
-  <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面" width="320" />
-</picture>
+<table border="0" cellpadding="12" cellspacing="0">
+  <tr>
+    <td align="center" valign="middle">
+      <!-- 電腦版截圖：手機視埠（≤767px）以 1×1 透明 GIF 隱藏，桌面視埠顯示實際截圖 -->
+      <picture>
+        <source media="(max-width: 767px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
+        <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 電腦版畫面" width="480" />
+      </picture>
+    </td>
+    <td align="center" valign="middle">
+      <!-- 手機版截圖：所有視埠皆顯示 -->
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
+        <img src="public/screenshots/receive-light.png" alt="OpenTWQR 手機版畫面" width="240" />
+      </picture>
+    </td>
+  </tr>
+</table>
 
 <br />
 
@@ -28,6 +43,9 @@
 
 > [!TIP]
 > 也可以將網頁加入主畫面，像一般 App 一樣使用，離線也能產生收款碼。
+
+> [!IMPORTANT]
+> **本專案為社群開源專案，與 TWQR 官方（財金資訊股份有限公司）無任何關聯。** OpenTWQR 僅產生符合 TWQR 規格的 QR Code，不涉及任何金流處理。詳細聲明請參閱下方[商標與聲明](#商標與聲明)段落。
 
 ---
 
@@ -103,6 +121,20 @@ OpenTWQR 是純前端應用程式，所有操作都在你的瀏覽器中完成�
 支援所有主流瀏覽器，包括 Chrome、Safari、Edge、Firefox。在 iOS Safari 或 Android Chrome 上可安裝為 PWA App。
 </details>
 
+<details>
+<summary><strong>收款金額有上限嗎？</strong></summary>
+<br />
+
+單筆收款金額上限為 NT$200,000，這是 TWQR 規格所允許的最大值。
+</details>
+
+<details>
+<summary><strong>可以管理幾個帳戶？</strong></summary>
+<br />
+
+沒有硬性上限。帳戶資料儲存在瀏覽器的本機資料庫（IndexedDB），容量遠大於一般使用需求。
+</details>
+
 ## 自行架設
 
 如果你想在自己的 GitHub Pages 上架設 OpenTWQR，可以按照以下步驟操作。
@@ -164,6 +196,13 @@ Fork 後，**刪除**以下兩個檔案（它們指向原作者的自訂網域�
 <a href="https://ko-fi.com/garyellow">
   <img src="https://img.shields.io/badge/Ko--fi-%E8%B4%8A%E5%8A%A9%E9%96%8B%E7%99%BC%E8%80%85-72a4f2?style=for-the-badge&logo=ko-fi&logoColor=white" alt="在 Ko-fi 上贊助開發者" height="36" />
 </a>
+
+## 商標與聲明
+
+- **OpenTWQR** 是一個由社群獨立開發的開放原始碼專案，**與財金資訊股份有限公司及其推出的 TWQR 共通支付標準、台灣 Pay 服務等均無任何隸屬、合作、代理或背書關係。**
+- 應用程式介面中使用了類似 TWQR 標誌的視覺元素，其目的僅為幫助使用者快速辨識所產生的 QR Code 所遵循的格式標準，並非意圖暗示本專案為官方產品或獲得官方授權。
+- 「TWQR」名稱及相關商標權利歸財金資訊股份有限公司所有。如有任何商標疑慮，歡迎透過 [Issue](https://github.com/garyellow/OpenTWQR/issues) 與我們聯繫。
+- 本專案不處理任何金融交易或金流，僅提供 QR Code 產生、顯示與分享功能。使用者因掃描 QR Code 所進行的轉帳行為，均由使用者自行透過各銀行或支付機構完成。
 
 ## 授權
 

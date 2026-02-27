@@ -5,7 +5,7 @@ import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount } from '../utils/twqr';
-import { Wallet, QrCode, ChevronRight, MessageSquare, X, Settings, Download } from 'lucide-react';
+import { QrCode, ChevronRight, MessageSquare, X, Settings, Download } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
@@ -89,12 +89,14 @@ export const ReceivePage = () => {
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-8 bg-zinc-50 dark:bg-zinc-950">
-        <div className="w-24 h-24 rounded-3xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs">
-          <Wallet size={48} className="text-zinc-300 dark:text-zinc-600" aria-hidden="true" />
+      <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
+        <div className="w-24 h-24 rounded-3xl flex items-center justify-center bg-teal-50 dark:bg-teal-950/50 border border-teal-100 dark:border-teal-900/50 shadow-xs">
+          <QrCode size={48} className="text-[#008BBA]" aria-hidden="true" />
         </div>
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">歡迎使用 OpenTWQR</h1>
+        <div className="text-center space-y-4">
+          <h1>
+            <OpenTWQRLogo className="h-9 w-auto mx-auto" />
+          </h1>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
             新增銀行帳戶即可開始產生收款 QR Code。
           </p>
