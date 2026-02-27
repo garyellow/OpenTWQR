@@ -38,7 +38,7 @@ export default defineConfig({
         id: '/',
         name: 'OpenTWQR',
         short_name: 'OpenTWQR',
-        description: '在裝置本地安全產生台灣 Pay（TWQR）個人收款 QR Code。',
+        description: '產生 TWQR 個人收款 QR Code，對方用銀行 App 掃碼即可轉帳。完全免費、無需註冊。',
         start_url: '/',
         scope: '/',
         theme_color: '#ffffff',

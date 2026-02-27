@@ -1,75 +1,104 @@
+<div align="center">
+
 # OpenTWQR
 
 [![Deploy](https://img.shields.io/github/deployments/garyellow/OpenTWQR/github-pages?label=deploy&logo=github)](https://pay.garyellow.app)
 [![License](https://img.shields.io/github/license/garyellow/OpenTWQR)](./LICENSE)
 [![Fork](https://img.shields.io/github/forks/garyellow/OpenTWQR?style=flat&logo=github&logoColor=white)](https://github.com/garyellow/OpenTWQR/fork)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-%E8%B4%8A%E5%8A%A9%E9%96%8B%E7%99%BC%E8%80%85-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/garyellow)
 
-**在你的手機上，即時產生台灣 Pay（TWQR）個人收款 QR Code。**
+**在你的手機上，即時產生 TWQR 個人收款 QR Code。**
 
-完全免費、開放原始碼、不需註冊、不會上傳資料——帳戶資訊只儲存在你自己的裝置上。
+完全免費、開放原始碼、無需註冊——帳戶資料只儲存在你自己的裝置上。
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
-    <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面" width="320" />
-  </picture>
-</p>
+<br />
 
-## 立即使用
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
+  <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面" width="320" />
+</picture>
 
-前往 **[pay.garyellow.app](https://pay.garyellow.app)** 開始使用，無需安裝。
+<br />
 
-> 也可以將網頁「加入主畫面」，就像一般 App 一樣使用，離線也能產生收款碼。
+<a href="https://pay.garyellow.app"><strong>立即使用 →</strong></a>
+
+</div>
+
+<br />
+
+> [!TIP]
+> 也可以將網頁加入主畫面，像一般 App 一樣使用，離線也能產生收款碼。
+
+---
+
+## TWQR 是什麼？
+
+**TWQR（Taiwan QR Code）** 是由財金資訊股份有限公司制定的 QR Code 共通支付標準，統一了國內銀行與電子支付機構的 QR Code 格式。目前大多數銀行的行動銀行 App 都支援掃描 TWQR 格式的 QR Code 進行轉帳付款。
+
+OpenTWQR 能讓你快速產生符合 TWQR 標準的個人收款 QR Code——對方只要用自己的銀行 App 掃碼，就能直接轉帳給你，不需額外安裝任何 App。
+
+> [!NOTE]
+> TWQR 是 QR Code「格式標準」，而台灣 Pay 是財金公司推出的「支付 App」，兩者並不相同。OpenTWQR 產生的 QR Code 可被所有支援 TWQR 的銀行 App 及電子支付 App 掃描，不限於台灣 Pay。
 
 ## 功能特色
 
-- **快速收款** — 新增銀行帳戶、輸入金額、產生 QR Code，讓對方用任何支援台灣 Pay 的銀行 App 掃碼轉帳
-- **多帳戶管理** — 支援多組銀行帳戶，可設定暱稱並一鍵切換
-- **安全分享** — 透過端對端加密連結分享收款碼，可設定密碼與有效期
-- **備份與匯入** — 帳戶資料可匯出為加密字串，輕鬆轉移至其他裝置
-- **離線可用** — 安裝為 App 後，無需網路也能產生收款 QR Code
-- **深色模式** — 淺色、深色與跟隨系統三種顯示模式
-- **App 鎖定** — 透過裝置驗證（Face ID、指紋、PIN 等）保護帳戶資料
-- **鍵盤快捷鍵** — 桌面版可用數字鍵輸入金額，按 Enter 產生 QR Code
+- **快速收款** — 選擇帳戶、輸入金額，一鍵產生收款 QR Code
+- **多帳戶管理** — 支援多組銀行帳戶，設定暱稱快速切換
+- **安全分享** — 透過加密連結分享收款碼，可設密碼與有效期限
+- **備份與轉移** — 匯出加密備份字串，輕鬆轉移至其他裝置
+- **離線可用** — 可安裝為 App，無需網路也能產生收款碼
+- **深色模式與 App 鎖定** — 淺色 / 深色 / 跟隨系統三種模式，可啟用裝置驗證（Face ID、指紋等）保護帳戶資料
 
 ## 隱私與安全
 
 | | |
-|---|---|
-| **資料在哪裡** | 所有帳戶資料只儲存在你的裝置上，不會傳到任何伺服器 |
-| **分享連結** | 使用 AES-256-GCM 端對端加密，解密金鑰保留在 URL 片段中（不會傳送至伺服器） |
-| **密碼保護** | 可為分享連結設定密碼，採用 PBKDF2 600,000 次迭代防止暴力破解 |
-| **連結有效期** | 可設定 10 分鐘、1 小時或 1 天自動失效 |
-| **開放原始碼** | 程式碼完全公開，歡迎檢視與貢獻 |
+| :--- | :--- |
+| **資料儲存** | 所有帳戶資料僅儲存在你的裝置上，不會傳送至任何伺服器。 |
+| **分享連結** | 使用 AES-256-GCM 端對端加密，解密金鑰保留在 URL 片段中，不會經過伺服器。 |
+| **密碼保護** | 可為分享連結設定密碼，採用 PBKDF2 600,000 次迭代防止暴力破解。 |
+| **連結有效期** | 可設定 10 分鐘、1 小時或 1 天自動失效。 |
+| **開放原始碼** | 程式碼完全公開，歡迎檢視與貢獻。 |
 
 ## 常見問題
 
 <details>
 <summary><strong>這跟台灣 Pay App 有什麼不同？</strong></summary>
+<br />
 
-OpenTWQR 只負責「產生收款 QR Code」，讓對方用自己的銀行 App 掃碼付款。它不是一個支付 App，不會處理金流，也不需要你登入任何銀行帳號。
+台灣 Pay 是財金公司推出的支付 App，可用於購物、轉帳、繳費等。OpenTWQR 則只負責「產生收款 QR Code」，讓對方用自己的銀行 App 掃碼轉帳——它不是支付 App，不會處理任何金流，也不需要你登入銀行帳號。
 </details>
 
 <details>
 <summary><strong>對方需要安裝 OpenTWQR 嗎？</strong></summary>
+<br />
 
-不需要。對方只要用任何支援台灣 Pay（TWQR）的銀行 App 掃描 QR Code 就能轉帳。
+不需要。對方只要用任何支援 TWQR 的銀行 App 或電子支付 App 掃描 QR Code，就能完成轉帳。
 </details>
 
 <details>
 <summary><strong>我的資料安全嗎？</strong></summary>
+<br />
 
-所有帳戶資料完全儲存在你的裝置上（瀏覽器的 IndexedDB），不會上傳到伺服器。分享連結採用端對端加密，即使連結經過伺服器，伺服器也看不到你的帳戶資訊。
+所有帳戶資料完全儲存在你的裝置上（瀏覽器的 IndexedDB），不會上傳至伺服器。分享連結採用端對端加密，即使連結經由伺服器傳遞，伺服器也無法取得你的帳戶資訊。
+</details>
+
+<details>
+<summary><strong>為什麼不需要後端伺服器？</strong></summary>
+<br />
+
+OpenTWQR 是純前端應用程式，所有操作都在你的瀏覽器中完成。帳戶資料儲存在瀏覽器的本機資料庫，QR Code 在裝置上即時運算產生，加密與解密也在瀏覽器端執行。伺服器只負責提供網頁檔案本身，完全不接觸任何使用者資料。
 </details>
 
 <details>
 <summary><strong>銀行清單多久更新一次？</strong></summary>
+<br />
 
-銀行清單資料來自財金資訊股份有限公司的公開資料，每日自動更新。App 內建清單確保離線也能使用。
+銀行清單資料來自財金資訊股份有限公司的公開資料，每日自動更新。App 內建清單確保離線時也能正常使用。
 </details>
 
 <details>
 <summary><strong>支援哪些瀏覽器？</strong></summary>
+<br />
 
 支援所有主流瀏覽器，包括 Chrome、Safari、Edge、Firefox。在 iOS Safari 或 Android Chrome 上可安裝為 PWA App。
 </details>
@@ -109,7 +138,8 @@ Fork 後，**刪除**以下兩個檔案（它們指向原作者的自訂網域�
 
 部署完成後，你的網站將會在 `https://<你的帳號>.github.io/OpenTWQR/` 上線。
 
-> **注意**：如果你的 Fork 使用子路徑（如 `/OpenTWQR/`），你需要在 `vite.config.ts` 中設定 `base: '/OpenTWQR/'`，否則靜態資源的路徑會不正確。
+> [!WARNING]
+> 如果你的 Fork 使用子路徑（如 `/OpenTWQR/`），你需要在 `vite.config.ts` 中設定 `base: '/OpenTWQR/'`，否則靜態資源的路徑會不正確。
 
 ### 5.（選用）設定自訂網域
 
@@ -122,6 +152,18 @@ Fork 後，**刪除**以下兩個檔案（它們指向原作者的自訂網域�
 使用自訂網域時，`vite.config.ts` 的 `base` 選項應維持預設值 `'/'`。
 
 </details>
+
+## 貢獻
+
+歡迎開 [Issue](https://github.com/garyellow/OpenTWQR/issues) 回報問題或提出建議，也歡迎直接發送 [Pull Request](https://github.com/garyellow/OpenTWQR/pulls)。
+
+## 贊助
+
+如果 OpenTWQR 對你有幫助，歡迎請我喝杯咖啡 ☕
+
+<a href="https://ko-fi.com/garyellow">
+  <img src="https://img.shields.io/badge/Ko--fi-%E8%B4%8A%E5%8A%A9%E9%96%8B%E7%99%BC%E8%80%85-72a4f2?style=for-the-badge&logo=ko-fi&logoColor=white" alt="在 Ko-fi 上贊助開發者" height="36" />
+</a>
 
 ## 授權
 
