@@ -159,7 +159,7 @@ Fork 後，**刪除**以下兩個檔案（它們指向原作者的自訂網域�
 
 ## 贊助
 
-如果 OpenTWQR 對你有幫助，歡迎請我喝杯咖啡 ☕
+覺得好用的話，餵我的 AI 一點 Token 吧 🤖✨
 
 <a href="https://ko-fi.com/garyellow">
   <img src="https://img.shields.io/badge/Ko--fi-%E8%B4%8A%E5%8A%A9%E9%96%8B%E7%99%BC%E8%80%85-72a4f2?style=for-the-badge&logo=ko-fi&logoColor=white" alt="在 Ko-fi 上贊助開發者" height="36" />
