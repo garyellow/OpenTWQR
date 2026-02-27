@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['pwa-192x192.svg', 'pwa-512x512.svg', 'pwa-maskable.svg', 'apple-touch-icon.png'],
@@ -56,8 +58,7 @@ export default defineConfig({
         // Chromium 121+: prefer opening in-scope links in the installed
         // PWA instead of the browser. Browsers that don't support this
         // member will silently ignore it.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...({ handle_links: 'preferred' } as any),
+        ...({ handle_links: 'preferred' } as Record<string, unknown>),
         icons: [
           {
             src: 'pwa-192x192.svg',

@@ -28,10 +28,10 @@ export const ShareMenu = ({
   useFocusTrap(ref, !isClosing);
 
   const itemClass =
-    'w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950';
+    'w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-left active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950';
 
   return (
-    <div className="fixed inset-0 z-[85]">
+    <div className="fixed inset-0 z-85">
       {/* Backdrop */}
       <div
         className={`absolute inset-0 bg-black/20 dark:bg-black/40 motion-reduce:animate-none ${
@@ -48,7 +48,7 @@ export const ShareMenu = ({
         role="dialog"
         aria-modal="true"
         aria-label="分享方式"
-        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden motion-reduce:animate-none ${
+        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-4xl border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden motion-reduce:animate-none ${
           isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'
         }`}
         onAnimationEnd={onAnimationEnd}
@@ -103,7 +103,7 @@ export const ShareMenu = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-3 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+            className="w-full py-3 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-all active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
             取消
           </button>

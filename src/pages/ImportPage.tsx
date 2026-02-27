@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
-import { ImportDialog } from '../components/settings/BackupSection';
+import { ImportDialog } from '../components/settings/ImportDialog';
 
 /**
  * Landing page for the Web Share Target API.

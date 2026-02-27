@@ -36,10 +36,10 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           onClick={() => setIsOpen(true)}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          className="w-full flex items-center justify-between px-4 py-4 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all shadow-sm group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
+          className="w-full flex items-center justify-between px-4 py-4 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all shadow-xs group focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0 shadow-sm border border-zinc-100 dark:border-zinc-700/50">
+            <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0 shadow-xs border border-zinc-100 dark:border-zinc-700/50">
               <Building2
                 size={20}
                 className="text-zinc-500 dark:text-zinc-400"
@@ -70,7 +70,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
       {isOpen && (
         <AnimatedModal
           onClose={() => { setIsOpen(false); setSearch(''); }}
-          overlayClass="z-[70]"
+          overlayClass="z-70"
           cardClass="max-h-[85svh] max-w-md flex flex-col"
           ariaLabelledby="bank-title"
           initialFocusRef={inputRef}
@@ -111,7 +111,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                     placeholder="搜尋銀行名稱或代碼…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-sm"
+                    className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"
                   />
                 </div>
               </div>
@@ -132,9 +132,9 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                         onChange(bank.code);
                         requestClose();
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                         value === bank.code
-                          ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                          ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
                           : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                       }`}
                     >

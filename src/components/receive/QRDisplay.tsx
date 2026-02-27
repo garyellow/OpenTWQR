@@ -69,18 +69,23 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   }, []);
 
   // Escape handler — closes the topmost active layer
+  const shareMenuIsOpen = shareMenu.isOpen;
+  const shareMenuClose = shareMenu.close;
+  const linkSettingsIsOpen = linkSettingsToggle.isOpen;
+  const linkSettingsClose = linkSettingsToggle.close;
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (isFullscreen) return; // QRFullscreen has its own Escape handler
       if (isEncrypting) return;
-      if (linkSettingsToggle.isOpen) { linkSettingsToggle.close(); return; }
-      if (shareMenu.isOpen) { shareMenu.close(); return; }
+      if (linkSettingsIsOpen) { linkSettingsClose(); return; }
+      if (shareMenuIsOpen) { shareMenuClose(); return; }
       requestClose();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [requestClose, isFullscreen, shareMenu, linkSettingsToggle, isEncrypting]);
+  }, [requestClose, isFullscreen, shareMenuIsOpen, shareMenuClose, linkSettingsIsOpen, linkSettingsClose, isEncrypting]);
 
   // Responsive QR size for the modal view
   useEffect(() => {
@@ -111,16 +116,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
 
   /* --- Share helpers --- */
 
-  const copyToClipboard = async (url: string) => {
+  const copyToClipboard = useCallback(async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
       showFeedback('已複製連結');
     } catch {
       showFeedback('複製失敗');
     }
-  };
+  }, [showFeedback]);
 
-  const shareViaSystem = async (url: string) => {
+  const shareViaSystem = useCallback(async (url: string) => {
     const payload = {
       title: 'OpenTWQR 收款',
       text: `收款${amount && amount > 0 ? ` ${formatCurrency(amount)}` : ''}${bankName ? ` — ${bankName}` : ''}`,
@@ -135,7 +140,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       }
     }
     await copyToClipboard(url);
-  };
+  }, [amount, bankName, copyToClipboard]);
 
   /* --- Share menu actions --- */
 
@@ -197,7 +202,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
 
   /* --- Link settings actions --- */
 
-  const handleLinkConfirm = async () => {
+  const handleLinkConfirm = useCallback(async () => {
     setIsEncrypting(true);
     try {
       const url = await buildShareUrl(shareData, { expiry: linkExpiry, password: linkPassword });
@@ -211,12 +216,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     }
     setIsEncrypting(false);
     linkSettingsToggle.close();
-  };
+  }, [shareData, linkExpiry, linkPassword, linkAction, copyToClipboard, shareViaSystem, showFeedback, linkSettingsToggle]);
 
   /* --- Main modal --- */
   return (
     <>
-    <div ref={modalRef} className="fixed inset-0 z-[80]">
+    <div ref={modalRef} className="fixed inset-0 z-80">
       {/* Backdrop — animated independently; clicks close the modal */}
       <div
         className={`absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm motion-reduce:animate-none ${
@@ -232,7 +237,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         role="dialog"
         aria-modal="true"
         aria-labelledby="qr-modal-title"
-        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-4xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
       >
         {/* Header */}
@@ -256,7 +261,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             type="button"
             onClick={() => setIsFullscreen(true)}
             aria-label="放大 QR Code"
-            className="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-[0.98] cursor-zoom-in"
+            className="bg-white p-5 rounded-2xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
             <div ref={qrRef}>
               <MemoQRCode
@@ -285,7 +290,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                 金額由付款方輸入
               </div>
             )}
-            <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+            <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   {bankName && (
@@ -306,7 +311,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       onClick={handleToggleReveal}
                       aria-label={accountRevealed ? '隱藏帳號' : '顯示帳號'}
                       aria-pressed={accountRevealed}
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      title={accountRevealed ? '隱藏帳號' : '顯示帳號'}
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
                       {accountRevealed
                         ? <Eye size={18} aria-hidden="true" />
@@ -316,7 +322,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       type="button"
                       onClick={handleCopyAccount}
                       aria-label="複製帳號"
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      title="複製帳號"
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
                       <Copy size={18} aria-hidden="true" />
                     </button>
@@ -327,7 +334,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             {note && (
               <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center">備註：{note}</p>
             )}
-            <p className="text-xs text-zinc-300 dark:text-zinc-600 text-center">請於銀行 App 核對帳號及戶名後再轉帳</p>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center">請於銀行 App 核對帳號及戶名後再轉帳</p>
           </div>
         </div>
 
@@ -349,7 +356,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             <button
               type="button"
               onClick={() => shareMenu.open()}
-              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 transition-all shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <Share2 size={18} aria-hidden="true" />
               <span>分享</span>

@@ -43,10 +43,12 @@ export const AppLockSection = () => {
       <h2 className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-1 mb-3">
         安全性
       </h2>
-      <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+      <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
         {/* App Lock Toggle */}
         <button
           type="button"
+          role="switch"
+          aria-checked={authEnabled}
           onClick={handleToggleLock}
           disabled={authBusy}
           className="w-full flex items-center justify-between p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-60"
@@ -64,18 +66,16 @@ export const AppLockSection = () => {
           </div>
           {/* Toggle switch */}
           <div
-            role="switch"
-            aria-checked={authEnabled}
-            aria-label="App 鎖定"
-            className={`relative shrink-0 w-[44px] h-[26px] rounded-full transition-colors duration-200 ${
+            aria-hidden="true"
+            className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
               authEnabled
                 ? 'bg-green-500 dark:bg-green-500'
                 : 'bg-zinc-300 dark:bg-zinc-600'
             }`}
           >
             <div
-              className={`absolute top-[3px] w-[20px] h-[20px] bg-white rounded-full shadow-sm transition-transform duration-200 ${
-                authEnabled ? 'translate-x-[21px]' : 'translate-x-[3px]'
+              className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${
+                authEnabled ? 'translate-x-5.25' : 'translate-x-0.75'
               }`}
             />
           </div>
@@ -90,15 +90,17 @@ export const AppLockSection = () => {
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
               切換到背景超過此時間後，需重新驗證身分
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="背景鎖定時間">
               {LOCK_TIMEOUT_OPTIONS.map(({ value, label }) => (
                 <button
                   key={value}
                   type="button"
+                  role="radio"
+                  aria-checked={lockTimeout === value}
                   onClick={() => setLockTimeout(value)}
                   className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
                     lockTimeout === value
-                      ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                      ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                   }`}
                 >

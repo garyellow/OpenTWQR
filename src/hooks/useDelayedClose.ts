@@ -19,7 +19,7 @@ export const useDelayedClose = (onClose: () => void) => {
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
-  });
+  }, [onClose]);
 
   const requestClose = useCallback(() => {
     setIsClosing(true);

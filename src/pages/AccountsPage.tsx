@@ -37,17 +37,17 @@ export const AccountsPage = () => {
     setDeletingId(null);
   }, []);
 
-  const handleAdd = (data: Omit<BankAccount, 'id'>) => {
+  const handleAdd = useCallback((data: Omit<BankAccount, 'id'>) => {
     addAccount({ id: crypto.randomUUID(), ...data });
     setIsAdding(false);
     navigate('/', { viewTransition: true });
-  };
+  }, [addAccount, navigate]);
 
   /** Selecting an account always navigates back to the receive page. */
-  const handleSelect = (id: string) => {
+  const handleSelect = useCallback((id: string) => {
     selectAccount(id);
     navigate('/', { viewTransition: true });
-  };
+  }, [selectAccount, navigate]);
 
   const sortedAccounts = useMemo(
     () => [...accounts].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
@@ -60,13 +60,13 @@ export const AccountsPage = () => {
     <div className="min-h-svh flex flex-col px-safe pb-safe bg-zinc-50 dark:bg-zinc-950">
       <a
         href="#accounts-main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
       >
         跳至主要內容
       </a>
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-[env(safe-area-inset-top)]">
+      <div className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -94,19 +94,19 @@ export const AccountsPage = () => {
       <main id="accounts-main" className="flex-1 p-5 max-w-md mx-auto w-full">
         {accounts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
-            <div className="w-24 h-24 rounded-3xl bg-white dark:bg-zinc-900 text-zinc-300 dark:text-zinc-700 border border-zinc-200/50 dark:border-zinc-800/50 flex items-center justify-center shadow-sm">
+            <div className="w-24 h-24 rounded-3xl bg-white dark:bg-zinc-900 text-zinc-300 dark:text-zinc-700 border border-zinc-200/50 dark:border-zinc-800/50 flex items-center justify-center shadow-xs">
               <Wallet size={48} aria-hidden="true" />
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">尚無帳戶</h2>
-              <p className="text-zinc-500 dark:text-zinc-400 max-w-[260px] mx-auto leading-relaxed">
+              <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-pretty">
                 新增銀行帳戶即可開始透過 TWQR 收款。
               </p>
             </div>
             <button
               type="button"
               onClick={() => setIsAdding(true)}
-              className="mt-4 px-8 py-4 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              className="mt-4 px-8 py-4 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 transition-all shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               新增第一個帳戶
             </button>
@@ -173,7 +173,7 @@ export const AccountsPage = () => {
       {deletingAccount && (
         <AnimatedModal
           onClose={closeDeleteModal}
-          overlayClass="z-[60]"
+          overlayClass="z-60"
           cardClass="max-w-sm p-6"
           ariaLabelledby="delete-title"
           ariaDescribedby="delete-desc"
@@ -186,7 +186,7 @@ export const AccountsPage = () => {
               <h2 id="delete-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-center">
                 刪除帳戶
               </h2>
-              <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed">
+              <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed text-pretty">
                 此帳戶將永久從此裝置上移除。
               </p>
               <div className="mt-6 text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-700/50 text-center space-y-1">
@@ -199,7 +199,7 @@ export const AccountsPage = () => {
                 <button
                   type="button"
                   onClick={requestClose}
-                  className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   取消
                 </button>
@@ -209,7 +209,7 @@ export const AccountsPage = () => {
                     if (deletingId) removeAccount(deletingId);
                     requestClose();
                   }}
-                  className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-[0.98] transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  className="flex-1 py-4 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-98 transition-all shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   刪除
                 </button>

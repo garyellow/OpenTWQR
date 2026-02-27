@@ -1,6 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+    Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", Menlo, Consolas, monospace;
+}
+
+@variant standalone (@media (display-mode: standalone));
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility px-safe {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
 :root {
   line-height: 1.5;
@@ -41,44 +63,17 @@ html.dark *:focus-visible {
   outline: 2px solid #f4f4f5;
 }
 
-.pt-safe {
-  padding-top: env(safe-area-inset-top);
-}
-
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.px-safe {
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
 button,
 a {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* ---------- Standalone PWA adjustments ---------- */
 @media (display-mode: standalone) {
-  /* Prevent pull-to-refresh — keeps scroll contained within the app */
   html,
   body {
     overscroll-behavior-y: contain;
   }
-}
-
-/*
- * tailwindcss-animate does NOT set animation-fill-mode by default.
- * Without `both`, entrance animations flash the element's natural state
- * for one frame before jumping to the "from" state; exit animations snap
- * back to the natural state for one frame after finishing before React
- * unmounts the element. `both` eliminates both artefacts.
- */
-.animate-in,
-.animate-out {
-  animation-fill-mode: both;
 }
 
 @media (prefers-reduced-motion: reduce) {

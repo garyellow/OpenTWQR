@@ -27,7 +27,7 @@ export const InstallPrompt = () => {
     <div
       role="complementary"
       aria-label="安裝應用程式"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] w-[calc(100%-2.5rem)] max-w-sm pb-safe animate-in slide-in-from-bottom-4 fade-in duration-300 motion-reduce:animate-none"
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-90 w-[calc(100%-2.5rem)] max-w-sm pb-safe animate-in slide-in-from-bottom-4 fade-in duration-300 motion-reduce:animate-none"
     >
       <div className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 pr-12">
         {/* Dismiss button */}
@@ -35,7 +35,7 @@ export const InstallPrompt = () => {
           type="button"
           onClick={dismiss}
           aria-label="關閉安裝提示"
-          className="absolute top-3 right-3 p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          className="absolute top-3 right-3 p-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
         >
           <X size={16} aria-hidden="true" />
         </button>
@@ -56,7 +56,7 @@ export const InstallPrompt = () => {
               <button
                 type="button"
                 onClick={promptInstall}
-                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.97] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-97 transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 安裝應用程式
               </button>
