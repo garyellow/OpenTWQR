@@ -1,4 +1,5 @@
 import tailwindcssAnimate from 'tailwindcss-animate';
+import plugin from 'tailwindcss/plugin';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -18,5 +19,11 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [
+    tailwindcssAnimate,
+    // standalone: variant — style elements only when running as installed PWA
+    plugin(({ addVariant }) => {
+      addVariant('standalone', '@media (display-mode: standalone)');
+    }),
+  ],
 }

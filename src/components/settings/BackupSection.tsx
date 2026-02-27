@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Download, Upload, Copy, Check, Loader2, Lock, AlertCircle } from 'lucide-react';
+import { Download, Upload, Copy, Check, Loader2, Lock, AlertCircle, Share2 } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { exportBackup, importBackup, isPasswordProtected } from '../../utils/backup';
@@ -70,6 +70,8 @@ const ExportDialog = ({ onClose }: { onClose: () => void }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
+  const canShare = typeof navigator.share === 'function';
 
   const handleExport = useCallback(async () => {
     if (accounts.length === 0) {
@@ -104,6 +106,20 @@ const ExportDialog = ({ onClose }: { onClose: () => void }) => {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setError('複製失敗');
+    }
+  }, [result]);
+
+  const handleShare = useCallback(async () => {
+    if (!result) return;
+    try {
+      await navigator.share({ text: result });
+      setShared(true);
+      haptic();
+      setTimeout(() => setShared(false), 2000);
+    } catch (err) {
+      // User cancelled the share sheet — not an error
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      setError('分享失敗');
     }
   }, [result]);
 
@@ -239,6 +255,26 @@ const ExportDialog = ({ onClose }: { onClose: () => void }) => {
                   </>
                 )}
               </button>
+
+              {canShare && (
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="w-full py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  {shared ? (
+                    <>
+                      <Check size={18} aria-hidden="true" />
+                      已分享
+                    </>
+                  ) : (
+                    <>
+                      <Share2 size={18} aria-hidden="true" />
+                      分享至其他應用程式
+                    </>
+                  )}
+                </button>
+              )}
 
               <button
                 type="button"

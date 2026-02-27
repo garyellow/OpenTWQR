@@ -60,6 +60,15 @@ a {
   touch-action: manipulation;
 }
 
+/* ---------- Standalone PWA adjustments ---------- */
+@media (display-mode: standalone) {
+  /* Prevent pull-to-refresh — keeps scroll contained within the app */
+  html,
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
 /*
  * tailwindcss-animate does NOT set animation-fill-mode by default.
  * Without `both`, entrance animations flash the element's natural state

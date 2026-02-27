@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/receive/AmountInput';
 import { QRDisplay } from '../components/receive/QRDisplay';
@@ -55,6 +55,26 @@ export const ReceivePage = () => {
   const handleCloseQR = useCallback(() => {
     setShowQR(false);
   }, []);
+
+  /* ---------- Desktop keyboard shortcuts ---------- */
+  useEffect(() => {
+    if (accounts.length === 0) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      // Enter — generate / show QR Code
+      if (e.key === 'Enter' && !showQR && !showNoteInput && !showImport) {
+        e.preventDefault();
+        haptic();
+        setShowQR(true);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [accounts.length, showQR, showNoteInput, showImport]);
 
   /* ---------- Hydrating from IndexedDB ---------- */
   if (!isHydrated) {

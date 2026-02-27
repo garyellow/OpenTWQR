@@ -4,6 +4,7 @@ import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme } from './stores/useThemeStore';
 import { useAuthStore } from './stores/useAuthStore';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
+import { PrivacyScreen } from './components/auth/PrivacyScreen';
 import { ReloadPrompt } from './components/layout/ReloadPrompt';
 import { InstallPrompt } from './components/layout/InstallPrompt';
 
@@ -18,6 +19,9 @@ const SettingsPage = lazy(() =>
 );
 const SharedPage = lazy(() =>
   import('./pages/SharedPage').then((m) => ({ default: m.SharedPage })),
+);
+const ImportPage = lazy(() =>
+  import('./pages/ImportPage').then((m) => ({ default: m.ImportPage })),
 );
 
 function App() {
@@ -98,12 +102,14 @@ function App() {
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/s/:data" element={<SharedPage />} />
+            <Route path="/import" element={<ImportPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       )}
       <ReloadPrompt />
       <InstallPrompt />
+      <PrivacyScreen />
     </>
   );
 }

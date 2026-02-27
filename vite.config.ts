@@ -96,6 +96,16 @@ export default defineConfig({
             url: '/settings',
           },
         ],
+        // Web Share Target: allow users to share an OTWQR backup string
+        // TO this app via the system share sheet (Chromium PWA only).
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...({
+          share_target: {
+            action: '/import',
+            method: 'GET',
+            params: { text: 'text', title: 'title', url: 'url' },
+          },
+        } as any),
         screenshots: [
           {
             src: 'screenshots/receive-light.png',

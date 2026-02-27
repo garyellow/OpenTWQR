@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Fingerprint } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { useAuthStore, LOCK_TIMEOUT_OPTIONS } from '../../stores/useAuthStore';
 import { isWebAuthnSupported, registerCredential } from '../../utils/authLock';
 
@@ -53,12 +53,12 @@ export const AppLockSection = () => {
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-              <Fingerprint size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+              <ShieldCheck size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
             </div>
             <div className="text-left">
               <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">App 鎖定</p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                使用生物辨識保護帳戶資料
+                使用裝置驗證保護帳戶資料
               </p>
             </div>
           </div>
