@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import { ImportDialog } from '../components/settings/BackupSection';
 
 /**
@@ -14,6 +14,9 @@ import { ImportDialog } from '../components/settings/BackupSection';
  * the first non-empty value that looks like an OTWQR backup string wins.
  * If none match, the raw `text` parameter is used as-is so the user can
  * still verify and edit it.
+ *
+ * If no query parameters are present (e.g. direct navigation), the page
+ * redirects to the home page.
  */
 export const ImportPage = () => {
   const [params] = useSearchParams();
@@ -37,8 +40,10 @@ export const ImportPage = () => {
     return candidates.find((c) => c?.trim())?.trim() ?? '';
   }, [params]);
 
+  // No shared data — redirect to home (e.g. user navigated here directly)
+  if (!sharedText) return <Navigate to="/" replace />;
+
   const handleClose = () => {
-    // Navigate to home page after closing the dialog
     navigate('/', { replace: true });
   };
 

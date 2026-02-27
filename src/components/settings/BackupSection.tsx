@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
-import { Download, Upload, Copy, Check, Loader2, Lock, AlertCircle, Share2 } from 'lucide-react';
+import { Download, Upload, Copy, Check, Loader2, Lock, AlertCircle, Share2, Pencil } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
+import { useBanksStore } from '../../stores/useBanksStore';
+import type { BankAccount } from '../../types';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { exportBackup, importBackup, isPasswordProtected } from '../../utils/backup';
 import { haptic } from '../../utils/haptics';
@@ -270,7 +272,7 @@ const ExportDialog = ({ onClose }: { onClose: () => void }) => {
                   ) : (
                     <>
                       <Share2 size={18} aria-hidden="true" />
-                      分享至其他應用程式
+                      透過其他 App 分享
                     </>
                   )}
                 </button>
@@ -297,8 +299,16 @@ const ExportDialog = ({ onClose }: { onClose: () => void }) => {
 
 interface ImportDialogProps {
   onClose: () => void;
-  /** Optional: pre-fill the import text (e.g. from empty-state paste) */
+  /** Optional: pre-fill the import text (e.g. from Web Share Target) */
   initialText?: string;
+}
+
+interface ImportCandidate {
+  original: BankAccount;
+  label: string;
+  checked: boolean;
+  isDuplicate: boolean;
+  isEditing: boolean;
 }
 
 export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) => {
@@ -306,22 +316,32 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
   const isDuplicate = useAppStore((s) => s.isDuplicate);
   const selectAccount = useAppStore((s) => s.selectAccount);
   const accounts = useAppStore((s) => s.accounts);
+  const banks = useBanksStore((s) => s.banks);
 
   const [input, setInput] = useState(initialText);
   const [password, setPassword] = useState('');
   const [needsPassword, setNeedsPassword] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState('');
-  const [importedCount, setImportedCount] = useState<number | null>(null);
-  const [skippedCount, setSkippedCount] = useState(0);
 
-  const handleImport = useCallback(async () => {
+  // Phase 2: preview
+  const [candidates, setCandidates] = useState<ImportCandidate[] | null>(null);
+
+  // Phase 3: success
+  const [importedCount, setImportedCount] = useState<number | null>(null);
+
+  const getBankName = useCallback(
+    (code: string) => banks.find((b) => b.code === code)?.name ?? code,
+    [banks],
+  );
+
+  /* --- Phase 1: Decrypt --- */
+  const handleDecrypt = useCallback(async () => {
     if (!input.trim()) {
       setError('請貼上備份字串');
       return;
     }
 
-    // Quick check if password is needed
     const isProtected = isPasswordProtected(input);
     if (isProtected === null) {
       setError('無效的備份字串');
@@ -357,33 +377,82 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
       return;
     }
 
-    // Merge accounts, skip duplicates
+    // Build candidate list
+    const items: ImportCandidate[] = result.accounts.map((acc) => {
+      const dup = isDuplicate(acc.bankCode, acc.accountNumber);
+      return {
+        original: acc,
+        label: acc.label || '',
+        checked: !dup,
+        isDuplicate: dup,
+        isEditing: false,
+      };
+    });
+
+    setCandidates(items);
+    setIsImporting(false);
+    haptic();
+  }, [input, password, needsPassword, isDuplicate]);
+
+  /* --- Phase 2: Toggle / edit candidates --- */
+  const toggleCandidate = useCallback((index: number) => {
+    setCandidates((prev) =>
+      prev?.map((c, i) => (i === index ? { ...c, checked: !c.checked } : c)) ?? null,
+    );
+  }, []);
+
+  const updateCandidateLabel = useCallback((index: number, newLabel: string) => {
+    setCandidates((prev) =>
+      prev?.map((c, i) => (i === index ? { ...c, label: newLabel } : c)) ?? null,
+    );
+  }, []);
+
+  const toggleEditing = useCallback((index: number) => {
+    setCandidates((prev) =>
+      prev?.map((c, i) => (i === index ? { ...c, isEditing: !c.isEditing } : c)) ?? null,
+    );
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setCandidates((prev) => prev?.map((c) => ({ ...c, checked: true })) ?? null);
+  }, []);
+
+  const selectNewOnly = useCallback(() => {
+    setCandidates((prev) =>
+      prev?.map((c) => ({ ...c, checked: !c.isDuplicate })) ?? null,
+    );
+  }, []);
+
+  /* --- Phase 2 → 3: Import selected --- */
+  const handleImportSelected = useCallback(() => {
+    if (!candidates) return;
+
     let added = 0;
-    let skipped = 0;
     let firstNewId: string | null = null;
 
-    for (const acc of result.accounts) {
-      if (isDuplicate(acc.bankCode, acc.accountNumber)) {
-        skipped++;
-        continue;
-      }
-      // Generate new ID to avoid conflicts
+    for (const c of candidates) {
+      if (!c.checked) continue;
       const newId = crypto.randomUUID();
-      addAccount({ ...acc, id: newId });
+      addAccount({
+        id: newId,
+        bankCode: c.original.bankCode,
+        accountNumber: c.original.accountNumber,
+        label: c.label || undefined,
+      });
       if (!firstNewId) firstNewId = newId;
       added++;
     }
 
-    // Select the first newly added account if no account was previously selected
     if (firstNewId && accounts.length === 0) {
       selectAccount(firstNewId);
     }
 
     setImportedCount(added);
-    setSkippedCount(skipped);
-    setIsImporting(false);
     haptic();
-  }, [input, password, needsPassword, isDuplicate, addAccount, selectAccount, accounts.length]);
+  }, [candidates, addAccount, selectAccount, accounts.length]);
+
+  const checkedCount = candidates?.filter((c) => c.checked).length ?? 0;
+  const newCount = candidates?.filter((c) => !c.isDuplicate).length ?? 0;
 
   return (
     <AnimatedModal
@@ -400,12 +469,14 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
           >
             匯入帳戶
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-6">
-            貼上先前匯出的加密字串
-          </p>
 
-          {importedCount === null ? (
+          {/* ---- Phase 1: Input ---- */}
+          {candidates === null && importedCount === null && (
             <>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-6">
+                貼上先前匯出的加密字串
+              </p>
+
               <textarea
                 value={input}
                 onChange={(e) => {
@@ -438,7 +509,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !isImporting) {
                         e.preventDefault();
-                        handleImport();
+                        handleDecrypt();
                       }
                     }}
                     placeholder="輸入匯出時設定的密碼"
@@ -466,7 +537,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                 </button>
                 <button
                   type="button"
-                  onClick={handleImport}
+                  onClick={handleDecrypt}
                   disabled={isImporting || !input.trim()}
                   className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
@@ -476,14 +547,131 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                       解密中…
                     </>
                   ) : (
-                    '匯入'
+                    '解密'
                   )}
                 </button>
               </div>
             </>
-          ) : (
+          )}
+
+          {/* ---- Phase 2: Preview & Select ---- */}
+          {candidates !== null && importedCount === null && (
             <>
-              {/* Success state */}
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-4">
+                共 {candidates.length} 個帳戶，{newCount} 個為新帳戶
+              </p>
+
+              {/* Quick filters */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={selectAll}
+                  className="text-xs px-3 py-1.5 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                >
+                  全選
+                </button>
+                <button
+                  type="button"
+                  onClick={selectNewOnly}
+                  className="text-xs px-3 py-1.5 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                >
+                  只選新帳戶
+                </button>
+              </div>
+
+              {/* Candidate list */}
+              <div className="space-y-2 mb-6 max-h-[40svh] overflow-y-auto -mx-1 px-1">
+                {candidates.map((c, i) => (
+                  <div
+                    key={`${c.original.bankCode}-${c.original.accountNumber}-${i}`}
+                    className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
+                      c.checked
+                        ? 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800'
+                        : 'bg-zinc-50 dark:bg-zinc-900/20 border-zinc-100 dark:border-zinc-800/50 opacity-60'
+                    }`}
+                  >
+                    {/* Checkbox */}
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={c.checked}
+                      aria-label={`${c.checked ? '取消選取' : '選取'} ${getBankName(c.original.bankCode)}`}
+                      onClick={() => toggleCandidate(i)}
+                      className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
+                        c.checked
+                          ? 'border-zinc-900 bg-zinc-900 dark:border-zinc-100 dark:bg-zinc-100'
+                          : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
+                      }`}
+                    >
+                      {c.checked && <Check size={12} className="text-white dark:text-zinc-900" aria-hidden="true" />}
+                    </button>
+
+                    {/* Account info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                          {getBankName(c.original.bankCode)}
+                        </span>
+                        {c.isDuplicate && (
+                          <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                            已存在
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wide">
+                        {c.original.accountNumber}
+                      </p>
+
+                      {/* Label — inline editing */}
+                      {c.isEditing ? (
+                        <input
+                          type="text"
+                          value={c.label}
+                          onChange={(e) => updateCandidateLabel(i, e.target.value)}
+                          onBlur={() => toggleEditing(i)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') toggleEditing(i); }}
+                          autoFocus
+                          placeholder="帳戶暱稱（選填）"
+                          className="mt-1.5 w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => toggleEditing(i)}
+                          className="mt-1 flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                        >
+                          <Pencil size={10} aria-hidden="true" />
+                          <span>{c.label || '新增暱稱'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  onClick={handleImportSelected}
+                  disabled={checkedCount === 0}
+                  className="flex-[2] py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  匯入 {checkedCount} 個帳戶
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* ---- Phase 3: Success ---- */}
+          {importedCount !== null && (
+            <>
               <div className="text-center py-4">
                 <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
                   <Check size={32} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
@@ -493,7 +681,6 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   成功匯入 {importedCount} 個帳戶
-                  {skippedCount > 0 && `，略過 ${skippedCount} 個重複帳戶`}
                 </p>
               </div>
 

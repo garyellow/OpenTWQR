@@ -5,8 +5,8 @@ import { authenticate } from '../../utils/authLock';
 import { haptic } from '../../utils/haptics';
 
 /**
- * Full-screen lock screen shown when the app requires biometric
- * authentication before granting access.
+ * Full-screen lock screen shown when the app requires device
+ * verification (biometrics / PIN / password) before granting access.
  */
 export const AuthLockScreen = () => {
   const credentialId = useAuthStore((s) => s.credentialId);

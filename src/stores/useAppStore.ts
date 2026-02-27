@@ -54,8 +54,9 @@ export const useAppStore = create<AppState>()(
       setReceiveAmount: (amount) => set({ receiveAmount: amount }),
       setReceiveNote: (note) => set({ receiveNote: note }),
       isDuplicate: (bankCode, accountNumber, excludeId) => {
+        const num = accountNumber.replace(/^0+/, '');
         return get().accounts.some(
-          (a) => a.bankCode === bankCode && a.accountNumber === accountNumber && a.id !== excludeId,
+          (a) => a.bankCode === bankCode && a.accountNumber.replace(/^0+/, '') === num && a.id !== excludeId,
         );
       },
     }),

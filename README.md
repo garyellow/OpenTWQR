@@ -1,8 +1,12 @@
 # OpenTWQR
 
+[![Deploy](https://img.shields.io/github/deployments/garyellow/OpenTWQR/github-pages?label=deploy&logo=github)](https://pay.garyellow.app)
+[![License](https://img.shields.io/github/license/garyellow/OpenTWQR)](./LICENSE)
+[![Fork](https://img.shields.io/github/forks/garyellow/OpenTWQR?style=flat&logo=github&logoColor=white)](https://github.com/garyellow/OpenTWQR/fork)
+
 **在你的手機上，即時產生台灣 Pay（TWQR）個人收款 QR Code。**
 
-完全免費、開放原始碼、不需註冊、不會上傳資料——你的帳戶資訊只儲存在你自己的裝置上。
+完全免費、開放原始碼、不需註冊、不會上傳資料——帳戶資訊只儲存在你自己的裝置上。
 
 <p align="center">
   <picture>
@@ -19,27 +23,14 @@
 
 ## 功能特色
 
-### 快速收款
-
-1. 新增你的銀行帳戶
-2. 輸入收款金額（或留空讓對方自行輸入）
-3. 產生 QR Code，讓對方用任何支援台灣 Pay 的銀行 App 掃碼轉帳
-
-### 多帳戶管理
-
-可以新增多組銀行帳戶，並為每個帳戶設定暱稱（例如「郵局」、「薪轉戶」），一鍵切換收款帳戶。
-
-### 安全分享
-
-透過加密連結將收款碼分享給對方，即使經由第三方通訊軟體傳送，帳戶資訊也受到端對端加密保護。可選擇設定密碼與連結有效期。
-
-### 離線可用
-
-安裝為 App 後，即使沒有網路也能產生收款 QR Code——適合市集、擺攤等行動收款場景。
-
-### 深色模式
-
-支援淺色、深色與跟隨系統三種顯示模式。
+- **快速收款** — 新增銀行帳戶、輸入金額、產生 QR Code，讓對方用任何支援台灣 Pay 的銀行 App 掃碼轉帳
+- **多帳戶管理** — 支援多組銀行帳戶，可設定暱稱並一鍵切換
+- **安全分享** — 透過端對端加密連結分享收款碼，可設定密碼與有效期
+- **備份與匯入** — 帳戶資料可匯出為加密字串，輕鬆轉移至其他裝置
+- **離線可用** — 安裝為 App 後，無需網路也能產生收款 QR Code
+- **深色模式** — 淺色、深色與跟隨系統三種顯示模式
+- **App 鎖定** — 透過裝置驗證（Face ID、指紋、PIN 等）保護帳戶資料
+- **鍵盤快捷鍵** — 桌面版可用數字鍵輸入金額，按 Enter 產生 QR Code
 
 ## 隱私與安全
 
@@ -83,15 +74,55 @@ OpenTWQR 只負責「產生收款 QR Code」，讓對方用自己的銀行 App �
 支援所有主流瀏覽器，包括 Chrome、Safari、Edge、Firefox。在 iOS Safari 或 Android Chrome 上可安裝為 PWA App。
 </details>
 
-## 開發
+## 自行架設
 
-```bash
-npm install     # 安裝依賴
-npm run dev     # 啟動開發伺服器
-npm run build   # 建置生產版本
-npm run lint    # 程式碼檢查
-```
+如果你想在自己的 GitHub Pages 上架設 OpenTWQR，可以按照以下步驟操作。
+
+<a href="https://github.com/garyellow/OpenTWQR/fork">
+  <img src="https://img.shields.io/badge/Fork%20this%20repo-181717?style=for-the-badge&logo=github&logoColor=white" alt="Fork this repo" />
+</a>
+
+<details>
+<summary><strong>展開架設步驟</strong></summary>
+
+### 1. Fork 專案
+
+點擊上方按鈕或前往 [Fork 頁面](https://github.com/garyellow/OpenTWQR/fork) 將專案 Fork 到你的帳號下。
+
+### 2. 刪除 CNAME 檔案
+
+Fork 後，**刪除**以下兩個檔案（它們指向原作者的自訂網域，會導致你的部署失敗）：
+
+- `CNAME`（專案根目錄）
+- `public/CNAME`（public 資料夾內）
+
+你可以直接在 GitHub 網頁上操作：點進檔案 → 右上角垃圾桶圖示 → Commit changes。
+
+### 3. 啟用 GitHub Pages
+
+1. 前往你 Fork 的 Repository → **Settings** → **Pages**
+2. **Source** 選擇 **GitHub Actions**
+3. 回到 **Actions** 頁籤，原本停用的 Workflow 需要手動啟用：點擊 "I understand my workflows, go ahead and enable them"
+4. 手動執行一次 **Deploy to GitHub Pages** Workflow（Actions → Deploy to GitHub Pages → Run workflow）
+
+### 4. 完成
+
+部署完成後，你的網站將會在 `https://<你的帳號>.github.io/OpenTWQR/` 上線。
+
+> **注意**：如果你的 Fork 使用子路徑（如 `/OpenTWQR/`），你需要在 `vite.config.ts` 中設定 `base: '/OpenTWQR/'`，否則靜態資源的路徑會不正確。
+
+### 5.（選用）設定自訂網域
+
+如果你有自己的網域：
+
+1. 在 `public/` 資料夾下新增 `CNAME` 檔案，寫入你的網域（例如 `pay.example.com`）
+2. 在專案根目錄也新增 `CNAME` 檔案，內容相同
+3. 在你的 DNS 設定中，將該網域指向 `<你的帳號>.github.io`
+
+使用自訂網域時，`vite.config.ts` 的 `base` 選項應維持預設值 `'/'`。
+
+</details>
 
 ## 授權
 
-本專案為開放原始碼。
+本專案採用 [MIT 授權條款](LICENSE)。

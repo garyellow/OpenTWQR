@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { formatAmount } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
+import { QR_CENTER_IMAGE } from '../../utils/qrLabel';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);
@@ -91,6 +92,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
           marginSize={4}
           bgColor="#ffffff"
           fgColor="#000000"
+          imageSettings={QR_CENTER_IMAGE}
         />
       </div>
 

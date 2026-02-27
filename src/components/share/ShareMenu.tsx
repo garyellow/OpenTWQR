@@ -71,7 +71,7 @@ export const ShareMenu = ({
               </div>
               <div>
                 <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">分享連結</p>
-                <p className="text-xs text-zinc-400 dark:text-zinc-500">透過系統分享模組傳送連結</p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500">透過其他 App 傳送連結</p>
               </div>
             </button>
           )}

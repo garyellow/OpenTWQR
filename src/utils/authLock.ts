@@ -2,9 +2,9 @@
  * WebAuthn-based local authentication utilities for PWA app lock.
  *
  * Uses the Web Authentication API purely client-side (no server required).
- * Biometric data never leaves the device — WebAuthn only confirms that the
- * user verified their identity via the platform authenticator (Touch ID,
- * Face ID, Windows Hello, Android biometrics, etc.).
+ * Verification data never leaves the device — WebAuthn only confirms that
+ * the user verified their identity via the platform authenticator (Touch ID,
+ * Face ID, Windows Hello, PIN, etc.).
  */
 
 /** Generate cryptographically random bytes for use as a WebAuthn challenge. */

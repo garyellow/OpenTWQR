@@ -13,6 +13,7 @@ import { QRFullscreen } from './QRFullscreen';
 import { ShareMenu } from '../share/ShareMenu';
 import { LinkSettingsDialog } from '../share/LinkSettingsDialog';
 import type { ShareData, ExpiryOption } from '../../types';
+import { QR_CENTER_IMAGE } from '../../utils/qrLabel';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);
@@ -265,6 +266,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                 marginSize={4}
                 bgColor="#ffffff"
                 fgColor="#000000"
+                imageSettings={QR_CENTER_IMAGE}
               />
             </div>
           </button>

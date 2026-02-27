@@ -3,7 +3,7 @@ import { BankSelect } from './BankSelect';
 import { useAppStore } from '../../stores/useAppStore';
 import type { BankAccount } from '../../types';
 import { isValidAccount } from '../../utils/twqr';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
@@ -18,9 +18,12 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const [accountNumber, setAccountNumber] = useState(initialData?.accountNumber || '');
   const [label, setLabel] = useState(initialData?.label || '');
   const [error, setError] = useState('');
+  const [duplicateWarning, setDuplicateWarning] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setDuplicateWarning('');
 
     if (!bankCode) {
       setError('請選擇銀行');
@@ -32,8 +35,25 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
       return;
     }
 
-    if (useAppStore.getState().isDuplicate(bankCode, accountNumber, editingId)) {
-      setError('此銀行帳號已存在');
+    const state = useAppStore.getState();
+    if (state.isDuplicate(bankCode, accountNumber, editingId)) {
+      const num = accountNumber.replace(/^0+/, '');
+      const newLabel = label || '';
+      const exactMatch = state.accounts.some(
+        (a) =>
+          a.bankCode === bankCode &&
+          a.accountNumber.replace(/^0+/, '') === num &&
+          a.id !== editingId &&
+          (a.label || '') === newLabel,
+      );
+
+      if (exactMatch) {
+        setError('此帳戶已存在');
+        return;
+      }
+
+      // Same bank + account but different label — ask for confirmation
+      setDuplicateWarning('你已經有一個相同的銀行帳號，確定要再新增嗎？');
       return;
     }
 
@@ -50,6 +70,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         onChange={(code) => {
           setBankCode(code);
           setError('');
+          setDuplicateWarning('');
         }}
       />
 
@@ -70,8 +91,9 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           placeholder="0000000000000000…"
           value={accountNumber}
           onChange={(e) => {
-            setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 16));
+            setAccountNumber(e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
             setError('');
+            setDuplicateWarning('');
           }}
           aria-invalid={Boolean(error && !isValidAccount(accountNumber))}
           aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
@@ -94,7 +116,10 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           autoComplete="off"
           placeholder="例如：郵局、薪轉戶…"
           value={label}
-          onChange={(e) => setLabel(e.target.value)}
+          onChange={(e) => {
+            setLabel(e.target.value);
+            setDuplicateWarning('');
+          }}
           className={inputClass}
         />
       </div>
@@ -108,6 +133,35 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         >
           <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
           <span className="font-medium">{error}</span>
+        </div>
+      )}
+
+      {duplicateWarning && !error && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-2xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200"
+        >
+          <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
+            <AlertTriangle size={18} className="shrink-0" aria-hidden="true" />
+            <span className="font-medium">{duplicateWarning}</span>
+          </div>
+          <div className="flex gap-2 ml-[30px]">
+            <button
+              type="button"
+              onClick={() => setDuplicateWarning('')}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={() => onSubmit({ bankCode, accountNumber, label: label || undefined })}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
+            >
+              仍要新增
+            </button>
+          </div>
         </div>
       )}
 
