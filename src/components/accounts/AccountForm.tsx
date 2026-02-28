@@ -84,7 +84,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             setDuplicateWarning('');
           }}
         />
-        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+        <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
           收款帳戶所屬的金融機構
         </p>
       </div>
@@ -114,7 +114,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
           className={`${inputClass} text-lg font-mono tracking-widest`}
         />
-        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+        <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
           10–16 位數字，不含分行代碼
         </p>
       </div>
@@ -139,7 +139,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           }}
           className={inputClass}
         />
-        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+        <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
           方便區分不同帳戶用途
         </p>
       </div>
@@ -178,7 +178,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             className={`${inputClass} pl-11`}
           />
         </div>
-        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+        <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
           可以填入圖片網址，也可以填入官網網址
         </p>
       </div>

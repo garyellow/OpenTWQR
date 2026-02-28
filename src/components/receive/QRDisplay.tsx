@@ -263,7 +263,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             type="button"
             onClick={requestClose}
             aria-label="關閉"
-            className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="p-2.5 min-w-11 min-h-11 -mr-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <X size={20} aria-hidden="true" />
           </button>
@@ -300,7 +300,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                 </span>
               </div>
             ) : (
-              <div className="text-lg font-medium text-zinc-400 dark:text-zinc-500 text-center">
+              <div className="text-lg font-medium text-zinc-500 dark:text-zinc-400 text-center">
                 金額由付款方輸入
               </div>
             )}
@@ -326,18 +326,18 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       aria-label={accountRevealed ? '隱藏帳號' : '顯示帳號'}
                       aria-pressed={accountRevealed}
                       title={accountRevealed ? '隱藏帳號' : '顯示帳號'}
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                     >
                       {accountRevealed
-                        ? <Eye size={18} aria-hidden="true" />
-                        : <EyeOff size={18} aria-hidden="true" />}
+                        ? <EyeOff size={18} aria-hidden="true" />
+                        : <Eye size={18} aria-hidden="true" />}
                     </button>
                     <button
                       type="button"
                       onClick={handleCopyAccount}
                       aria-label="複製帳號"
                       title="複製帳號"
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                     >
                       <Copy size={18} aria-hidden="true" />
                     </button>
@@ -346,9 +346,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               </div>
             </div>
             {note && (
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center">備註：{note}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">備註：{note}</p>
             )}
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center">請於銀行 App 核對帳號及戶名後再轉帳</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">請於銀行 App 核對帳號及戶名後再轉帳</p>
           </div>
         </div>
 

@@ -56,7 +56,7 @@ export const InstallPrompt = () => {
           type="button"
           onClick={handleDismiss}
           aria-label="關閉安裝提示"
-          className="absolute top-3 right-3 p-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          className="absolute top-3 right-3 p-2.5 min-w-11 min-h-11 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
         >
           <X size={16} aria-hidden="true" />
         </button>

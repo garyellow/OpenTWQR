@@ -81,7 +81,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
       role="dialog"
       aria-modal="true"
       aria-label="全螢幕 QR Code"
-      className={`fixed inset-0 z-90 bg-black flex flex-col items-center justify-center cursor-pointer motion-reduce:animate-none ${
+      className={`fixed inset-0 z-90 bg-black flex flex-col items-center justify-center cursor-pointer overscroll-contain motion-reduce:animate-none ${
         isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
       }`}
       onClick={requestClose}
@@ -112,7 +112,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
           <p className="text-lg font-medium text-white/50">金額由付款方輸入</p>
         )}
         {bankName && <p className="text-white/60 text-sm">{bankName}</p>}
-        {note && <p className="text-white/40 text-xs">{note}</p>}
+        {note && <p className="text-white/50 text-xs">{note}</p>}
       </div>
 
       <button

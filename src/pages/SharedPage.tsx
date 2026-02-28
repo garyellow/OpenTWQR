@@ -86,7 +86,7 @@ export const SharedPage = () => {
             onKeyDown={(e) => {
               if (e.key === 'Enter') handlePasswordSubmit();
             }}
-            placeholder="輸入密碼"
+            placeholder="輸入密碼…"
             aria-label="連結密碼"
             aria-describedby={result.status === 'wrong-password' ? 'shared-pw-error' : undefined}
             autoFocus
@@ -97,9 +97,9 @@ export const SharedPage = () => {
             <div
               id="shared-pw-error"
               role="alert"
-              className="flex items-center justify-center gap-2 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-2xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
+              className="flex items-center justify-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-2xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
             >
-              <Lock size={16} className="shrink-0" aria-hidden="true" />
+              <Lock size={18} className="shrink-0" aria-hidden="true" />
               <span className="font-medium">密碼錯誤，請重新輸入</span>
             </div>
           )}
@@ -115,7 +115,7 @@ export const SharedPage = () => {
         <button
           type="button"
           onClick={() => navigate('/', { viewTransition: true })}
-          className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors mt-2"
+          className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors mt-2 py-2 px-4 min-h-11 inline-flex items-center rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
           前往首頁
         </button>

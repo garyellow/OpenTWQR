@@ -23,7 +23,7 @@ export const SettingsPage = () => {
               to="/"
               viewTransition
               aria-label="返回"
-              className="p-2.5 -ml-2 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+              className="p-2.5 min-w-11 min-h-11 -ml-2 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
               <ChevronLeft size={24} aria-hidden="true" />
             </Link>

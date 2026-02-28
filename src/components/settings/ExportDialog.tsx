@@ -141,7 +141,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
               </div>
 
               {/* Info */}
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-4 leading-relaxed">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4 leading-relaxed">
                 {password
                   ? '你的帳戶資料將以 AES-256 加密，匯入時需輸入密碼。'
                   : '不設定密碼時，任何人取得此字串皆可匯入。'}
@@ -187,7 +187,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
                   readOnly
                   value={result}
                   rows={6}
-                  className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-3.5 text-xs font-mono text-zinc-700 dark:text-zinc-300 break-all resize-none focus-visible:outline-hidden"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 text-xs font-mono text-zinc-700 dark:text-zinc-300 break-all resize-none focus-visible:outline-hidden"
                   onClick={(e) => (e.target as HTMLTextAreaElement).select()}
                 />
               </div>

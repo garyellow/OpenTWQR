@@ -122,7 +122,7 @@ export const ReceivePage = () => {
     <div className="h-svh flex flex-col overflow-hidden px-safe bg-zinc-50 dark:bg-zinc-950">
       <a
         href="#receive-main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-white dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
       >
         跳至主要內容
       </a>
@@ -139,7 +139,7 @@ export const ReceivePage = () => {
               to="/settings"
               viewTransition
               aria-label="設定"
-              className="p-2.5 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="p-2.5 min-w-11 min-h-11 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <Settings size={20} aria-hidden="true" />
             </Link>
@@ -187,7 +187,7 @@ export const ReceivePage = () => {
               <button
                 type="button"
                 onClick={() => setShowNoteInput(true)}
-                className="flex items-center gap-2 mx-auto text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors py-3 min-h-11"
+                className="flex items-center gap-2 mx-auto text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-3 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
               >
                 <MessageSquare size={16} aria-hidden="true" />
                 <span>{note ? `備註：${note}` : '新增交易備註'}</span>
@@ -253,7 +253,7 @@ export const ReceivePage = () => {
                   maxLength={20}
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 dark:text-zinc-500 pointer-events-none">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 dark:text-zinc-400 pointer-events-none">
                   {note.length}/20
                 </span>
               </div>

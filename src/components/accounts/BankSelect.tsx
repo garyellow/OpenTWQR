@@ -39,10 +39,10 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           className="w-full flex items-center justify-between px-4 py-4 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 action-transition shadow-xs group focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0 shadow-xs border border-zinc-100 dark:border-zinc-700/50">
+            <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center shrink-0 border border-zinc-100 dark:border-zinc-700/50">
               <Building2
                 size={20}
-                className="text-zinc-500 dark:text-zinc-400"
+                className="text-zinc-400 dark:text-zinc-500"
                 aria-hidden="true"
               />
             </div>
@@ -120,7 +120,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
               <div className="flex-1 overflow-y-auto p-3 overscroll-contain">
                 <div className="space-y-1 pb-safe">
                   {search && filteredBanks.length > 0 && (
-                    <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2 pb-2">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 px-2 pb-2" aria-live="polite">
                       找到 {filteredBanks.length} 家銀行
                     </p>
                   )}
@@ -132,7 +132,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                         onChange(bank.code);
                         requestClose();
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
+                      className={`w-full flex items-baseline justify-between px-4 py-3.5 rounded-2xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                         value === bank.code
                           ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
                           : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'

@@ -111,13 +111,15 @@ html.dark body {
   color: #f4f4f5;
 }
 
-*:focus-visible {
-  outline: 2px solid #18181b;
-  outline-offset: 2px;
-}
+@layer base {
+  *:focus-visible {
+    outline: 2px solid #18181b;
+    outline-offset: 2px;
+  }
 
-html.dark *:focus-visible {
-  outline: 2px solid #f4f4f5;
+  html.dark *:focus-visible {
+    outline: 2px solid #f4f4f5;
+  }
 }
 
 button,
