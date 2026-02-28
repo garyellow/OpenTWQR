@@ -36,7 +36,7 @@ export const LinkSettingsDialog = ({
     <div className="fixed inset-0 z-85">
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black/20 dark:bg-black/40 motion-reduce:animate-none ${
+        className={`absolute inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm motion-reduce:animate-none ${
           isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-150'
         }`}
         onClick={() => !isEncrypting && onClose()}
