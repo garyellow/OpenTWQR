@@ -3,7 +3,6 @@ import { isValidAccount } from './twqr';
 import {
   toBase64Url,
   fromBase64Url,
-  asBuffer,
   deriveKeyFromPassword,
   IV_LEN,
   SALT_LEN,
@@ -21,7 +20,7 @@ const aesEncrypt = async (
   iv: Uint8Array,
   plaintext: Uint8Array,
 ): Promise<Uint8Array> => {
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: asBuffer(iv) }, key, asBuffer(plaintext));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
   return new Uint8Array(ct);
 };
 
@@ -31,7 +30,7 @@ const aesDecrypt = async (
   ciphertext: Uint8Array,
 ): Promise<Uint8Array | null> => {
   try {
-    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: asBuffer(iv) }, key, asBuffer(ciphertext));
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
     return new Uint8Array(pt);
   } catch {
     return null;
@@ -163,7 +162,7 @@ export const parseShareUrl = async (
 
     const key = await crypto.subtle.importKey(
       'raw',
-      asBuffer(rawKey),
+      rawKey,
       { name: 'AES-GCM' },
       false,
       ['decrypt'],

@@ -135,6 +135,7 @@ export const useBanksStore = create<BanksState>()(
     }),
     {
       name: 'opentwqr-bank-catalog',
+      version: 1,
       storage: createJSONStorage(() => idbStorage),
       partialize: (state) => ({
         banks: state.banks,

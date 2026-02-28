@@ -25,9 +25,9 @@ interface AuthState {
 export const LOCK_TIMEOUT_OPTIONS = [
   { value: 0, label: '立即' },
   { value: 10_000, label: '10 秒' },
-  { value: 30_000, label: '30 秒' },
   { value: 60_000, label: '1 分鐘' },
   { value: 300_000, label: '5 分鐘' },
+  { value: 3_600_000, label: '1 小時' },
 ] as const;
 
 export const useAuthStore = create<AuthState>()(
@@ -47,13 +47,24 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'opentwqr-auth',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => idbStorage),
       partialize: (state) => ({
         isEnabled: state.isEnabled,
         credentialId: state.credentialId,
         lockTimeout: state.lockTimeout,
       }),
+      migrate: (persisted, fromVersion) => {
+        const state = persisted as Partial<AuthState>;
+        if (fromVersion < 2) {
+          // The 30s option was removed. Reset any stale value to the default (10s).
+          const validValues = LOCK_TIMEOUT_OPTIONS.map((o) => o.value as number);
+          if (state.lockTimeout !== undefined && !validValues.includes(state.lockTimeout)) {
+            state.lockTimeout = 10_000;
+          }
+        }
+        return state;
+      },
       onRehydrateStorage: () => () => {
         useAuthStore.setState({ isHydrated: true });
       },

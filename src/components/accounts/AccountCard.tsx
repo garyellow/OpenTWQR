@@ -42,12 +42,12 @@ export const AccountCard = ({
       />
 
       {/* Card content */}
-      <div className="relative pr-24 pointer-events-none">
+      <div className="relative pr-20 pointer-events-none">
         <div className="flex items-center gap-3 mb-1 min-w-0">
           {isSelected ? (
-            <div className="w-6 h-6 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0">
               <Check
-                size={14}
+                size={16}
                 className="text-zinc-900 dark:text-zinc-100"
                 aria-hidden="true"
               />
@@ -55,7 +55,7 @@ export const AccountCard = ({
           ) : (
             <BankIcon iconUrl={account.iconUrl} bankUrl={bank?.url} bankCode={account.bankCode} size="sm" />
           )}
-          <h3 className={`font-semibold truncate text-lg ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'}`}>
+          <h3 className={`font-semibold truncate text-base ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'}`}>
             {displayName}
           </h3>
         </div>

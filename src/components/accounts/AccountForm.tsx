@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BankSelect } from './BankSelect';
 import { useAppStore } from '../../stores/useAppStore';
+import { useBanksStore } from '../../stores/useBanksStore';
 import type { BankAccount } from '../../types';
 import { isValidAccount } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
@@ -22,6 +23,10 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const [iconError, setIconError] = useState(false);
   const [error, setError] = useState('');
   const [duplicateWarning, setDuplicateWarning] = useState('');
+
+  const banks = useBanksStore((state) => state.banks);
+  const selectedBank = banks.find((b) => b.code === bankCode);
+  const bankUrlPlaceholder = selectedBank?.url || 'https://example.com/icon.png';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,7 +169,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             type="url"
             autoComplete="off"
             spellCheck={false}
-            placeholder="https://example.com/icon.png"
+            placeholder={bankUrlPlaceholder}
             value={iconUrl}
             onChange={(e) => {
               setIconUrl(e.target.value);
@@ -174,7 +179,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           />
         </div>
         <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
-          留空會自動使用銀行官方圖示
+          可以填入圖片網址，也可以填入官網網址
         </p>
       </div>
 

@@ -12,6 +12,7 @@ import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { OpenTWQRLogo } from '../components/ui/OpenTWQRLogo';
 import { BankIcon } from '../components/accounts/BankIcon';
 import { haptic } from '../utils/haptics';
+import { PageLoader } from '../components/layout/PageLoader';
 
 export const ReceivePage = () => {
   const { accounts, selectedAccountId, isHydrated, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
@@ -82,11 +83,7 @@ export const ReceivePage = () => {
 
   /* ---------- Hydrating from IndexedDB ---------- */
   if (!isHydrated) {
-    return (
-      <div className="min-h-svh flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-600 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   /* ---------- Empty state ---------- */

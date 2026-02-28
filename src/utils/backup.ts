@@ -25,7 +25,6 @@ import type { BankAccount } from '../types';
 import {
   toBase64Url,
   fromBase64Url,
-  asBuffer,
   deriveKeyFromPassword,
   IV_LEN,
   SALT_LEN,
@@ -100,7 +99,7 @@ export const exportBackup = async (
     }
 
     const ciphertext = new Uint8Array(
-      await crypto.subtle.encrypt({ name: 'AES-GCM', iv: asBuffer(iv) }, key, asBuffer(json)),
+      await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, json),
     );
 
     const flags = hasPassword ? 0x01 : 0x00;
@@ -194,7 +193,7 @@ export const importBackup = async (
 
       key = await crypto.subtle.importKey(
         'raw',
-        asBuffer(rawKey),
+        rawKey,
         { name: 'AES-GCM' },
         false,
         ['decrypt'],
@@ -204,9 +203,9 @@ export const importBackup = async (
     let plaintext: ArrayBuffer;
     try {
       plaintext = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: asBuffer(iv) },
+        { name: 'AES-GCM', iv },
         key,
-        asBuffer(ciphertext),
+        ciphertext,
       );
     } catch {
       return { ok: false, error: hasPassword ? 'wrong-password' : 'decrypt-error' };
