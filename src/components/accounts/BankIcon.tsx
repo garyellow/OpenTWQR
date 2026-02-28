@@ -3,6 +3,8 @@ import { resolveIconSrc } from '../../utils/favicon';
 
 interface BankIconProps {
   iconUrl?: string;
+  /** Default bank website URL — used as favicon fallback when iconUrl is absent. */
+  bankUrl?: string;
   bankCode: string;
   size?: 'sm' | 'md';
   /** Extra Tailwind classes for the outer wrapper. */
@@ -12,16 +14,17 @@ interface BankIconProps {
 /**
  * Bank icon with automatic favicon resolution and fallback to bank code text.
  *
- * - If `iconUrl` resolves to a valid image → shows the image.
- * - Otherwise → shows the first 3 chars of `bankCode` as text.
+ * Resolution order: `iconUrl` → `bankUrl` → text code.
  */
 export const BankIcon = ({
   iconUrl,
+  bankUrl,
   bankCode,
   size = 'md',
   className = '',
 }: BankIconProps) => {
-  const src = resolveIconSrc(iconUrl);
+  // Prioritise user-set icon; fall back to bank default URL
+  const src = resolveIconSrc(iconUrl) ?? resolveIconSrc(bankUrl);
   const [imgError, setImgError] = useState(false);
   const showImage = Boolean(src && !imgError);
 

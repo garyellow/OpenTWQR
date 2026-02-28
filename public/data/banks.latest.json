@@ -1,183 +1,310 @@
 {
   "source": {
-    "provider": "財金資訊股份有限公司（FISC）",
-    "url": "https://www.fisc.com.tw/TC/OPENDATA/Comm1_MEMBER.xml",
-    "business": "跨行自動化服務機器業務(金融卡)",
-    "generatedAt": "2026-02-23T00:35:13.505Z",
-    "count": 70
+    "provider": "財金資訊股份有限公司（FISC）＋金融監督管理委員會（FSC）",
+    "fiscUrl": "https://www.fisc.com.tw/TC/OPENDATA/Comm1_MEMBER.xml",
+    "fscUrl": "https://stat.fsc.gov.tw/FSC_OAS3_RESTORE/api/CSV_EXPORT?TableID=B14&OUTPUT_FILE=Y",
+    "businesses": [
+      "跨行自動化服務機器業務(金融卡)",
+      "通匯業務-入戶電匯"
+    ],
+    "generatedAt": "2026-02-28T06:06:47.975Z",
+    "count": 86
   },
   "banks": [
     {
       "code": "004",
-      "name": "臺灣銀行"
+      "name": "臺灣銀行",
+      "url": "https://www.bot.com.tw"
     },
     {
       "code": "005",
-      "name": "臺灣土地銀行"
+      "name": "臺灣土地銀行",
+      "url": "https://www.landbank.com.tw"
     },
     {
       "code": "006",
-      "name": "合作金庫商業銀行"
+      "name": "合作金庫商業銀行",
+      "url": "https://www.tcb-bank.com.tw"
     },
     {
       "code": "007",
-      "name": "第一商業銀行"
+      "name": "第一商業銀行",
+      "url": "https://www.firstbank.com.tw"
     },
     {
       "code": "008",
-      "name": "華南商業銀行"
+      "name": "華南商業銀行",
+      "url": "https://www.hncb.com.tw"
     },
     {
       "code": "009",
-      "name": "彰化商業銀行"
+      "name": "彰化商業銀行",
+      "url": "https://www.bankchb.com"
     },
     {
       "code": "011",
-      "name": "上海商業儲蓄銀行"
+      "name": "上海商業儲蓄銀行",
+      "url": "https://www.scsb.com.tw"
     },
     {
       "code": "012",
-      "name": "台北富邦商業銀行"
+      "name": "台北富邦商業銀行",
+      "url": "https://www.fubon.com"
     },
     {
       "code": "013",
-      "name": "國泰世華商業銀行"
+      "name": "國泰世華商業銀行",
+      "url": "https://www.cathaybk.com.tw"
     },
     {
       "code": "016",
-      "name": "高雄銀行"
+      "name": "高雄銀行",
+      "url": "https://www.bok.com.tw"
     },
     {
       "code": "017",
-      "name": "兆豐國際商業銀行"
+      "name": "兆豐國際商業銀行",
+      "url": "https://www.megabank.com.tw"
     },
     {
       "code": "018",
-      "name": "全國農業金庫"
+      "name": "全國農業金庫",
+      "url": "https://www.agribank.com.tw"
     },
     {
       "code": "020",
-      "name": "日商瑞穗銀行台北分行"
+      "name": "日商瑞穗銀行台北分行",
+      "url": "https://www.mizuhogroup.com"
     },
     {
       "code": "021",
-      "name": "花旗(台灣)商業銀行"
+      "name": "花旗(台灣)商業銀行",
+      "url": "https://www.citibank.com.tw"
     },
     {
       "code": "022",
-      "name": "美國銀行台北分行"
+      "name": "美國銀行台北分行",
+      "url": "https://business.bofa.com"
     },
     {
       "code": "023",
-      "name": "泰國盤谷銀行台北分行"
+      "name": "泰國盤谷銀行台北分行",
+      "url": "https://www.bbl.com.tw"
     },
     {
       "code": "025",
-      "name": "菲律賓首都銀行台北分行"
+      "name": "菲律賓首都銀行台北分行",
+      "url": "https://www.metrobank.com.tw"
+    },
+    {
+      "code": "029",
+      "name": "新加坡商大華銀行台北分行",
+      "url": "https://www.uobgroup.com"
+    },
+    {
+      "code": "030",
+      "name": "美商道富銀行台北分行",
+      "url": "https://www.statestreet.com"
+    },
+    {
+      "code": "037",
+      "name": "法商法國興業銀行台北分行",
+      "url": "https://www.societegenerale.com"
+    },
+    {
+      "code": "039",
+      "name": "澳商澳盛銀行台北分行",
+      "url": "https://institutional.anz.com"
     },
     {
       "code": "048",
-      "name": "王道商業銀行"
+      "name": "王道商業銀行",
+      "url": "https://www.o-bank.com"
     },
     {
       "code": "050",
-      "name": "臺灣中小企業銀行"
+      "name": "臺灣中小企業銀行",
+      "url": "https://www.tbb.com.tw"
     },
     {
       "code": "052",
-      "name": "渣打國際商業銀行"
+      "name": "渣打國際商業銀行",
+      "url": "https://www.sc.com"
     },
     {
       "code": "053",
-      "name": "台中商業銀行"
+      "name": "台中商業銀行",
+      "url": "https://www.tcbbank.com.tw"
     },
     {
       "code": "054",
-      "name": "京城商業銀行"
+      "name": "京城商業銀行",
+      "url": "https://customer.ktb.com.tw"
     },
     {
       "code": "072",
-      "name": "德商德意志銀行台北分行"
+      "name": "德商德意志銀行台北分行",
+      "url": "https://country.db.com"
     },
     {
       "code": "075",
-      "name": "香港商東亞銀行台北分行"
+      "name": "香港商東亞銀行台北分行",
+      "url": "https://www.hkbea.com.tw"
+    },
+    {
+      "code": "076",
+      "name": "美商摩根大通銀行台北分行",
+      "url": "https://www.jpmorgan.com"
     },
     {
       "code": "081",
-      "name": "匯豐(台灣)商業銀行"
+      "name": "匯豐(台灣)商業銀行",
+      "url": "https://www.hsbc.com.tw"
     },
     {
       "code": "082",
-      "name": "法國巴黎銀行台北分行"
+      "name": "法國巴黎銀行台北分行",
+      "url": "https://www.bnpparibas.com.tw"
+    },
+    {
+      "code": "085",
+      "name": "新加坡商新加坡華僑銀行台北分行",
+      "url": "https://www.ocbc.com"
+    },
+    {
+      "code": "086",
+      "name": "法商東方匯理銀行台北分行",
+      "url": "https://www.ca-cib.com"
+    },
+    {
+      "code": "092",
+      "name": "瑞士商瑞士銀行台北分行",
+      "url": "https://www.ubs.com"
+    },
+    {
+      "code": "093",
+      "name": "荷商安智銀行台北分行",
+      "url": "https://www.ing.com"
+    },
+    {
+      "code": "098",
+      "name": "日商三菱日聯銀行台北分行",
+      "url": "https://www.tw.bk.mufg.jp"
     },
     {
       "code": "101",
-      "name": "瑞興商業銀行"
+      "name": "瑞興商業銀行",
+      "url": "https://www.taipeistarbank.com.tw"
     },
     {
       "code": "102",
-      "name": "華泰商業銀行"
+      "name": "華泰商業銀行",
+      "url": "https://www.hwataibank.com.tw"
     },
     {
       "code": "103",
-      "name": "臺灣新光商業銀行"
+      "name": "臺灣新光商業銀行",
+      "url": "https://www.skbank.com.tw"
     },
     {
       "code": "108",
-      "name": "陽信商業銀行"
+      "name": "陽信商業銀行",
+      "url": "https://www.sunnybank.com.tw"
     },
     {
       "code": "114",
-      "name": "基隆第一信用合作社"
+      "name": "基隆第一信用合作社",
+      "url": "https://www.kfcc.com.tw"
     },
     {
       "code": "115",
-      "name": "基隆市第二信用合作社"
+      "name": "基隆市第二信用合作社",
+      "url": "https://www.kscc.com.tw"
     },
     {
       "code": "118",
-      "name": "板信商業銀行"
+      "name": "板信商業銀行",
+      "url": "https://www.bop.com.tw"
     },
     {
       "code": "119",
-      "name": "淡水第一信用合作社"
+      "name": "淡水第一信用合作社",
+      "url": "https://www.tfccbank.com.tw"
     },
     {
       "code": "130",
-      "name": "新竹第一信用合作社"
+      "name": "新竹第一信用合作社",
+      "url": "https://www.hcfcbank.com.tw"
     },
     {
       "code": "132",
-      "name": "新竹第三信用合作社"
+      "name": "新竹第三信用合作社",
+      "url": "https://www.hc3cbank.com.tw"
     },
     {
       "code": "146",
-      "name": "台中市第二信用合作社"
+      "name": "台中市第二信用合作社",
+      "url": "https://www.tsca.com.tw"
     },
     {
       "code": "147",
-      "name": "三信商業銀行"
+      "name": "三信商業銀行",
+      "url": "https://www.cotabank.com.tw"
     },
     {
       "code": "162",
-      "name": "彰化第六信用合作社"
+      "name": "彰化第六信用合作社",
+      "url": "https://www.ch6c.com.tw"
     },
     {
       "code": "204",
-      "name": "高雄市第三信用合作社"
+      "name": "高雄市第三信用合作社",
+      "url": "https://www.kh3c.com.tw"
     },
     {
       "code": "215",
-      "name": "花蓮第一信用合作社"
+      "name": "花蓮第一信用合作社",
+      "url": "https://www.hua215.com.tw"
     },
     {
       "code": "216",
-      "name": "花蓮第二信用合作社"
+      "name": "花蓮第二信用合作社",
+      "url": "https://www.hl2c.com.tw"
+    },
+    {
+      "code": "321",
+      "name": "日商三井住友銀行台北分行",
+      "url": "https://www.smbc.co.jp"
+    },
+    {
+      "code": "326",
+      "name": "西班牙商西班牙對外銀行臺北分行",
+      "url": "https://www.bbva.com.tw"
     },
     {
       "code": "329",
-      "name": "印尼商印尼人民銀行台北分行"
+      "name": "印尼商印尼人民銀行台北分行",
+      "url": "https://www.britaipei.com"
+    },
+    {
+      "code": "330",
+      "name": "韓商韓亞銀行台北分行",
+      "url": "https://global.1qbank.com"
+    },
+    {
+      "code": "380",
+      "name": "大陸商中國銀行臺北分行",
+      "url": "https://www.bankofchina.com"
+    },
+    {
+      "code": "381",
+      "name": "大陸商交通銀行臺北分行",
+      "url": "https://www.bankcomm.com.tw"
+    },
+    {
+      "code": "382",
+      "name": "大陸商中國建設銀行臺北分行",
+      "url": "https://tw.ccb.com"
     },
     {
       "code": "387",
@@ -185,39 +312,48 @@
     },
     {
       "code": "388",
-      "name": "全盈支付金融科技股份有限公司"
+      "name": "全盈支付金融科技股份有限公司",
+      "url": "https://www.pluspay.com.tw"
     },
     {
       "code": "389",
-      "name": "全支付電子支付股份有限公司"
+      "name": "全支付電子支付股份有限公司",
+      "url": "https://www.pxpayplus.com"
     },
     {
       "code": "390",
-      "name": "悠遊卡股份有限公司"
+      "name": "悠遊卡股份有限公司",
+      "url": "https://www.easycard.com.tw"
     },
     {
       "code": "391",
-      "name": "一卡通票證股份有限公司"
+      "name": "一卡通票證股份有限公司",
+      "url": "https://www.i-pass.com.tw"
     },
     {
       "code": "392",
-      "name": "愛金卡股份有限公司"
+      "name": "愛金卡股份有限公司",
+      "url": "https://www.icash.com.tw"
     },
     {
       "code": "395",
-      "name": "橘子支行動支付股份有限公司"
+      "name": "橘子支行動支付股份有限公司",
+      "url": "https://www.gamapay.com.tw"
     },
     {
       "code": "396",
-      "name": "街口電子支付股份有限公司"
+      "name": "街口電子支付股份有限公司",
+      "url": "https://www.jkopay.com"
     },
     {
       "code": "397",
-      "name": "歐付寶電子支付股份有限公司"
+      "name": "歐付寶電子支付股份有限公司",
+      "url": "https://www.opay.tw"
     },
     {
       "code": "398",
-      "name": "簡單行動支付股份有限公司"
+      "name": "簡單行動支付股份有限公司",
+      "url": "https://www.ezpay.com.tw"
     },
     {
       "code": "600",
@@ -225,59 +361,73 @@
     },
     {
       "code": "700",
-      "name": "中華郵政股份有限公司"
+      "name": "中華郵政股份有限公司",
+      "url": "https://www.post.gov.tw"
     },
     {
       "code": "803",
-      "name": "聯邦商業銀行"
+      "name": "聯邦商業銀行",
+      "url": "https://www.ubot.com.tw"
     },
     {
       "code": "805",
-      "name": "遠東國際商業銀行"
+      "name": "遠東國際商業銀行",
+      "url": "https://www.feib.com.tw"
     },
     {
       "code": "806",
-      "name": "元大商業銀行"
+      "name": "元大商業銀行",
+      "url": "https://www.yuantabank.com.tw"
     },
     {
       "code": "807",
-      "name": "永豐商業銀行"
+      "name": "永豐商業銀行",
+      "url": "https://bank.sinopac.com"
     },
     {
       "code": "808",
-      "name": "玉山商業銀行"
+      "name": "玉山商業銀行",
+      "url": "https://www.esunbank.com.tw"
     },
     {
       "code": "809",
-      "name": "凱基商業銀行"
+      "name": "凱基商業銀行",
+      "url": "https://www.kgibank.com.tw"
     },
     {
       "code": "810",
-      "name": "星展(台灣)商業銀行"
+      "name": "星展(台灣)商業銀行",
+      "url": "https://www.dbs.com.tw"
     },
     {
       "code": "812",
-      "name": "台新國際商業銀行"
+      "name": "台新國際商業銀行",
+      "url": "https://www.taishinbank.com.tw"
     },
     {
       "code": "816",
-      "name": "安泰商業銀行"
+      "name": "安泰商業銀行",
+      "url": "https://www.entiebank.com.tw"
     },
     {
       "code": "822",
-      "name": "中國信託商業銀行"
+      "name": "中國信託商業銀行",
+      "url": "https://www.ctbcbank.com"
     },
     {
       "code": "823",
-      "name": "將來商業銀行"
+      "name": "將來商業銀行",
+      "url": "https://www.nextbank.com.tw"
     },
     {
       "code": "824",
-      "name": "連線商業銀行"
+      "name": "連線商業銀行",
+      "url": "https://www.linebank.com.tw"
     },
     {
       "code": "826",
-      "name": "樂天國際商業銀行"
+      "name": "樂天國際商業銀行",
+      "url": "https://www.rakuten-bank.com.tw"
     },
     {
       "code": "952",

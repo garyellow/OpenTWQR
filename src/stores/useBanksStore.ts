@@ -1,26 +1,29 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Bank } from '../types';
-import { BANKS, BANKS_SOURCE } from '../data/banks';
+import { BANKS, BANKS_SOURCE } from '../data/banks.generated';
 import { idbStorage } from './idbStorage';
 
 interface RemoteBankPayload {
   source?: {
     provider?: string;
     url?: string;
-    business?: string;
+    fiscUrl?: string;
+    fscUrl?: string;
+    businesses?: string[];
     generatedAt?: string;
     count?: number;
   };
-  banks?: Array<{ code?: string; name?: string }>;
+  banks?: Array<{ code?: string; name?: string; url?: string }>;
 }
 
 interface BanksState {
   banks: Bank[];
   source: {
     provider: string;
-    url: string;
-    business?: string;
+    fiscUrl?: string;
+    fscUrl?: string;
+    businesses?: string[];
     generatedAt?: string;
     count: number;
   };
@@ -35,15 +38,16 @@ const FALLBACK_BANKS = [...BANKS].sort((left, right) => Number(left.code) - Numb
 
 const FALLBACK_SOURCE = {
   provider: BANKS_SOURCE.provider,
-  url: BANKS_SOURCE.url,
-  business: 'business' in BANKS_SOURCE ? BANKS_SOURCE.business : undefined,
+  fiscUrl: BANKS_SOURCE.fiscUrl,
+  fscUrl: BANKS_SOURCE.fscUrl,
+  businesses: 'businesses' in BANKS_SOURCE ? [...BANKS_SOURCE.businesses] : undefined,
   generatedAt: BANKS_SOURCE.generatedAt,
   count: FALLBACK_BANKS.length,
 };
 
 const normalizeRemoteBanks = (payload: RemoteBankPayload): Bank[] => {
   const items = Array.isArray(payload.banks) ? payload.banks : [];
-  const unique = new Map<string, string>();
+  const unique = new Map<string, { name: string; url?: string }>();
 
   for (const item of items) {
     const rawCode = item?.code?.trim();
@@ -54,12 +58,15 @@ const normalizeRemoteBanks = (payload: RemoteBankPayload): Bank[] => {
     }
 
     if (!unique.has(rawCode)) {
-      unique.set(rawCode, rawName);
+      unique.set(rawCode, {
+        name: rawName,
+        url: typeof item?.url === 'string' && item.url.trim() ? item.url.trim() : undefined,
+      });
     }
   }
 
   return [...unique.entries()]
-    .map(([code, name]) => ({ code, name }))
+    .map(([code, data]) => ({ code, name: data.name, url: data.url }))
     .sort((left, right) => Number(left.code) - Number(right.code));
 };
 
@@ -117,8 +124,9 @@ export const useBanksStore = create<BanksState>()(
               banks,
               source: {
                 provider: payload.source?.provider || FALLBACK_SOURCE.provider,
-                url: payload.source?.url || FALLBACK_SOURCE.url,
-                business: payload.source?.business || FALLBACK_SOURCE.business,
+                fiscUrl: payload.source?.fiscUrl || FALLBACK_SOURCE.fiscUrl,
+                fscUrl: payload.source?.fscUrl || FALLBACK_SOURCE.fscUrl,
+                businesses: payload.source?.businesses || FALLBACK_SOURCE.businesses,
                 generatedAt: payload.source?.generatedAt,
                 count: banks.length,
               },

@@ -9,7 +9,7 @@
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-export const PBKDF2_ITERATIONS = 600_000;
+const PBKDF2_ITERATIONS = 600_000;
 export const IV_LEN = 12;
 export const SALT_LEN = 16;
 export const KEY_LEN = 32;

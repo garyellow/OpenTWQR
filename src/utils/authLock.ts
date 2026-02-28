@@ -15,14 +15,14 @@ const generateChallenge = (): ArrayBuffer => {
 };
 
 /** Encode an ArrayBuffer to a URL-safe Base64 string for storage. */
-export const bufferToBase64 = (buffer: ArrayBuffer): string =>
+const bufferToBase64 = (buffer: ArrayBuffer): string =>
   btoa(String.fromCharCode(...new Uint8Array(buffer)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
 
 /** Decode a URL-safe Base64 string back to an ArrayBuffer. */
-export const base64ToBuffer = (base64: string): ArrayBuffer => {
+const base64ToBuffer = (base64: string): ArrayBuffer => {
   const padded = base64.replace(/-/g, '+').replace(/_/g, '/');
   const binary = atob(padded);
   const buf = new ArrayBuffer(binary.length);

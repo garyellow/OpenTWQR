@@ -20,17 +20,17 @@ export const AccountCard = ({
   onEdit,
 }: AccountCardProps) => {
   const banks = useBanksStore((state) => state.banks);
-  const bankName = banks.find((b) => b.code === account.bankCode)?.name || account.bankCode;
+  const bank = banks.find((b) => b.code === account.bankCode);
+  const bankName = bank?.name || account.bankCode;
   const displayName = account.label || bankName;
   const showBankSubtitle = Boolean(account.label);
 
   return (
     <article
-      className={`relative min-w-0 p-5 rounded-2xl transition-all border ${
-        isSelected
-          ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 shadow-md'
-          : 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs'
-      }`}
+      className={`relative min-w-0 p-5 rounded-2xl transition-all border ${isSelected
+        ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 shadow-md'
+        : 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs'
+        }`}
     >
       {/* Full-card tap target */}
       <button
@@ -52,9 +52,9 @@ export const AccountCard = ({
                 aria-hidden="true"
               />
             </div>
-          ) : account.iconUrl ? (
-            <BankIcon iconUrl={account.iconUrl} bankCode={account.bankCode} size="sm" />
-          ) : null}
+          ) : (
+            <BankIcon iconUrl={account.iconUrl} bankUrl={bank?.url} bankCode={account.bankCode} size="sm" />
+          )}
           <h3 className={`font-semibold truncate text-lg ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'}`}>
             {displayName}
           </h3>
@@ -82,11 +82,10 @@ export const AccountCard = ({
             type="button"
             aria-label="編輯帳戶"
             onClick={onEdit}
-            className={`p-3 rounded-xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
-              isSelected
-                ? 'text-white/70 hover:text-white hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-zinc-900 dark:hover:bg-black/10'
-                : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-            }`}
+            className={`p-3 rounded-xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${isSelected
+              ? 'text-white/70 hover:text-white hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-zinc-900 dark:hover:bg-black/10'
+              : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+              }`}
           >
             <Pencil size={18} aria-hidden="true" />
           </button>
@@ -96,11 +95,10 @@ export const AccountCard = ({
             type="button"
             aria-label="刪除帳戶"
             onClick={onDelete}
-            className={`p-3 rounded-xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-500 ${
-              isSelected
-                ? 'text-white/70 hover:text-red-300 hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-red-600 dark:hover:bg-black/10'
-                : 'text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10'
-            }`}
+            className={`p-3 rounded-xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-500 ${isSelected
+              ? 'text-white/70 hover:text-red-300 hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-red-600 dark:hover:bg-black/10'
+              : 'text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10'
+              }`}
           >
             <Trash2 size={18} aria-hidden="true" />
           </button>

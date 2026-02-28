@@ -26,9 +26,11 @@ export const ReceivePage = () => {
     [accounts, selectedAccountId],
   );
 
-  const bankName = useMemo(() => {
-    return banks.find((b) => b.code === selectedAccount?.bankCode)?.name || '';
+  const bank = useMemo(() => {
+    return banks.find((b) => b.code === selectedAccount?.bankCode);
   }, [banks, selectedAccount]);
+
+  const bankName = bank?.name || '';
 
   /* ---------- QR string generation ---------- */
   const qrString = useMemo(() => {
@@ -160,7 +162,7 @@ export const ReceivePage = () => {
             viewTransition
             className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all group active:scale-98 shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
           >
-            <BankIcon iconUrl={selectedAccount.iconUrl} bankCode={selectedAccount.bankCode} />
+            <BankIcon iconUrl={selectedAccount.iconUrl} bankUrl={bank?.url} bankCode={selectedAccount.bankCode} />
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-base">
                 {selectedAccount.label || bankName || '我的帳戶'}

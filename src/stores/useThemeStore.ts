@@ -8,7 +8,7 @@ interface ThemeState {
   setMode: (mode: ThemeMode) => void;
 }
 
-export const getResolvedTheme = (mode: ThemeMode): 'light' | 'dark' => {
+const getResolvedTheme = (mode: ThemeMode): 'light' | 'dark' => {
   if (mode === 'system') {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }

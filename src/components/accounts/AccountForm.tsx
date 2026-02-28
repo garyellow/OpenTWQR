@@ -4,7 +4,7 @@ import { useAppStore } from '../../stores/useAppStore';
 import type { BankAccount } from '../../types';
 import { isValidAccount } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
-import { AlertCircle, AlertTriangle, Globe, Image } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Globe } from 'lucide-react';
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
@@ -70,14 +70,19 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <BankSelect
-        value={bankCode}
-        onChange={(code) => {
-          setBankCode(code);
-          setError('');
-          setDuplicateWarning('');
-        }}
-      />
+      <div>
+        <BankSelect
+          value={bankCode}
+          onChange={(code) => {
+            setBankCode(code);
+            setError('');
+            setDuplicateWarning('');
+          }}
+        />
+        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+          收款帳戶所屬的金融機構
+        </p>
+      </div>
 
       <div>
         <label
@@ -93,7 +98,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           inputMode="numeric"
           autoComplete="off"
           spellCheck={false}
-          placeholder="0000000000000000…"
+          placeholder="輸入銀行帳號…"
           value={accountNumber}
           onChange={(e) => {
             setAccountNumber(e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
@@ -104,7 +109,9 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
           className={`${inputClass} text-lg font-mono tracking-widest`}
         />
-        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">10–16 位數字</p>
+        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+          10–16 位數字，不含分行代碼
+        </p>
       </div>
 
       <div>
@@ -127,6 +134,9 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           }}
           className={inputClass}
         />
+        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+          方便區分不同帳戶用途
+        </p>
       </div>
 
       <div>
@@ -134,7 +144,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           htmlFor="account-icon-url"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          銀行圖示（選填）
+          自訂圖示（選填）
         </label>
         <div className="relative">
           {resolvedIcon && !iconError ? (
@@ -154,7 +164,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             type="url"
             autoComplete="off"
             spellCheck={false}
-            placeholder="https://bank.example.com"
+            placeholder="https://example.com/icon.png"
             value={iconUrl}
             onChange={(e) => {
               setIconUrl(e.target.value);
@@ -163,9 +173,8 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             className={`${inputClass} pl-11`}
           />
         </div>
-        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1 flex items-start gap-1.5">
-          <Image size={13} className="shrink-0 mt-0.5" aria-hidden="true" />
-          <span>輸入圖片網址直接顯示，或輸入銀行官網自動抓取 Favicon</span>
+        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1">
+          留空會自動使用銀行官方圖示
         </p>
       </div>
 

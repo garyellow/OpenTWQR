@@ -1,6 +1,8 @@
 export interface Bank {
   code: string;
   name: string;
+  /** Default official website URL (from FSC open data). */
+  url?: string;
 }
 
 export interface BankAccount {
@@ -8,15 +10,7 @@ export interface BankAccount {
   bankCode: string;
   accountNumber: string;
   label?: string;
-  /**
-   * Optional icon for visual identification.
-   *
-   * Accepted formats:
-   * - **Direct image URL** — an absolute URL ending in a common image extension
-   *   (`.ico`, `.png`, `.jpg`, `.svg`, `.webp`) is used as-is.
-   * - **Website URL** — any other `https://…` URL is treated as a bank homepage;
-   *   the resolved favicon is derived as `${origin}/favicon.ico` at display time.
-   */
+  /** Optional user-defined icon URL (overrides the bank default). */
   iconUrl?: string;
 }
 
