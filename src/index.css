@@ -4,9 +4,13 @@
 /*
  * Override tw-animate-css default animation-fill-mode from `none` to `both`.
  *
- * Without this, exit animations (animate-out) revert to the element's
- * original visible state for 1–2 frames between the animation ending and
- * React unmounting the element, causing a visible flash/flicker.
+ * tw-animate-css defines `@property --tw-animation-fill-mode { initial-value: none }`
+ * and uses `var(--tw-animation-fill-mode, none)` in its animation shorthands.
+ * Using another `@property` to override fails because Vite's CSS pipeline
+ * deduplicates `@property` rules and the original `none` wins.
+ *
+ * Instead, we set the CSS custom property directly on the animated elements.
+ * This takes precedence over the @property initial-value.
  *
  * `both` = `backwards` + `forwards`:
  *   - Entrance (animate-in): element displays the "from" keyframe (e.g.
@@ -15,10 +19,9 @@
  *   - Exit (animate-out): element holds the "to" keyframe (e.g. transparent)
  *     after the animation ends — no snap-back to visible before unmount.
  */
-@property --tw-animation-fill-mode {
-  syntax: "*";
-  inherits: false;
-  initial-value: both;
+.animate-in,
+.animate-out {
+  --tw-animation-fill-mode: both;
 }
 
 @variant dark (&:where(.dark, .dark *));

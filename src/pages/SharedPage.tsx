@@ -94,7 +94,14 @@ export const SharedPage = () => {
             className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs text-center"
           />
           {result.status === 'wrong-password' && (
-            <p id="shared-pw-error" role="alert" className="text-red-500 dark:text-red-400 text-sm text-center">密碼錯誤，請重新輸入</p>
+            <div
+              id="shared-pw-error"
+              role="alert"
+              className="flex items-center justify-center gap-2 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-2xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
+            >
+              <Lock size={16} className="shrink-0" aria-hidden="true" />
+              <span className="font-medium">密碼錯誤，請重新輸入</span>
+            </div>
           )}
           <button
             type="button"

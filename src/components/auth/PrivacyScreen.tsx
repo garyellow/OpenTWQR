@@ -10,8 +10,14 @@ import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
  * preventing bystanders from glimpsing sensitive account data.
  *
  * Implementation:
- * - Uses `backdrop-filter: blur(64px)` with a semi-transparent background
- *   to heavily blur the underlying app content (frosted glass effect).
+ * - Uses `backdrop-filter: blur(40px) saturate(1.5)` with a low-opacity
+ *   tinted background to create a visible frosted-glass effect.
+ *   The blur itself makes **all** text and numbers completely unreadable
+ *   (privacy is preserved), while the low opacity lets blurred shapes and
+ *   colours bleed through so the overlay looks like actual frosted glass
+ *   rather than a plain white/dark screen.
+ * - `backdrop-saturate-150` lifts the vibrancy of the blurred colours,
+ *   matching the iOS / macOS frosted-glass aesthetic (`blur` + `saturate`).
  * - Centres the coloured OpenTWQR SVG logo as the sole visual element —
  *   clean, branded, and recognisable in the task switcher thumbnail.
  * - The overlay is kept hidden via `visibility: hidden` (not `display: none`)
@@ -92,7 +98,7 @@ export const PrivacyScreen = () => {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-100 flex items-center justify-center bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-3xl"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-white/30 dark:bg-black/40 backdrop-blur-2xl backdrop-saturate-150"
       style={{ visibility: 'hidden' }}
       aria-hidden="true"
     >

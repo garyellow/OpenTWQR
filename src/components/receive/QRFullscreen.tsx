@@ -119,7 +119,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
         type="button"
         onClick={requestClose}
         aria-label="關閉全螢幕"
-        className="mt-10 text-white/40 text-xs transition-opacity hover:text-white/60"
+        className="mt-10 text-white/60 text-xs transition-opacity hover:text-white/80"
       >
         點擊任意處返回
       </button>

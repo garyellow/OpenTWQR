@@ -238,7 +238,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     <div ref={modalRef} className="fixed inset-0 z-80">
       {/* Backdrop — animated independently; clicks close the modal */}
       <div
-        className={`absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm motion-reduce:animate-none ${
+        className={`absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${
           isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
         }`}
         onClick={requestClose}
@@ -263,7 +263,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             type="button"
             onClick={requestClose}
             aria-label="關閉"
-            className="p-2 -mr-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <X size={20} aria-hidden="true" />
           </button>

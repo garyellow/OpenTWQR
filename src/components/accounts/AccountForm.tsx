@@ -188,7 +188,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           id="form-error"
           role="alert"
           aria-live="polite"
-          className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-2xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200"
+          className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-2xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
         >
           <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
           <span className="font-medium">{error}</span>
@@ -199,7 +199,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         <div
           role="alert"
           aria-live="polite"
-          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-2xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200"
+          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-2xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
         >
           <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
             <AlertTriangle size={18} className="shrink-0" aria-hidden="true" />
