@@ -24,7 +24,7 @@ export const toBase64Url = (buf: Uint8Array): string => {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 };
 
-export const fromBase64Url = (str: string): Uint8Array => {
+export const fromBase64Url = (str: string): Uint8Array<ArrayBuffer> => {
   const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
   const padding = '='.repeat((4 - (base64.length % 4)) % 4);
   const binary = atob(base64 + padding);
@@ -46,7 +46,7 @@ export const asBuffer = (data: Uint8Array): ArrayBuffer => {
 
 export const deriveKeyFromPassword = async (
   password: string,
-  salt: Uint8Array,
+  salt: Uint8Array<ArrayBuffer>,
 ): Promise<CryptoKey> => {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',

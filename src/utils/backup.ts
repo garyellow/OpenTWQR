@@ -81,8 +81,8 @@ export const exportBackup = async (
     const iv = crypto.getRandomValues(new Uint8Array(IV_LEN));
 
     let key: CryptoKey;
-    let salt: Uint8Array | null = null;
-    let rawKeyBytes: Uint8Array | null = null;
+    let salt: Uint8Array<ArrayBuffer> | null = null;
+    let rawKeyBytes: Uint8Array<ArrayBuffer> | null = null;
 
     if (hasPassword) {
       salt = crypto.getRandomValues(new Uint8Array(SALT_LEN));
@@ -164,8 +164,8 @@ export const importBackup = async (
     const hasPassword = (flags & 0x01) !== 0;
 
     let key: CryptoKey;
-    let iv: Uint8Array;
-    let ciphertext: Uint8Array;
+    let iv: Uint8Array<ArrayBuffer>;
+    let ciphertext: Uint8Array<ArrayBuffer>;
 
     if (hasPassword) {
       // Need at least header + salt + iv + 1 byte ciphertext

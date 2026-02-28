@@ -17,18 +17,18 @@ const VERSION = 0x01;
 
 const aesEncrypt = async (
   key: CryptoKey,
-  iv: Uint8Array,
-  plaintext: Uint8Array,
-): Promise<Uint8Array> => {
+  iv: Uint8Array<ArrayBuffer>,
+  plaintext: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer>> => {
   const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
   return new Uint8Array(ct);
 };
 
 const aesDecrypt = async (
   key: CryptoKey,
-  iv: Uint8Array,
-  ciphertext: Uint8Array,
-): Promise<Uint8Array | null> => {
+  iv: Uint8Array<ArrayBuffer>,
+  ciphertext: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer> | null> => {
   try {
     const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
     return new Uint8Array(pt);
@@ -134,8 +134,8 @@ export const parseShareUrl = async (
     const hasPassword = (flags & 0x01) !== 0;
     const iv = pathBytes.slice(2, 2 + IV_LEN);
 
-    let ciphertext: Uint8Array;
-    let rawKey: Uint8Array;
+    let ciphertext: Uint8Array<ArrayBuffer>;
+    let rawKey: Uint8Array<ArrayBuffer>;
 
     if (hasPassword) {
       if (pathBytes.length < 2 + IV_LEN + SALT_LEN + 1) return { status: 'invalid' };
