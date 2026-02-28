@@ -13,15 +13,21 @@
 
 <br />
 
+**手機版**
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/welcome-dark.png" />
-  <img src="public/screenshots/welcome-light.png" alt="OpenTWQR 歡迎畫面" width="200" />
+  <img src="public/screenshots/welcome-light.png" alt="OpenTWQR 歡迎畫面（手機版）" width="200" />
 </picture>&nbsp;&nbsp;<picture>
   <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
-  <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面" width="200" />
-</picture>&nbsp;&nbsp;<picture>
+  <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面（手機版）" width="200" />
+</picture>
+
+**桌面版**
+
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
-  <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 桌面版畫面" width="420" />
+  <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 收款畫面（桌面版）" width="600" />
 </picture>
 
 <br />
