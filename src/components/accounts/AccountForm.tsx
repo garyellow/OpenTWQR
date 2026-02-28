@@ -3,7 +3,8 @@ import { BankSelect } from './BankSelect';
 import { useAppStore } from '../../stores/useAppStore';
 import type { BankAccount } from '../../types';
 import { isValidAccount } from '../../utils/twqr';
-import { AlertCircle, AlertTriangle } from 'lucide-react';
+import { resolveIconSrc } from '../../utils/favicon';
+import { AlertCircle, AlertTriangle, Globe, Image } from 'lucide-react';
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
@@ -17,6 +18,8 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const [bankCode, setBankCode] = useState(initialData?.bankCode || '');
   const [accountNumber, setAccountNumber] = useState(initialData?.accountNumber || '');
   const [label, setLabel] = useState(initialData?.label || '');
+  const [iconUrl, setIconUrl] = useState(initialData?.iconUrl || '');
+  const [iconError, setIconError] = useState(false);
   const [error, setError] = useState('');
   const [duplicateWarning, setDuplicateWarning] = useState('');
 
@@ -57,8 +60,10 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
       return;
     }
 
-    onSubmit({ bankCode, accountNumber, label: label || undefined });
+    onSubmit({ bankCode, accountNumber, label: label || undefined, iconUrl: iconUrl.trim() || undefined });
   };
+
+  const resolvedIcon = resolveIconSrc(iconUrl);
 
   const inputClass =
     'w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs';
@@ -124,6 +129,46 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         />
       </div>
 
+      <div>
+        <label
+          htmlFor="account-icon-url"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
+        >
+          銀行圖示（選填）
+        </label>
+        <div className="relative">
+          {resolvedIcon && !iconError ? (
+            <img
+              src={resolvedIcon}
+              alt=""
+              onError={() => setIconError(true)}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 rounded-sm object-contain"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <Globe size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none" aria-hidden="true" />
+          )}
+          <input
+            id="account-icon-url"
+            name="iconUrl"
+            type="url"
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="https://bank.example.com"
+            value={iconUrl}
+            onChange={(e) => {
+              setIconUrl(e.target.value);
+              setIconError(false);
+            }}
+            className={`${inputClass} pl-11`}
+          />
+        </div>
+        <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-2 ml-1 flex items-start gap-1.5">
+          <Image size={13} className="shrink-0 mt-0.5" aria-hidden="true" />
+          <span>輸入圖片網址直接顯示，或輸入銀行官網自動抓取 Favicon</span>
+        </p>
+      </div>
+
       {error && (
         <div
           id="form-error"
@@ -156,7 +201,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             </button>
             <button
               type="button"
-              onClick={() => onSubmit({ bankCode, accountNumber, label: label || undefined })}
+              onClick={() => onSubmit({ bankCode, accountNumber, label: label || undefined, iconUrl: iconUrl.trim() || undefined })}
               className="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
             >
               仍要新增

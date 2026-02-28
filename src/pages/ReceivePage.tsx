@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { OpenTWQRLogo } from '../components/ui/OpenTWQRLogo';
+import { BankIcon } from '../components/accounts/BankIcon';
 import { haptic } from '../utils/haptics';
 
 export const ReceivePage = () => {
@@ -133,7 +134,7 @@ export const ReceivePage = () => {
         跳至主要內容
       </a>
 
-      <main id="receive-main" className="flex-1 flex flex-col min-h-0 max-w-md mx-auto w-full pb-safe">
+      <main id="receive-main" className="flex-1 flex flex-col min-h-0 max-w-md lg:max-w-lg mx-auto w-full pb-safe">
         {/* Header */}
         <header className="shrink-0 flex justify-between items-center p-5 pt-[calc(1.25rem+env(safe-area-inset-top))]">
           <h1>
@@ -159,9 +160,7 @@ export const ReceivePage = () => {
             viewTransition
             className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all group active:scale-98 shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-semibold text-sm bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-700/50">
-              {selectedAccount.bankCode.substring(0, 3)}
-            </div>
+            <BankIcon iconUrl={selectedAccount.iconUrl} bankCode={selectedAccount.bankCode} />
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-base">
                 {selectedAccount.label || bankName || '我的帳戶'}

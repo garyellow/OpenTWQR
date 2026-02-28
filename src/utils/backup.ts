@@ -234,6 +234,7 @@ export const importBackup = async (
           bankCode: acc.bankCode,
           accountNumber: acc.accountNumber,
           label: typeof acc.label === 'string' ? acc.label : undefined,
+          iconUrl: typeof acc.iconUrl === 'string' ? acc.iconUrl : undefined,
         });
       }
     }

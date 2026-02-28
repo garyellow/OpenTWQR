@@ -8,6 +8,16 @@ export interface BankAccount {
   bankCode: string;
   accountNumber: string;
   label?: string;
+  /**
+   * Optional icon for visual identification.
+   *
+   * Accepted formats:
+   * - **Direct image URL** — an absolute URL ending in a common image extension
+   *   (`.ico`, `.png`, `.jpg`, `.svg`, `.webp`) is used as-is.
+   * - **Website URL** — any other `https://…` URL is treated as a bank homepage;
+   *   the resolved favicon is derived as `${origin}/favicon.ico` at display time.
+   */
+  iconUrl?: string;
 }
 
 export interface TWQRParams {

@@ -13,21 +13,28 @@
 
 <br />
 
-<table border="0" cellpadding="12" cellspacing="0">
+<table border="0" cellpadding="8" cellspacing="0">
   <tr>
     <td align="center" valign="middle">
-      <!-- 電腦版截圖：手機視埠（≤767px）以 1×1 透明 GIF 隱藏，桌面視埠顯示實際截圖 -->
+      <!-- 歡迎畫面（手機版） -->
       <picture>
-        <source media="(max-width: 767px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
-        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
-        <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 電腦版畫面" width="480" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/welcome-dark.png" />
+        <img src="public/screenshots/welcome-light.png" alt="OpenTWQR 歡迎畫面" width="200" />
       </picture>
     </td>
     <td align="center" valign="middle">
-      <!-- 手機版截圖：所有視埠皆顯示 -->
+      <!-- 收款畫面（手機版） -->
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
-        <img src="public/screenshots/receive-light.png" alt="OpenTWQR 手機版畫面" width="240" />
+        <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面" width="200" />
+      </picture>
+    </td>
+    <td align="center" valign="middle">
+      <!-- 桌面版收款畫面：手機視埠（≤767px）隱藏 -->
+      <picture>
+        <source media="(max-width: 767px)" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
+        <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 桌面版畫面" width="420" />
       </picture>
     </td>
   </tr>

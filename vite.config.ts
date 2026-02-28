@@ -102,18 +102,46 @@ export default defineConfig({
         } as Record<string, unknown>),
         screenshots: [
           {
+            src: 'screenshots/welcome-light.png',
+            sizes: '1290x2796',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: '歡迎畫面',
+          },
+          {
+            src: 'screenshots/welcome-dark.png',
+            sizes: '1290x2796',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: '歡迎畫面（深色模式）',
+          },
+          {
             src: 'screenshots/receive-light.png',
-            sizes: '780x1688',
+            sizes: '1290x2796',
             type: 'image/png',
             form_factor: 'narrow',
             label: '收款頁面',
           },
           {
             src: 'screenshots/receive-dark.png',
-            sizes: '780x1688',
+            sizes: '1290x2796',
             type: 'image/png',
             form_factor: 'narrow',
             label: '收款頁面（深色模式）',
+          },
+          {
+            src: 'screenshots/welcome-desktop-light.png',
+            sizes: '2560x1600',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: '歡迎畫面（桌面版）',
+          },
+          {
+            src: 'screenshots/welcome-desktop-dark.png',
+            sizes: '2560x1600',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: '歡迎畫面（桌面版深色模式）',
           },
           {
             src: 'screenshots/receive-desktop-light.png',

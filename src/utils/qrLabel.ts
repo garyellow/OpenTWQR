@@ -5,7 +5,7 @@ import { LOGO_SVG_STRING } from '../data/logoPaths';
  *
  * Path data is shared via `src/data/logoPaths.ts` (canonical source).
  *
- * - "Open" — Nunito SemiBold (600) filled outlines in TWQR brand teal (#008BBA)
+ * - "Open" — Montserrat SemiBold (600) filled outlines in TWQR brand teal (#008BBA)
  * - "TWQR" — official vector paths in standard brand colours:
  *   - Pink (#E74E95) for the stylised TW heartbeat + QR interior accents
  *   - Teal (#008BBA) for Q, R, period and structural elements

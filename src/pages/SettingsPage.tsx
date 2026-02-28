@@ -34,7 +34,7 @@ export const SettingsPage = () => {
       </div>
 
       {/* Content */}
-      <main id="settings-main" className="flex-1 p-5 max-w-md mx-auto w-full">
+      <main id="settings-main" className="flex-1 p-5 max-w-md lg:max-w-lg mx-auto w-full">
         <div className="space-y-8 pb-24">
           <AppLockSection />
           <BackupSection />

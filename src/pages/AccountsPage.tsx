@@ -91,7 +91,7 @@ export const AccountsPage = () => {
       </div>
 
       {/* Content */}
-      <main id="accounts-main" className="flex-1 p-5 max-w-md mx-auto w-full">
+      <main id="accounts-main" className="flex-1 p-5 max-w-md lg:max-w-lg mx-auto w-full">
         {accounts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
             <div className="w-24 h-24 rounded-3xl bg-white dark:bg-zinc-900 text-zinc-300 dark:text-zinc-700 border border-zinc-200/50 dark:border-zinc-800/50 flex items-center justify-center shadow-xs">

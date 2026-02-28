@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Lock, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { authenticate } from '../../utils/authLock';
+import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
 import { haptic } from '../../utils/haptics';
 
 /**
@@ -42,8 +43,8 @@ export const AuthLockScreen = () => {
 
       {/* Headline */}
       <div className="text-center space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          OpenTWQR
+        <h1>
+          <OpenTWQRLogo className="h-9 w-auto mx-auto" />
         </h1>
         <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
           請驗證身分以解鎖應用程式
