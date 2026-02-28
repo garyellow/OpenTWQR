@@ -148,6 +148,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
         bankCode: c.original.bankCode,
         accountNumber: c.original.accountNumber,
         label: c.label || undefined,
+        iconUrl: c.original.iconUrl || undefined,
       });
       if (!firstNewId) firstNewId = newId;
       added++;

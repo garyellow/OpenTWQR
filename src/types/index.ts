@@ -1,7 +1,7 @@
 export interface Bank {
   code: string;
   name: string;
-  /** Default official website URL (from FSC open data). */
+  /** Default official website URL (from Banking Bureau or FSC open data). */
   url?: string;
 }
 

@@ -8,9 +8,6 @@ interface RemoteBankPayload {
   source?: {
     provider?: string;
     url?: string;
-    fiscUrl?: string;
-    fscUrl?: string;
-    businesses?: string[];
     generatedAt?: string;
     count?: number;
   };
@@ -21,9 +18,7 @@ interface BanksState {
   banks: Bank[];
   source: {
     provider: string;
-    fiscUrl?: string;
-    fscUrl?: string;
-    businesses?: string[];
+    url?: string;
     generatedAt?: string;
     count: number;
   };
@@ -38,9 +33,7 @@ const FALLBACK_BANKS = [...BANKS].sort((left, right) => Number(left.code) - Numb
 
 const FALLBACK_SOURCE = {
   provider: BANKS_SOURCE.provider,
-  fiscUrl: BANKS_SOURCE.fiscUrl,
-  fscUrl: BANKS_SOURCE.fscUrl,
-  businesses: 'businesses' in BANKS_SOURCE ? [...BANKS_SOURCE.businesses] : undefined,
+  url: BANKS_SOURCE.url,
   generatedAt: BANKS_SOURCE.generatedAt,
   count: FALLBACK_BANKS.length,
 };
@@ -124,9 +117,7 @@ export const useBanksStore = create<BanksState>()(
               banks,
               source: {
                 provider: payload.source?.provider || FALLBACK_SOURCE.provider,
-                fiscUrl: payload.source?.fiscUrl || FALLBACK_SOURCE.fiscUrl,
-                fscUrl: payload.source?.fscUrl || FALLBACK_SOURCE.fscUrl,
-                businesses: payload.source?.businesses || FALLBACK_SOURCE.businesses,
+                url: payload.source?.url || FALLBACK_SOURCE.url,
                 generatedAt: payload.source?.generatedAt,
                 count: banks.length,
               },
