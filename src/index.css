@@ -1,6 +1,26 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/*
+ * Override tw-animate-css default animation-fill-mode from `none` to `both`.
+ *
+ * Without this, exit animations (animate-out) revert to the element's
+ * original visible state for 1–2 frames between the animation ending and
+ * React unmounting the element, causing a visible flash/flicker.
+ *
+ * `both` = `backwards` + `forwards`:
+ *   - Entrance (animate-in): element displays the "from" keyframe (e.g.
+ *     transparent / scaled-down) before the animation starts — no 1-frame
+ *     flash of full opacity on mount.
+ *   - Exit (animate-out): element holds the "to" keyframe (e.g. transparent)
+ *     after the animation ends — no snap-back to visible before unmount.
+ */
+@property --tw-animation-fill-mode {
+  syntax: "*";
+  inherits: false;
+  initial-value: both;
+}
+
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
