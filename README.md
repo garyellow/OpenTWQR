@@ -13,22 +13,42 @@
 
 <br />
 
-**手機版**
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/welcome-dark.png" />
-  <img src="public/screenshots/welcome-light.png" alt="OpenTWQR 歡迎畫面（手機版）" width="200" />
-</picture>&nbsp;&nbsp;<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
-  <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面（手機版）" width="200" />
-</picture>
-
-**桌面版**
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
-  <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 收款畫面（桌面版）" width="600" />
-</picture>
+<table>
+  <tr>
+    <th colspan="2">📱 手機版</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/welcome-dark.png" />
+        <img src="public/screenshots/welcome-light.png" alt="OpenTWQR 歡迎畫面（手機版）" width="200" />
+      </picture>
+      <br />
+      <sub>歡迎畫面</sub>
+    </td>
+    <td align="center">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
+        <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面（手機版）" width="200" />
+      </picture>
+      <br />
+      <sub>收款畫面</sub>
+    </td>
+  </tr>
+  <tr>
+    <th colspan="2">🖥️ 桌面版</th>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
+        <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 收款畫面（桌面版）" width="600" />
+      </picture>
+      <br />
+      <sub>收款畫面</sub>
+    </td>
+  </tr>
+</table>
 
 <br />
 
