@@ -1,5 +1,6 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { Delete, X } from 'lucide-react';
+import { haptic } from '../../utils/haptics';
 
 interface AmountInputProps {
   value: string;
@@ -8,6 +9,13 @@ interface AmountInputProps {
 }
 
 export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInputProps) => {
+  const [isShaking, setIsShaking] = useState(false);
+
+  const rejectInput = useCallback(() => {
+    haptic();
+    setIsShaking(true);
+  }, []);
+
   const handleDigit = useCallback(
     (digit: string) => {
       const newValue = value + digit;
@@ -16,11 +24,14 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
       if (Number.isNaN(numericValue) || numericValue <= 0) return;
 
       const normalized = numericValue.toString();
-      if (normalized.length > 9 || numericValue > maxAmount) return;
+      if (normalized.length > 9 || numericValue > maxAmount) {
+        rejectInput();
+        return;
+      }
 
       onChange(normalized);
     },
-    [value, onChange, maxAmount],
+    [value, onChange, maxAmount, rejectInput],
   );
 
   const handleBackspace = useCallback(() => {
@@ -64,7 +75,12 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
       {/* Amount display */}
       <div className="flex flex-col items-center justify-center relative">
         <span className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-2">轉帳金額</span>
-        <div className="flex items-center justify-center w-full relative" aria-live="polite" aria-atomic="true">
+        <div
+          className={`flex items-center justify-center w-full relative ${isShaking ? 'animate-shake' : ''}`}
+          aria-live="polite"
+          aria-atomic="true"
+          onAnimationEnd={() => setIsShaking(false)}
+        >
           <div className="flex items-baseline gap-1">
             <span className="text-[2.5rem] font-semibold text-emerald-600 dark:text-emerald-400">NT$</span>
             <span

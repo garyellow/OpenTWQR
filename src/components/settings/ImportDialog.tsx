@@ -196,6 +196,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   setNeedsPassword(false);
                 }}
                 placeholder="OTWQR1-..."
+                aria-label="匯入加密字串"
                 rows={5}
                 autoFocus
                 spellCheck={false}

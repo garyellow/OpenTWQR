@@ -64,14 +64,14 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     // Show immediately (restart)
     setFeedbackClosing(false);
     setFeedback(msg);
-    // Begin closing animation at 1 700 ms—toast disappears at 2 000 ms total
+    // Begin closing animation at 1 800 ms—toast disappears at 2 000 ms total
     feedbackShowTimerRef.current = window.setTimeout(() => {
       setFeedbackClosing(true);
       feedbackHideTimerRef.current = window.setTimeout(() => {
         setFeedback(null);
         setFeedbackClosing(false);
-      }, 300);
-    }, 1700);
+      }, 200);
+    }, 1800);
   }, []);
 
   // Cleanup both feedback timers on unmount
@@ -361,8 +361,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               aria-live="polite"
               className={`absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-medium shadow-lg motion-reduce:animate-none ${
                 feedbackClosing
-                  ? 'animate-out fade-out zoom-out-90 duration-300'
-                  : 'animate-in fade-in zoom-in-95 duration-150'
+                  ? 'animate-out fade-out zoom-out-95 duration-200'
+                  : 'animate-in fade-in zoom-in-95 duration-200'
               }`}
             >
               <Check size={14} aria-hidden="true" />

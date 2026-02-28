@@ -199,7 +199,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
               >
                 {copied ? (
                   <>
-                    <Check size={18} aria-hidden="true" />
+                    <Check size={18} aria-hidden="true" className="animate-in zoom-in-75 fade-in duration-150 motion-reduce:animate-none" />
                     已複製
                   </>
                 ) : (
@@ -218,7 +218,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
                 >
                   {shared ? (
                     <>
-                      <Check size={18} aria-hidden="true" />
+                      <Check size={18} aria-hidden="true" className="animate-in zoom-in-75 fade-in duration-150 motion-reduce:animate-none" />
                       已分享
                     </>
                   ) : (

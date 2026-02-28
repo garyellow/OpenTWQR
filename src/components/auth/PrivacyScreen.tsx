@@ -10,13 +10,15 @@ import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
  * preventing bystanders from glimpsing sensitive account data.
  *
  * Implementation:
- * - Uses `backdrop-filter: blur(40px) saturate(1.5)` with a low-opacity
+ * - Uses `backdrop-filter: blur(16px) saturate(1.8)` with a low-opacity
  *   tinted background to create a visible frosted-glass effect.
- *   The blur itself makes **all** text and numbers completely unreadable
- *   (privacy is preserved), while the low opacity lets blurred shapes and
- *   colours bleed through so the overlay looks like actual frosted glass
- *   rather than a plain white/dark screen.
- * - `backdrop-saturate-150` lifts the vibrancy of the blurred colours,
+ *   16 px of blur makes all **text and numbers completely unreadable**
+ *   (privacy preserved) while keeping large shapes — like the QR code
+ *   card or the amount display — recognisable as blurred silhouettes.
+ *   The low background opacity (15 % white / 25 % black) lets those
+ *   blurred shapes bleed through, so the overlay looks like real frosted
+ *   glass instead of a plain white/dark screen.
+ * - `backdrop-saturate-180` boosts the vibrancy of the blurred colours,
  *   matching the iOS / macOS frosted-glass aesthetic (`blur` + `saturate`).
  * - Centres the coloured OpenTWQR SVG logo as the sole visual element —
  *   clean, branded, and recognisable in the task switcher thumbnail.
@@ -98,7 +100,7 @@ export const PrivacyScreen = () => {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-100 flex items-center justify-center bg-white/30 dark:bg-black/40 backdrop-blur-2xl backdrop-saturate-150"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-white/15 dark:bg-black/25 backdrop-blur-lg backdrop-saturate-[1.8]"
       style={{ visibility: 'hidden' }}
       aria-hidden="true"
     >

@@ -16,8 +16,8 @@ import { useLocation } from 'react-router-dom';
  * - Respects prior dismissals (30-day cooldown) and never shows when
  *   already running in standalone mode.
  * - Hidden on shared `/s/:data` pages (irrelevant for payment senders).
- * - The dismiss action plays a slide-out animation before removing the
- *   banner, preventing the jarring instant-disappear effect.
+ * - The dismiss action plays a slide-out animation; `onAnimationEnd`
+ *   removes the banner from the tree once the animation completes.
  */
 export const InstallPrompt = () => {
   const { canShow, platform, promptInstall, dismiss } = useInstallPrompt();
@@ -26,11 +26,14 @@ export const InstallPrompt = () => {
 
   const handleDismiss = useCallback(() => {
     setIsExiting(true);
-    setTimeout(() => {
+  }, []);
+
+  const handleAnimationEnd = useCallback(() => {
+    if (isExiting) {
       dismiss();
       setIsExiting(false);
-    }, 300);
-  }, [dismiss]);
+    }
+  }, [isExiting, dismiss]);
 
   // Don't show on shared payment pages — those are for payers, not the app owner
   // Keep rendering while exiting so the slide-out animation can complete
@@ -45,6 +48,7 @@ export const InstallPrompt = () => {
           ? 'animate-out slide-out-to-bottom-4 fade-out duration-300'
           : 'animate-in slide-in-from-bottom-4 fade-in duration-300'
       }`}
+      onAnimationEnd={handleAnimationEnd}
     >
       <div className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 pr-12">
         {/* Dismiss button */}

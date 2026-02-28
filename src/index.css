@@ -66,6 +66,21 @@
   transition-duration: 150ms;
 }
 
+/*
+ * animate-shake — short horizontal shake for "rejected input" feedback.
+ * Used by AmountInput when the user exceeds the max amount.
+ */
+@utility animate-shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90%  { translate: -1px 0; }
+  20%, 80%  { translate:  2px 0; }
+  30%, 50%, 70% { translate: -4px 0; }
+  40%, 60%  { translate:  4px 0; }
+}
+
 :root {
   line-height: 1.5;
   font-weight: 400;
