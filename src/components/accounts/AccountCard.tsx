@@ -27,7 +27,7 @@ export const AccountCard = ({
 
   return (
     <article
-      className={`relative min-w-0 p-5 rounded-2xl transition-all border ${isSelected
+      className={`relative min-w-0 p-5 rounded-2xl transition-[background-color,border-color,box-shadow,color,opacity] border ${isSelected
         ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 shadow-md'
         : 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs'
         }`}

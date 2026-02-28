@@ -40,8 +40,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   const [linkPassword, setLinkPassword] = useState('');
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedbackClosing, setFeedbackClosing] = useState(false);
   const [accountRevealed, setAccountRevealed] = useState(false);
-  const feedbackTimerRef = useRef<number | null>(null);
+  const feedbackShowTimerRef = useRef<number | null>(null);
+  const feedbackHideTimerRef = useRef<number | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -56,15 +58,27 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
 
   const showFeedback = useCallback((msg: string) => {
     haptic();
+    // Cancel any in-flight timers
+    if (feedbackShowTimerRef.current) window.clearTimeout(feedbackShowTimerRef.current);
+    if (feedbackHideTimerRef.current) window.clearTimeout(feedbackHideTimerRef.current);
+    // Show immediately (restart)
+    setFeedbackClosing(false);
     setFeedback(msg);
-    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
-    feedbackTimerRef.current = window.setTimeout(() => setFeedback(null), 2000);
+    // Begin closing animation at 1 700 ms—toast disappears at 2 000 ms total
+    feedbackShowTimerRef.current = window.setTimeout(() => {
+      setFeedbackClosing(true);
+      feedbackHideTimerRef.current = window.setTimeout(() => {
+        setFeedback(null);
+        setFeedbackClosing(false);
+      }, 300);
+    }, 1700);
   }, []);
 
-  // Cleanup feedback timer on unmount
+  // Cleanup both feedback timers on unmount
   useEffect(() => {
     return () => {
-      if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+      if (feedbackShowTimerRef.current) window.clearTimeout(feedbackShowTimerRef.current);
+      if (feedbackHideTimerRef.current) window.clearTimeout(feedbackHideTimerRef.current);
     };
   }, []);
 
@@ -312,7 +326,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       aria-label={accountRevealed ? '隱藏帳號' : '顯示帳號'}
                       aria-pressed={accountRevealed}
                       title={accountRevealed ? '隱藏帳號' : '顯示帳號'}
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
                       {accountRevealed
                         ? <Eye size={18} aria-hidden="true" />
@@ -323,7 +337,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       onClick={handleCopyAccount}
                       aria-label="複製帳號"
                       title="複製帳號"
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
+                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
                     >
                       <Copy size={18} aria-hidden="true" />
                     </button>
@@ -345,7 +359,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             <div
               role="status"
               aria-live="polite"
-              className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-medium shadow-lg animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
+              className={`absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-medium shadow-lg motion-reduce:animate-none ${
+                feedbackClosing
+                  ? 'animate-out fade-out zoom-out-90 duration-300'
+                  : 'animate-in fade-in zoom-in-95 duration-150'
+              }`}
             >
               <Check size={14} aria-hidden="true" />
               {feedback}
@@ -356,7 +374,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             <button
               type="button"
               onClick={() => shareMenu.open()}
-              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 transition-all shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <Share2 size={18} aria-hidden="true" />
               <span>分享</span>

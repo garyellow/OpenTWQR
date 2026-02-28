@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme } from './stores/useThemeStore';
 import { useAuthStore } from './stores/useAuthStore';
+import { useAppStore } from './stores/useAppStore';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { PrivacyScreen } from './components/auth/PrivacyScreen';
 import { ReloadPrompt } from './components/layout/ReloadPrompt';
@@ -37,6 +38,10 @@ function App() {
   const authUnlocked = useAuthStore((s) => s.isUnlocked);
   const lockTimeout = useAuthStore((s) => s.lockTimeout);
   const lock = useAuthStore((s) => s.lock);
+
+  /* appStore hydration — wait for it alongside authStore so ReceivePage
+     never shows a secondary PageLoader after the lazy chunk loads. */
+  const appHydrated = useAppStore((s) => s.isHydrated);
 
   const showLockScreen = authEnabled && !authUnlocked && !isSharedPage && authHydrated;
 
@@ -92,7 +97,7 @@ function App() {
 
   return (
     <>
-      {!authHydrated && !isSharedPage ? (
+      {(!authHydrated || !appHydrated) && !isSharedPage ? (
         <PageLoader />
       ) : showLockScreen ? (
         <AuthLockScreen />

@@ -24,6 +24,25 @@
   padding-right: env(safe-area-inset-right);
 }
 
+/*
+ * action-transition — precision transition for interactive elements
+ *
+ * Using `transition-all` on buttons/links transitions every CSS property,
+ * including layout-affecting ones (padding, margin, width…) that can
+ * silently trigger expensive style recalculations on every interaction.
+ * `action-transition` restricts the transition to the GPU-composited or
+ * paint-only properties that actually change during hover / focus / active
+ * states, giving us smooth animations without the overhead.
+ *
+ * Usage: replace `transition-all` on <button> and <a> elements.
+ */
+@utility action-transition {
+  transition-property: transform, background-color, color, border-color,
+    box-shadow, opacity, text-decoration-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
 :root {
   line-height: 1.5;
   font-weight: 400;

@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { Download, X, Share } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 import { useLocation } from 'react-router-dom';
@@ -15,25 +16,41 @@ import { useLocation } from 'react-router-dom';
  * - Respects prior dismissals (30-day cooldown) and never shows when
  *   already running in standalone mode.
  * - Hidden on shared `/s/:data` pages (irrelevant for payment senders).
+ * - The dismiss action plays a slide-out animation before removing the
+ *   banner, preventing the jarring instant-disappear effect.
  */
 export const InstallPrompt = () => {
   const { canShow, platform, promptInstall, dismiss } = useInstallPrompt();
   const location = useLocation();
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleDismiss = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      dismiss();
+      setIsExiting(false);
+    }, 300);
+  }, [dismiss]);
 
   // Don't show on shared payment pages — those are for payers, not the app owner
-  if (!canShow || !platform || location.pathname.startsWith('/s/')) return null;
+  // Keep rendering while exiting so the slide-out animation can complete
+  if ((!canShow && !isExiting) || !platform || location.pathname.startsWith('/s/')) return null;
 
   return (
     <div
       role="complementary"
       aria-label="安裝應用程式"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-90 w-[calc(100%-2.5rem)] max-w-sm pb-safe animate-in slide-in-from-bottom-4 fade-in duration-300 motion-reduce:animate-none"
+      className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-90 w-[calc(100%-2.5rem)] max-w-sm pb-safe motion-reduce:animate-none ${
+        isExiting
+          ? 'animate-out slide-out-to-bottom-4 fade-out duration-300'
+          : 'animate-in slide-in-from-bottom-4 fade-in duration-300'
+      }`}
     >
       <div className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 pr-12">
         {/* Dismiss button */}
         <button
           type="button"
-          onClick={dismiss}
+          onClick={handleDismiss}
           aria-label="關閉安裝提示"
           className="absolute top-3 right-3 p-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
         >
@@ -56,7 +73,7 @@ export const InstallPrompt = () => {
               <button
                 type="button"
                 onClick={promptInstall}
-                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-97 transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-97 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 安裝應用程式
               </button>

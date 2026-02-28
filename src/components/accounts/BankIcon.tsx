@@ -15,6 +15,15 @@ interface BankIconProps {
  * Bank icon with automatic favicon resolution and fallback to bank code text.
  *
  * Resolution order: `iconUrl` → `bankUrl` → text code.
+ *
+ * The image fades in after it loads so the component never shows a jarring
+ * snap from the blank container to the fully-rendered icon.
+ *
+ * State is tracked per-URL rather than reset in an effect:
+ * `loadedSrc` and `erroredSrc` store the URL they represent, so when `src`
+ * changes React can derive the new loaded/error state in render without
+ * needing `useEffect` — this avoids the extra render cycle and the
+ * `react-hooks/set-state-in-effect` lint error.
  */
 export const BankIcon = ({
   iconUrl,
@@ -25,8 +34,14 @@ export const BankIcon = ({
 }: BankIconProps) => {
   // Prioritise user-set icon; fall back to bank default URL
   const src = resolveIconSrc(iconUrl) ?? resolveIconSrc(bankUrl);
-  const [imgError, setImgError] = useState(false);
-  const showImage = Boolean(src && !imgError);
+
+  // Track load / error by URL instead of boolean flags so React can derive
+  // state during render when `src` changes without needing useEffect.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const [erroredSrc, setErroredSrc] = useState<string | null>(null);
+
+  const showImage = Boolean(src && src !== erroredSrc);
+  const imgReady = loadedSrc === src;
 
   const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-12 h-12 text-sm';
   const radiusClass = size === 'sm' ? 'rounded-lg' : 'rounded-xl';
@@ -41,8 +56,9 @@ export const BankIcon = ({
         <img
           src={src}
           alt=""
-          onError={() => setImgError(true)}
-          className="w-full h-full object-contain p-1"
+          onError={() => setErroredSrc(src!)}
+          onLoad={() => setLoadedSrc(src!)}
+          className={`w-full h-full object-contain p-1 transition-opacity duration-200 ${imgReady ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
           referrerPolicy="no-referrer"
         />

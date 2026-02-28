@@ -98,7 +98,7 @@ export const AppLockSection = () => {
                   role="radio"
                   aria-checked={lockTimeout === value}
                   onClick={() => setLockTimeout(value)}
-                  className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`py-2 px-3 rounded-xl text-sm font-medium action-transition ${
                     lockTimeout === value
                       ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'

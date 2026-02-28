@@ -64,7 +64,7 @@ export const AuthLockScreen = () => {
         type="button"
         onClick={handleUnlock}
         disabled={isAuthenticating}
-        className="w-full max-w-xs flex items-center justify-center gap-2.5 py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 transition-all shadow-xs disabled:opacity-60 disabled:active:scale-100 mt-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        className="w-full max-w-xs flex items-center justify-center gap-2.5 py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-2xl text-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs disabled:opacity-60 disabled:active:scale-100 mt-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       >
         <ShieldCheck size={22} aria-hidden="true" />
         {isAuthenticating ? '驗證中…' : '解鎖'}
