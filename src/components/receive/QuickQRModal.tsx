@@ -243,6 +243,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
           amount={numAmount || undefined}
           bankName={bankName}
           accountNumber={accountNumber}
+          bankCode={bankCode}
           note={undefined}
           shareData={shareData}
           onClose={() => setShowQR(false)}

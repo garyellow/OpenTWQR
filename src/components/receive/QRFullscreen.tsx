@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { formatAmount } from '../../utils/twqr';
+import { formatAmount, maskAccount } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -21,13 +21,19 @@ interface QRFullscreenProps {
   customName?: string;
   /** Whether to show bank name label from QR settings. */
   showBankName?: boolean;
+  /** Masked account number to show above QR if showAccount is true. */
+  accountNumber?: string;
+  /** Bank code displayed alongside masked account. */
+  bankCode?: string;
+  /** Whether to show masked account number above QR. */
+  showAccount?: boolean;
 }
 
 /**
  * Full-black QR Code view for in-store payments.
  * Includes Screen Wake Lock and landscape-aware sizing.
  */
-export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName }: QRFullscreenProps) => {
+export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount }: QRFullscreenProps) => {
   const t = useLocaleStore((s) => s.t);
   const ref = useRef<HTMLDivElement>(null);
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
@@ -96,6 +102,12 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
       onAnimationEnd={onAnimationEnd}
     >
       <div className="bg-white p-8 rounded-2xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
+        {/* Account number — bankCode.masked, single compact line */}
+        {showAccount && accountNumber && bankCode && (
+          <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-3">
+            {bankCode}.{maskAccount(accountNumber)}
+          </p>
+        )}
         <MemoQRCode
           value={value}
           size={qrSize}
@@ -105,14 +117,14 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
           fgColor="#000000"
           imageSettings={qrCenterImage}
         />
-        {/* Name label — displayed inside the QR white margin area */}
+        {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
         {(customName || (showBankName && bankName)) && (
-          <div className="text-center mt-1 space-y-0.5">
-            {customName && (
-              <p className="text-xs font-semibold text-zinc-700 leading-tight">{customName}</p>
-            )}
+          <div className="text-center mt-2 space-y-0.5">
             {showBankName && bankName && (
-              <p className="text-[10px] text-zinc-400 leading-tight">{bankName}</p>
+              <p className="text-xs text-zinc-400 leading-tight">{bankName}</p>
+            )}
+            {customName && (
+              <p className="text-sm font-semibold text-zinc-700 leading-tight">{customName}</p>
             )}
           </div>
         )}

@@ -7,11 +7,14 @@ export type QRLogoType = 'opentwqr' | 'bank';
 interface QRSettingsState {
   /** Which logo to display in QR center: OpenTWQR brand or bank favicon. */
   logoType: QRLogoType;
+  /** Whether to show masked account number above the QR image. */
+  showAccount: boolean;
   /** Whether to show the official bank name on the QR card. */
   showBankName: boolean;
   /** Custom display name shown on the QR card (e.g. person's name). */
   customName: string;
   setLogoType: (type: QRLogoType) => void;
+  setShowAccount: (show: boolean) => void;
   setShowBankName: (show: boolean) => void;
   setCustomName: (name: string) => void;
 }
@@ -34,9 +37,11 @@ export const useQRSettingsStore = create<QRSettingsState>()(
   persist(
     (set) => ({
       logoType: 'opentwqr',
+      showAccount: false,
       showBankName: false,
       customName: '',
       setLogoType: (logoType) => set({ logoType }),
+      setShowAccount: (showAccount) => set({ showAccount }),
       setShowBankName: (showBankName) => set({ showBankName }),
       setCustomName: (customName) => set({ customName }),
     }),

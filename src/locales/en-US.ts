@@ -166,16 +166,20 @@ const enUS: Translations = {
 
   /* ─── QRSettingsSection ────────────────────────────────── */
   qrSettings: {
-    sectionTitle: 'QR Code Display',
+    settingsTitle: 'Customize QR Code',
+    settingsDesc: 'Choose what to display on your QR Code',
+    settingsModalTitle: 'Customize QR Code',
     logoTitle: 'Show Bank Icon',
-    logoDesc: 'Off = show OpenTWQR logo',
-    customNameTitle: 'Custom Name',
-    customNameDesc: 'Label whose payment code',
-    customNamePlaceholder: 'e.g., John…',
-    customNameModalTitle: 'Custom Name',
-    customNameClear: 'Clear',
+    logoDesc: 'Embed bank icon in the center of QR Code',
+    showAccountTitle: 'Show Account Number',
+    showAccountDesc: 'Display masked account above QR Code',
     bankNameTitle: 'Show Bank Name',
-    bankNameDesc: 'Show bank name in QR Code margin',
+    bankNameDesc: 'Show bank name below QR Code',
+    customNameTitle: 'Display Name',
+    customNameDesc: 'Show recipient name at bottom of QR Code',
+    customNamePlaceholder: 'e.g., John…',
+    customNameModalTitle: 'Display Name',
+    customNameClear: 'Clear',
   },
 
   /* ─── PersonalizationSection (Accent + AppLock combined) ─ */

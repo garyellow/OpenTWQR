@@ -164,16 +164,20 @@ const zhTW = {
 
   /* ─── QRSettingsSection ────────────────────────────────── */
   qrSettings: {
-    sectionTitle: 'QR Code 顯示',
+    settingsTitle: '自訂 QR Code',
+    settingsDesc: '設定 QR Code 上要顯示哪些資訊',
+    settingsModalTitle: '自訂 QR Code',
     logoTitle: '顯示銀行圖示',
-    logoDesc: '關閉時預設顯示 OpenTWQR',
-    customNameTitle: '自訂名稱',
-    customNameDesc: '標示這是誰的收款碼',
-    customNamePlaceholder: '例如：小明…',
-    customNameModalTitle: '自訂名稱',
-    customNameClear: '清除',
+    logoDesc: '開啟後在 QR Code 中專嵌入銀行圖示',
+    showAccountTitle: '顯示帳戶號碼',
+    showAccountDesc: '在 QR Code 上方顯示遞蔽後的帳號',
     bankNameTitle: '顯示銀行名稱',
-    bankNameDesc: '在 QR Code 白邊區域顯示官方銀行名稱',
+    bankNameDesc: '在 QR Code 下方標示所屬銀行',
+    customNameTitle: '個人名稱',
+    customNameDesc: '在 QR Code 底部顯示收款人的名字',
+    customNamePlaceholder: '例如：小明…',
+    customNameModalTitle: '個人名稱',
+    customNameClear: '清除',
   },
 
   /* ─── PersonalizationSection (Accent + AppLock combined) ─ */

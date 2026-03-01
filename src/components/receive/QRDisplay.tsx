@@ -25,6 +25,7 @@ interface QRDisplayProps {
   amount?: number;
   bankName?: string;
   accountNumber?: string;
+  bankCode?: string;
   note?: string;
   shareData: ShareData;
   onClose: () => void;
@@ -34,25 +35,65 @@ interface QRDisplayProps {
   bankIconUrl?: string;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareData, onClose, isSharedView = false, bankIconUrl }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl }: QRDisplayProps) => {
   const t = useLocaleStore((s) => s.t);
   const storedLogoType = useQRSettingsStore((s) => s.logoType);
+  const storedShowAccount = useQRSettingsStore((s) => s.showAccount);
   const storedShowBankName = useQRSettingsStore((s) => s.showBankName);
   const storedCustomName = useQRSettingsStore((s) => s.customName);
 
   // Shared view always uses defaults — viewer's personal settings must not leak.
   const logoType = isSharedView ? 'opentwqr' as const : storedLogoType;
+  const showAccountSetting = isSharedView ? false : storedShowAccount;
   const showBankNameSetting = isSharedView ? false : storedShowBankName;
   const customName = isSharedView ? '' : storedCustomName;
 
-  /** Whether any name/label info will be displayed below the QR code. */
+  /** Whether any name/label info will be displayed BELOW the QR code. */
   const hasLabelInfo = Boolean(customName.trim()) || (showBankNameSetting && Boolean(bankName));
+  /** Whether account number will be displayed ABOVE the QR code. */
+  const showAccountAbove = showAccountSetting && Boolean(accountNumber) && Boolean(bankCode);
 
-  /** Dynamic QR center image based on user settings. */
-  const qrCenterImage = useMemo(
-    () => buildQRCenterImage({ logoType, hasLabelInfo, bankIconUrl }),
-    [logoType, hasLabelInfo, bankIconUrl],
-  );
+  /**
+   * Natural dimensions of the bank icon — loaded via JS so imageSettings can
+   * receive the correct proportional width/height rather than a forced square.
+   */
+  const [bankIconSize, setBankIconSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    if (logoType !== 'bank' || !bankIconUrl) return;
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => {
+      if (cancelled) return;
+      const MAX_W = 56;
+      const MAX_H = 36;
+      const ratio = img.naturalWidth / img.naturalHeight;
+      let w = MAX_W;
+      let h = w / ratio;
+      if (h > MAX_H) {
+        h = MAX_H;
+        w = h * ratio;
+      }
+      setBankIconSize({ width: Math.round(w), height: Math.round(h) });
+    };
+    img.onerror = () => {
+      if (!cancelled) setBankIconSize(null);
+    };
+    img.src = bankIconUrl;
+    return () => { cancelled = true; };
+  }, [logoType, bankIconUrl]);
+
+  /**
+   * QR center image — when logoType is 'bank' and the icon has loaded, embed
+   * the bank favicon with proportional dimensions (not a forced square).
+   */
+  const qrCenterImage = useMemo(() => {
+    if (logoType === 'bank' && bankIconUrl && bankIconSize) {
+      return { src: bankIconUrl, width: bankIconSize.width, height: bankIconSize.height, excavate: true };
+    }
+    return buildQRCenterImage({ logoType, hasLabelInfo, bankIconUrl: undefined });
+  }, [logoType, hasLabelInfo, bankIconUrl, bankIconSize]);
+
   const [qrSize, setQrSize] = useState(240);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const shareMenu = useAnimatedToggle();
@@ -160,7 +201,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   useEffect(() => {
     const update = () => {
       const vw = window.innerWidth;
-      setQrSize(Math.max(180, Math.min(260, Math.floor(vw * 0.55))));
+      setQrSize(Math.max(180, Math.min(280, Math.floor(vw * 0.58))));
     };
     update();
     window.addEventListener('resize', update);
@@ -348,6 +389,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             aria-label={t.qr.enlargeQR}
             className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
+            {/* Account number — bankCode.masked, single compact line */}
+            {showAccountAbove && (
+              <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-3">
+                {bankCode}.{maskAccount(accountNumber!)}
+              </p>
+            )}
             <div ref={qrRef}>
               <MemoQRCode
                 value={value}
@@ -359,14 +406,14 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                 imageSettings={qrCenterImage}
               />
             </div>
-            {/* Name label — displayed inside the QR white margin area */}
+            {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
             {hasLabelInfo && (
-              <div className="text-center mt-1 space-y-0.5">
-                {customName.trim() && (
-                  <p className="text-xs font-semibold text-zinc-700 leading-tight">{customName.trim()}</p>
-                )}
+              <div className="text-center mt-2 space-y-0.5">
                 {showBankNameSetting && bankName && (
-                  <p className="text-[10px] text-zinc-400 leading-tight">{bankName}</p>
+                  <p className="text-xs text-zinc-400 leading-tight">{bankName}</p>
+                )}
+                {customName.trim() && (
+                  <p className="text-sm font-semibold text-zinc-700 leading-tight">{customName.trim()}</p>
                 )}
               </div>
             )}
@@ -393,7 +440,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                     <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">{bankName}</p>
                   )}
                   {accountNumber && (
-                    <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-widest">
+                    <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
                       {accountRevealed
                         ? formatAccountDisplay(accountNumber)
                         : maskAccount(accountNumber)}
@@ -512,6 +559,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         qrCenterImage={qrCenterImage}
         customName={customName.trim() || undefined}
         showBankName={showBankNameSetting}
+        accountNumber={accountNumber}
+        bankCode={bankCode}
+        showAccount={showAccountSetting}
       />
     )}
     </>

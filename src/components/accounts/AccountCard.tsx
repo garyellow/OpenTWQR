@@ -66,7 +66,7 @@ export const AccountCard = ({
           </h3>
         </div>
 
-        <p className={`font-mono text-base tracking-widest mt-2 ${isSelected ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-700 dark:text-zinc-300'}`}>
+        <p className={`font-mono text-base tracking-wider mt-2 ${isSelected ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-700 dark:text-zinc-300'}`}>
           {maskAccount(account.accountNumber)}
         </p>
 

@@ -190,6 +190,7 @@ export const SharedPage = () => {
       amount={shareData.amount}
       bankName={bankName}
       accountNumber={shareData.accountNumber}
+      bankCode={shareData.bankCode}
       note={shareData.note}
       shareData={shareData}
       onClose={() => navigate('/', { viewTransition: true })}

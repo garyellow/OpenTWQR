@@ -18,10 +18,10 @@ const HORIZONTAL_SRC = `data:image/svg+xml,${encodeURIComponent(LOGO_SVG_STRING)
 const VERTICAL_SRC = `data:image/svg+xml,${encodeURIComponent(VERTICAL_LOGO_SVG_STRING)}`;
 
 /** `qrcode.react` imageSettings for embedding the colourful centre label with excavation. */
-export const QR_CENTER_IMAGE = { src: HORIZONTAL_SRC, width: 95, height: 17, excavate: true } as const;
+export const QR_CENTER_IMAGE = { src: HORIZONTAL_SRC, width: 108, height: 19, excavate: true } as const;
 
 /** Vertical / square "Open TWQR" logo — used when no name label is displayed. */
-export const QR_CENTER_IMAGE_VERTICAL = { src: VERTICAL_SRC, width: 56, height: 38, excavate: true } as const;
+export const QR_CENTER_IMAGE_VERTICAL = { src: VERTICAL_SRC, width: 64, height: 44, excavate: true } as const;
 
 export interface QRCenterImageSettings {
   src: string;

@@ -315,6 +315,7 @@ export const ReceivePage = () => {
           amount={amount ? parseInt(amount, 10) : undefined}
           bankName={bankName}
           accountNumber={selectedAccount.accountNumber}
+          bankCode={selectedAccount.bankCode}
           note={note || undefined}
           shareData={shareData}
           onClose={handleCloseQR}
