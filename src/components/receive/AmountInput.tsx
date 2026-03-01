@@ -69,7 +69,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
   const formattedMax = new Intl.NumberFormat().format(maxAmount);
 
   const digitBtnClass =
-    'h-14 rounded-2xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 action-transition flex items-center justify-center';
+    'h-14 rounded-xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 action-transition flex items-center justify-center';
 
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-3">
@@ -83,7 +83,9 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
           onAnimationEnd={() => setIsShaking(false)}
         >
           <div className="flex items-baseline gap-1">
-            <span className="text-[2.5rem] font-semibold text-emerald-600 dark:text-emerald-400">NT$</span>
+            <span className="text-[2.5rem] font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>
+              NT$
+            </span>
             <span
               className={`text-6xl font-semibold tracking-tight ${
                 value ? 'text-zinc-900 dark:text-white' : 'text-zinc-300 dark:text-zinc-700'
@@ -118,7 +120,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
           }`}
           aria-live="polite"
         >
-          {isShaking ? `上限 NT$${formattedMax}` : '不輸入金額，付款方可自行填入'}
+          {isShaking ? `上限 NT$${formattedMax}` : '不輸入金額，由付款方自行填入'}
         </div>
       </div>
 
@@ -144,7 +146,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
           type="button"
           onClick={handleBackspace}
           aria-label="刪除一位數字"
-          className="h-14 rounded-2xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 action-transition flex items-center justify-center"
+          className="h-14 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 action-transition flex items-center justify-center"
         >
           <Delete size={28} aria-hidden="true" />
         </button>

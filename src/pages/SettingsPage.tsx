@@ -1,6 +1,7 @@
 import { ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { AccentColorSection } from '../components/settings/AccentColorSection';
 import { AppLockSection } from '../components/settings/AppLockSection';
 import { BackupSection } from '../components/settings/BackupSection';
 import { SafetySection } from '../components/settings/SafetySection';
@@ -37,6 +38,7 @@ export const SettingsPage = () => {
       {/* Content */}
       <main id="settings-main" className="flex-1 p-5 max-w-md lg:max-w-lg mx-auto w-full">
         <div className="space-y-8 pb-24">
+          <AccentColorSection />
           <AppLockSection />
           <BackupSection />
           <SafetySection />

@@ -25,7 +25,7 @@ export const AboutSection = () => {
       <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider px-1 mb-3">
         關於
       </h2>
-      <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+      <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
         <a
           href="https://ko-fi.com/garyellow"
           target="_blank"
@@ -38,7 +38,7 @@ export const AboutSection = () => {
           <div className="text-left flex-1">
             <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">贊助開發者</p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              餵我的 AI 一點 Token 吧
+              請 AI 吃點 Token，支持專案持續維護
             </p>
           </div>
         </a>

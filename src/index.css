@@ -27,9 +27,38 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
-    Roboto, "Helvetica Neue", sans-serif;
-  --font-mono: "SF Mono", Menlo, Consolas, monospace;
+  /* iOS: SF Pro Display → Android/web: system-ui (Roboto) → CJK: Noto Sans TC → fallbacks */
+  --font-sans: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui,
+    "Segoe UI", Roboto, "Noto Sans TC", "Noto Sans CJK TC", "Helvetica Neue",
+    Arial, sans-serif;
+  --font-mono: "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+
+/*
+ * Typed CSS custom properties for accent colours.
+ * Declaring syntax:'<color>' + inherits:true lets the browser interpolate
+ * them as colours, enabling smooth transitions when the hue changes.
+ */
+@property --accent            { syntax: '<color>'; inherits: true; initial-value: oklch(55% 0.15 200); }
+@property --accent-hover      { syntax: '<color>'; inherits: true; initial-value: oklch(48% 0.15 200); }
+@property --accent-light      { syntax: '<color>'; inherits: true; initial-value: oklch(95% 0.04 200); }
+@property --accent-subtle     { syntax: '<color>'; inherits: true; initial-value: oklch(90% 0.06 200); }
+@property --accent-dark       { syntax: '<color>'; inherits: true; initial-value: oklch(75% 0.12 200); }
+@property --accent-dark-hover { syntax: '<color>'; inherits: true; initial-value: oklch(80% 0.12 200); }
+@property --accent-dark-light { syntax: '<color>'; inherits: true; initial-value: oklch(25% 0.04 200); }
+@property --accent-dark-subtle{ syntax: '<color>'; inherits: true; initial-value: oklch(30% 0.06 200); }
+
+/* Smooth accent colour transitions — activated by JS when user picks a preset */
+html.accent-animating {
+  transition:
+    --accent            250ms ease,
+    --accent-hover      250ms ease,
+    --accent-light      250ms ease,
+    --accent-subtle     250ms ease,
+    --accent-dark       250ms ease,
+    --accent-dark-hover 250ms ease,
+    --accent-dark-light 250ms ease,
+    --accent-dark-subtle 250ms ease;
 }
 
 @variant standalone (@media (display-mode: standalone));
@@ -88,6 +117,16 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Accent color system — computed from --accent-hue via JS */
+  --accent-hue: 200;
+  --accent: oklch(55% 0.15 var(--accent-hue));
+  --accent-hover: oklch(48% 0.15 var(--accent-hue));
+  --accent-light: oklch(95% 0.04 var(--accent-hue));
+  --accent-subtle: oklch(90% 0.06 var(--accent-hue));
+  --accent-dark: oklch(75% 0.12 var(--accent-hue));
+  --accent-dark-hover: oklch(80% 0.12 var(--accent-hue));
+  --accent-dark-light: oklch(25% 0.04 var(--accent-hue));
+  --accent-dark-subtle: oklch(30% 0.06 var(--accent-hue));
 }
 
 html:not(.dark) {
@@ -107,7 +146,7 @@ body {
 }
 
 html.dark body {
-  background-color: #09090b;
+  background-color: #0c0c0e;
   color: #f4f4f5;
 }
 

@@ -9,9 +9,9 @@ import { haptic } from '../../utils/haptics';
  * Full-screen lock screen shown when the app requires device
  * verification (biometrics / PIN / password) before granting access.
  *
- * Design: centered branded layout with the logo, a teal-accented lock
- * icon and a prominent unlock button — matching the app's TWQR brand
- * palette (#008BBA teal, #E74E95 pink) for visual consistency.
+ * Design: centered branded layout with the logo, an accent-coloured lock
+ * icon and a prominent unlock button — colours driven by the user's
+ * chosen accent hue (CSS custom properties) for visual consistency.
  */
 export const AuthLockScreen = () => {
   const credentialId = useAuthStore((s) => s.credentialId);
@@ -40,9 +40,14 @@ export const AuthLockScreen = () => {
 
   return (
     <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
-      {/* Branded lock icon with teal accent */}
-      <div className="w-24 h-24 rounded-3xl flex items-center justify-center bg-[#008BBA]/10 dark:bg-[#008BBA]/15 border border-[#008BBA]/20 dark:border-[#008BBA]/25 shadow-xs">
-        <Lock size={48} className="text-[#008BBA]" aria-hidden="true" />
+      {/* Lock icon with accent colour */}
+      <div className="w-24 h-24 rounded-2xl flex items-center justify-center border shadow-xs"
+        style={{
+          backgroundColor: 'color-mix(in oklch, var(--accent) 10%, transparent)',
+          borderColor: 'color-mix(in oklch, var(--accent) 20%, transparent)',
+        }}
+      >
+        <Lock size={48} style={{ color: 'var(--accent)' }} aria-hidden="true" />
       </div>
 
       {/* Headline */}
@@ -63,12 +68,17 @@ export const AuthLockScreen = () => {
         </div>
       )}
 
-      {/* Unlock button — uses brand teal for a cohesive branded feel */}
+      {/* Unlock button — accent colour for cohesive branding */}
       <button
         type="button"
         onClick={handleUnlock}
         disabled={isAuthenticating}
-        className="w-full max-w-xs flex items-center justify-center gap-2.5 py-4 bg-[#008BBA] text-white font-semibold rounded-2xl text-lg hover:bg-[#007AA6] active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 mt-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#008BBA] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        className="w-full max-w-xs flex items-center justify-center gap-2.5 py-4 text-white font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 mt-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        style={{
+          backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
+          // @ts-expect-error non-standard CSS property for focus ring
+          '--tw-ring-color': 'light-dark(var(--accent), var(--accent-dark))',
+        }}
       >
         <ShieldCheck size={22} aria-hidden="true" />
         {isAuthenticating ? '驗證中…' : '解鎖'}

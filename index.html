@@ -12,7 +12,7 @@
     <meta property="og:image" content="/screenshots/receive-light.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; connect-src 'self'; worker-src 'self'; manifest-src 'self'" />
@@ -26,11 +26,22 @@
           var d = m === 'dark' || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
           if (d) {
             document.documentElement.classList.add('dark');
-            // Update both theme-color meta tags for dark mode
             document.querySelectorAll('meta[name="theme-color"]').forEach(function(el) {
-              el.content = '#09090b';
+              el.content = '#0c0c0e';
             });
           }
+          // Apply accent hue from persisted store
+          var hue = (s.state && s.state.accentHue) || 200;
+          var r = document.documentElement.style;
+          r.setProperty('--accent-hue', String(hue));
+          r.setProperty('--accent', 'oklch(55% 0.15 ' + hue + ')');
+          r.setProperty('--accent-hover', 'oklch(48% 0.15 ' + hue + ')');
+          r.setProperty('--accent-light', 'oklch(95% 0.04 ' + hue + ')');
+          r.setProperty('--accent-subtle', 'oklch(90% 0.06 ' + hue + ')');
+          r.setProperty('--accent-dark', 'oklch(75% 0.12 ' + hue + ')');
+          r.setProperty('--accent-dark-hover', 'oklch(80% 0.12 ' + hue + ')');
+          r.setProperty('--accent-dark-light', 'oklch(25% 0.04 ' + hue + ')');
+          r.setProperty('--accent-dark-subtle', 'oklch(30% 0.06 ' + hue + ')');
         } catch (e) {}
       })();
     </script>

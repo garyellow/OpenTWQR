@@ -14,7 +14,7 @@ export const SafetySection = () => {
       <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider px-1 mb-3">
         隱私與安全
       </h2>
-      <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden">
         <button
           type="button"
           onClick={() => setShowInfo(true)}
@@ -57,8 +57,8 @@ export const SafetySection = () => {
 
               <div className="p-5 pt-4 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mt-0.5">
-                    <Eye size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Eye size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">隱私聲明</p>
@@ -69,8 +69,8 @@ export const SafetySection = () => {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mt-0.5">
-                    <ShieldAlert size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+                  <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <ShieldAlert size={18} className="text-orange-600 dark:text-orange-400" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">安全提醒</p>
@@ -97,7 +97,7 @@ export const SafetySection = () => {
                 <button
                   type="button"
                   onClick={requestClose}
-                  className="w-full py-3.5 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  className="w-full py-3.5 rounded-xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   了解
                 </button>

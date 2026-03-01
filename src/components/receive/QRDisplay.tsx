@@ -222,12 +222,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       const svgEl = qrRef.current?.querySelector('svg');
       if (!svgEl) return;
 
-      // Pass the Promise directly to ClipboardItem so the clipboard.write call
-      // is initiated synchronously within the user gesture context.
-      // Awaiting svgToBlob first would break this on iOS Safari, which enforces
-      // a strict user-activation boundary for clipboard access.
+      const pngBlob = await svgToBlob(svgEl, qrSize);
       await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': svgToBlob(svgEl, qrSize) }),
+        new ClipboardItem({ 'image/png': pngBlob }),
       ]);
       showFeedback('已複製圖片');
     } catch {
@@ -273,7 +270,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         role="dialog"
         aria-modal="true"
         aria-labelledby="qr-modal-title"
-        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-4xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
       >
         {/* Header */}
@@ -297,7 +294,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             type="button"
             onClick={() => setIsFullscreen(true)}
             aria-label="放大 QR Code"
-            className="bg-white p-5 rounded-2xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
+            className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
             <div ref={qrRef}>
               <MemoQRCode
@@ -316,7 +313,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           <div className="space-y-2.5 w-full">
             {amount != null && amount > 0 ? (
               <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">NT$</span>
+                <span className="text-2xl font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>NT$</span>
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatAmount(amount)}
                 </span>
@@ -396,7 +393,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
             <button
               type="button"
               onClick={() => shareMenu.open()}
-              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <Share2 size={18} aria-hidden="true" />
               <span>分享</span>

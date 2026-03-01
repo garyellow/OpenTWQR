@@ -71,7 +71,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const resolvedIcon = resolveIconSrc(iconUrl);
 
   const inputClass =
-    'w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs';
+    'w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -188,7 +188,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           id="form-error"
           role="alert"
           aria-live="polite"
-          className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-2xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
+          className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
         >
           <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
           <span className="font-medium">{error}</span>
@@ -199,7 +199,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         <div
           role="alert"
           aria-live="polite"
-          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-2xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
+          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
         >
           <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
             <AlertTriangle size={18} className="shrink-0" aria-hidden="true" />
@@ -228,13 +228,13 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-4 rounded-2xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+          className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           取消
         </button>
         <button
           type="submit"
-          className="flex-2 py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+          className="flex-2 py-4 rounded-xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           儲存帳戶
         </button>

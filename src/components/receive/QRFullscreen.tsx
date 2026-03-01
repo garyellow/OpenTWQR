@@ -87,7 +87,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
       onClick={requestClose}
       onAnimationEnd={onAnimationEnd}
     >
-      <div className="bg-white p-8 rounded-3xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
+      <div className="bg-white p-8 rounded-2xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
         <MemoQRCode
           value={value}
           size={qrSize}
@@ -103,7 +103,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
       <div className="mt-8 text-center space-y-2">
         {amount != null && amount > 0 ? (
           <div className="flex items-baseline justify-center gap-0.5">
-            <span className="text-xl font-semibold text-emerald-400">NT$</span>
+            <span className="text-xl font-semibold" style={{ color: 'var(--accent-dark)' }}>NT$</span>
             <span className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {formatAmount(amount)}
             </span>

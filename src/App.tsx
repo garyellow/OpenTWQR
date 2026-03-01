@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useBanksStore } from './stores/useBanksStore';
-import { useThemeStore, applyTheme } from './stores/useThemeStore';
+import { useThemeStore, applyTheme, applyAccentHue } from './stores/useThemeStore';
 import { useAuthStore } from './stores/useAuthStore';
 import { useAppStore } from './stores/useAppStore';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
@@ -29,6 +29,7 @@ const ImportPage = lazy(() =>
 function App() {
   const refreshBanks = useBanksStore((state) => state.refreshBanks);
   const mode = useThemeStore((state) => state.mode);
+  const accentHue = useThemeStore((state) => state.accentHue);
 
   /* ---------- Auth lock state ---------- */
   const location = useLocation();
@@ -68,6 +69,7 @@ function App() {
 
   useEffect(() => {
     applyTheme(mode);
+    applyAccentHue(accentHue);
 
     if (mode !== 'system') return;
 
@@ -75,7 +77,7 @@ function App() {
     const handler = () => applyTheme('system');
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
-  }, [mode]);
+  }, [mode, accentHue]);
 
   useEffect(() => {
     refreshBanks();

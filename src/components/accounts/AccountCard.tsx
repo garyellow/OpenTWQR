@@ -27,7 +27,7 @@ export const AccountCard = ({
 
   return (
     <article
-      className={`relative min-w-0 p-5 rounded-2xl action-transition border ${isSelected
+      className={`relative min-w-0 p-5 rounded-xl action-transition border ${isSelected
         ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 shadow-md'
         : 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs'
         }`}
@@ -38,7 +38,7 @@ export const AccountCard = ({
         onClick={onSelect}
         aria-pressed={isSelected}
         aria-label={`選擇 ${displayName} 帳戶`}
-        className="absolute inset-0 w-full h-full rounded-2xl cursor-pointer z-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        className="absolute inset-0 w-full h-full rounded-xl cursor-pointer z-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       />
 
       {/* Card content */}

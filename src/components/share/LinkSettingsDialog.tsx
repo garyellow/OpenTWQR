@@ -50,7 +50,7 @@ export const LinkSettingsDialog = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="link-settings-title"
-        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-4xl border border-zinc-200 dark:border-zinc-800 shadow-2xl motion-reduce:animate-none p-6 overflow-y-auto overscroll-contain max-h-[calc(100svh-2.5rem)] ${
+        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-2xl motion-reduce:animate-none p-6 overflow-y-auto overscroll-contain max-h-[calc(100svh-2.5rem)] ${
           isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'
         }`}
         onAnimationEnd={onAnimationEnd}
@@ -127,7 +127,7 @@ export const LinkSettingsDialog = ({
             disabled={isEncrypting}
             placeholder="不設定密碼則留空"
             autoComplete="new-password"
-            className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs disabled:opacity-50"
+            className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs disabled:opacity-50"
           />
         </div>
 
@@ -136,7 +136,7 @@ export const LinkSettingsDialog = ({
           type="button"
           onClick={onConfirm}
           disabled={isEncrypting}
-          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           {isEncrypting ? (
             <>

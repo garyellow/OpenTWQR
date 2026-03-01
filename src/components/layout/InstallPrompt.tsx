@@ -50,7 +50,7 @@ export const InstallPrompt = () => {
       }`}
       onAnimationEnd={handleAnimationEnd}
     >
-      <div className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 pr-12">
+      <div className="relative bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 pr-12">
         {/* Dismiss button */}
         <button
           type="button"
