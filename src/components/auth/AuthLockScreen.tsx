@@ -38,7 +38,7 @@ export const AuthLockScreen = () => {
     }
 
     setIsAuthenticating(false);
-  }, [credentialId, isAuthenticating, unlock]);
+  }, [credentialId, isAuthenticating, unlock, t.auth.authFailed]);
 
   return (
     <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">

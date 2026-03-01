@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { QrCode, Tag, Landmark, X } from 'lucide-react';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -27,10 +27,6 @@ export const QRCodeSection = () => {
 
   const bankIconEnabled = logoType === 'bank';
 
-  useEffect(() => {
-    if (showNameModal) setDraftName(customName);
-  }, [showNameModal, customName]);
-
   const handleToggleLogo = useCallback(() => {
     haptic();
     setLogoType(bankIconEnabled ? 'opentwqr' : 'bank');
@@ -42,8 +38,9 @@ export const QRCodeSection = () => {
   }, [showBankName, setShowBankName]);
 
   const handleOpenNameModal = useCallback(() => {
+    setDraftName(customName);
     setShowNameModal(true);
-  }, []);
+  }, [customName]);
 
   const handleConfirmName = useCallback((close: () => void) => {
     setCustomName(draftName.trim());
@@ -180,6 +177,7 @@ export const QRCodeSection = () => {
                     }
                   }}
                   placeholder={t.qrSettings.customNamePlaceholder}
+                  autoFocus
                   autoComplete="off"
                   maxLength={20}
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"

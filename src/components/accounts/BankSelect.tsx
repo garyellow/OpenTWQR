@@ -107,6 +107,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                     ref={inputRef}
                     name="bankSearch"
                     type="text"
+                    autoFocus
                     autoComplete="off"
                     spellCheck={false}
                     aria-label={t.bankSelect.searchLabel}

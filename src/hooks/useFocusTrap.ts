@@ -36,6 +36,12 @@ export const useFocusTrap = (
 
     // Move focus into the trap.
     const setInitialFocus = () => {
+      // If autoFocus (or another mechanism) has already placed focus inside
+      // the trap, respect it and do nothing. Overriding would move focus to
+      // the wrong element (e.g. the close button) and dismiss the mobile
+      // virtual keyboard that autoFocus triggered.
+      if (container.contains(document.activeElement)) return;
+
       if (initialFocusRef?.current) {
         initialFocusRef.current.focus();
       } else {
