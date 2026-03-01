@@ -6,23 +6,9 @@ import { haptic } from '../../utils/haptics';
 const DEFAULT_HUE = 200;
 
 /**
- * Accent-colour picker for the Settings page.
- *
- * Offers 8 preset colour swatches and a continuous hue slider. Changes
- * are applied immediately via CSS custom properties so the user can see
- * the effect in real time. The final value is persisted on pointer-up.
- *
- * **Slider architecture:** A local `dragHue` state tracks the thumb
- * position during drag so React keeps the controlled `<input>` in sync.
- * Only the final value on pointer-up is written to the Zustand store.
- *
- * **RAF throttle:** `applyAccentHue` (8× `style.setProperty`) is scheduled
- * via `requestAnimationFrame` so CSS custom-property writes happen at most
- * once per screen refresh (~16 ms / 60 fps). `setDragHue` still runs on
- * every `onChange` event so the slider thumb and degree counter feel
- * instantaneous — only the expensive CSS work is throttled.
- * Before persisting on pointer-up the pending RAF is cancelled to prevent
- * a stale hue from overwriting the final committed value.
+ * Accent colour picker — 8 preset swatches + continuous hue slider.
+ * Local `dragHue` state for instant thumb tracking; CSS writes batched
+ * via RAF (one per frame). Final hue persisted on pointer-up.
  */
 export const AccentColorSection = () => {
   const accentHue = useThemeStore((s) => s.accentHue);

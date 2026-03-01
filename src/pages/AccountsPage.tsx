@@ -3,8 +3,9 @@ import { useAppStore } from '../stores/useAppStore';
 import { AccountCard } from '../components/accounts/AccountCard';
 import { AccountForm } from '../components/accounts/AccountForm';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { Plus, ChevronLeft, Wallet, Trash2 } from 'lucide-react';
+import { Plus, ChevronLeft, Wallet, Trash2, Download } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { ImportDialog } from '../components/settings/ImportDialog';
 import type { BankAccount } from '../types';
 import { generateId } from '../utils/generateId';
 
@@ -28,6 +29,7 @@ export const AccountsPage = () => {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showImport, setShowImport] = useState(false);
 
   const closeFormModal = useCallback(() => {
     setIsAdding(false);
@@ -80,14 +82,24 @@ export const AccountsPage = () => {
             </Link>
             <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">帳戶管理</h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsAdding(true)}
-            aria-label="新增帳戶"
-            className="p-2.5 min-w-11 min-h-11 rounded-full text-zinc-900 dark:text-white bg-zinc-200/50 dark:bg-zinc-800/50 hover:bg-zinc-300/50 dark:hover:bg-zinc-700/50 transition-colors"
-          >
-            <Plus size={22} aria-hidden="true" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setShowImport(true)}
+              aria-label="匯入帳戶"
+              className="p-2.5 min-w-11 min-h-11 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+            >
+              <Download size={20} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAdding(true)}
+              aria-label="新增帳戶"
+              className="p-2.5 min-w-11 min-h-11 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+            >
+              <Plus size={20} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -104,13 +116,23 @@ export const AccountsPage = () => {
                 新增銀行帳戶即可開始透過 TWQR 收款。
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsAdding(true)}
-              className="mt-4 px-8 py-4 rounded-xl btn-accent font-semibold active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-            >
-              新增第一個帳戶
-            </button>
+            <div className="w-full max-w-72 space-y-3 mt-4">
+              <button
+                type="button"
+                onClick={() => setIsAdding(true)}
+                className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              >
+                新增銀行帳戶
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowImport(true)}
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              >
+                <Download size={20} aria-hidden="true" />
+                匯入帳戶
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-8 pb-24">
@@ -219,6 +241,8 @@ export const AccountsPage = () => {
           )}
         </AnimatedModal>
       )}
+
+      {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
     </div>
   );
 };

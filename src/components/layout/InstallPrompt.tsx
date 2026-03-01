@@ -4,20 +4,9 @@ import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 import { useLocation } from 'react-router-dom';
 
 /**
- * A non-intrusive bottom banner that prompts users to install the PWA.
- *
- * - On Chromium browsers: clicking "安裝應用程式" triggers the browser's
- *   **native install dialog** (including Richer Install UI with screenshots
- *   on Android / desktop Chrome) via the official `beforeinstallprompt` API.
- *   We are NOT building a custom install dialog — we only provide a small
- *   teaser banner; the actual install UI is the browser's own.
- * - On iOS Safari: shows step-by-step instructions to "Add to Home Screen",
- *   since Safari doesn't support `beforeinstallprompt`.
- * - Respects prior dismissals (30-day cooldown) and never shows when
- *   already running in standalone mode.
- * - Hidden on shared `/s/:data` pages (irrelevant for payment senders).
- * - The dismiss action plays a slide-out animation; `onAnimationEnd`
- *   removes the banner from the tree once the animation completes.
+ * Bottom banner prompting PWA install. Chromium: triggers native install dialog.
+ * iOS: shows manual Add to Home Screen steps. Respects 30-day dismiss cooldown.
+ * Hidden in standalone mode and on /s/ pages.
  */
 export const InstallPrompt = () => {
   const { canShow, platform, promptInstall, dismiss } = useInstallPrompt();
@@ -77,7 +66,7 @@ export const InstallPrompt = () => {
               <button
                 type="button"
                 onClick={promptInstall}
-                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold btn-accent active:scale-97 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold btn-accent active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 安裝應用程式
               </button>

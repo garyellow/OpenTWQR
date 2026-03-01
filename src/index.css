@@ -1,24 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/*
- * Override tw-animate-css default animation-fill-mode from `none` to `both`.
- *
- * tw-animate-css defines `@property --tw-animation-fill-mode { initial-value: none }`
- * and uses `var(--tw-animation-fill-mode, none)` in its animation shorthands.
- * Using another `@property` to override fails because Vite's CSS pipeline
- * deduplicates `@property` rules and the original `none` wins.
- *
- * Instead, we set the CSS custom property directly on the animated elements.
- * This takes precedence over the @property initial-value.
- *
- * `both` = `backwards` + `forwards`:
- *   - Entrance (animate-in): element displays the "from" keyframe (e.g.
- *     transparent / scaled-down) before the animation starts — no 1-frame
- *     flash of full opacity on mount.
- *   - Exit (animate-out): element holds the "to" keyframe (e.g. transparent)
- *     after the animation ends — no snap-back to visible before unmount.
- */
+/* Override tw-animate-css fill-mode to `both` (backwards + forwards).
+ * @property deduplication prevents override, so set the var directly. */
 .animate-in,
 .animate-out {
   --tw-animation-fill-mode: both;
@@ -76,15 +60,8 @@ html.accent-animating {
   padding-right: env(safe-area-inset-right);
 }
 
-/*
- * btn-accent — Primary CTA button coloured with the user's accent.
- *
- * Light mode: vibrant accent bg (L=55%) + white text → WCAG AA 4.5:1 ✓
- * Dark mode:  lighter accent bg (L=75%) + dark text → WCAG AA 7:1 ✓
- *
- * Replaces the `bg-zinc-900 dark:bg-zinc-100` pattern on primary action
- * buttons (Generate QR, Share, Unlock, Save …).
- */
+/* btn-accent — Primary CTA with user's accent colour.
+ * Light: L=55% + white (WCAG AA 4.5:1), Dark: L=75% + dark (WCAG AA 7:1). */
 .btn-accent {
   background-color: light-dark(var(--accent), var(--accent-dark));
   color: light-dark(#fff, #18181b);
@@ -96,17 +73,8 @@ html.accent-animating {
   --tw-ring-color: light-dark(var(--accent), var(--accent-dark));
 }
 
-/*
- * chip-accent — Selected state for radio-chip / toggle elements.
- *
- * Used on lock-timeout buttons, link-expiry options, and any
- * radio-like chip that indicates the active choice.
- *
- * :hover   — slightly deeper accent on hover for a tactile feel.
- * :focus-visible — accent ring so keyboard focus is clearly visible
- *   against the accent background (avoids the invisible currentColor
- *   fallback that `ring-2` without an explicit color would produce).
- */
+/* chip-accent — Selected state for radio-chip / toggle elements.
+ * :hover deepens accent, :focus-visible sets accent ring for keyboard visibility. */
 .chip-accent {
   background-color: light-dark(var(--accent), var(--accent-dark));
   color: light-dark(#fff, #18181b);
@@ -118,18 +86,9 @@ html.accent-animating {
   --tw-ring-color: light-dark(var(--accent), var(--accent-dark));
 }
 
-/*
- * action-transition — precision transition for interactive elements
- *
- * Using `transition-all` on buttons/links transitions every CSS property,
- * including layout-affecting ones (padding, margin, width…) that can
- * silently trigger expensive style recalculations on every interaction.
- * `action-transition` restricts the transition to the GPU-composited or
- * paint-only properties that actually change during hover / focus / active
- * states, giving us smooth animations without the overhead.
- *
- * Usage: replace `transition-all` on <button> and <a> elements.
- */
+/* action-transition — Restricts transitions to visual properties only
+ * (transform, bg, color, etc.) instead of `transition-all`, avoiding
+ * expensive layout recalculations on every interaction. */
 @utility action-transition {
   transition-property: transform, background-color, color, border-color,
     box-shadow, opacity, text-decoration-color;

@@ -3,20 +3,9 @@ import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import { ImportDialog } from '../components/settings/ImportDialog';
 
 /**
- * Landing page for the Web Share Target API.
- *
- * When another app shares text to the installed OpenTWQR PWA, the browser opens
- * `/import?text=<shared-text>`. This page extracts the shared payload and
- * immediately presents the {@link ImportDialog} with the text pre-filled,
- * giving the user a one-tap import experience.
- *
- * The `text`, `title`, and `url` query parameters are inspected in order;
- * the first non-empty value that looks like an OTWQR backup string wins.
- * If none match, the raw `text` parameter is used as-is so the user can
- * still verify and edit it.
- *
- * If no query parameters are present (e.g. direct navigation), the page
- * redirects to the home page.
+ * Web Share Target landing page — `/import?text=<shared-text>`.
+ * Extracts shared OTWQR backup string and opens ImportDialog pre-filled.
+ * Redirects home if no query parameters are present.
  */
 export const ImportPage = () => {
   const [params] = useSearchParams();
