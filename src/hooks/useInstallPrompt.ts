@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { safeGetItem, safeSetItem } from '../utils/safeStorage';
 
 export interface BeforeInstallPromptEvent extends Event {
   /**
@@ -38,15 +39,11 @@ function isStandalone(): boolean {
 }
 
 function isDismissed(): boolean {
-  try {
-    const raw = localStorage.getItem(DISMISS_KEY);
-    if (!raw) return false;
-    const ts = parseInt(raw, 10);
-    if (isNaN(ts)) return false;
-    return Date.now() - ts < DISMISS_DURATION_MS;
-  } catch {
-    return false;
-  }
+  const raw = safeGetItem(DISMISS_KEY);
+  if (!raw) return false;
+  const ts = parseInt(raw, 10);
+  if (isNaN(ts)) return false;
+  return Date.now() - ts < DISMISS_DURATION_MS;
 }
 
 function detectIOSSafari(): boolean {
@@ -129,18 +126,14 @@ export function useInstallPrompt(): InstallPromptState {
       // User dismissed the native dialog — hide the banner and
       // remember the choice so we don't nag again for 30 days.
       setCanShow(false);
-      try {
-        localStorage.setItem(DISMISS_KEY, String(Date.now()));
-      } catch { /* ignore */ }
+      safeSetItem(DISMISS_KEY, String(Date.now()));
     }
   }, []);
 
   const dismiss = useCallback(() => {
     setCanShow(false);
     deferredPromptRef.current = null;
-    try {
-      localStorage.setItem(DISMISS_KEY, String(Date.now()));
-    } catch { /* quota exceeded — ignore */ }
+    safeSetItem(DISMISS_KEY, String(Date.now()));
   }, []);
 
   return { canShow, platform, promptInstall, dismiss };

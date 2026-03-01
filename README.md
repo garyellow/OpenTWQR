@@ -143,7 +143,7 @@ OpenTWQR 是純前端應用程式，所有操作都在你的瀏覽器中完成�
 <summary><strong>收款金額有上限嗎？</strong></summary>
 <br />
 
-單筆收款金額上限為 NT$200,000，這是 TWQR 規格所允許的最大值。
+OpenTWQR 的單筆金額上限設定為 NT$2,000,000。不輸入金額時，付款方可在銀行 App 中自行填入。實際可轉帳金額依各銀行規定而異。
 </details>
 
 <details>

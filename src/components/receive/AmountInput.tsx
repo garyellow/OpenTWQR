@@ -8,7 +8,7 @@ interface AmountInputProps {
   maxAmount?: number;
 }
 
-export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInputProps) => {
+export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountInputProps) => {
   const [isShaking, setIsShaking] = useState(false);
 
   const rejectInput = useCallback(() => {
@@ -66,6 +66,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
   }, [handleDigit, handleBackspace, handleClear]);
 
   const formattedAmount = value ? new Intl.NumberFormat().format(parseInt(value, 10)) : '';
+  const formattedMax = new Intl.NumberFormat().format(maxAmount);
 
   const digitBtnClass =
     'h-14 rounded-2xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 action-transition flex items-center justify-center';
@@ -105,6 +106,19 @@ export const AmountInput = ({ value, onChange, maxAmount = 200000 }: AmountInput
               <X size={24} aria-hidden="true" />
             </button>
           </div>
+        </div>
+        {/* Amount hint — zero-amount guidance or max-amount warning on shake */}
+        <div
+          className={`text-xs text-center transition-opacity duration-200 h-5 flex items-center justify-center ${
+            isShaking
+              ? 'text-red-500 dark:text-red-400 opacity-100'
+              : !value
+                ? 'text-zinc-400 dark:text-zinc-500 opacity-100'
+                : 'text-transparent opacity-0'
+          }`}
+          aria-live="polite"
+        >
+          {isShaking ? `上限 NT$${formattedMax}` : '不輸入金額，付款方可自行填入'}
         </div>
       </div>
 

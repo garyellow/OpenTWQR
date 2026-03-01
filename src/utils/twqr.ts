@@ -74,3 +74,13 @@ export const formatAccountDisplay = (accountNumber: string): string => {
   const padded = accountNumber.padStart(paddedLen, '0');
   return padded.replace(/(.{4})/g, '$1 ').trim();
 };
+
+/**
+ * Remove invisible/control characters that may be pasted from external sources.
+ * Prevents zero-width spaces, control chars, and directional overrides
+ * from corrupting QR code data or account numbers.
+ */
+export const removeInvisibleChars = (str: string): string => {
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\uFEFF]/g, '');
+};

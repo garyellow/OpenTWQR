@@ -3,7 +3,7 @@ import { BankSelect } from './BankSelect';
 import { useAppStore } from '../../stores/useAppStore';
 import { useBanksStore } from '../../stores/useBanksStore';
 import type { BankAccount } from '../../types';
-import { isValidAccount } from '../../utils/twqr';
+import { isValidAccount, removeInvisibleChars } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
 import { AlertCircle, AlertTriangle, Globe } from 'lucide-react';
 
@@ -106,7 +106,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           placeholder="輸入銀行帳號…"
           value={accountNumber}
           onChange={(e) => {
-            setAccountNumber(e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
+            setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
             setError('');
             setDuplicateWarning('');
           }}

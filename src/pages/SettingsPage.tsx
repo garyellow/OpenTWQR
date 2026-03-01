@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { AppLockSection } from '../components/settings/AppLockSection';
 import { BackupSection } from '../components/settings/BackupSection';
+import { SafetySection } from '../components/settings/SafetySection';
 import { AboutSection } from '../components/settings/AboutSection';
 
 export const SettingsPage = () => {
@@ -38,6 +39,7 @@ export const SettingsPage = () => {
         <div className="space-y-8 pb-24">
           <AppLockSection />
           <BackupSection />
+          <SafetySection />
           <AboutSection />
         </div>
       </main>

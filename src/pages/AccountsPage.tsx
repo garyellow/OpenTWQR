@@ -6,6 +6,7 @@ import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { Plus, ChevronLeft, Wallet, Trash2 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import type { BankAccount } from '../types';
+import { generateId } from '../utils/generateId';
 
 export const AccountsPage = () => {
   const { accounts, addAccount, removeAccount, updateAccount, selectAccount, selectedAccountId } =
@@ -38,7 +39,7 @@ export const AccountsPage = () => {
   }, []);
 
   const handleAdd = useCallback((data: Omit<BankAccount, 'id'>) => {
-    addAccount({ id: crypto.randomUUID(), ...data });
+    addAccount({ id: generateId(), ...data });
     setIsAdding(false);
     navigate('/', { viewTransition: true });
   }, [addAccount, navigate]);

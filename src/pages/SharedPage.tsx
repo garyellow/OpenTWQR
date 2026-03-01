@@ -33,6 +33,8 @@ export const SharedPage = () => {
     if (!data || !fragment || !password) return;
     setIsDecrypting(true);
     const res = await parseShareUrl(data, fragment, password);
+    // Clear password on failure so the user can immediately re-type
+    if (res.status === 'wrong-password') setPassword('');
     setResult(res);
     setIsDecrypting(false);
   }, [data, fragment, password]);

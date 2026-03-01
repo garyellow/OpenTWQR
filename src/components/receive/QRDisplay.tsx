@@ -52,6 +52,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   /** `navigator.share` is only available in secure contexts (HTTPS / PWA). */
   const supportsNativeShare = typeof navigator.share === 'function';
 
+  /** `ClipboardItem` + `navigator.clipboard.write` for copying images. */
+  const supportsClipboardWrite = typeof ClipboardItem !== 'undefined' && typeof navigator.clipboard?.write === 'function';
+
   // Focus trap: active only when no sub-overlay is on top
   useFocusTrap(modalRef, !shareMenu.isOpen && !linkSettingsToggle.isOpen && !isFullscreen);
   useScrollLock(true);
@@ -64,14 +67,14 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     // Show immediately (restart)
     setFeedbackClosing(false);
     setFeedback(msg);
-    // Begin closing animation at 1 800 ms—toast disappears at 2 000 ms total
+    // Begin closing animation at 2 300 ms—toast disappears at 2 500 ms total
     feedbackShowTimerRef.current = window.setTimeout(() => {
       setFeedbackClosing(true);
       feedbackHideTimerRef.current = window.setTimeout(() => {
         setFeedback(null);
         setFeedbackClosing(false);
       }, 200);
-    }, 1800);
+    }, 2300);
   }, []);
 
   // Cleanup both feedback timers on unmount
@@ -210,6 +213,25 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       showFeedback('已下載圖片');
     } catch {
       showFeedback('下載失敗');
+    }
+    shareMenu.close();
+  }, [qrSize, shareMenu, showFeedback]);
+
+  const handleCopyImage = useCallback(async () => {
+    try {
+      const svgEl = qrRef.current?.querySelector('svg');
+      if (!svgEl) return;
+
+      // Pass the Promise directly to ClipboardItem so the clipboard.write call
+      // is initiated synchronously within the user gesture context.
+      // Awaiting svgToBlob first would break this on iOS Safari, which enforces
+      // a strict user-activation boundary for clipboard access.
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': svgToBlob(svgEl, qrSize) }),
+      ]);
+      showFeedback('已複製圖片');
+    } catch {
+      showFeedback('複製失敗');
     }
     shareMenu.close();
   }, [qrSize, shareMenu, showFeedback]);
@@ -396,6 +418,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         onAnimationEnd={shareMenu.onAnimationEnd}
         onCopyLink={handleCopyLink}
         onShareLink={handleShareLink}
+        onCopyImage={supportsClipboardWrite ? handleCopyImage : undefined}
         onShareImage={handleShareImage}
         onDownloadImage={handleDownloadImage}
         supportsNativeShare={supportsNativeShare}

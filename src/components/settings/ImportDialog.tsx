@@ -6,6 +6,7 @@ import type { BankAccount } from '../../types';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { importBackup, isPasswordProtected } from '../../utils/backup';
 import { haptic } from '../../utils/haptics';
+import { generateId } from '../../utils/generateId';
 
 interface ImportDialogProps {
   onClose: () => void;
@@ -142,7 +143,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
 
     for (const c of candidates) {
       if (!c.checked) continue;
-      const newId = crypto.randomUUID();
+      const newId = generateId();
       addAccount({
         id: newId,
         bankCode: c.original.bankCode,

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/safeStorage';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -26,10 +27,23 @@ export const applyTheme = (mode: ThemeMode) => {
 };
 
 /**
- * Theme store intentionally uses localStorage (not IndexedDB) so that the
- * inline FOUC-prevention script in index.html can read the persisted mode
+ * Safe localStorage adapter for Zustand persist.
+ *
+ * Wraps every read/write in try/catch so the store never throws in
+ * private-browsing mode or when storage is full. The theme store
+ * intentionally uses localStorage (not IndexedDB) so that the inline
+ * FOUC-prevention script in index.html can read the persisted mode
  * synchronously before any JS bundle executes.
  */
+const safeLocalStorage: Storage = {
+  get length() { try { return localStorage.length; } catch { return 0; } },
+  key(index) { try { return localStorage.key(index); } catch { return null; } },
+  clear() { try { localStorage.clear(); } catch { /* noop */ } },
+  getItem: (key) => safeGetItem(key),
+  setItem: (key, value) => { safeSetItem(key, value); },
+  removeItem: (key) => { safeRemoveItem(key); },
+};
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
@@ -41,7 +55,7 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'opentwqr-theme',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeLocalStorage),
       onRehydrateStorage: () => (state) => {
         if (state) applyTheme(state.mode);
       },

@@ -4,7 +4,7 @@ import { AmountInput } from '../components/receive/AmountInput';
 import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
-import { generateTWQR, maskAccount } from '../utils/twqr';
+import { generateTWQR, maskAccount, removeInvisibleChars } from '../utils/twqr';
 import { QrCode, ChevronRight, MessageSquare, X, Settings, Download } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
@@ -240,21 +240,21 @@ export const ReceivePage = () => {
                   id="note-modal-input"
                   aria-label="交易備註"
                   value={note}
-                  onChange={(e) => setNote(e.target.value.slice(0, 20))}
+                  onChange={(e) => setNote(removeInvisibleChars(e.target.value).slice(0, 19))}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       requestClose();
                     }
                   }}
-                  placeholder="輸入備註，最多 20 字…"
+                  placeholder="輸入備註，最多 19 字…"
                   autoFocus
                   autoComplete="off"
-                  maxLength={20}
+                  maxLength={19}
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 dark:text-zinc-400 pointer-events-none">
-                  {note.length}/20
+                  {note.length}/19
                 </span>
               </div>
               <div className="flex gap-3 mt-4">
