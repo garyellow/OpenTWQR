@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ShieldAlert, Eye, TriangleAlert, Info, X } from 'lucide-react';
 import { AnimatedModal } from '../ui/AnimatedModal';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 
 /**
  * Privacy & safety information – a single settings row that opens a modal
@@ -8,11 +9,12 @@ import { AnimatedModal } from '../ui/AnimatedModal';
  */
 export const SafetySection = () => {
   const [showInfo, setShowInfo] = useState(false);
+  const t = useLocaleStore((s) => s.t);
 
   return (
     <div>
       <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider px-1 mb-3">
-        隱私與安全
+        {t.safety.sectionTitle}
       </h2>
       <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden">
         <button
@@ -24,9 +26,9 @@ export const SafetySection = () => {
             <Info size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
           </div>
           <div className="text-left">
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">隱私與安全資訊</p>
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.infoTitle}</p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              了解資料保護與轉帳安全注意事項
+              {t.safety.infoDesc}
             </p>
           </div>
         </button>
@@ -43,12 +45,12 @@ export const SafetySection = () => {
             <>
               <div className="flex items-center justify-between p-5 pb-0">
                 <h2 id="safety-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                  隱私與安全
+                  {t.safety.modalTitle}
                 </h2>
                 <button
                   type="button"
                   onClick={requestClose}
-                  aria-label="關閉"
+                  aria-label={t.common.close}
                   className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <X size={20} aria-hidden="true" />
@@ -61,9 +63,9 @@ export const SafetySection = () => {
                     <Eye size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">隱私聲明</p>
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.privacyTitle}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                      QR Code 皆在您的瀏覽器本地產生，帳戶資料僅儲存於此裝置，不會上傳至任何伺服器。
+                      {t.safety.privacyDesc}
                     </p>
                   </div>
                 </div>
@@ -73,9 +75,9 @@ export const SafetySection = () => {
                     <ShieldAlert size={18} className="text-orange-600 dark:text-orange-400" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">安全提醒</p>
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.securityTitle}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                      轉帳前請務必於銀行 App 中核對收款帳號與戶名，確認無誤後再執行轉帳。
+                      {t.safety.securityDesc}
                     </p>
                   </div>
                 </div>
@@ -85,9 +87,9 @@ export const SafetySection = () => {
                     <TriangleAlert size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">防範三方詐騙</p>
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.scamTitle}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                      切勿依不明來源提供的帳號進行轉帳。若有人要求您代為收款再轉出，很可能是三方詐騙手法，請提高警覺。
+                      {t.safety.scamDesc}
                     </p>
                   </div>
                 </div>
@@ -99,7 +101,7 @@ export const SafetySection = () => {
                   onClick={requestClose}
                   className="w-full py-3.5 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  了解
+                  {t.common.understand}
                 </button>
               </div>
             </>

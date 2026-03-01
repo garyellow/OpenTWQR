@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useAppStore } from '../stores/useAppStore';
+import { useLocaleStore } from '../stores/useLocaleStore';
 import { AccountCard } from '../components/accounts/AccountCard';
 import { AccountForm } from '../components/accounts/AccountForm';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
@@ -12,6 +13,7 @@ import { generateId } from '../utils/generateId';
 export const AccountsPage = () => {
   const { accounts, addAccount, removeAccount, updateAccount, selectAccount, selectedAccountId } =
     useAppStore();
+  const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -65,7 +67,7 @@ export const AccountsPage = () => {
         href="#accounts-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
       >
-        跳至主要內容
+        {t.common.skipToMain}
       </a>
 
       {/* Header */}
@@ -75,27 +77,27 @@ export const AccountsPage = () => {
             <Link
               to="/"
               viewTransition
-              aria-label="返回"
-              className="p-2.5 min-w-11 min-h-11 -ml-2 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+              aria-label={t.common.back}
+              className="p-2.5 min-w-11 min-h-11 -ml-2 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
               <ChevronLeft size={24} aria-hidden="true" />
             </Link>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">帳戶管理</h1>
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t.accounts.title}</h1>
           </div>
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={() => setShowImport(true)}
-              aria-label="匯入帳戶"
-              className="p-2.5 min-w-11 min-h-11 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+              aria-label={t.accounts.importLabel}
+              className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
               <Download size={20} aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={() => setIsAdding(true)}
-              aria-label="新增帳戶"
-              className="p-2.5 min-w-11 min-h-11 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+              aria-label={t.accounts.addLabel}
+              className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
               <Plus size={20} aria-hidden="true" />
             </button>
@@ -111,9 +113,9 @@ export const AccountsPage = () => {
               <Wallet size={48} aria-hidden="true" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">尚無帳戶</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">{t.accounts.emptyTitle}</h2>
               <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-pretty">
-                新增銀行帳戶即可開始透過 TWQR 收款。
+                {t.accounts.emptyHint}
               </p>
             </div>
             <div className="w-full max-w-72 space-y-3 mt-4">
@@ -122,7 +124,7 @@ export const AccountsPage = () => {
                 onClick={() => setIsAdding(true)}
                 className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
-                新增銀行帳戶
+                {t.receive.addBankAccount}
               </button>
               <button
                 type="button"
@@ -130,7 +132,7 @@ export const AccountsPage = () => {
                 className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 <Download size={20} aria-hidden="true" />
-                匯入帳戶
+                {t.receive.importAccounts}
               </button>
             </div>
           </div>
@@ -172,7 +174,7 @@ export const AccountsPage = () => {
                 id="account-form-title"
                 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-8 text-center"
               >
-                {editingId ? '編輯帳戶' : '新增帳戶'}
+                {editingId ? t.accounts.editTitle : t.accounts.addTitle}
               </h2>
               <AccountForm
                 initialData={editingId ? accounts.find((a) => a.id === editingId) : undefined}
@@ -207,10 +209,10 @@ export const AccountsPage = () => {
                 <Trash2 size={24} className="text-red-600 dark:text-red-400" aria-hidden="true" />
               </div>
               <h2 id="delete-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-center">
-                刪除帳戶
+                {t.accounts.deleteTitle}
               </h2>
               <p id="delete-desc" className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed text-pretty">
-                此帳戶將永久從此裝置上移除。
+                {t.accounts.deleteDesc}
               </p>
               <div className="mt-6 text-sm text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3 break-all border border-zinc-200/50 dark:border-zinc-700/50 text-center space-y-1">
                 {deletingAccount.label && (
@@ -224,7 +226,7 @@ export const AccountsPage = () => {
                   onClick={requestClose}
                   className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  取消
+                  {t.common.cancel}
                 </button>
                 <button
                   type="button"
@@ -234,7 +236,7 @@ export const AccountsPage = () => {
                   }}
                   className="flex-1 py-4 rounded-xl font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-600 dark:focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  刪除
+                  {t.common.delete}
                 </button>
               </div>
             </>

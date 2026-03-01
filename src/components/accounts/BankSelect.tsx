@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { Search, X, ChevronDown, Building2 } from 'lucide-react';
 import { useBanksStore } from '../../stores/useBanksStore';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 import { AnimatedModal } from '../ui/AnimatedModal';
 
 interface BankSelectProps {
@@ -13,6 +14,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const banks = useBanksStore((state) => state.banks);
+  const t = useLocaleStore((s) => s.t);
 
   const selectedBank = useMemo(() => banks.find((b) => b.code === value), [banks, value]);
 
@@ -28,7 +30,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           htmlFor="bank-select-trigger"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          銀行
+          {t.form.bankLabel}
         </label>
         <button
           id="bank-select-trigger"
@@ -54,7 +56,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">{selectedBank.code}</div>
               </div>
             ) : (
-              <span className="text-zinc-400 dark:text-zinc-500 text-base">請選擇銀行…</span>
+              <span className="text-zinc-400 dark:text-zinc-500 text-base">{t.form.bankPlaceholder}</span>
             )}
           </div>
           <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
@@ -81,12 +83,12 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
               <div className="p-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/50 flex flex-col gap-4 shrink-0">
                 <div className="flex items-center justify-between">
                   <h2 id="bank-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                    選擇銀行
+                    {t.bankSelect.title}
                   </h2>
                   <button
                     type="button"
                     onClick={requestClose}
-                    aria-label="關閉"
+                    aria-label={t.common.close}
                     className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                   >
                     <X size={20} aria-hidden="true" />
@@ -107,8 +109,8 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                     type="text"
                     autoComplete="off"
                     spellCheck={false}
-                    aria-label="搜尋銀行名稱或代碼"
-                    placeholder="搜尋銀行名稱或代碼…"
+                    aria-label={t.bankSelect.searchLabel}
+                    placeholder={t.bankSelect.searchPlaceholder}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3.5 pl-11 pr-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"
@@ -121,7 +123,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                 <div className="space-y-1 pb-safe">
                   {search && filteredBanks.length > 0 && (
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 px-2 pb-2" aria-live="polite">
-                      找到 {filteredBanks.length} 家銀行
+                      {t.bankSelect.found(filteredBanks.length)}
                     </p>
                   )}
                   {filteredBanks.map((bank) => (
@@ -156,7 +158,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                       <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
                         <Search size={24} aria-hidden="true" />
                       </div>
-                      <p>找不到「{search}」的搜尋結果</p>
+                      <p>{t.bankSelect.noResult(search)}</p>
                     </div>
                   )}
                 </div>

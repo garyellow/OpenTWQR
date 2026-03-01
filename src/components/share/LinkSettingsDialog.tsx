@@ -1,6 +1,7 @@
 import { useRef, type AnimationEvent } from 'react';
 import { X, Clipboard, Link2, Lock, Clock, Loader2 } from 'lucide-react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 import type { ExpiryOption } from '../../types';
 
 interface LinkSettingsDialogProps {
@@ -31,6 +32,7 @@ export const LinkSettingsDialog = ({
 }: LinkSettingsDialogProps) => {
   const ref = useRef<HTMLDivElement>(null);
   useFocusTrap(ref, !isClosing);
+  const t = useLocaleStore((s) => s.t);
 
   return (
     <div className="fixed inset-0 z-85">
@@ -58,13 +60,13 @@ export const LinkSettingsDialog = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h3 id="link-settings-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            分享連結設定
+            {t.linkSettings.title}
           </h3>
           <button
             type="button"
             onClick={onClose}
             disabled={isEncrypting}
-            aria-label="關閉"
+            aria-label={t.common.close}
             className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
           >
             <X size={20} aria-hidden="true" />
@@ -75,15 +77,12 @@ export const LinkSettingsDialog = ({
         <div className="mb-5">
           <label className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
             <Clock size={16} aria-hidden="true" />
-            連結到期時間
+            {t.linkSettings.expiryLabel}
           </label>
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="連結到期時間">
-            {([
-              [0, '不限制'],
-              [600, '10 分鐘'],
-              [3600, '1 小時'],
-              [86400, '1 天'],
-            ] as const).map(([val, label]) => (
+          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t.linkSettings.expiryLabel}>
+            {([0, 600, 3600, 86400] as const).map((val) => {
+              const label = t.linkSettings.expiryOptions[val] ?? String(val);
+              return (
               <button
                 key={val}
                 type="button"
@@ -99,7 +98,8 @@ export const LinkSettingsDialog = ({
               >
                 {label}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -110,8 +110,8 @@ export const LinkSettingsDialog = ({
             htmlFor="link-password-input"
           >
             <Lock size={16} aria-hidden="true" />
-            連結密碼
-            <span className="font-normal text-zinc-400 dark:text-zinc-500">（選填）</span>
+            {t.linkSettings.passwordLabel}
+            <span className="font-normal text-zinc-400 dark:text-zinc-500">{t.linkSettings.passwordOptional}</span>
           </label>
           <input
             type="password"
@@ -125,7 +125,7 @@ export const LinkSettingsDialog = ({
               }
             }}
             disabled={isEncrypting}
-            placeholder="不設定密碼則留空"
+            placeholder={t.linkSettings.passwordPlaceholder}
             autoComplete="new-password"
             className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs disabled:opacity-50"
           />
@@ -141,7 +141,7 @@ export const LinkSettingsDialog = ({
           {isEncrypting ? (
             <>
               <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-              加密中…
+              {t.linkSettings.encrypting}
             </>
           ) : (
             <>
@@ -150,7 +150,7 @@ export const LinkSettingsDialog = ({
               ) : (
                 <Link2 size={18} aria-hidden="true" />
               )}
-              {action === 'copy' ? '複製連結' : '分享連結'}
+              {action === 'copy' ? t.linkSettings.copyLinkAction : t.linkSettings.shareLinkAction}
             </>
           )}
         </button>

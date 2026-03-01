@@ -7,6 +7,9 @@
 [![Fork](https://img.shields.io/github/forks/garyellow/OpenTWQR?style=flat&logo=github&logoColor=white)](https://github.com/garyellow/OpenTWQR/fork)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-%E8%B4%8A%E5%8A%A9%E9%96%8B%E7%99%BC%E8%80%85-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/garyellow)
 
+[English](README-EN.md) ·
+[繁體中文](README.md)
+
 **在你的手機上，即時產生 TWQR 個人收款 QR Code。**
 
 完全免費、開放原始碼、無需註冊——帳戶資料只儲存在你自己的裝置上。

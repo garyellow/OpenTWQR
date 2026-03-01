@@ -8,7 +8,9 @@ import { generateTWQR, maskAccount, removeInvisibleChars } from '../utils/twqr';
 import { QrCode, ChevronRight, MessageSquare, X, Settings, Download } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
+import { useLocaleStore } from '../stores/useLocaleStore';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { LanguageToggle } from '../components/ui/LanguageToggle';
 import { OpenTWQRLogo } from '../components/ui/OpenTWQRLogo';
 import { BankIcon } from '../components/accounts/BankIcon';
 import { haptic } from '../utils/haptics';
@@ -19,6 +21,7 @@ export const ReceivePage = () => {
   const [showQR, setShowQR] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const banks = useBanksStore((state) => state.banks);
+  const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
 
   const selectedAccount = useMemo(
@@ -97,7 +100,7 @@ export const ReceivePage = () => {
             <OpenTWQRLogo className="h-9 w-auto mx-auto" />
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
-            新增銀行帳戶即可開始產生收款 QR Code。
+            {t.receive.emptyHint}
           </p>
         </div>
         <div className="w-full max-w-72 space-y-3 mt-4">
@@ -106,7 +109,7 @@ export const ReceivePage = () => {
             onClick={() => navigate('/accounts', { viewTransition: true, state: { autoAdd: true } })}
             className="w-full py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
-            新增銀行帳戶
+            {t.receive.addBankAccount}
           </button>
           <button
             type="button"
@@ -114,7 +117,7 @@ export const ReceivePage = () => {
             className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-lg"
           >
             <Download size={20} aria-hidden="true" />
-            匯入帳戶
+            {t.receive.importAccounts}
           </button>
         </div>
         {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
@@ -129,7 +132,7 @@ export const ReceivePage = () => {
         href="#receive-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
       >
-        跳至主要內容
+        {t.common.skipToMain}
       </a>
 
       <main id="receive-main" className="flex-1 flex flex-col min-h-0 max-w-md lg:max-w-lg mx-auto w-full pb-safe">
@@ -139,12 +142,13 @@ export const ReceivePage = () => {
             <OpenTWQRLogo className="h-7 w-auto" />
           </h1>
           <div className="flex items-center gap-1">
+            <LanguageToggle />
             <ThemeToggle />
             <Link
               to="/settings"
               viewTransition
-              aria-label="設定"
-              className="p-2.5 min-w-11 min-h-11 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+              aria-label={t.receive.settings}
+              className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
               <Settings size={20} aria-hidden="true" />
             </Link>
@@ -161,7 +165,7 @@ export const ReceivePage = () => {
             <BankIcon iconUrl={selectedAccount.iconUrl} bankUrl={bank?.url} bankCode={selectedAccount.bankCode} />
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-base">
-                {selectedAccount.label || bankName || '我的帳戶'}
+                {selectedAccount.label || bankName || t.receive.myAccount}
               </p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
                 {maskAccount(selectedAccount.accountNumber)}
@@ -195,7 +199,7 @@ export const ReceivePage = () => {
                 className="flex items-center gap-2 mx-auto text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-3 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
               >
                 <MessageSquare size={16} aria-hidden="true" />
-                <span>{note ? `備註：${note}` : '新增交易備註'}</span>
+                <span>{note ? `${t.receive.notePrefix}${note}` : t.receive.addNote}</span>
               </button>
             </div>
           </div>
@@ -210,7 +214,7 @@ export const ReceivePage = () => {
               className="w-full flex items-center justify-center gap-2.5 py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <QrCode size={22} aria-hidden="true" />
-              產生 QR Code
+              {t.receive.generateQR}
             </button>
           </div>
         </div>
@@ -228,12 +232,12 @@ export const ReceivePage = () => {
             <>
               <div className="flex items-center justify-between mb-5">
                 <h2 id="note-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                  交易備註
+                  {t.receive.noteTitle}
                 </h2>
                 <button
                   type="button"
                   onClick={requestClose}
-                  aria-label="關閉"
+                  aria-label={t.common.close}
                   className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <X size={20} aria-hidden="true" />
@@ -243,7 +247,7 @@ export const ReceivePage = () => {
                 <input
                   type="text"
                   id="note-modal-input"
-                  aria-label="交易備註"
+                  aria-label={t.receive.noteLabel}
                   value={note}
                   onChange={(e) => setNote(removeInvisibleChars(e.target.value).slice(0, 19))}
                   onKeyDown={(e) => {
@@ -252,7 +256,7 @@ export const ReceivePage = () => {
                       requestClose();
                     }
                   }}
-                  placeholder="輸入備註，最多 19 字…"
+                  placeholder={t.receive.notePlaceholder}
                   autoFocus
                   autoComplete="off"
                   maxLength={19}
@@ -272,7 +276,7 @@ export const ReceivePage = () => {
                     }}
                     className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                   >
-                    清除備註
+                    {t.receive.clearNote}
                   </button>
                 )}
                 <button
@@ -280,7 +284,7 @@ export const ReceivePage = () => {
                   onClick={requestClose}
                   className="flex-2 py-4 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  確認
+                  {t.common.confirm}
                 </button>
               </div>
             </>

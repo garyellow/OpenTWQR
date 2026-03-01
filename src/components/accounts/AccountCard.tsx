@@ -1,6 +1,7 @@
 import type { BankAccount } from '../../types';
 import { Trash2, Pencil, Check } from 'lucide-react';
 import { useBanksStore } from '../../stores/useBanksStore';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 import { maskAccount } from '../../utils/twqr';
 import { BankIcon } from './BankIcon';
 
@@ -19,6 +20,7 @@ export const AccountCard = ({
   onDelete,
   onEdit,
 }: AccountCardProps) => {
+  const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((state) => state.banks);
   const bank = banks.find((b) => b.code === account.bankCode);
   const bankName = bank?.name || account.bankCode;
@@ -41,7 +43,7 @@ export const AccountCard = ({
         type="button"
         onClick={onSelect}
         aria-pressed={isSelected}
-        aria-label={`選擇 ${displayName} 帳戶`}
+        aria-label={t.accounts.selectAccount(displayName)}
         className="absolute inset-0 w-full h-full rounded-xl cursor-pointer z-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       />
 
@@ -84,7 +86,7 @@ export const AccountCard = ({
         {onEdit && (
           <button
             type="button"
-            aria-label="編輯帳戶"
+            aria-label={t.accounts.editAccount}
             onClick={onEdit}
             className={`p-3 rounded-xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${isSelected
               ? 'text-white/70 hover:text-white hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-zinc-900 dark:hover:bg-black/10'
@@ -97,7 +99,7 @@ export const AccountCard = ({
         {onDelete && (
           <button
             type="button"
-            aria-label="刪除帳戶"
+            aria-label={t.accounts.deleteAccount}
             onClick={onDelete}
             className={`p-3 rounded-xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-500 ${isSelected
               ? 'text-white/70 hover:text-red-300 hover:bg-white/20 dark:text-zinc-900/70 dark:hover:text-red-600 dark:hover:bg-black/10'

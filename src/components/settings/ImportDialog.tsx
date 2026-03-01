@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Check, Loader2, Lock, AlertCircle, Pencil } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useBanksStore } from '../../stores/useBanksStore';
 import type { BankAccount } from '../../types';
 import { AnimatedModal } from '../ui/AnimatedModal';
@@ -28,6 +29,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
   const selectAccount = useAppStore((s) => s.selectAccount);
   const accounts = useAppStore((s) => s.accounts);
   const banks = useBanksStore((s) => s.banks);
+  const t = useLocaleStore((s) => s.t);
 
   const [input, setInput] = useState(initialText);
   const [password, setPassword] = useState('');
@@ -49,13 +51,13 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
   /* --- Phase 1: Decrypt --- */
   const handleDecrypt = useCallback(async () => {
     if (!input.trim()) {
-      setError('請貼上備份字串');
+      setError(t.importDialog.emptyInput);
       return;
     }
 
     const isProtected = isPasswordProtected(input);
     if (isProtected === null) {
-      setError('無效的備份字串');
+      setError(t.importDialog.invalidString);
       return;
     }
 
@@ -75,13 +77,13 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
           setNeedsPassword(true);
           break;
         case 'wrong-password':
-          setError('密碼錯誤');
+          setError(t.importDialog.wrongPassword);
           break;
         case 'invalid':
-          setError('無效的備份字串');
+          setError(t.importDialog.invalidString);
           break;
         case 'decrypt-error':
-          setError('解密失敗，字串可能已損壞');
+          setError(t.importDialog.decryptError);
           break;
       }
       setIsImporting(false);
@@ -179,14 +181,14 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
             id="import-title"
             className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-2 text-center"
           >
-            匯入帳戶
+            {t.importDialog.title}
           </h2>
 
           {/* ---- Phase 1: Input ---- */}
           {candidates === null && importedCount === null && (
             <>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-6">
-                貼上先前匯出的加密字串
+                {t.importDialog.subtitle}
               </p>
 
               <textarea
@@ -197,7 +199,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   setNeedsPassword(false);
                 }}
                 placeholder="OTWQR1-..."
-                aria-label="匯入加密字串"
+                aria-label={t.importDialog.inputLabel}
                 rows={5}
                 autoFocus
                 spellCheck={false}
@@ -212,7 +214,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                     className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
                   >
                     <Lock size={14} aria-hidden="true" />
-                    輸入密碼
+                    {t.importDialog.passwordLabel}
                   </label>
                   <input
                     id="import-password"
@@ -225,7 +227,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                         handleDecrypt();
                       }
                     }}
-                    placeholder="輸入匯出時設定的密碼"
+                    placeholder={t.importDialog.passwordPlaceholder}
                     autoFocus
                     autoComplete="off"
                     className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"
@@ -246,7 +248,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   onClick={requestClose}
                   className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  取消
+                  {t.common.cancel}
                 </button>
                 <button
                   type="button"
@@ -257,10 +259,10 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   {isImporting ? (
                     <>
                       <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-                      解密中…
+                      {t.importDialog.decrypting}
                     </>
                   ) : (
-                    '解密'
+                    t.importDialog.decrypt
                   )}
                 </button>
               </div>
@@ -271,7 +273,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
           {candidates !== null && importedCount === null && (
             <>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-4">
-                共 {candidates.length} 個帳戶，{newCount} 個為新帳戶
+                {t.importDialog.summary(candidates.length, newCount)}
               </p>
 
               {/* Quick filters */}
@@ -281,14 +283,14 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   onClick={selectAll}
                   className="text-xs px-3 py-1.5 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  全選
+                  {t.importDialog.selectAll}
                 </button>
                 <button
                   type="button"
                   onClick={selectNewOnly}
                   className="text-xs px-3 py-1.5 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  只選新帳戶
+                  {t.importDialog.selectNewOnly}
                 </button>
               </div>
 
@@ -308,7 +310,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                       type="button"
                       role="checkbox"
                       aria-checked={c.checked}
-                      aria-label={`${c.checked ? '取消選取' : '選取'} ${getBankName(c.original.bankCode)}`}
+                      aria-label={t.importDialog.selectLabel(c.checked, getBankName(c.original.bankCode))}
                       onClick={() => toggleCandidate(i)}
                       className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
                         c.checked
@@ -331,7 +333,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                         </span>
                         {c.isDuplicate && (
                           <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
-                            已存在
+                            {t.importDialog.existing}
                           </span>
                         )}
                       </div>
@@ -348,7 +350,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                           onBlur={() => toggleEditing(i)}
                           onKeyDown={(e) => { if (e.key === 'Enter') toggleEditing(i); }}
                           autoFocus
-                          placeholder="帳戶暱稱（選填）"
+                          placeholder={t.importDialog.nicknamePlaceholder}
                           className="mt-1.5 w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
                         />
                       ) : (
@@ -358,7 +360,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                           className="mt-1 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors rounded focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
                         >
                           <Pencil size={10} aria-hidden="true" />
-                          <span>{c.label || '新增暱稱'}</span>
+                          <span>{c.label || t.importDialog.addNickname}</span>
                         </button>
                       )}
                     </div>
@@ -372,7 +374,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   onClick={requestClose}
                   className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  取消
+                  {t.common.cancel}
                 </button>
                 <button
                   type="button"
@@ -380,7 +382,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   disabled={checkedCount === 0}
                   className="flex-2 py-4 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
-                  匯入 {checkedCount} 個帳戶
+                  {t.importDialog.importCount(checkedCount)}
                 </button>
               </div>
             </>
@@ -394,10 +396,10 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   <Check size={32} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                 </div>
                 <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
-                  匯入完成
+                  {t.importDialog.successTitle}
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  成功匯入 {importedCount} 個帳戶
+                  {t.importDialog.successDesc(importedCount)}
                 </p>
               </div>
 
@@ -406,7 +408,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                 onClick={requestClose}
                 className="w-full py-4 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
-                完成
+                {t.common.done}
               </button>
             </>
           )}

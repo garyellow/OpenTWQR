@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BankSelect } from './BankSelect';
 import { useAppStore } from '../../stores/useAppStore';
 import { useBanksStore } from '../../stores/useBanksStore';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 import type { BankAccount } from '../../types';
 import { isValidAccount, removeInvisibleChars } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
@@ -24,6 +25,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const [error, setError] = useState('');
   const [duplicateWarning, setDuplicateWarning] = useState('');
 
+  const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((state) => state.banks);
   const selectedBank = banks.find((b) => b.code === bankCode);
   const bankUrlPlaceholder = selectedBank?.url || 'https://example.com/icon.png';
@@ -34,12 +36,12 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
     setDuplicateWarning('');
 
     if (!bankCode) {
-      setError('請選擇銀行');
+      setError(t.form.selectBank);
       return;
     }
 
     if (!isValidAccount(accountNumber)) {
-      setError('帳號必須為 10–16 位數字');
+      setError(t.form.invalidAccount);
       return;
     }
 
@@ -56,12 +58,12 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
       );
 
       if (exactMatch) {
-        setError('此帳戶已存在');
+        setError(t.form.duplicateExact);
         return;
       }
 
       // Same bank + account but different label — ask for confirmation
-      setDuplicateWarning('你已經有一個相同的銀行帳號，確定要再新增嗎？');
+      setDuplicateWarning(t.form.duplicateWarn);
       return;
     }
 
@@ -85,7 +87,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           }}
         />
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
-          收款帳戶所屬的金融機構
+          {t.form.bankHint}
         </p>
       </div>
 
@@ -94,7 +96,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           htmlFor="account-number"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          帳號
+          {t.form.accountLabel}
         </label>
         <input
           id="account-number"
@@ -103,7 +105,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           inputMode="numeric"
           autoComplete="off"
           spellCheck={false}
-          placeholder="輸入銀行帳號…"
+          placeholder={t.form.accountPlaceholder}
           value={accountNumber}
           onChange={(e) => {
             setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
@@ -115,7 +117,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           className={`${inputClass} text-lg font-mono tracking-widest`}
         />
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
-          10–16 位數字，不含分行代碼
+          {t.form.accountHint}
         </p>
       </div>
 
@@ -124,14 +126,14 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           htmlFor="account-label"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          帳戶暱稱（選填）
+          {t.form.nicknameLabel}
         </label>
         <input
           id="account-label"
           name="label"
           type="text"
           autoComplete="off"
-          placeholder="例如：郵局、薪轉戶…"
+          placeholder={t.form.nicknamePlaceholder}
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
@@ -140,7 +142,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           className={inputClass}
         />
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
-          方便區分不同帳戶用途
+          {t.form.nicknameHint}
         </p>
       </div>
 
@@ -149,7 +151,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           htmlFor="account-icon-url"
           className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 ml-1"
         >
-          自訂圖示（選填）
+          {t.form.iconLabel}
         </label>
         <div className="relative">
           {resolvedIcon && !iconError ? (
@@ -179,7 +181,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           />
         </div>
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
-          可以填入圖片網址，也可以填入官網網址
+          {t.form.iconHint}
         </p>
       </div>
 
@@ -211,14 +213,14 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
               onClick={() => setDuplicateWarning('')}
               className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
             >
-              取消
+              {t.common.cancel}
             </button>
             <button
               type="button"
               onClick={() => onSubmit({ bankCode, accountNumber, label: label || undefined, iconUrl: iconUrl.trim() || undefined })}
               className="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
             >
-              仍要新增
+              {t.form.addAnyway}
             </button>
           </div>
         </div>
@@ -230,13 +232,13 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           onClick={onCancel}
           className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
-          取消
+          {t.common.cancel}
         </button>
         <button
           type="submit"
           className="flex-2 py-4 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
-          儲存帳戶
+          {t.form.saveAccount}
         </button>
       </div>
     </form>

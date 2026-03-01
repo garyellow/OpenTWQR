@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 
 /** GitHub logo from Simple Icons (MIT). Avoids deprecated lucide brand icons. */
 const GithubIcon = ({ size = 18, className }: { size?: number; className?: string }) => (
@@ -20,10 +21,12 @@ const GithubIcon = ({ size = 18, className }: { size?: number; className?: strin
  * Provides links to the Ko-fi sponsor page and the GitHub repository.
  */
 export const AboutSection = () => {
+  const t = useLocaleStore((s) => s.t);
+
   return (
     <div>
       <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider px-1 mb-3">
-        關於
+        {t.about.sectionTitle}
       </h2>
       <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
         <a
@@ -36,9 +39,9 @@ export const AboutSection = () => {
             <Heart size={18} className="text-pink-600 dark:text-pink-400" aria-hidden="true" />
           </div>
           <div className="text-left flex-1">
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">贊助開發者</p>
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.sponsorTitle}</p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              請 AI 吃點 Token，支持專案持續維護
+              {t.about.sponsorDesc}
             </p>
           </div>
         </a>
@@ -53,9 +56,9 @@ export const AboutSection = () => {
             <GithubIcon size={18} className="text-zinc-600 dark:text-zinc-400" />
           </div>
           <div className="text-left flex-1">
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">GitHub 原始碼</p>
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.githubTitle}</p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              檢視原始碼、回報問題或參與貢獻
+              {t.about.githubDesc}
             </p>
           </div>
         </a>

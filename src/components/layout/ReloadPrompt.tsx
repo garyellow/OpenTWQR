@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { RefreshCw } from 'lucide-react';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 
 /**
  * Displays a non-intrusive toast when a new service worker is ready,
@@ -10,6 +11,7 @@ import { RefreshCw } from 'lucide-react';
  * removes the toast from the tree once the animation completes.
  */
 export const ReloadPrompt = () => {
+  const t = useLocaleStore((s) => s.t);
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -41,21 +43,21 @@ export const ReloadPrompt = () => {
       onAnimationEnd={handleAnimationEnd}
     >
       <RefreshCw size={18} className="shrink-0" aria-hidden="true" />
-      <span className="text-sm font-medium">有新版本可用</span>
+      <span className="text-sm font-medium">{t.reload.newVersion}</span>
       <button
         type="button"
         onClick={() => updateServiceWorker(true)}
         className="ml-1 px-3 py-1.5 text-sm font-semibold rounded-lg bg-white/20 dark:bg-black/10 hover:bg-white/30 dark:hover:bg-black/20 transition-colors"
       >
-        更新
+        {t.reload.update}
       </button>
       <button
         type="button"
         onClick={handleDismiss}
-        aria-label="關閉"
+        aria-label={t.reload.dismiss}
         className="ml-1 px-3 py-2 text-sm rounded-lg text-white/60 dark:text-zinc-900/60 hover:text-white dark:hover:text-zinc-900 transition-colors"
       >
-        稍後
+        {t.reload.later}
       </button>
     </div>
   );

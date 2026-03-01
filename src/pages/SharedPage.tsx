@@ -4,6 +4,7 @@ import { QRDisplay } from '../components/receive/QRDisplay';
 import { parseShareUrl } from '../utils/share';
 import { generateTWQR } from '../utils/twqr';
 import { useBanksStore } from '../stores/useBanksStore';
+import { useLocaleStore } from '../stores/useLocaleStore';
 import { Unlink, Lock, Clock } from 'lucide-react';
 import type { ParseShareResult } from '../types';
 
@@ -11,6 +12,7 @@ export const SharedPage = () => {
   const { data } = useParams<{ data: string }>();
   const navigate = useNavigate();
   const banks = useBanksStore((state) => state.banks);
+  const t = useLocaleStore((s) => s.t);
 
   const [result, setResult] = useState<ParseShareResult | null>(null);
   const [password, setPassword] = useState('');
@@ -74,10 +76,10 @@ export const SharedPage = () => {
         </div>
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">
-            需要密碼
+            {t.shared.needPasswordTitle}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
-            此收款連結受密碼保護，請輸入密碼以查看。
+            {t.shared.needPasswordDesc}
           </p>
         </div>
         <div className="w-full max-w-xs space-y-3">
@@ -88,8 +90,8 @@ export const SharedPage = () => {
             onKeyDown={(e) => {
               if (e.key === 'Enter') handlePasswordSubmit();
             }}
-            placeholder="輸入密碼…"
-            aria-label="連結密碼"
+            placeholder={t.shared.passwordPlaceholder}
+            aria-label={t.shared.passwordLabel}
             aria-describedby={result.status === 'wrong-password' ? 'shared-pw-error' : undefined}
             autoFocus
             autoComplete="off"
@@ -102,7 +104,7 @@ export const SharedPage = () => {
               className="flex items-center justify-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
             >
               <Lock size={18} className="shrink-0" aria-hidden="true" />
-              <span className="font-medium">密碼錯誤，請重新輸入</span>
+              <span className="font-medium">{t.shared.wrongPassword}</span>
             </div>
           )}
           <button
@@ -111,7 +113,7 @@ export const SharedPage = () => {
             disabled={isDecrypting || !password}
             className="w-full py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
-            {isDecrypting ? '解密中…' : '解鎖'}
+            {isDecrypting ? t.shared.decrypting : t.shared.unlock}
           </button>
         </div>
         <button
@@ -119,7 +121,7 @@ export const SharedPage = () => {
           onClick={() => navigate('/', { viewTransition: true })}
           className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors mt-2 py-2 px-4 min-h-11 inline-flex items-center rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
-          前往首頁
+          {t.common.goHome}
         </button>
       </div>
     );
@@ -134,10 +136,10 @@ export const SharedPage = () => {
         </div>
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">
-            連結已過期
+            {t.shared.expiredTitle}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
-            此收款連結已超過有效期限，無法繼續使用。
+            {t.shared.expiredDesc}
           </p>
         </div>
         <button
@@ -145,7 +147,7 @@ export const SharedPage = () => {
           onClick={() => navigate('/', { viewTransition: true })}
           className="w-full max-w-xs py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
-          前往首頁
+          {t.common.goHome}
         </button>
       </div>
     );
@@ -160,10 +162,10 @@ export const SharedPage = () => {
         </div>
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">
-            連結無效
+            {t.shared.invalidTitle}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
-            此收款連結無法解析，可能已損壞或格式不正確。
+            {t.shared.invalidDesc}
           </p>
         </div>
         <button
@@ -171,7 +173,7 @@ export const SharedPage = () => {
           onClick={() => navigate('/', { viewTransition: true })}
           className="w-full max-w-xs py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
-          前往首頁
+          {t.common.goHome}
         </button>
       </div>
     );

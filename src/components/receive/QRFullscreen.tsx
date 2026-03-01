@@ -4,6 +4,7 @@ import { formatAmount } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { QR_CENTER_IMAGE } from '../../utils/qrLabel';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);
@@ -21,6 +22,7 @@ interface QRFullscreenProps {
  * Includes Screen Wake Lock and landscape-aware sizing.
  */
 export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullscreenProps) => {
+  const t = useLocaleStore((s) => s.t);
   const ref = useRef<HTMLDivElement>(null);
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
   const [qrSize, setQrSize] = useState(() =>
@@ -80,7 +82,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
       ref={ref}
       role="dialog"
       aria-modal="true"
-      aria-label="全螢幕 QR Code"
+      aria-label={t.qr.fullscreenLabel}
       className={`fixed inset-0 z-90 bg-black flex flex-col items-center justify-center cursor-pointer overscroll-contain motion-reduce:animate-none ${
         isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
       }`}
@@ -109,7 +111,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
             </span>
           </div>
         ) : (
-          <p className="text-lg font-medium text-white/50">金額由付款方輸入</p>
+          <p className="text-lg font-medium text-white/50">{t.amount.payerEnter}</p>
         )}
         {bankName && <p className="text-white/60 text-sm">{bankName}</p>}
         {note && <p className="text-white/50 text-xs">{note}</p>}
@@ -118,10 +120,10 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
       <button
         type="button"
         onClick={requestClose}
-        aria-label="關閉全螢幕"
+        aria-label={t.qr.fullscreenClose}
         className="mt-10 text-white/60 text-xs transition-opacity hover:text-white/80"
       >
-        點擊任意處返回
+        {t.qr.fullscreenHint}
       </button>
     </div>
   );

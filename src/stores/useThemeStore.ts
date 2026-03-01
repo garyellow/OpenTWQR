@@ -23,9 +23,12 @@ interface ThemeState {
   mode: ThemeMode;
   /** User-chosen accent hue (0–360, OKLCH hue angle). */
   accentHue: number;
+  /** Whether the user has opted-in to a custom accent colour. */
+  accentEnabled: boolean;
   setMode: (mode: ThemeMode) => void;
   /** @param animate - Pass `true` on intentional user actions to cross-fade accent colours. */
   setAccentHue: (hue: number, animate?: boolean) => void;
+  setAccentEnabled: (enabled: boolean) => void;
 }
 
 const getResolvedTheme = (mode: ThemeMode): 'light' | 'dark' => {
@@ -94,6 +97,7 @@ export const useThemeStore = create<ThemeState>()(
     (set) => ({
       mode: 'system' as ThemeMode,
       accentHue: DEFAULT_HUE,
+      accentEnabled: false,
       setMode: (mode) => {
         applyTheme(mode);
         set({ mode });
@@ -101,6 +105,14 @@ export const useThemeStore = create<ThemeState>()(
       setAccentHue: (hue, animate = false) => {
         applyAccentHue(hue, animate);
         set({ accentHue: hue });
+      },
+      setAccentEnabled: (enabled) => {
+        if (!enabled) {
+          applyAccentHue(DEFAULT_HUE, true);
+          set({ accentEnabled: false, accentHue: DEFAULT_HUE });
+        } else {
+          set({ accentEnabled: true });
+        }
       },
     }),
     {

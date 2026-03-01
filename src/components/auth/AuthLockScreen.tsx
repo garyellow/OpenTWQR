@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Lock, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useLocaleStore } from '../../stores/useLocaleStore';
 import { authenticate } from '../../utils/authLock';
 import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
 import { haptic } from '../../utils/haptics';
@@ -16,6 +17,7 @@ import { haptic } from '../../utils/haptics';
 export const AuthLockScreen = () => {
   const credentialId = useAuthStore((s) => s.credentialId);
   const unlock = useAuthStore((s) => s.unlock);
+  const t = useLocaleStore((s) => s.t);
 
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export const AuthLockScreen = () => {
       haptic();
       unlock();
     } else {
-      setError('驗證失敗，請再試一次');
+      setError(t.auth.authFailed);
     }
 
     setIsAuthenticating(false);
@@ -56,7 +58,7 @@ export const AuthLockScreen = () => {
           <OpenTWQRLogo className="h-9 w-auto mx-auto" />
         </h1>
         <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
-          請驗證身分以解鎖應用程式
+          {t.auth.promptDesc}
         </p>
       </div>
 
@@ -76,7 +78,7 @@ export const AuthLockScreen = () => {
         className="w-full max-w-72 flex items-center justify-center gap-2.5 py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 mt-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       >
         <ShieldCheck size={22} aria-hidden="true" />
-        {isAuthenticating ? '驗證中…' : '解鎖'}
+        {isAuthenticating ? t.auth.authenticating : t.auth.unlock}
       </button>
     </div>
   );
