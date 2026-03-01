@@ -23,11 +23,11 @@ interface AuthState {
 
 /** Available lock timeout presets (milliseconds). */
 export const LOCK_TIMEOUT_OPTIONS = [
-  { value: 0, label: '立即' },
-  { value: 10_000, label: '10 秒' },
-  { value: 60_000, label: '1 分鐘' },
-  { value: 300_000, label: '5 分鐘' },
-  { value: 3_600_000, label: '1 小時' },
+  { value: 0 },
+  { value: 10_000 },
+  { value: 60_000 },
+  { value: 300_000 },
+  { value: 3_600_000 },
 ] as const;
 
 export const useAuthStore = create<AuthState>()(

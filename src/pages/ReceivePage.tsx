@@ -5,7 +5,7 @@ import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars } from '../utils/twqr';
-import { QrCode, ChevronRight, MessageSquare, X, Settings, Download } from 'lucide-react';
+import { QrCode, ChevronRight, MessageSquare, X, Settings, Download, Zap } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
@@ -14,12 +14,15 @@ import { LanguageToggle } from '../components/ui/LanguageToggle';
 import { OpenTWQRLogo } from '../components/ui/OpenTWQRLogo';
 import { BankIcon } from '../components/accounts/BankIcon';
 import { haptic } from '../utils/haptics';
+import { resolveIconSrc } from '../utils/favicon';
+import { QuickQRModal } from '../components/receive/QuickQRModal';
 
 export const ReceivePage = () => {
   const { accounts, selectedAccountId, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showQuickQR, setShowQuickQR] = useState(false);
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
@@ -34,6 +37,11 @@ export const ReceivePage = () => {
   }, [banks, selectedAccount]);
 
   const bankName = bank?.name || '';
+
+  /** Resolved bank icon URL for QR center logo (when logoType is 'bank'). */
+  const bankIconUrl = useMemo(() => {
+    return resolveIconSrc(selectedAccount?.iconUrl) ?? resolveIconSrc(bank?.url);
+  }, [selectedAccount, bank]);
 
   /* ---------- QR string generation ---------- */
   const qrString = useMemo(() => {
@@ -119,8 +127,17 @@ export const ReceivePage = () => {
             <Download size={20} aria-hidden="true" />
             {t.receive.importAccounts}
           </button>
+          <button
+            type="button"
+            onClick={() => setShowQuickQR(true)}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-lg"
+          >
+            <Zap size={20} aria-hidden="true" />
+            {t.receive.quickQR}
+          </button>
         </div>
         {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
+        {showQuickQR && <QuickQRModal onClose={() => setShowQuickQR(false)} />}
       </div>
     );
   }
@@ -172,7 +189,7 @@ export const ReceivePage = () => {
               </p>
               {selectedAccount.label && bankName && (
                 <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">
-                  {bankName}（{selectedAccount.bankCode}）
+                  {bankName}{t.receive.bankCode(selectedAccount.bankCode)}
                 </p>
               )}
             </div>
@@ -199,7 +216,7 @@ export const ReceivePage = () => {
                 className="flex items-center gap-2 mx-auto text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-3 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
               >
                 <MessageSquare size={16} aria-hidden="true" />
-                <span>{note ? `${t.receive.notePrefix}${note}` : t.receive.addNote}</span>
+                <span>{note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}</span>
               </button>
             </div>
           </div>
@@ -301,8 +318,10 @@ export const ReceivePage = () => {
           note={note || undefined}
           shareData={shareData}
           onClose={handleCloseQR}
+          bankIconUrl={bankIconUrl}
         />
       )}
+
     </div>
   );
 };

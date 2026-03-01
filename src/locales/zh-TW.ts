@@ -5,13 +5,13 @@ const zhTW = {
     close: '關閉',
     cancel: '取消',
     confirm: '確認',
-    save: '儲存',
     delete: '刪除',
     done: '完成',
     back: '返回',
     skipToMain: '跳至主要內容',
     goHome: '前往首頁',
     understand: '了解',
+    loading: '載入中',
   },
 
   /* ─── ReceivePage ──────────────────────────────────────── */
@@ -29,11 +29,11 @@ const zhTW = {
     quickQRSave: '儲存此帳戶',
     quickQRSaved: '已儲存帳戶',
     addNote: '新增交易備註',
-    notePrefix: '備註：',
     noteTitle: '交易備註',
     noteLabel: '交易備註',
     notePlaceholder: '輸入備註，最多 19 字…',
     clearNote: '清除備註',
+    bankCode: (code: string) => `（${code}）`,
   },
 
   /* ─── AmountInput ──────────────────────────────────────── */
@@ -244,6 +244,7 @@ const zhTW = {
     shared: '已分享',
     copyFailed: '複製失敗',
     shareFailed: '分享失敗',
+    encryptFailed: '加密失敗',
   },
 
   /* ─── ImportDialog ─────────────────────────────────────── */
@@ -355,6 +356,13 @@ const zhTW = {
     later: '稍後',
     dismiss: '關閉',
   },
+  /* ─── ErrorBoundary ────────────────────────────────────── */
+  errorBoundary: {
+    title: '發生錯誤',
+    desc: '應用程式發生預期外的錯誤，請重新整理後再試。',
+    refresh: '重新整理',
+  },
+
 } as const;
 
 /**

@@ -9,14 +9,14 @@ const DEFAULT_HUE = 200;
 
 /** Predefined accent hue presets for the color picker. */
 export const ACCENT_PRESETS = [
-  { hue: 200, label: '水波藍', color: 'oklch(55% 0.15 200)' },
-  { hue: 250, label: '靛青藍', color: 'oklch(55% 0.15 250)' },
-  { hue: 285, label: '薰衣紫', color: 'oklch(55% 0.15 285)' },
-  { hue: 340, label: '玫瑰粉', color: 'oklch(55% 0.15 340)' },
-  { hue: 15,  label: '珊瑚紅', color: 'oklch(55% 0.15 15)' },
-  { hue: 55,  label: '琥珀橘', color: 'oklch(55% 0.15 55)' },
-  { hue: 145, label: '翡翠綠', color: 'oklch(55% 0.15 145)' },
-  { hue: 175, label: '青碧',   color: 'oklch(55% 0.15 175)' },
+  { hue: 200, color: 'oklch(55% 0.15 200)' },
+  { hue: 250, color: 'oklch(55% 0.15 250)' },
+  { hue: 285, color: 'oklch(55% 0.15 285)' },
+  { hue: 340, color: 'oklch(55% 0.15 340)' },
+  { hue: 15,  color: 'oklch(55% 0.15 15)' },
+  { hue: 55,  color: 'oklch(55% 0.15 55)' },
+  { hue: 145, color: 'oklch(55% 0.15 145)' },
+  { hue: 175, color: 'oklch(55% 0.15 175)' },
 ] as const;
 
 interface ThemeState {

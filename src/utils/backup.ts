@@ -57,7 +57,7 @@ interface BackupPayload {
 
 export type ExportResult =
   | { ok: true; data: string }
-  | { ok: false; error: string };
+  | { ok: false; error: 'encrypt-failed' };
 
 /**
  * Encrypt account data into a compact, copy-pasteable string.
@@ -125,7 +125,7 @@ export const exportBackup = async (
 
     return { ok: true, data: PREFIX + toBase64Url(binaryPayload) };
   } catch {
-    return { ok: false, error: '匯出加密失敗' };
+    return { ok: false, error: 'encrypt-failed' as const };
   }
 };
 

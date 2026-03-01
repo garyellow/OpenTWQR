@@ -7,13 +7,13 @@ const enUS: Translations = {
     close: 'Close',
     cancel: 'Cancel',
     confirm: 'Confirm',
-    save: 'Save',
     delete: 'Delete',
     done: 'Done',
     back: 'Back',
     skipToMain: 'Skip to main content',
     goHome: 'Go to Home',
     understand: 'Got it',
+    loading: 'Loading',
   },
 
   /* ─── ReceivePage ──────────────────────────────────────── */
@@ -30,12 +30,12 @@ const enUS: Translations = {
     quickQRGenerate: 'Generate QR Code',
     quickQRSave: 'Save This Account',
     quickQRSaved: 'Account saved',
-    addNote: 'Add a note',
-    notePrefix: 'Note: ',
+    addNote: 'Add Note',
     noteTitle: 'Transaction Note',
     noteLabel: 'Transaction note',
     notePlaceholder: 'Enter a note, up to 19 chars…',
     clearNote: 'Clear Note',
+    bankCode: (code: string) => `(${code})`,
   },
 
   /* ─── AmountInput ──────────────────────────────────────── */
@@ -65,7 +65,7 @@ const enUS: Translations = {
     fullscreenClose: 'Exit fullscreen',
     fullscreenHint: 'Tap anywhere to go back',
     shareTitle: 'OpenTWQR Payment',
-    shareImageTitle: 'OpenTWQR Payment QR',
+    shareImageTitle: 'OpenTWQR Payment QR Code',
     shareText: (amount: string, bankName: string) => {
       let s = 'Payment';
       if (amount) s += ` ${amount}`;
@@ -193,7 +193,7 @@ const enUS: Translations = {
     appLockTitle: 'App Lock',
     appLockDesc: 'Use device authentication to protect data',
     lockTimeoutTitle: 'Lock Timeout',
-    lockTimeoutDesc: 'Re-authentication required after being in the background for this long',
+    lockTimeoutDesc: 'Time in background before re-authentication is required',
     lockTimeoutLabel: 'Lock timeout',
     lockTimeoutOptions: {
       0: 'Immediately',
@@ -246,6 +246,7 @@ const enUS: Translations = {
     shared: 'Shared',
     copyFailed: 'Copy failed',
     shareFailed: 'Share failed',
+    encryptFailed: 'Encryption failed',
   },
 
   /* ─── ImportDialog ─────────────────────────────────────── */
@@ -356,6 +357,12 @@ const enUS: Translations = {
     update: 'Update',
     later: 'Later',
     dismiss: 'Dismiss',
+  },
+  /* ─── ErrorBoundary ────────────────────────────────────── */
+  errorBoundary: {
+    title: 'Something went wrong',
+    desc: 'An unexpected error has occurred. Please refresh and try again.',
+    refresh: 'Refresh',
   },
 } as const;
 

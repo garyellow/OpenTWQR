@@ -105,7 +105,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
     setCandidates(items);
     setIsImporting(false);
     haptic();
-  }, [input, password, needsPassword, isDuplicate]);
+  }, [input, password, needsPassword, isDuplicate, t]);
 
   /* --- Phase 2: Toggle / edit candidates --- */
   const toggleCandidate = useCallback((index: number) => {
@@ -198,7 +198,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   setError('');
                   setNeedsPassword(false);
                 }}
-                placeholder="OTWQR1-..."
+                placeholder={t.importDialog.inputPlaceholder}
                 aria-label={t.importDialog.inputLabel}
                 rows={5}
                 autoFocus

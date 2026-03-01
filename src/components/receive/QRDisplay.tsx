@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState, useCallback, memo } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useLocaleStore } from '../../stores/useLocaleStore';
+import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { X, Share2, Check, Eye, EyeOff, Copy } from 'lucide-react';
@@ -13,7 +15,7 @@ import { QRFullscreen } from './QRFullscreen';
 import { ShareMenu } from '../share/ShareMenu';
 import { LinkSettingsDialog } from '../share/LinkSettingsDialog';
 import type { ShareData, ExpiryOption } from '../../types';
-import { QR_CENTER_IMAGE } from '../../utils/qrLabel';
+import { buildQRCenterImage, QR_CENTER_IMAGE, QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);
@@ -28,9 +30,29 @@ interface QRDisplayProps {
   onClose: () => void;
   /** When true (SharedPage), hide re-link options to prevent expiry bypass */
   isSharedView?: boolean;
+  /** Bank favicon / icon URL for centre logo when logo type is 'bank'. */
+  bankIconUrl?: string;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareData, onClose, isSharedView = false }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareData, onClose, isSharedView = false, bankIconUrl }: QRDisplayProps) => {
+  const t = useLocaleStore((s) => s.t);
+  const storedLogoType = useQRSettingsStore((s) => s.logoType);
+  const storedShowBankName = useQRSettingsStore((s) => s.showBankName);
+  const storedCustomName = useQRSettingsStore((s) => s.customName);
+
+  // Shared view always uses defaults — viewer's personal settings must not leak.
+  const logoType = isSharedView ? 'opentwqr' as const : storedLogoType;
+  const showBankNameSetting = isSharedView ? false : storedShowBankName;
+  const customName = isSharedView ? '' : storedCustomName;
+
+  /** Whether any name/label info will be displayed below the QR code. */
+  const hasLabelInfo = Boolean(customName.trim()) || (showBankNameSetting && Boolean(bankName));
+
+  /** Dynamic QR center image based on user settings. */
+  const qrCenterImage = useMemo(
+    () => buildQRCenterImage({ logoType, hasLabelInfo, bankIconUrl }),
+    [logoType, hasLabelInfo, bankIconUrl],
+  );
   const [qrSize, setQrSize] = useState(240);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const shareMenu = useAnimatedToggle();
@@ -46,6 +68,36 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   const feedbackHideTimerRef = useRef<number | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Returns an export-safe SVG clone — replaces any external (https://) centre
+   * image href with an embedded data-URI OpenTWQR logo so that exported PNGs
+   * always render the logo.
+   *
+   * Background: browsers block external resources when an SVG is loaded via
+   * `<img src="blob:...">` (the technique used by svgToBlob). Data-URI sources
+   * are not affected, but bank favicon URLs (https://) go missing in exports.
+   */
+  const getExportSvgEl = useCallback((): SVGSVGElement | null => {
+    const svgEl = qrRef.current?.querySelector('svg') as SVGSVGElement | null;
+    if (!svgEl) return null;
+    const imageEl = svgEl.querySelector('image');
+    const href =
+      imageEl?.getAttribute('href') ??
+      imageEl?.getAttributeNS('http://www.w3.org/1999/xlink', 'href') ??
+      '';
+    // data: URIs are embedded and safe — return the original element directly.
+    if (!href.startsWith('https://')) return svgEl;
+    // Clone and swap the external URL with the compact OpenTWQR data-URI logo.
+    const clone = svgEl.cloneNode(true) as SVGSVGElement;
+    const cloneImg = clone.querySelector('image');
+    if (cloneImg) {
+      const fallback = hasLabelInfo ? QR_CENTER_IMAGE : QR_CENTER_IMAGE_VERTICAL;
+      cloneImg.setAttribute('href', fallback.src);
+      cloneImg.removeAttributeNS('http://www.w3.org/1999/xlink', 'href');
+    }
+    return clone;
+  }, [hasLabelInfo]);
 
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
 
@@ -121,11 +173,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
     if (!accountNumber) return;
     try {
       await navigator.clipboard.writeText(accountNumber);
-      showFeedback('已複製帳號');
+      showFeedback(t.qr.copiedAccount);
     } catch {
-      showFeedback('複製失敗');
+      showFeedback(t.qr.copyFailed);
     }
-  }, [accountNumber, showFeedback]);
+  }, [accountNumber, showFeedback, t]);
 
   const handleToggleReveal = useCallback(() => {
     setAccountRevealed((prev) => !prev);
@@ -136,16 +188,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
   const copyToClipboard = useCallback(async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
-      showFeedback('已複製連結');
+      showFeedback(t.share.copiedLink);
     } catch {
-      showFeedback('複製失敗');
+      showFeedback(t.qr.copyFailed);
     }
-  }, [showFeedback]);
+  }, [showFeedback, t]);
 
   const shareViaSystem = useCallback(async (url: string) => {
     const payload = {
-      title: 'OpenTWQR 收款',
-      text: `收款${amount && amount > 0 ? ` ${formatCurrency(amount)}` : ''}${bankName ? ` — ${bankName}` : ''}`,
+      title: t.qr.shareTitle,
+      text: t.qr.shareText(amount && amount > 0 ? formatCurrency(amount) : '', bankName || ''),
       url,
     };
     if (navigator.share) {
@@ -157,7 +209,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
       }
     }
     await copyToClipboard(url);
-  }, [amount, bankName, copyToClipboard]);
+  }, [amount, bankName, copyToClipboard, t]);
 
   /* --- Share menu actions --- */
 
@@ -181,57 +233,57 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
 
   const handleShareImage = useCallback(async () => {
     try {
-      const svgEl = qrRef.current?.querySelector('svg');
+      const svgEl = getExportSvgEl();
       if (!svgEl) return;
 
       const pngBlob = await svgToBlob(svgEl, qrSize);
       const file = new File([pngBlob], 'opentwqr.png', { type: 'image/png' });
 
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'OpenTWQR 收款碼' });
+        await navigator.share({ files: [file], title: t.qr.shareImageTitle });
         shareMenu.close();
         return;
       }
 
       downloadBlob(pngBlob, 'opentwqr.png');
-      showFeedback('已下載圖片');
+      showFeedback(t.share.downloadedImage);
       shareMenu.close();
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
-      showFeedback('分享失敗');
+      showFeedback(t.share.shareFailed);
       shareMenu.close();
     }
-  }, [qrSize, shareMenu, showFeedback]);
+  }, [getExportSvgEl, qrSize, shareMenu, showFeedback, t]);
 
   const handleDownloadImage = useCallback(async () => {
     try {
-      const svgEl = qrRef.current?.querySelector('svg');
+      const svgEl = getExportSvgEl();
       if (!svgEl) return;
 
       const pngBlob = await svgToBlob(svgEl, qrSize);
       downloadBlob(pngBlob, 'opentwqr.png');
-      showFeedback('已下載圖片');
+      showFeedback(t.share.downloadedImage);
     } catch {
-      showFeedback('下載失敗');
+      showFeedback(t.share.downloadFailed);
     }
     shareMenu.close();
-  }, [qrSize, shareMenu, showFeedback]);
+  }, [getExportSvgEl, qrSize, shareMenu, showFeedback, t]);
 
   const handleCopyImage = useCallback(async () => {
     try {
-      const svgEl = qrRef.current?.querySelector('svg');
+      const svgEl = getExportSvgEl();
       if (!svgEl) return;
 
       const pngBlob = await svgToBlob(svgEl, qrSize);
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': pngBlob }),
       ]);
-      showFeedback('已複製圖片');
+      showFeedback(t.share.copiedImage);
     } catch {
-      showFeedback('複製失敗');
+      showFeedback(t.qr.copyFailed);
     }
     shareMenu.close();
-  }, [qrSize, shareMenu, showFeedback]);
+  }, [getExportSvgEl, qrSize, shareMenu, showFeedback, t]);
 
   /* --- Link settings actions --- */
 
@@ -245,11 +297,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         await shareViaSystem(url);
       }
     } catch {
-      showFeedback('加密失敗');
+      showFeedback(t.linkSettings.encryptFailed);
     }
     setIsEncrypting(false);
     linkSettingsToggle.close();
-  }, [shareData, linkExpiry, linkPassword, linkAction, copyToClipboard, shareViaSystem, showFeedback, linkSettingsToggle]);
+  }, [shareData, linkExpiry, linkPassword, linkAction, copyToClipboard, shareViaSystem, showFeedback, linkSettingsToggle, t]);
 
   /* --- Main modal --- */
   return (
@@ -276,13 +328,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         {/* Header */}
         <div className="flex items-center justify-between p-5 pb-3">
           <h2 id="qr-modal-title" className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            收款 QR Code
+            {t.qr.title}
           </h2>
           <button
             type="button"
             onClick={requestClose}
-            aria-label="關閉"
-            className="p-2.5 min-w-11 min-h-11 -mr-2 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label={t.common.close}
+            className="p-2.5 min-w-11 min-h-11 -mr-2 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <X size={20} aria-hidden="true" />
           </button>
@@ -293,7 +345,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
           <button
             type="button"
             onClick={() => setIsFullscreen(true)}
-            aria-label="放大 QR Code"
+            aria-label={t.qr.enlargeQR}
             className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
             <div ref={qrRef}>
@@ -304,13 +356,24 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                 marginSize={4}
                 bgColor="#ffffff"
                 fgColor="#000000"
-                imageSettings={QR_CENTER_IMAGE}
+                imageSettings={qrCenterImage}
               />
             </div>
           </button>
 
           {/* Amount & account info */}
           <div className="space-y-2.5 w-full">
+            {/* Name label — custom name and/or bank name from QR settings */}
+            {hasLabelInfo && (
+              <div className="text-center space-y-0.5">
+                {customName.trim() && (
+                  <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{customName.trim()}</p>
+                )}
+                {showBankNameSetting && bankName && (
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{bankName}</p>
+                )}
+              </div>
+            )}
             {amount != null && amount > 0 ? (
               <div className="flex items-baseline justify-center gap-0.5">
                 <span className="text-2xl font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>NT$</span>
@@ -320,7 +383,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               </div>
             ) : (
               <div className="text-lg font-medium text-zinc-500 dark:text-zinc-400 text-center">
-                金額由付款方輸入
+                {t.amount.payerEnter}
               </div>
             )}
             <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-xs">
@@ -342,9 +405,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                     <button
                       type="button"
                       onClick={handleToggleReveal}
-                      aria-label={accountRevealed ? '隱藏帳號' : '顯示帳號'}
+                      aria-label={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
                       aria-pressed={accountRevealed}
-                      title={accountRevealed ? '隱藏帳號' : '顯示帳號'}
+                      title={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
                       className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                     >
                       {accountRevealed
@@ -354,8 +417,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                     <button
                       type="button"
                       onClick={handleCopyAccount}
-                      aria-label="複製帳號"
-                      title="複製帳號"
+                      aria-label={t.qr.copyAccount}
+                      title={t.qr.copyAccount}
                       className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                     >
                       <Copy size={18} aria-hidden="true" />
@@ -365,9 +428,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               </div>
             </div>
             {note && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">備註：{note}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">{t.qr.notePrefix}{note}</p>
             )}
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">請於銀行 App 核對帳號及戶名後再轉帳</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">{t.qr.safetyReminder}</p>
           </div>
         </div>
 
@@ -396,7 +459,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
               className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl btn-accent active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <Share2 size={18} aria-hidden="true" />
-              <span>分享</span>
+              <span>{t.qr.share}</span>
             </button>
           )}
         </div>
@@ -446,6 +509,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
         bankName={bankName}
         note={note}
         onExit={() => setIsFullscreen(false)}
+        qrCenterImage={qrCenterImage}
+        customName={customName.trim() || undefined}
+        showBankName={showBankNameSetting}
       />
     )}
     </>

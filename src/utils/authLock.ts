@@ -59,7 +59,7 @@ export const registerCredential = async (): Promise<string | null> => {
         user: {
           id: generateChallenge(),   // Random user ID (single-user local app)
           name: 'opentwqr-user',
-          displayName: 'OpenTWQR 使用者',
+          displayName: 'OpenTWQR User',
         },
         pubKeyCredParams: [
           { alg: -7, type: 'public-key' },   // ES256

@@ -21,7 +21,7 @@
  * Returns `undefined` for empty, blank, or non-https input.
  */
 
-const IMAGE_EXT_RE = /\.(ico|png|jpe?g|svg|webp|gif|avif|bmp)(\?[^]*)?$/i;
+const IMAGE_EXT_RE = /\.(ico|png|jpe?g|svg|webp|gif|avif|bmp)$/i;
 
 export const resolveIconSrc = (iconUrl: string | undefined): string | undefined => {
   if (!iconUrl) return undefined;

@@ -3,8 +3,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import { formatAmount } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
-import { QR_CENTER_IMAGE } from '../../utils/qrLabel';
 import { useLocaleStore } from '../../stores/useLocaleStore';
+import type { QRCenterImageSettings } from '../../utils/qrLabel';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);
@@ -15,13 +15,19 @@ interface QRFullscreenProps {
   bankName?: string;
   note?: string;
   onExit: () => void;
+  /** Dynamic center image settings (passed from QRDisplay). */
+  qrCenterImage: QRCenterImageSettings;
+  /** Custom display name from QR settings. */
+  customName?: string;
+  /** Whether to show bank name label from QR settings. */
+  showBankName?: boolean;
 }
 
 /**
  * Full-black QR Code view for in-store payments.
  * Includes Screen Wake Lock and landscape-aware sizing.
  */
-export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullscreenProps) => {
+export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName }: QRFullscreenProps) => {
   const t = useLocaleStore((s) => s.t);
   const ref = useRef<HTMLDivElement>(null);
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
@@ -97,12 +103,23 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
           marginSize={4}
           bgColor="#ffffff"
           fgColor="#000000"
-          imageSettings={QR_CENTER_IMAGE}
+          imageSettings={qrCenterImage}
         />
       </div>
 
       {/* Info below QR */}
       <div className="mt-8 text-center space-y-2">
+        {/* Name label from QR settings */}
+        {(customName || (showBankName && bankName)) && (
+          <div className="space-y-0.5">
+            {customName && (
+              <p className="text-sm font-semibold text-white/80">{customName}</p>
+            )}
+            {showBankName && bankName && (
+              <p className="text-white/50 text-xs">{bankName}</p>
+            )}
+          </div>
+        )}
         {amount != null && amount > 0 ? (
           <div className="flex items-baseline justify-center gap-0.5">
             <span className="text-xl font-semibold" style={{ color: 'var(--accent-dark)' }}>NT$</span>
@@ -113,8 +130,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit }: QRFullsc
         ) : (
           <p className="text-lg font-medium text-white/50">{t.amount.payerEnter}</p>
         )}
-        {bankName && <p className="text-white/60 text-sm">{bankName}</p>}
-        {note && <p className="text-white/50 text-xs">{note}</p>}
+        {note && <p className="text-white/50 text-xs">{t.qr.notePrefix}{note}</p>}
       </div>
 
       <button

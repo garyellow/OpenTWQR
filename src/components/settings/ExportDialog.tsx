@@ -46,10 +46,10 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
       setResult(res.data);
       haptic();
     } else {
-      setError(res.error);
+      setError(t.exportDialog.encryptFailed);
     }
     setIsExporting(false);
-  }, [accounts, password, confirmPassword]);
+  }, [accounts, password, confirmPassword, t]);
 
   const handleCopy = useCallback(async () => {
     if (!result) return;
@@ -62,7 +62,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
     } catch {
       setError(t.exportDialog.copyFailed);
     }
-  }, [result]);
+  }, [result, t]);
 
   const handleShare = useCallback(async () => {
     if (!result) return;
@@ -77,7 +77,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
       if (err instanceof DOMException && err.name === 'AbortError') return;
       setError(t.exportDialog.shareFailed);
     }
-  }, [result]);
+  }, [result, t]);
 
   return (
     <AnimatedModal

@@ -112,3 +112,24 @@ export const LOGO_SVG_STRING =
   hOpenGroup +
   hTwqrGroup +
   '</svg>';
+
+/* ── Vertical layout groups ── */
+
+const vOpenGroup =
+  `<g transform="translate(${VERTICAL_OPEN_X} ${VERTICAL_OPEN_Y})">` + openPath + '</g>';
+
+const vTwqrGroup =
+  `<g transform="translate(${VERTICAL_TWQR_X} ${VERTICAL_TWQR_Y})">` + twqrPaths + '</g>';
+
+/**
+ * Complete "Open TWQR" SVG markup (vertical / stacked) suitable for a data-URI.
+ * "Open" centred on top, "TWQR" centred below — near-square aspect ratio.
+ *
+ * Content box: 114 × 78 (viewBox). No explicit width/height so the
+ * consumer controls the display size via CSS or imageSettings.
+ */
+export const VERTICAL_LOGO_SVG_STRING =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VERTICAL_VIEWBOX}">` +
+  vOpenGroup +
+  vTwqrGroup +
+  '</svg>';
