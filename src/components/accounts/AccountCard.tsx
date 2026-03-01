@@ -68,7 +68,7 @@ export const AccountCard = ({
           {maskAccount(account.accountNumber)}
         </p>
 
-        <div className={`flex items-baseline gap-2 mt-2 ${isSelected ? 'text-white/60 dark:text-zinc-900/60' : 'text-zinc-500 dark:text-zinc-400'}`}>
+        <div className={`flex items-center gap-2 mt-2 ${isSelected ? 'text-white/60 dark:text-zinc-900/60' : 'text-zinc-500 dark:text-zinc-400'}`}>
           {showBankSubtitle && (
             <span className="text-sm truncate">
               {bankName}

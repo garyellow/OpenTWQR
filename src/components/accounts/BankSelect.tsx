@@ -132,7 +132,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                         onChange(bank.code);
                         requestClose();
                       }}
-                      className={`w-full flex items-baseline justify-between px-4 py-3.5 rounded-xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                         value === bank.code
                           ? 'chip-accent shadow-xs'
                           : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
@@ -140,7 +140,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                     >
                       <span className="font-medium truncate text-base">{bank.name}</span>
                       <span
-                        className={`font-mono text-sm px-2.5 py-1 rounded-lg shrink-0 ml-3 leading-none inline-flex items-center ${
+                        className={`font-mono text-sm px-2.5 py-1 rounded-lg shrink-0 ml-3 ${
                           value === bank.code
                             ? 'bg-white/20 dark:bg-black/10 text-white dark:text-zinc-900'
                             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'

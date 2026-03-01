@@ -348,8 +348,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                       className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                     >
                       {accountRevealed
-                        ? <EyeOff size={18} aria-hidden="true" />
-                        : <Eye size={18} aria-hidden="true" />}
+                        ? <Eye size={18} aria-hidden="true" />
+                        : <EyeOff size={18} aria-hidden="true" />}
                     </button>
                     <button
                       type="button"

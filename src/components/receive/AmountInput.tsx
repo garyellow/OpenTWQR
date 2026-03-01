@@ -69,7 +69,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
   const formattedMax = new Intl.NumberFormat().format(maxAmount);
 
   const digitBtnClass =
-    'h-14 rounded-xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 action-transition flex items-center justify-center';
+    'h-14 rounded-xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center';
 
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-3">
@@ -146,7 +146,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
           type="button"
           onClick={handleBackspace}
           aria-label="刪除一位數字"
-          className="h-14 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 active:scale-95 action-transition flex items-center justify-center"
+          className="h-14 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center"
         >
           <Delete size={28} aria-hidden="true" />
         </button>

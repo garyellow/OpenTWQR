@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Palette, RotateCcw } from 'lucide-react';
 import { useThemeStore, ACCENT_PRESETS, applyAccentHue } from '../../stores/useThemeStore';
 import { haptic } from '../../utils/haptics';
@@ -15,6 +15,14 @@ const DEFAULT_HUE = 200;
  * **Slider architecture:** A local `dragHue` state tracks the thumb
  * position during drag so React keeps the controlled `<input>` in sync.
  * Only the final value on pointer-up is written to the Zustand store.
+ *
+ * **RAF throttle:** `applyAccentHue` (8× `style.setProperty`) is scheduled
+ * via `requestAnimationFrame` so CSS custom-property writes happen at most
+ * once per screen refresh (~16 ms / 60 fps). `setDragHue` still runs on
+ * every `onChange` event so the slider thumb and degree counter feel
+ * instantaneous — only the expensive CSS work is throttled.
+ * Before persisting on pointer-up the pending RAF is cancelled to prevent
+ * a stale hue from overwriting the final committed value.
  */
 export const AccentColorSection = () => {
   const accentHue = useThemeStore((s) => s.accentHue);
@@ -23,6 +31,17 @@ export const AccentColorSection = () => {
   // Local state so the slider thumb follows the finger/pointer in real time.
   const [dragHue, setDragHue] = useState<number | null>(null);
   const displayHue = dragHue ?? accentHue;
+
+  // Ref to track the pending requestAnimationFrame id for CSS throttling.
+  const rafRef = useRef<number | null>(null);
+
+  // Cancel any in-flight RAF on unmount to prevent calling setState after
+  // the component has been removed from the tree.
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   const handlePreset = useCallback(
     (hue: number) => {
@@ -36,14 +55,29 @@ export const AccentColorSection = () => {
   const handleSlider = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const hue = Number(e.target.value);
-      setDragHue(hue);          // keep slider thumb in sync
-      applyAccentHue(hue);      // instant CSS update without persisting
+      // Update React state immediately so thumb + degree counter are instant.
+      setDragHue(hue);
+      // Throttle the expensive 8× style.setProperty call to one per frame.
+      // Cancelling the previous pending frame ensures we always apply the
+      // latest hue without accumulating a backlog of stale updates.
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        applyAccentHue(hue);
+        rafRef.current = null;
+      });
     },
     [],
   );
 
   const handleSliderEnd = useCallback(
     (e: React.PointerEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
+      // Cancel any pending RAF first — setAccentHue (called below) already
+      // invokes applyAccentHue internally, so letting the RAF fire after would
+      // overwrite the final value with a potentially stale hue.
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
       const hue = Number((e.target as HTMLInputElement).value);
       setDragHue(null);
       setAccentHue(hue); // persist final value
