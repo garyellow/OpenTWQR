@@ -31,7 +31,7 @@
             });
           }
           // Apply accent hue from persisted store
-          var hue = (s.state && s.state.accentHue) || 200;
+          var hue = (s.state && s.state.accentHue) || 216;
           var r = document.documentElement.style;
           r.setProperty('--accent-hue', String(hue));
           r.setProperty('--accent', 'oklch(55% 0.15 ' + hue + ')');

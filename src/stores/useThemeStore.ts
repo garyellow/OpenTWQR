@@ -4,19 +4,18 @@ import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/safeStorage';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
-/** Default OKLCH hue for the accent color (teal, matching TWQR brand). */
-const DEFAULT_HUE = 200;
+/** Default OKLCH hue for the accent color (OpenTWQR brand blue #008BBA). */
+const DEFAULT_HUE = 216;
 
-/** Predefined accent hue presets for the color picker. */
+/** Predefined accent hue presets — 7 colours in spectral order, centred on brand blue. */
 export const ACCENT_PRESETS = [
-  { hue: 200, color: 'oklch(55% 0.15 200)' },
-  { hue: 250, color: 'oklch(55% 0.15 250)' },
-  { hue: 285, color: 'oklch(55% 0.15 285)' },
-  { hue: 340, color: 'oklch(55% 0.15 340)' },
-  { hue: 15,  color: 'oklch(55% 0.15 15)' },
-  { hue: 55,  color: 'oklch(55% 0.15 55)' },
+  { hue: 25,  color: 'oklch(55% 0.15 25)' },
+  { hue: 70,  color: 'oklch(55% 0.15 70)' },
   { hue: 145, color: 'oklch(55% 0.15 145)' },
-  { hue: 175, color: 'oklch(55% 0.15 175)' },
+  { hue: 180, color: 'oklch(55% 0.15 180)' },
+  { hue: 216, color: 'oklch(55% 0.15 216)' },
+  { hue: 270, color: 'oklch(55% 0.15 270)' },
+  { hue: 330, color: 'oklch(55% 0.15 330)' },
 ] as const;
 
 interface ThemeState {

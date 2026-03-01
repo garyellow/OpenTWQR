@@ -23,14 +23,14 @@
  * Declaring syntax:'<color>' + inherits:true lets the browser interpolate
  * them as colours, enabling smooth transitions when the hue changes.
  */
-@property --accent            { syntax: '<color>'; inherits: true; initial-value: oklch(55% 0.15 200); }
-@property --accent-hover      { syntax: '<color>'; inherits: true; initial-value: oklch(48% 0.15 200); }
-@property --accent-light      { syntax: '<color>'; inherits: true; initial-value: oklch(95% 0.04 200); }
-@property --accent-subtle     { syntax: '<color>'; inherits: true; initial-value: oklch(90% 0.06 200); }
-@property --accent-dark       { syntax: '<color>'; inherits: true; initial-value: oklch(75% 0.12 200); }
-@property --accent-dark-hover { syntax: '<color>'; inherits: true; initial-value: oklch(80% 0.12 200); }
-@property --accent-dark-light { syntax: '<color>'; inherits: true; initial-value: oklch(25% 0.04 200); }
-@property --accent-dark-subtle{ syntax: '<color>'; inherits: true; initial-value: oklch(30% 0.06 200); }
+@property --accent            { syntax: '<color>'; inherits: true; initial-value: oklch(55% 0.15 216); }
+@property --accent-hover      { syntax: '<color>'; inherits: true; initial-value: oklch(48% 0.15 216); }
+@property --accent-light      { syntax: '<color>'; inherits: true; initial-value: oklch(95% 0.04 216); }
+@property --accent-subtle     { syntax: '<color>'; inherits: true; initial-value: oklch(90% 0.06 216); }
+@property --accent-dark       { syntax: '<color>'; inherits: true; initial-value: oklch(75% 0.12 216); }
+@property --accent-dark-hover { syntax: '<color>'; inherits: true; initial-value: oklch(80% 0.12 216); }
+@property --accent-dark-light { syntax: '<color>'; inherits: true; initial-value: oklch(25% 0.04 216); }
+@property --accent-dark-subtle{ syntax: '<color>'; inherits: true; initial-value: oklch(30% 0.06 216); }
 
 /* Smooth accent colour transitions — activated by JS when user picks a preset */
 html.accent-animating {
@@ -119,7 +119,7 @@ html.accent-animating {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Accent color system — computed from --accent-hue via JS */
-  --accent-hue: 200;
+  --accent-hue: 216;
   --accent: oklch(55% 0.15 var(--accent-hue));
   --accent-hover: oklch(48% 0.15 var(--accent-hue));
   --accent-light: oklch(95% 0.04 var(--accent-hue));

@@ -23,16 +23,16 @@
   <tr>
     <td align="center">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/welcome-dark.png" />
-        <img src="public/screenshots/welcome-light.png" alt="OpenTWQR 歡迎畫面（手機版）" width="200" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/welcome-mobile-dark.png" />
+        <img src="public/screenshots/welcome-mobile-light.png" alt="OpenTWQR 歡迎畫面（手機版）" width="200" />
       </picture>
       <br />
       <sub>歡迎畫面</sub>
     </td>
     <td align="center">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-dark.png" />
-        <img src="public/screenshots/receive-light.png" alt="OpenTWQR 收款畫面（手機版）" width="200" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-mobile-dark.png" />
+        <img src="public/screenshots/receive-mobile-light.png" alt="OpenTWQR 收款畫面（手機版）" width="200" />
       </picture>
       <br />
       <sub>收款畫面</sub>
@@ -44,8 +44,8 @@
   <tr>
     <td align="center" colspan="2">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
-        <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 收款畫面（桌面版）" width="600" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-Desktop-dark.png" />
+        <img src="public/screenshots/receive-Desktop-light.png" alt="OpenTWQR 收款畫面（桌面版）" width="600" />
       </picture>
       <br />
       <sub>收款畫面</sub>

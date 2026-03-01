@@ -10,15 +10,15 @@ import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
  * preventing bystanders from glimpsing sensitive account data.
  *
  * Implementation:
- * - Uses `backdrop-filter: blur(12px) saturate(1.8)` with a low-opacity
- *   tinted background to create a visible frosted-glass effect.
- *   12 px of blur makes all **text and numbers completely unreadable**
- *   (privacy preserved) while keeping large shapes — like the QR code
- *   card or the amount display — recognisable as blurred silhouettes.
- *   The low background opacity (10 % white / 20 % black) lets those
- *   blurred shapes bleed through, so the overlay looks like real frosted
- *   glass instead of a plain white/dark screen.
- * - `backdrop-saturate-180` boosts the vibrancy of the blurred colours,
+ * - Uses a high-opacity tinted background (70 % white / 75 % black) as
+ *   the **primary** privacy mechanism — content is obscured even when
+ *   `backdrop-filter` is unsupported or fails (common on Android during
+ *   the task-switcher screenshot phase).
+ * - Enhances the overlay with `backdrop-filter: blur(10px) saturate(1.6)`
+ *   for a subtle frosted-glass effect on supported browsers.
+ * - `will-change: backdrop-filter, opacity` keeps the compositing layer
+ *   warm so the GPU is ready to apply the filter instantly on show.
+ * - `backdrop-saturate-160` boosts the vibrancy of the blurred colours,
  *   matching the iOS / macOS frosted-glass aesthetic (`blur` + `saturate`).
  * - Centres the coloured OpenTWQR SVG logo as the sole visual element —
  *   clean, branded, and recognisable in the task switcher thumbnail.
@@ -100,8 +100,8 @@ export const PrivacyScreen = () => {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-100 flex items-center justify-center bg-white/10 dark:bg-black/20 backdrop-blur-md backdrop-saturate-[1.8]"
-      style={{ visibility: 'hidden' }}
+      className="fixed inset-0 z-100 flex items-center justify-center bg-white/70 dark:bg-black/75 backdrop-blur-[10px] backdrop-saturate-[1.6]"
+      style={{ visibility: 'hidden', willChange: 'backdrop-filter, opacity' }}
       aria-hidden="true"
     >
       <OpenTWQRLogo className="h-10 w-auto" />

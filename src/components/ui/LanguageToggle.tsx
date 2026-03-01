@@ -20,7 +20,7 @@ export const LanguageToggle = () => {
       <span
         key={locale}
         aria-hidden="true"
-        className="text-[15px] font-bold leading-none select-none animate-in fade-in zoom-in-75 duration-150 motion-reduce:animate-none"
+        className="text-lg font-bold leading-none select-none animate-in fade-in zoom-in-75 duration-150 motion-reduce:animate-none"
       >
         {locale === 'zh-TW' ? '文' : 'A'}
       </span>

@@ -165,15 +165,15 @@ const zhTW = {
   /* ─── QRSettingsSection ────────────────────────────────── */
   qrSettings: {
     sectionTitle: 'QR Code 顯示',
-    logoTitle: '中央圖示',
-    logoDesc: '選擇 QR Code 中央顯示的圖示',
-    logoOpenTWQR: 'Open TWQR',
-    logoBankIcon: '銀行圖示',
+    logoTitle: '顯示銀行圖示',
+    logoDesc: '關閉時預設顯示 OpenTWQR',
     customNameTitle: '自訂名稱',
     customNameDesc: '標示這是誰的收款碼',
     customNamePlaceholder: '例如：小明…',
+    customNameModalTitle: '自訂名稱',
+    customNameClear: '清除',
     bankNameTitle: '顯示銀行名稱',
-    bankNameDesc: '在 QR Code 下方顯示官方銀行名稱',
+    bankNameDesc: '在 QR Code 白邊區域顯示官方銀行名稱',
   },
 
   /* ─── PersonalizationSection (Accent + AppLock combined) ─ */
@@ -204,14 +204,13 @@ const zhTW = {
 
   /* ─── AccentColor presets ──────────────────────────────── */
   accentPresets: {
-    200: '水波藍',
-    250: '靛青藍',
-    285: '薰衣紫',
-    340: '玫瑰粉',
-    15: '珊瑚紅',
-    55: '琥珀橘',
+    25: '珊瑩紅',
+    70: '琥琥橘',
     145: '翡翠綠',
-    175: '青碧',
+    180: '青碧',
+    216: '品牌藍',
+    270: '薰衣紫',
+    330: '玫瑰粉',
   } as Record<number, string>,
 
   /* ─── BackupSection ────────────────────────────────────── */

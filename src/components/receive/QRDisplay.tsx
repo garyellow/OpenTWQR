@@ -359,21 +359,21 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, note, shareD
                 imageSettings={qrCenterImage}
               />
             </div>
+            {/* Name label — displayed inside the QR white margin area */}
+            {hasLabelInfo && (
+              <div className="text-center mt-1 space-y-0.5">
+                {customName.trim() && (
+                  <p className="text-xs font-semibold text-zinc-700 leading-tight">{customName.trim()}</p>
+                )}
+                {showBankNameSetting && bankName && (
+                  <p className="text-[10px] text-zinc-400 leading-tight">{bankName}</p>
+                )}
+              </div>
+            )}
           </button>
 
           {/* Amount & account info */}
           <div className="space-y-2.5 w-full">
-            {/* Name label — custom name and/or bank name from QR settings */}
-            {hasLabelInfo && (
-              <div className="text-center space-y-0.5">
-                {customName.trim() && (
-                  <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{customName.trim()}</p>
-                )}
-                {showBankNameSetting && bankName && (
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{bankName}</p>
-                )}
-              </div>
-            )}
             {amount != null && amount > 0 ? (
               <div className="flex items-baseline justify-center gap-0.5">
                 <span className="text-2xl font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>NT$</span>

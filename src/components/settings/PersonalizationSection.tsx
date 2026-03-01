@@ -5,8 +5,9 @@ import { useAuthStore, LOCK_TIMEOUT_OPTIONS } from '../../stores/useAuthStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { isWebAuthnSupported, registerCredential } from '../../utils/authLock';
 import { haptic } from '../../utils/haptics';
+import { QRCodeSection } from './QRCodeSection';
 
-const DEFAULT_HUE = 200;
+const DEFAULT_HUE = 216;
 
 /**
  * Combined "Personalization" section — accent colour (toggled) + app lock.
@@ -307,6 +308,9 @@ export const PersonalizationSection = () => {
             )}
           </>
         )}
+
+        {/* ── QR Code display settings (inlined after App Lock) ── */}
+        <QRCodeSection />
       </div>
     </div>
   );

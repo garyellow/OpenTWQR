@@ -105,21 +105,21 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
           fgColor="#000000"
           imageSettings={qrCenterImage}
         />
+        {/* Name label — displayed inside the QR white margin area */}
+        {(customName || (showBankName && bankName)) && (
+          <div className="text-center mt-1 space-y-0.5">
+            {customName && (
+              <p className="text-xs font-semibold text-zinc-700 leading-tight">{customName}</p>
+            )}
+            {showBankName && bankName && (
+              <p className="text-[10px] text-zinc-400 leading-tight">{bankName}</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Info below QR */}
       <div className="mt-8 text-center space-y-2">
-        {/* Name label from QR settings */}
-        {(customName || (showBankName && bankName)) && (
-          <div className="space-y-0.5">
-            {customName && (
-              <p className="text-sm font-semibold text-white/80">{customName}</p>
-            )}
-            {showBankName && bankName && (
-              <p className="text-white/50 text-xs">{bankName}</p>
-            )}
-          </div>
-        )}
         {amount != null && amount > 0 ? (
           <div className="flex items-baseline justify-center gap-0.5">
             <span className="text-xl font-semibold" style={{ color: 'var(--accent-dark)' }}>NT$</span>
