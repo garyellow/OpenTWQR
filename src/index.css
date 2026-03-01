@@ -77,6 +77,37 @@ html.accent-animating {
 }
 
 /*
+ * btn-accent — Primary CTA button coloured with the user's accent.
+ *
+ * Light mode: vibrant accent bg (L=55%) + white text → WCAG AA 4.5:1 ✓
+ * Dark mode:  lighter accent bg (L=75%) + dark text → WCAG AA 7:1 ✓
+ *
+ * Replaces the `bg-zinc-900 dark:bg-zinc-100` pattern on primary action
+ * buttons (Generate QR, Share, Unlock, Save …).
+ */
+.btn-accent {
+  background-color: light-dark(var(--accent), var(--accent-dark));
+  color: light-dark(#fff, #18181b);
+}
+.btn-accent:hover {
+  background-color: light-dark(var(--accent-hover), var(--accent-dark-hover));
+}
+.btn-accent:focus-visible {
+  --tw-ring-color: light-dark(var(--accent), var(--accent-dark));
+}
+
+/*
+ * chip-accent — Selected state for radio-chip / toggle elements.
+ *
+ * Used on lock-timeout buttons, link-expiry options, and any
+ * radio-like chip that indicates the active choice.
+ */
+.chip-accent {
+  background-color: light-dark(var(--accent), var(--accent-dark));
+  color: light-dark(#fff, #18181b);
+}
+
+/*
  * action-transition — precision transition for interactive elements
  *
  * Using `transition-all` on buttons/links transitions every CSS property,

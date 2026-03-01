@@ -77,7 +77,7 @@ export const InstallPrompt = () => {
               <button
                 type="button"
                 onClick={promptInstall}
-                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-97 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                className="mt-2.5 px-4 py-2 rounded-xl text-sm font-semibold btn-accent active:scale-97 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 安裝應用程式
               </button>

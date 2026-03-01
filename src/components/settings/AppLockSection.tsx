@@ -54,8 +54,8 @@ export const AppLockSection = () => {
           className="w-full flex items-center justify-between p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-              <ShieldCheck size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+            <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
+              <ShieldCheck size={18} className="text-green-600 dark:text-green-400" aria-hidden="true" />
             </div>
             <div className="text-left">
               <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">App 鎖定</p>
@@ -69,9 +69,10 @@ export const AppLockSection = () => {
             aria-hidden="true"
             className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
               authEnabled
-                ? 'bg-green-500 dark:bg-green-500'
+                ? ''
                 : 'bg-zinc-300 dark:bg-zinc-600'
             }`}
+            style={authEnabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
           >
             <div
               className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${
@@ -98,9 +99,9 @@ export const AppLockSection = () => {
                   role="radio"
                   aria-checked={lockTimeout === value}
                   onClick={() => setLockTimeout(value)}
-                  className={`py-2 px-3 rounded-xl text-sm font-medium action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
+                  className={`py-2 px-3 rounded-xl text-sm font-medium action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                     lockTimeout === value
-                      ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
+                      ? 'chip-accent shadow-xs'
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                   }`}
                 >

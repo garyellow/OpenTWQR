@@ -22,8 +22,8 @@ export const BackupSection = () => {
           onClick={() => setShowExport(true)}
           className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
-          <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-            <Upload size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+          <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center">
+            <Upload size={18} className="text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
           </div>
           <div className="text-left">
             <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">匯出帳戶</p>
@@ -38,8 +38,8 @@ export const BackupSection = () => {
           onClick={() => setShowImport(true)}
           className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
-          <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-            <Download size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+          <div className="w-9 h-9 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 flex items-center justify-center">
+            <Download size={18} className="text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
           </div>
           <div className="text-left">
             <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">匯入帳戶</p>

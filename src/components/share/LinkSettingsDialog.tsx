@@ -93,7 +93,7 @@ export const LinkSettingsDialog = ({
                 disabled={isEncrypting}
                 className={`py-2.5 px-3 rounded-xl text-sm font-medium action-transition ${
                   expiry === val
-                    ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
+                    ? 'chip-accent shadow-xs'
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                 } disabled:opacity-50`}
               >
@@ -136,7 +136,7 @@ export const LinkSettingsDialog = ({
           type="button"
           onClick={onConfirm}
           disabled={isEncrypting}
-          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           {isEncrypting ? (
             <>

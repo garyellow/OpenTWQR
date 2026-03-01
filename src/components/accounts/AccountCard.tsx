@@ -28,9 +28,13 @@ export const AccountCard = ({
   return (
     <article
       className={`relative min-w-0 p-5 rounded-xl action-transition border ${isSelected
-        ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 shadow-md'
+        ? 'shadow-md'
         : 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs'
         }`}
+      style={isSelected ? {
+        backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
+        borderColor: 'light-dark(var(--accent), var(--accent-dark))',
+      } : undefined}
     >
       {/* Full-card tap target */}
       <button

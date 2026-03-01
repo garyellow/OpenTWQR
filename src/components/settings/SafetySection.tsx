@@ -20,8 +20,8 @@ export const SafetySection = () => {
           onClick={() => setShowInfo(true)}
           className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
-          <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-            <Info size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+            <Info size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
           </div>
           <div className="text-left">
             <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">隱私與安全資訊</p>
@@ -97,7 +97,7 @@ export const SafetySection = () => {
                 <button
                   type="button"
                   onClick={requestClose}
-                  className="w-full py-3.5 rounded-xl font-semibold text-white dark:text-zinc-900 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  className="w-full py-3.5 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   了解
                 </button>

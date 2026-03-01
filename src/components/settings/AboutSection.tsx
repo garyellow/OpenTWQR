@@ -32,8 +32,8 @@ export const AboutSection = () => {
           rel="noopener noreferrer"
           className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
-          <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-            <Heart size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+          <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-500/10 flex items-center justify-center">
+            <Heart size={18} className="text-pink-600 dark:text-pink-400" aria-hidden="true" />
           </div>
           <div className="text-left flex-1">
             <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">贊助開發者</p>

@@ -132,9 +132,9 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                         onChange(bank.code);
                         requestClose();
                       }}
-                      className={`w-full flex items-baseline justify-between px-4 py-3.5 rounded-xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
+                      className={`w-full flex items-baseline justify-between px-4 py-3.5 rounded-xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
                         value === bank.code
-                          ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
+                          ? 'chip-accent shadow-xs'
                           : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                       }`}
                     >

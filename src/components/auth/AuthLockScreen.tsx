@@ -43,11 +43,11 @@ export const AuthLockScreen = () => {
       {/* Lock icon with accent colour */}
       <div className="w-24 h-24 rounded-2xl flex items-center justify-center border shadow-xs"
         style={{
-          backgroundColor: 'color-mix(in oklch, var(--accent) 10%, transparent)',
-          borderColor: 'color-mix(in oklch, var(--accent) 20%, transparent)',
+          backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 10%, transparent)',
+          borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 20%, transparent)',
         }}
       >
-        <Lock size={48} style={{ color: 'var(--accent)' }} aria-hidden="true" />
+        <Lock size={48} style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }} aria-hidden="true" />
       </div>
 
       {/* Headline */}
@@ -73,12 +73,7 @@ export const AuthLockScreen = () => {
         type="button"
         onClick={handleUnlock}
         disabled={isAuthenticating}
-        className="w-full max-w-xs flex items-center justify-center gap-2.5 py-4 text-white font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 mt-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-        style={{
-          backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
-          // @ts-expect-error non-standard CSS property for focus ring
-          '--tw-ring-color': 'light-dark(var(--accent), var(--accent-dark))',
-        }}
+        className="w-full max-w-72 flex items-center justify-center gap-2.5 py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 mt-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       >
         <ShieldCheck size={22} aria-hidden="true" />
         {isAuthenticating ? '驗證中…' : '解鎖'}
