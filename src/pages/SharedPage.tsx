@@ -117,7 +117,7 @@ export const SharedPage = () => {
             disabled={isDecrypting || !password}
             className="w-full py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
-            {isDecrypting ? t.shared.decrypting : t.shared.unlock}
+            {isDecrypting ? t.shared.unlocking : t.shared.unlock}
           </button>
         </div>
         <button

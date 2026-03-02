@@ -134,12 +134,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackClosing, setFeedbackClosing] = useState(false);
   /**
-   * Reveal state — initialised from showAccountSetting so it starts consistent
-   * with the user's QR settings. The eye icon toggles both the bottom card
-   * account display AND the account line above the QR image.
+   * Reveal state — seeded from showAccountSetting so the initial visibility
+   * matches the user's QR preference. Once the modal is open, the eye icon
+   * toggles this independently of the setting; showAccountSetting is NOT
+   * re-consulted after initialisation.
    *
-   * The line above the QR is always kept in the DOM (using `invisible` when
-   * hidden) so that the layout does not jump when toggling visibility.
+   * The account line above the QR is always kept in the DOM (visible only when
+   * accountRevealed is true) so toggling never causes layout shifts.
    */
   const [accountRevealed, setAccountRevealed] = useState(showAccountSetting);
   const feedbackShowTimerRef = useRef<number | null>(null);
@@ -187,15 +188,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
 
   /**
    * Labels to include in exported PNG images.
-   * Account line follows the SETTING (showAccountSetting), not the runtime
-   * reveal state — the user may have the account temporarily hidden on screen
-   * but still want it rendered in the exported/shared image.
+   * Account line follows the RUNTIME reveal state (accountRevealed) so that
+   * the exported / shared image is always consistent with what the user sees
+   * on screen — if they toggled the eye off, the account is omitted from the
+   * export too.
    */
   const exportLabels = useMemo(() => ({
-    accountLine: showAccountSetting && bankCode && accountNumber ? `(${bankCode}) ${accountNumber}` : undefined,
+    accountLine: accountRevealed && bankCode && accountNumber ? `(${bankCode}) ${accountNumber}` : undefined,
     bankName: showBankNameSetting && bankName ? bankName : undefined,
     customName: customName.trim() || undefined,
-  }), [showAccountSetting, bankCode, accountNumber, showBankNameSetting, bankName, customName]);
+  }), [accountRevealed, bankCode, accountNumber, showBankNameSetting, bankName, customName]);
 
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
 
@@ -395,7 +397,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         await shareViaSystem(url);
       }
     } catch {
-      showFeedback(t.linkSettings.encryptFailed);
+      showFeedback(t.linkSettings.createFailed);
     }
     setIsEncrypting(false);
     linkSettingsToggle.close();
@@ -446,8 +448,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             aria-label={t.qr.enlargeQR}
             className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
-            {/* Account number — always reserve space when setting is on; hide content when not revealed */}
-            {showAccountSetting && accountNumber && bankCode && (
+            {/* Account number — always in DOM when data is available so toggling
+                the eye icon never causes layout shifts. Visibility is driven
+                entirely by accountRevealed; showAccountSetting only seeds the
+                initial revealed state and must NOT gate this render. */}
+            {accountNumber && bankCode && (
               <p className={`text-center font-mono text-xs tracking-wider mb-1.5 ${accountRevealed ? 'text-zinc-400' : 'invisible'}`}>
                 ({bankCode}){' '}{accountNumber}
               </p>
@@ -619,7 +624,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         showBankName={showBankNameSetting}
         accountNumber={accountNumber}
         bankCode={bankCode}
-        showAccount={showAccountSetting}
+        showAccount={accountRevealed}
       />
     )}
     </>

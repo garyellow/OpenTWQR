@@ -141,7 +141,7 @@ export const LinkSettingsDialog = ({
           {isEncrypting ? (
             <>
               <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-              {t.linkSettings.encrypting}
+              {t.linkSettings.creating}
             </>
           ) : (
             <>

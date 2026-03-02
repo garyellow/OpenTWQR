@@ -46,7 +46,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
       setResult(res.data);
       haptic();
     } else {
-      setError(t.exportDialog.encryptFailed);
+      setError(t.exportDialog.exportFailed);
     }
     setIsExporting(false);
   }, [accounts, password, confirmPassword, t]);
@@ -174,7 +174,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
                   {isExporting ? (
                     <>
                       <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-                      {t.exportDialog.encrypting}
+                      {t.exportDialog.exporting}
                     </>
                   ) : (
                     t.exportDialog.export
@@ -208,7 +208,7 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
                 ) : (
                   <>
                     <Copy size={18} aria-hidden="true" />
-                    {t.exportDialog.copyEncrypted}
+                    {t.exportDialog.copyBackup}
                   </>
                 )}
               </button>

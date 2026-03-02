@@ -84,7 +84,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
           setError(t.importDialog.invalidString);
           break;
         case 'decrypt-error':
-          setError(t.importDialog.decryptError);
+          setError(t.importDialog.importError);
           break;
       }
       setIsImporting(false);
@@ -292,10 +292,10 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                   {isImporting ? (
                     <>
                       <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-                      {t.importDialog.decrypting}
+                      {t.importDialog.importing}
                     </>
                   ) : (
-                    t.importDialog.decrypt
+                    t.importDialog.import
                   )}
                 </button>
               </div>
