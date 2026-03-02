@@ -197,7 +197,6 @@ const enUS: Translations = {
     appLockTitle: 'App Lock',
     appLockDesc: 'Use device auth to protect data',
     lockTimeoutTitle: 'Lock Timeout',
-    lockTimeoutDesc: 'Background time before re-auth',
     lockTimeoutLabel: 'Lock timeout',
     lockTimeoutOptions: {
       0: 'Immediately',

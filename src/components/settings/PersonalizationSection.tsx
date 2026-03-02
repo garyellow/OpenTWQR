@@ -241,7 +241,7 @@ export const PersonalizationSection = () => {
 
         {/* ── App lock toggle ── */}
         {showAppLock && (
-          <>
+          <div>
             <button
               type="button"
               role="switch"
@@ -277,14 +277,11 @@ export const PersonalizationSection = () => {
               </div>
             </button>
 
-            {/* Lock timeout selector */}
+            {/* Lock timeout selector — inside the same <div> so divide-y does not add an extra line */}
             {authEnabled && (
-              <div className="p-4">
-                <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+              <div className="px-4 pb-4">
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">
                   {t.personalization.lockTimeoutTitle}
-                </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
-                  {t.personalization.lockTimeoutDesc}
                 </p>
                 <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t.personalization.lockTimeoutLabel}>
                   {LOCK_TIMEOUT_OPTIONS.map(({ value }) => (
@@ -306,7 +303,7 @@ export const PersonalizationSection = () => {
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* ── QR Code display settings (inlined after App Lock) ── */}

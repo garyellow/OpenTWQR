@@ -5,7 +5,7 @@ import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { X, Share2, Check, Eye, EyeOff, Copy } from 'lucide-react';
-import { formatCurrency, formatAmount, maskAccount } from '../../utils/twqr';
+import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { svgToBlob, downloadBlob } from '../../utils/qrImage';
 import { haptic } from '../../utils/haptics';
@@ -50,8 +50,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
 
   /** Whether any name/label info will be displayed BELOW the QR code. */
   const hasLabelInfo = Boolean(customName.trim()) || (showBankNameSetting && Boolean(bankName));
-  /** Whether account number will be displayed ABOVE the QR code. */
-  const showAccountAbove = showAccountSetting && Boolean(accountNumber) && Boolean(bankCode);
 
   /**
    * Bank icon info — dimensions + optional data URI for export-safe SVG.
@@ -135,7 +133,14 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackClosing, setFeedbackClosing] = useState(false);
-  const [accountRevealed, setAccountRevealed] = useState(false);
+  /**
+   * Reveal state — initialised from showAccountSetting so it starts consistent
+   * with the user's QR settings. The eye icon then toggles both the bottom
+   * card account display AND the account line above the QR image.
+   */
+  const [accountRevealed, setAccountRevealed] = useState(showAccountSetting);
+  /** Whether account number will be displayed ABOVE the QR code (follows eye-reveal state). */
+  const showAccountAbove = showAccountSetting && accountRevealed && Boolean(accountNumber) && Boolean(bankCode);
   const feedbackShowTimerRef = useRef<number | null>(null);
   const feedbackHideTimerRef = useRef<number | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
@@ -179,12 +184,17 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return clone;
   }, []);
 
-  /** Labels to include in exported PNG images (depends on user settings). */
+  /**
+   * Labels to include in exported PNG images.
+   * Account line follows the SETTING (showAccountSetting), not the runtime
+   * reveal state — the user may have the account temporarily hidden on screen
+   * but still want it rendered in the exported/shared image.
+   */
   const exportLabels = useMemo(() => ({
-    accountLine: showAccountAbove && bankCode && accountNumber ? `(${bankCode}) ${accountNumber}` : undefined,
+    accountLine: showAccountSetting && bankCode && accountNumber ? `(${bankCode}) ${accountNumber}` : undefined,
     bankName: showBankNameSetting && bankName ? bankName : undefined,
     customName: customName.trim() || undefined,
-  }), [showAccountAbove, bankCode, accountNumber, showBankNameSetting, bankName, customName]);
+  }), [showAccountSetting, bankCode, accountNumber, showBankNameSetting, bankName, customName]);
 
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
 
@@ -489,7 +499,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
                       {bankCode && `(${bankCode}) `}
                       {accountRevealed
-                        ? accountNumber
+                        ? formatAccountDisplay(accountNumber)
                         : maskAccount(accountNumber)}
                     </p>
                   )}

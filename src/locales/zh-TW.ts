@@ -195,7 +195,6 @@ const zhTW = {
     appLockTitle: 'App 鎖定',
     appLockDesc: '使用裝置驗證保護帳戶資料',
     lockTimeoutTitle: '背景鎖定時間',
-    lockTimeoutDesc: '切換到背景超過此時間後，需重新驗證身分',
     lockTimeoutLabel: '背景鎖定時間',
     lockTimeoutOptions: {
       0: '立即',

@@ -65,6 +65,17 @@ export const maskAccount = (accountNumber: string): string => {
 };
 
 /**
+ * 顯示完整帳號（已揭露）：補齊至四的倍數後四個一組呈現。
+ * 例如：10 碼 `1234567890` → `0012 3456 7890`
+ */
+export const formatAccountDisplay = (accountNumber: string): string => {
+  if (!accountNumber) return '';
+  const paddedLen = Math.ceil(accountNumber.length / 4) * 4;
+  const padded = accountNumber.padStart(paddedLen, '0');
+  return padded.replace(/(.{4})/g, '$1 ').trim();
+};
+
+/**
  * Remove invisible/control characters that may be pasted from external sources.
  * Prevents zero-width spaces, control chars, and directional overrides
  * from corrupting QR code data or account numbers.

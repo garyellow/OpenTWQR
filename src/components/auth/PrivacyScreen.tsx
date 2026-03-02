@@ -104,7 +104,7 @@ export const PrivacyScreen = () => {
       style={{ visibility: 'hidden', willChange: 'backdrop-filter, opacity' }}
       aria-hidden="true"
     >
-      <OpenTWQRLogo className="h-10 w-auto" />
+      <OpenTWQRLogo variant="vertical" className="h-16 w-auto" />
     </div>
   );
 };
