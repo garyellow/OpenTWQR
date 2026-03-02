@@ -218,7 +218,7 @@ export const AccountsPage = () => {
                 {deletingAccount.label && (
                   <p className="font-semibold text-zinc-800 dark:text-zinc-200">{deletingAccount.label}</p>
                 )}
-                <p className="font-mono">{deletingAccount.bankCode} · {deletingAccount.accountNumber}</p>
+                <p className="font-mono">({deletingAccount.bankCode}) {deletingAccount.accountNumber}</p>
               </div>
               <div className="mt-8 flex gap-3">
                 <button

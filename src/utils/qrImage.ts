@@ -1,26 +1,70 @@
 /**
+ * Optional text labels to render around the QR code in exported PNGs.
+ */
+export interface QRExportLabels {
+  /** Account line above QR, e.g. "(700) 1234567890". */
+  accountLine?: string;
+  /** Bank name below QR. */
+  bankName?: string;
+  /** Custom recipient name below bank name. */
+  customName?: string;
+}
+
+/**
  * Render a QR Code SVG element to a PNG Blob with proper DPR scaling.
+ * Optionally draws labels (account / bank name / custom name) around the QR.
  */
 export const svgToBlob = async (
   svgEl: SVGSVGElement,
   qrSize: number,
   padding = 32,
+  labels?: QRExportLabels,
 ): Promise<Blob> => {
   const dpr = Math.min(window.devicePixelRatio || 1, 3);
-  const logicalSize = qrSize + padding * 2;
-  const physicalSize = Math.round(logicalSize * dpr);
+
+  /* ---- label layout constants ---- */
+  const FONT_ACCOUNT = '11px ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace';
+  const FONT_BANK = '11px system-ui, -apple-system, sans-serif';
+  const FONT_NAME = '600 13px system-ui, -apple-system, sans-serif';
+  const COLOR_LIGHT = '#a1a1aa'; // zinc-400
+  const COLOR_DARK = '#3f3f46';  // zinc-700
+
+  const topExtra = labels?.accountLine ? 22 : 0;
+  const hasBankName = Boolean(labels?.bankName);
+  const hasCustomName = Boolean(labels?.customName);
+  const bottomExtra = (hasBankName || hasCustomName)
+    ? 10 + (hasBankName ? 16 : 0) + (hasCustomName ? 18 : 0) + (hasBankName && hasCustomName ? 2 : 0)
+    : 0;
+
+  const logicalW = qrSize + padding * 2;
+  const logicalH = qrSize + padding * 2 + topExtra + bottomExtra;
+  const physicalW = Math.round(logicalW * dpr);
+  const physicalH = Math.round(logicalH * dpr);
 
   const canvas = document.createElement('canvas');
-  canvas.width = physicalSize;
-  canvas.height = physicalSize;
+  canvas.width = physicalW;
+  canvas.height = physicalH;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas 2D context unavailable');
 
   ctx.scale(dpr, dpr);
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, logicalSize, logicalSize);
 
+  /* ---- white background ---- */
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, logicalW, logicalH);
+
+  /* ---- account line above QR ---- */
+  const qrY = padding + topExtra;
+  if (labels?.accountLine) {
+    ctx.font = FONT_ACCOUNT;
+    ctx.fillStyle = COLOR_LIGHT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(labels.accountLine, logicalW / 2, qrY - 6);
+  }
+
+  /* ---- QR SVG ---- */
   const svgData = new XMLSerializer().serializeToString(svgEl);
   const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(svgBlob);
@@ -29,7 +73,7 @@ export const svgToBlob = async (
     const img = new Image();
     await new Promise<void>((resolve, reject) => {
       img.onload = () => {
-        ctx.drawImage(img, padding, padding, qrSize, qrSize);
+        ctx.drawImage(img, padding, qrY, qrSize, qrSize);
         resolve();
       };
       img.onerror = () => reject(new Error('Failed to load SVG as image'));
@@ -37,6 +81,25 @@ export const svgToBlob = async (
     });
   } finally {
     URL.revokeObjectURL(url);
+  }
+
+  /* ---- labels below QR ---- */
+  if (hasBankName || hasCustomName) {
+    ctx.textAlign = 'center';
+    let labelY = qrY + qrSize + 10;
+    if (labels?.bankName) {
+      ctx.font = FONT_BANK;
+      ctx.fillStyle = COLOR_LIGHT;
+      ctx.textBaseline = 'top';
+      ctx.fillText(labels.bankName, logicalW / 2, labelY);
+      labelY += 16 + (hasCustomName ? 2 : 0);
+    }
+    if (labels?.customName) {
+      ctx.font = FONT_NAME;
+      ctx.fillStyle = COLOR_DARK;
+      ctx.textBaseline = 'top';
+      ctx.fillText(labels.customName, logicalW / 2, labelY);
+    }
   }
 
   return new Promise<Blob>((resolve, reject) =>

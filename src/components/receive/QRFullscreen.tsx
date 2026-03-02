@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { formatAmount, maskAccount } from '../../utils/twqr';
+import { formatAmount } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -102,10 +102,10 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
       onAnimationEnd={onAnimationEnd}
     >
       <div className="bg-white p-8 rounded-2xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
-        {/* Account number — bankCode.masked, single compact line */}
+        {/* Account number — (bankCode) full account, compact line */}
         {showAccount && accountNumber && bankCode && (
-          <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-3">
-            {bankCode}.{maskAccount(accountNumber)}
+          <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-1.5">
+            ({bankCode}){' '}{accountNumber}
           </p>
         )}
         <MemoQRCode
@@ -119,7 +119,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
         />
         {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
         {(customName || (showBankName && bankName)) && (
-          <div className="text-center mt-2 space-y-0.5">
+          <div className="text-center mt-1 space-y-0.5">
             {showBankName && bankName && (
               <p className="text-xs text-zinc-400 leading-tight">{bankName}</p>
             )}

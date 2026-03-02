@@ -170,7 +170,7 @@ const zhTW = {
     logoTitle: '顯示銀行圖示',
     logoDesc: '開啟後在 QR Code 中專嵌入銀行圖示',
     showAccountTitle: '顯示帳戶號碼',
-    showAccountDesc: '在 QR Code 上方顯示遞蔽後的帳號',
+    showAccountDesc: '在 QR Code 上方顯示帳戶號碼',
     bankNameTitle: '顯示銀行名稱',
     bankNameDesc: '在 QR Code 下方標示所屬銀行',
     customNameTitle: '個人名稱',

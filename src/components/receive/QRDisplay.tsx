@@ -5,7 +5,7 @@ import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { X, Share2, Check, Eye, EyeOff, Copy } from 'lucide-react';
-import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
+import { formatCurrency, formatAmount, maskAccount } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { svgToBlob, downloadBlob } from '../../utils/qrImage';
 import { haptic } from '../../utils/haptics';
@@ -15,7 +15,7 @@ import { QRFullscreen } from './QRFullscreen';
 import { ShareMenu } from '../share/ShareMenu';
 import { LinkSettingsDialog } from '../share/LinkSettingsDialog';
 import type { ShareData, ExpiryOption } from '../../types';
-import { buildQRCenterImage, QR_CENTER_IMAGE, QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
+import { QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
 
 /** Memoised QR Code to avoid re-rendering when parent state changes. */
 const MemoQRCode = memo(QRCodeSVG);
@@ -54,10 +54,15 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const showAccountAbove = showAccountSetting && Boolean(accountNumber) && Boolean(bankCode);
 
   /**
-   * Natural dimensions of the bank icon — loaded via JS so imageSettings can
-   * receive the correct proportional width/height rather than a forced square.
+   * Bank icon info — dimensions + optional data URI for export-safe SVG.
+   * Stores the URL it was loaded from so stale data is never used.
    */
-  const [bankIconSize, setBankIconSize] = useState<{ width: number; height: number } | null>(null);
+  const [bankIconInfo, setBankIconInfo] = useState<{
+    url: string;
+    width: number;
+    height: number;
+    dataUri?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (logoType !== 'bank' || !bankIconUrl) return;
@@ -74,25 +79,51 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         h = MAX_H;
         w = h * ratio;
       }
-      setBankIconSize({ width: Math.round(w), height: Math.round(h) });
+      const info = { url: bankIconUrl, width: Math.round(w), height: Math.round(h) };
+      setBankIconInfo(info);
+      // Convert to data URI so the SVG <image> uses an inline source,
+      // making PNG export reliable (external URLs are blocked in blob SVGs).
+      fetch(bankIconUrl)
+        .then((r) => r.blob())
+        .then(
+          (blob) =>
+            new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            }),
+        )
+        .then((uri) => {
+          if (!cancelled) setBankIconInfo({ ...info, dataUri: uri });
+        })
+        .catch(() => {
+          /* CORS blocked — getExportSvgEl will fall back to vertical OpenTWQR */
+        });
     };
     img.onerror = () => {
-      if (!cancelled) setBankIconSize(null);
+      if (!cancelled) setBankIconInfo(null);
     };
     img.src = bankIconUrl;
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [logoType, bankIconUrl]);
 
   /**
-   * QR center image — when logoType is 'bank' and the icon has loaded, embed
-   * the bank favicon with proportional dimensions (not a forced square).
+   * QR center image — always the vertical (stacked) OpenTWQR logo,
+   * unless logoType is 'bank' and the icon has loaded successfully.
    */
   const qrCenterImage = useMemo(() => {
-    if (logoType === 'bank' && bankIconUrl && bankIconSize) {
-      return { src: bankIconUrl, width: bankIconSize.width, height: bankIconSize.height, excavate: true };
+    if (logoType === 'bank' && bankIconUrl && bankIconInfo?.url === bankIconUrl) {
+      return {
+        src: bankIconInfo.dataUri ?? bankIconUrl,
+        width: bankIconInfo.width,
+        height: bankIconInfo.height,
+        excavate: true,
+      };
     }
-    return buildQRCenterImage({ logoType, hasLabelInfo, bankIconUrl: undefined });
-  }, [logoType, hasLabelInfo, bankIconUrl, bankIconSize]);
+    return { ...QR_CENTER_IMAGE_VERTICAL };
+  }, [logoType, bankIconUrl, bankIconInfo]);
 
   const [qrSize, setQrSize] = useState(240);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -129,16 +160,31 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       '';
     // data: URIs are embedded and safe — return the original element directly.
     if (!href.startsWith('https://')) return svgEl;
-    // Clone and swap the external URL with the compact OpenTWQR data-URI logo.
+    // External URL blocked in blob export — swap with vertical OpenTWQR logo.
     const clone = svgEl.cloneNode(true) as SVGSVGElement;
     const cloneImg = clone.querySelector('image');
     if (cloneImg) {
-      const fallback = hasLabelInfo ? QR_CENTER_IMAGE : QR_CENTER_IMAGE_VERTICAL;
+      const fallback = QR_CENTER_IMAGE_VERTICAL;
       cloneImg.setAttribute('href', fallback.src);
       cloneImg.removeAttributeNS('http://www.w3.org/1999/xlink', 'href');
+      // Re-centre the fallback logo (dimensions differ from bank icon).
+      const svgW = parseFloat(clone.getAttribute('width') || '0');
+      if (svgW > 0) {
+        cloneImg.setAttribute('width', String(fallback.width));
+        cloneImg.setAttribute('height', String(fallback.height));
+        cloneImg.setAttribute('x', String((svgW - fallback.width) / 2));
+        cloneImg.setAttribute('y', String((svgW - fallback.height) / 2));
+      }
     }
     return clone;
-  }, [hasLabelInfo]);
+  }, []);
+
+  /** Labels to include in exported PNG images (depends on user settings). */
+  const exportLabels = useMemo(() => ({
+    accountLine: showAccountAbove && bankCode && accountNumber ? `(${bankCode}) ${accountNumber}` : undefined,
+    bankName: showBankNameSetting && bankName ? bankName : undefined,
+    customName: customName.trim() || undefined,
+  }), [showAccountAbove, bankCode, accountNumber, showBankNameSetting, bankName, customName]);
 
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
 
@@ -277,7 +323,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       const svgEl = getExportSvgEl();
       if (!svgEl) return;
 
-      const pngBlob = await svgToBlob(svgEl, qrSize);
+      const pngBlob = await svgToBlob(svgEl, qrSize, 32, exportLabels);
       const file = new File([pngBlob], 'opentwqr.png', { type: 'image/png' });
 
       if (navigator.canShare?.({ files: [file] })) {
@@ -294,28 +340,28 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       showFeedback(t.share.shareFailed);
       shareMenu.close();
     }
-  }, [getExportSvgEl, qrSize, shareMenu, showFeedback, t]);
+  }, [getExportSvgEl, qrSize, exportLabels, shareMenu, showFeedback, t]);
 
   const handleDownloadImage = useCallback(async () => {
     try {
       const svgEl = getExportSvgEl();
       if (!svgEl) return;
 
-      const pngBlob = await svgToBlob(svgEl, qrSize);
+      const pngBlob = await svgToBlob(svgEl, qrSize, 32, exportLabels);
       downloadBlob(pngBlob, 'opentwqr.png');
       showFeedback(t.share.downloadedImage);
     } catch {
       showFeedback(t.share.downloadFailed);
     }
     shareMenu.close();
-  }, [getExportSvgEl, qrSize, shareMenu, showFeedback, t]);
+  }, [getExportSvgEl, qrSize, exportLabels, shareMenu, showFeedback, t]);
 
   const handleCopyImage = useCallback(async () => {
     try {
       const svgEl = getExportSvgEl();
       if (!svgEl) return;
 
-      const pngBlob = await svgToBlob(svgEl, qrSize);
+      const pngBlob = await svgToBlob(svgEl, qrSize, 32, exportLabels);
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': pngBlob }),
       ]);
@@ -324,7 +370,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       showFeedback(t.qr.copyFailed);
     }
     shareMenu.close();
-  }, [getExportSvgEl, qrSize, shareMenu, showFeedback, t]);
+  }, [getExportSvgEl, qrSize, exportLabels, shareMenu, showFeedback, t]);
 
   /* --- Link settings actions --- */
 
@@ -389,10 +435,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             aria-label={t.qr.enlargeQR}
             className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
-            {/* Account number — bankCode.masked, single compact line */}
+            {/* Account number — (bankCode) full account, compact line */}
             {showAccountAbove && (
-              <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-3">
-                {bankCode}.{maskAccount(accountNumber!)}
+              <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-1.5">
+                ({bankCode}){' '}{accountNumber}
               </p>
             )}
             <div ref={qrRef}>
@@ -408,7 +454,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             </div>
             {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
             {hasLabelInfo && (
-              <div className="text-center mt-2 space-y-0.5">
+              <div className="text-center mt-1 space-y-0.5">
                 {showBankNameSetting && bankName && (
                   <p className="text-xs text-zinc-400 leading-tight">{bankName}</p>
                 )}
@@ -441,8 +487,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                   )}
                   {accountNumber && (
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
+                      {bankCode && `(${bankCode}) `}
                       {accountRevealed
-                        ? formatAccountDisplay(accountNumber)
+                        ? accountNumber
                         : maskAccount(accountNumber)}
                     </p>
                   )}

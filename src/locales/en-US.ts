@@ -172,7 +172,7 @@ const enUS: Translations = {
     logoTitle: 'Show Bank Icon',
     logoDesc: 'Embed bank icon in the center of QR Code',
     showAccountTitle: 'Show Account Number',
-    showAccountDesc: 'Display masked account above QR Code',
+    showAccountDesc: 'Display account number above QR Code',
     bankNameTitle: 'Show Bank Name',
     bankNameDesc: 'Show bank name below QR Code',
     customNameTitle: 'Display Name',
