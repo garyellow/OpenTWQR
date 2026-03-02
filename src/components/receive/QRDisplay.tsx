@@ -135,12 +135,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const [feedbackClosing, setFeedbackClosing] = useState(false);
   /**
    * Reveal state — initialised from showAccountSetting so it starts consistent
-   * with the user's QR settings. The eye icon then toggles both the bottom
-   * card account display AND the account line above the QR image.
+   * with the user's QR settings. The eye icon toggles both the bottom card
+   * account display AND the account line above the QR image.
+   *
+   * The line above the QR is always kept in the DOM (using `invisible` when
+   * hidden) so that the layout does not jump when toggling visibility.
    */
   const [accountRevealed, setAccountRevealed] = useState(showAccountSetting);
-  /** Whether account number will be displayed ABOVE the QR code (follows eye-reveal state). */
-  const showAccountAbove = showAccountSetting && accountRevealed && Boolean(accountNumber) && Boolean(bankCode);
   const feedbackShowTimerRef = useRef<number | null>(null);
   const feedbackHideTimerRef = useRef<number | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
@@ -445,9 +446,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             aria-label={t.qr.enlargeQR}
             className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
-            {/* Account number — (bankCode) full account, compact line */}
-            {showAccountAbove && (
-              <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-1.5">
+            {/* Account number — always reserve space when setting is on; hide content when not revealed */}
+            {showAccountSetting && accountNumber && bankCode && (
+              <p className={`text-center font-mono text-xs tracking-wider mb-1.5 ${accountRevealed ? 'text-zinc-400' : 'invisible'}`}>
                 ({bankCode}){' '}{accountNumber}
               </p>
             )}

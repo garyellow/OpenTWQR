@@ -276,7 +276,7 @@ const enUS: Translations = {
       `${checked ? 'Deselect' : 'Select'} ${name}`,
     importCount: (n: number) => `Import ${n} Account${n !== 1 ? 's' : ''}`,
     successTitle: 'Import Complete',
-    successDesc: (n: number) => `Successfully imported ${n} account${n !== 1 ? 's' : ''}`,
+    successDesc: (n: number) => n === 0 ? 'Selected accounts are already up to date' : `Successfully processed ${n} account${n !== 1 ? 's' : ''}`,
   },
 
   /* ─── SafetySection ────────────────────────────────────── */

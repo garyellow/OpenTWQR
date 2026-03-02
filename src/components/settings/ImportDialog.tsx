@@ -25,6 +25,7 @@ interface ImportCandidate {
 
 export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) => {
   const addAccount = useAppStore((s) => s.addAccount);
+  const updateAccount = useAppStore((s) => s.updateAccount);
   const isDuplicate = useAppStore((s) => s.isDuplicate);
   const selectAccount = useAppStore((s) => s.selectAccount);
   const accounts = useAppStore((s) => s.accounts);
@@ -136,34 +137,66 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
     );
   }, []);
 
-  /* --- Phase 2 → 3: Import selected --- */
+  /**
+   * Phase 2 → 3: Commit selected candidates.
+   * - New accounts are added with a fresh generated ID.
+   * - Existing accounts (same bankCode + accountNumber) have their label
+   *   overwritten only when the incoming label differs from the stored one;
+   *   identical accounts are silently skipped.
+   * `processed` counts both additions and label updates so the success screen
+   * accurately reflects the number of changes made.
+   */
   const handleImportSelected = useCallback(() => {
     if (!candidates) return;
 
-    let added = 0;
+    let processed = 0;
     let firstNewId: string | null = null;
 
     for (const c of candidates) {
       if (!c.checked) continue;
-      const newId = generateId();
-      addAccount({
-        id: newId,
-        bankCode: c.original.bankCode,
-        accountNumber: c.original.accountNumber,
-        label: c.label || undefined,
-        iconUrl: c.original.iconUrl || undefined,
-      });
-      if (!firstNewId) firstNewId = newId;
-      added++;
+
+      if (!c.isDuplicate) {
+        // New account — add with a fresh id
+        const newId = generateId();
+        addAccount({
+          id: newId,
+          bankCode: c.original.bankCode,
+          accountNumber: c.original.accountNumber,
+          label: c.label || undefined,
+          iconUrl: c.original.iconUrl || undefined,
+        });
+        if (!firstNewId) firstNewId = newId;
+        processed++;
+      } else {
+        // Existing account — find by bankCode + accountNumber and update label
+        const normalised = c.original.accountNumber.replace(/^0+/, '');
+        const existing = accounts.find(
+          (a) =>
+            a.bankCode === c.original.bankCode &&
+            a.accountNumber.replace(/^0+/, '') === normalised,
+        );
+        if (existing) {
+          const incomingLabel = c.label || undefined;
+          const existingLabel = existing.label || undefined;
+          if (incomingLabel !== existingLabel) {
+            // Labels differ — overwrite
+            updateAccount(existing.id, { label: incomingLabel });
+            processed++;
+          }
+          // else: identical — no-op, no count
+        }
+      }
     }
 
+    // accounts.length reflects the pre-import snapshot (closure capture).
+    // Auto-select the first newly added account only if the list was empty before.
     if (firstNewId && accounts.length === 0) {
       selectAccount(firstNewId);
     }
 
-    setImportedCount(added);
+    setImportedCount(processed);
     haptic();
-  }, [candidates, addAccount, selectAccount, accounts.length]);
+  }, [candidates, addAccount, updateAccount, selectAccount, accounts]);
 
   const checkedCount = candidates?.filter((c) => c.checked).length ?? 0;
   const newCount = candidates?.filter((c) => !c.isDuplicate).length ?? 0;
@@ -299,19 +332,26 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                 {candidates.map((c, i) => (
                   <div
                     key={`${c.original.bankCode}-${c.original.accountNumber}-${i}`}
-                    className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={c.checked}
+                    aria-label={t.importDialog.selectLabel(c.checked, getBankName(c.original.bankCode))}
+                    onClick={() => toggleCandidate(i)}
+                    onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleCandidate(i); } }}
+                    className={`flex items-start gap-3 p-3 rounded-xl border transition-colors cursor-pointer select-none ${
                       c.checked
                         ? 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800'
                         : 'bg-zinc-50 dark:bg-zinc-900/20 border-zinc-100 dark:border-zinc-800/50 opacity-60'
                     }`}
                   >
-                    {/* Checkbox */}
+                    {/* Checkbox — click handled by parent card row */}
                     <button
                       type="button"
                       role="checkbox"
                       aria-checked={c.checked}
                       aria-label={t.importDialog.selectLabel(c.checked, getBankName(c.original.bankCode))}
-                      onClick={() => toggleCandidate(i)}
+                      onClick={(e) => e.stopPropagation()}
+                      tabIndex={-1}
                       className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
                         c.checked
                           ? 'border-transparent'
@@ -348,7 +388,8 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                           value={c.label}
                           onChange={(e) => updateCandidateLabel(i, e.target.value)}
                           onBlur={() => toggleEditing(i)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') toggleEditing(i); }}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); toggleEditing(i); } }}
                           autoFocus
                           placeholder={t.importDialog.nicknamePlaceholder}
                           className="mt-1.5 w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
@@ -356,7 +397,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                       ) : (
                         <button
                           type="button"
-                          onClick={() => toggleEditing(i)}
+                          onClick={(e) => { e.stopPropagation(); toggleEditing(i); }}
                           className="mt-1 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors rounded focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-500"
                         >
                           <Pencil size={10} aria-hidden="true" />

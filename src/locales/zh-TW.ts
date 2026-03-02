@@ -274,7 +274,7 @@ const zhTW = {
       `${checked ? '取消選取' : '選取'} ${name}`,
     importCount: (n: number) => `匯入 ${n} 個帳戶`,
     successTitle: '匯入完成',
-    successDesc: (n: number) => `成功匯入 ${n} 個帳戶`,
+    successDesc: (n: number) => n === 0 ? '所選帳戶已是最新狀態，無需更新' : `成功處理 ${n} 個帳戶`,
   },
 
   /* ─── SafetySection ────────────────────────────────────── */
