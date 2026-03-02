@@ -5,12 +5,10 @@ import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars } from '../utils/twqr';
-import { QrCode, ChevronRight, MessageSquare, X, Settings, Download, Zap } from 'lucide-react';
+import { QrCode, ChevronRight, MessageSquare, X, Download, Zap } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
-import { ThemeToggle } from '../components/ui/ThemeToggle';
-import { LanguageToggle } from '../components/ui/LanguageToggle';
 import { OpenTWQRLogo } from '../components/ui/OpenTWQRLogo';
 import { BankIcon } from '../components/accounts/BankIcon';
 import { haptic } from '../utils/haptics';
@@ -144,7 +142,7 @@ export const ReceivePage = () => {
 
   /* ---------- Main layout ---------- */
   return (
-    <div className="h-svh flex flex-col overflow-hidden px-safe bg-zinc-50 dark:bg-zinc-950">
+    <div className="h-svh flex flex-col overflow-hidden px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
       <a
         href="#receive-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -158,18 +156,6 @@ export const ReceivePage = () => {
           <h1>
             <OpenTWQRLogo className="h-7 w-auto" />
           </h1>
-          <div className="flex items-center gap-1">
-            <LanguageToggle />
-            <ThemeToggle />
-            <Link
-              to="/settings"
-              viewTransition
-              aria-label={t.receive.settings}
-              className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
-            >
-              <Settings size={20} aria-hidden="true" />
-            </Link>
-          </div>
         </header>
 
         {/* Account selector */}

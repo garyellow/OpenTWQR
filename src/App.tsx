@@ -9,6 +9,7 @@ import { PrivacyScreen } from './components/auth/PrivacyScreen';
 import { ReloadPrompt } from './components/layout/ReloadPrompt';
 import { InstallPrompt } from './components/layout/InstallPrompt';
 import { PageLoader } from './components/layout/PageLoader';
+import { TabLayout } from './components/layout/TabLayout';
 
 const ReceivePage = lazy(() =>
   import('./pages/ReceivePage').then((m) => ({ default: m.ReceivePage })),
@@ -18,6 +19,9 @@ const AccountsPage = lazy(() =>
 );
 const SettingsPage = lazy(() =>
   import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
+const ScanPage = lazy(() =>
+  import('./pages/ScanPage').then((m) => ({ default: m.ScanPage })),
 );
 const SharedPage = lazy(() =>
   import('./pages/SharedPage').then((m) => ({ default: m.SharedPage })),
@@ -106,9 +110,12 @@ function App() {
       ) : (
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/" element={<ReceivePage />} />
-            <Route path="/accounts" element={<AccountsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route element={<TabLayout />}>
+              <Route path="/" element={<ReceivePage />} />
+              <Route path="/scan" element={<ScanPage />} />
+              <Route path="/accounts" element={<AccountsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
             <Route path="/s/:data" element={<SharedPage />} />
             <Route path="/import" element={<ImportPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

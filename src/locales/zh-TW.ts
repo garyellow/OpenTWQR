@@ -302,6 +302,70 @@ const zhTW = {
     githubDesc: '檢視原始碼、回報問題或參與貢獻',
   },
 
+  /* ─── Bottom Navigation ────────────────────────────────── */
+  nav: {
+    receive: '收款',
+    scan: '掃描',
+    accounts: '帳戶',
+    settings: '設定',
+    ariaLabel: '主要導覽',
+  },
+
+  /* ─── ScanPage ─────────────────────────────────────────── */
+  scan: {
+    title: '掃描 QR Code',
+    hint: '將 QR Code 對準框內',
+    unsupportedTitle: '不支援掃描功能',
+    unsupportedDesc: '您的瀏覽器不支援相機掃描，請改用圖片上傳或更換瀏覽器。',
+    permissionTitle: '需要相機權限',
+    permissionDesc: '請允許使用相機以掃描 QR Code。',
+    noCameraTitle: '找不到相機',
+    noCameraDesc: '您的裝置似乎沒有可用的相機，可改用圖片上傳方式。',
+    unknownErrorTitle: '相機發生錯誤',
+    unknownErrorDesc: '啟動相機時發生未預期的錯誤，您可以重試或改用圖片上傳。',
+    uploadImage: '上傳圖片',
+    torchOn: '開啟閃光燈',
+    torchOff: '關閉閃光燈',
+    noQRFound: '圖片中未偵測到 QR Code',
+    decodeFailed: '無法解碼圖片',
+    unknownBank: '未知銀行',
+    amount: '金額',
+    note: '備註',
+    openBankApp: '開啟銀行 App',
+    openLink: '開啟連結',
+    showResult: '顯示付款資訊',
+    showQR: '顯示 QR Code',
+    copyAccount: '複製帳號',
+    copyRaw: '複製內容',
+    copied: '已複製',
+    rescan: '重新掃描',
+    rawResult: '掃描結果',
+    retry: '重試',
+  },
+
+  /* ─── URL Scheme Settings ──────────────────────────────── */
+  urlScheme: {
+    sectionTitle: '銀行 App 連動',
+    sectionDesc: '掃描後顯示開啟銀行 App 的快捷按鈕',
+    addBank: '新增銀行連動',
+    editTitle: '編輯銀行連動',
+    addTitle: '新增銀行連動',
+    urlLabel: 'URL 範本',
+    urlPlaceholder: 'https://bank.example.com/pay?acct={account}',
+    placeholderHelp: '佔位符說明',
+    placeholderTitle: '可用的佔位符：',
+    phAccount: '帳號',
+    phPaddedAccount: '16 位帳號（前面補 0）',
+    phBankCode: '銀行代碼',
+    phAmount: '金額（新台幣）',
+    phAmountCents: '金額（分，新台幣×100）',
+    phNote: '備註（已 URL 編碼）',
+
+    deleteTitle: '刪除銀行連動',
+    deleteConfirm: '確定要刪除此銀行的連動設定嗎？此操作無法復原。',
+    save: '儲存',
+  },
+
   /* ─── AuthLockScreen ───────────────────────────────────── */
   auth: {
     promptDesc: '請驗證身分以解鎖應用程式',

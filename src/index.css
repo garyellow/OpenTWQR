@@ -111,6 +111,20 @@ html.accent-animating {
   40%, 60%  { translate:  4px 0; }
 }
 
+/* animate-scan-line — vertical scanning line animation for QR scanner viewfinder */
+@utility animate-scan-line {
+  top: 1rem; /* base position; animation drives translateY for GPU acceleration */
+  animation: scan-line 2.5s ease-in-out infinite;
+}
+
+@keyframes scan-line {
+  0%   { transform: translateY(0); opacity: 0; }
+  10%  { opacity: 0.8; }
+  50%  { transform: translateY(14rem); opacity: 0.8; }
+  60%  { opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
 :root {
   line-height: 1.5;
   font-weight: 400;

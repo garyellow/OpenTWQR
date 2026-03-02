@@ -4,8 +4,8 @@ import { useLocaleStore } from '../stores/useLocaleStore';
 import { AccountCard } from '../components/accounts/AccountCard';
 import { AccountForm } from '../components/accounts/AccountForm';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { Plus, ChevronLeft, Wallet, Trash2, Download } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Plus, Wallet, Trash2, Download } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import type { BankAccount } from '../types';
 import { generateId } from '../utils/generateId';
@@ -62,7 +62,7 @@ export const AccountsPage = () => {
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
   return (
-    <div className="min-h-svh flex flex-col px-safe pb-safe bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
       <a
         href="#accounts-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -73,17 +73,7 @@ export const AccountsPage = () => {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
         <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              viewTransition
-              aria-label={t.common.back}
-              className="p-2.5 min-w-11 min-h-11 -ml-2 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
-            >
-              <ChevronLeft size={24} aria-hidden="true" />
-            </Link>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t.accounts.title}</h1>
-          </div>
+          <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 ml-1">{t.accounts.title}</h1>
           <div className="flex items-center gap-1">
             <button
               type="button"
