@@ -44,8 +44,8 @@ Completely free, open source, no sign-up required — account data is stored onl
   <tr>
     <td align="center" colspan="2">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-Desktop-dark.png" />
-        <img src="public/screenshots/receive-Desktop-light.png" alt="OpenTWQR Receive Screen (Desktop)" width="600" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
+        <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR Receive Screen (Desktop)" width="600" />
       </picture>
       <br />
       <sub>Receive Screen</sub>
