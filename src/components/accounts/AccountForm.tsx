@@ -4,7 +4,7 @@ import { useAppStore } from '../../stores/useAppStore';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import type { BankAccount } from '../../types';
-import { isValidAccount, removeInvisibleChars } from '../../utils/twqr';
+import { isValidAccount, isShortAccount, removeInvisibleChars } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
 import { AlertCircle, AlertTriangle, Globe } from 'lucide-react';
 
@@ -24,6 +24,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const [iconError, setIconError] = useState(false);
   const [error, setError] = useState('');
   const [duplicateWarning, setDuplicateWarning] = useState('');
+  const [shortAccountWarning, setShortAccountWarning] = useState('');
 
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((state) => state.banks);
@@ -34,6 +35,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
     e.preventDefault();
     setError('');
     setDuplicateWarning('');
+    setShortAccountWarning('');
 
     if (!bankCode) {
       setError(t.form.selectBank);
@@ -41,6 +43,11 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
     }
 
     if (!isValidAccount(accountNumber)) {
+      if (isShortAccount(accountNumber)) {
+        // Soft warning: shorter than standard but potentially valid (e.g. e-payment)
+        setShortAccountWarning(t.form.shortAccountWarn(accountNumber.length));
+        return;
+      }
       setError(t.form.invalidAccount);
       return;
     }
@@ -84,6 +91,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             setBankCode(code);
             setError('');
             setDuplicateWarning('');
+            setShortAccountWarning('');
           }}
         />
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
@@ -111,6 +119,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
             setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
             setError('');
             setDuplicateWarning('');
+            setShortAccountWarning('');
           }}
           aria-invalid={Boolean(error && !isValidAccount(accountNumber))}
           aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
@@ -194,6 +203,35 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         >
           <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
           <span className="font-medium">{error}</span>
+        </div>
+      )}
+
+      {shortAccountWarning && !error && !duplicateWarning && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
+        >
+          <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
+            <AlertTriangle size={18} className="shrink-0" aria-hidden="true" />
+            <span className="font-medium">{shortAccountWarning}</span>
+          </div>
+          <div className="flex gap-2 ml-7.5">
+            <button
+              type="button"
+              onClick={() => setShortAccountWarning('')}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            >
+              {t.common.cancel}
+            </button>
+            <button
+              type="button"
+              onClick={() => onSubmit({ bankCode, accountNumber, label: label || undefined, iconUrl: iconUrl.trim() || undefined })}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
+            >
+              {t.form.saveShort}
+            </button>
+          </div>
         </div>
       )}
 

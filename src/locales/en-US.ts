@@ -144,10 +144,12 @@ const enUS: Translations = {
     iconHint: 'Image or bank website URL',
     saveAccount: 'Save Account',
     selectBank: 'Please select a bank',
-    invalidAccount: 'Account must be 10–16 digits',
+    invalidAccount: 'Please enter an account number',
+    shortAccountWarn: (n: number) => `This account has only ${n} digits — below the standard 10-digit minimum. If this is an e-payment account (e.g. JKOPay), confirm save anyway?`,
     duplicateExact: 'This account already exists',
     duplicateWarn: 'You already have an account with the same bank and number. Add anyway?',
     addAnyway: 'Add Anyway',
+    saveShort: 'Save Anyway',
   },
 
   /* ─── BankSelect ───────────────────────────────────────── */

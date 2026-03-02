@@ -32,6 +32,16 @@ export const isValidAccount = (account: string): boolean => {
   return /^\d{10,16}$/.test(account);
 };
 
+/**
+ * Returns true for accounts that are valid digit strings but shorter than the
+ * standard 10-digit minimum.  Used to show a soft confirmation warning rather
+ * than a hard blocking error — e-payment accounts (e.g. JKOPay / 街口) may
+ * legitimately have fewer digits.
+ */
+export const isShortAccount = (account: string): boolean => {
+  return /^\d{1,9}$/.test(account);
+};
+
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('zh-TW', {
     style: 'currency',

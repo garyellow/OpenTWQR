@@ -142,10 +142,12 @@ const zhTW = {
     iconHint: '可以填入圖片網址，也可以填入官網網址',
     saveAccount: '儲存帳戶',
     selectBank: '請選擇銀行',
-    invalidAccount: '帳號必須為 10–16 位數字',
+    invalidAccount: '請輸入帳號',
+    shortAccountWarn: (n: number) => `此帳號僅 ${n} 碼，低於一般銀行帳號的標準下限（10 碼）。若為電子支付帳號（如街口支付）確定要儲存嗎？`,
     duplicateExact: '此帳戶已存在',
     duplicateWarn: '你已經有一個相同的銀行帳號，確定要再新增嗎？',
     addAnyway: '仍要新增',
+    saveShort: '確認儲存',
   },
 
   /* ─── BankSelect ───────────────────────────────────────── */
