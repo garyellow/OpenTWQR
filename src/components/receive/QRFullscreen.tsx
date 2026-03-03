@@ -104,13 +104,12 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
       onClick={requestClose}
       onAnimationEnd={onAnimationEnd}
     >
+      {/* Custom name above QR card */}
+      {customName && (
+        <p className="text-sm font-semibold text-white/80 mb-4 text-center px-6">{customName}</p>
+      )}
+
       <div className="bg-white p-8 rounded-2xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
-        {/* Account number — (bankCode) full account, compact line */}
-        {showAccount && accountNumber && bankCode && (
-          <p className="text-center font-mono text-xs text-zinc-400 tracking-wider mb-1.5">
-            ({bankCode}){' '}{accountNumber}
-          </p>
-        )}
         <StyledQRCode
           value={value}
           size={qrSize}
@@ -119,20 +118,15 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
           errorLevel={errorLevel}
           centerImage={qrCenterImage}
         />
-        {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
-        {(customName || (showBankName && bankName)) && (
-          <div className="text-center mt-1 space-y-0.5">
-            {showBankName && bankName && (
-              <p className="text-xs text-zinc-400 leading-tight">{bankName}</p>
-            )}
-            {customName && (
-              <p className="text-sm font-semibold text-zinc-700 leading-tight">{customName}</p>
-            )}
-          </div>
+        {/* Bank name + code below QR inside white card */}
+        {showBankName && bankName && bankCode && (
+          <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
+            （{bankCode}） {bankName}
+          </p>
         )}
       </div>
 
-      {/* Info below QR */}
+      {/* Info below QR card */}
       <div className="mt-8 text-center space-y-2">
         {amount != null && amount > 0 ? (
           <div className="flex items-baseline justify-center gap-0.5">
@@ -143,6 +137,11 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
           </div>
         ) : (
           <p className="text-lg font-medium text-white/50">{t.amount.payerEnter}</p>
+        )}
+        {showAccount && accountNumber && (
+          <p className="font-mono text-sm text-white/60 tracking-wider">
+            {accountNumber}
+          </p>
         )}
         {note && <p className="text-white/50 text-xs">{t.qr.notePrefix}{note}</p>}
       </div>

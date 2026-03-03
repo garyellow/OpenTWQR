@@ -69,16 +69,18 @@ export const DangerSection = () => {
           onClose={() => setShowConfirm(false)}
           overlayClass="z-50"
           cardClass="w-full max-w-sm"
+          ariaLabelledby="danger-reset-title"
+          ariaDescribedby="danger-reset-desc"
         >
           {(requestClose) => (
             <div className="p-6 text-center">
               <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
                 <Trash2 size={28} className="text-red-600 dark:text-red-400" aria-hidden="true" />
               </div>
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+              <h2 id="danger-reset-title" className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-2">
                 {t.danger.resetConfirmTitle}
               </h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed">
+              <p id="danger-reset-desc" className="text-sm text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed">
                 {t.danger.resetConfirmDesc}
               </p>
               <div className="flex gap-3">

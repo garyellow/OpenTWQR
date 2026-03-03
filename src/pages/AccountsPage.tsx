@@ -118,9 +118,10 @@ export const AccountsPage = () => {
               <button
                 type="button"
                 onClick={() => setIsAdding(true)}
-                className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                className="w-full flex items-center justify-center gap-2 py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
-                {t.receive.addBankAccount}
+                <Plus size={20} aria-hidden="true" />
+                {t.receive.addAccount}
               </button>
               <button
                 type="button"

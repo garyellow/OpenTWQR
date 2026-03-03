@@ -68,7 +68,7 @@ export const OnboardingOverlay = () => {
       <div className="w-full max-w-sm mx-auto px-8 flex flex-col items-center text-center">
         {/* Icon */}
         <div
-          className={`w-24 h-24 rounded-3xl flex items-center justify-center mb-8 transition-all duration-300 ${current.bgClass}`}
+          className={`w-24 h-24 rounded-3xl flex items-center justify-center mb-8 transition-colors duration-300 ${current.bgClass}`}
           key={step}
         >
           <Icon size={48} className={`transition-colors duration-300 ${current.colorClass}`} aria-hidden="true" />
@@ -87,7 +87,7 @@ export const OnboardingOverlay = () => {
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              className={`h-2 rounded-full transition-[width,background-color] duration-300 ${
                 i === step
                   ? 'w-8'
                   : 'w-2 bg-zinc-200 dark:bg-zinc-700'

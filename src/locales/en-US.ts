@@ -15,24 +15,28 @@ const enUS: Translations = {
     understand: 'Got it',
     loading: 'Loading',
     or: 'or',
+    expand: 'Expand',
+    collapse: 'Collapse',
   },
 
   /* ─── ReceivePage ──────────────────────────────────────── */
   receive: {
     settings: 'Settings',
     myAccount: 'My Account',
-    addBankAccount: 'Add Bank Account',
+    addAccount: 'Add Account',
     importAccounts: 'Import Accounts',
-    emptyHint: 'Add a bank account to start generating QR Codes.',
-    loadSample: 'Load Sample Account',
-    loadSampleDesc: 'Try it out first — delete it later in Accounts',
+    emptyHint: 'Add an account to start generating QR Codes.',
+    loadSample: 'Load Sample Accounts',
+    loadSampleDesc: 'Try it out first — delete them later in Accounts',
+    loadSampleHint: 'For demo only — not real accounts. Delete anytime.',
+    sampleLabel: 'Sample',
     generateQR: 'Generate QR',
-    quickQR: 'Quick QR',
-    quickQRDesc: 'Generate QR without saving an account',
-    quickQRTitle: 'Quick QR',
-    quickQRGenerate: 'Generate QR',
-    quickQRSave: 'Save Account',
-    quickQRSaved: 'Saved',
+    quickAccess: 'Quick Access',
+    quickAccessDesc: 'Generate QR without saving',
+    quickAccessTitle: 'Quick Access',
+    quickAccessGenerate: 'Generate QR',
+    quickAccessSave: 'Save Account',
+    quickAccessSaved: 'Saved',
     addNote: 'Add Note',
     noteTitle: 'Note',
     noteLabel: 'Note',
@@ -75,6 +79,9 @@ const enUS: Translations = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
+    editCustomName: 'Edit display message',
+    customNamePlaceholder: 'Enter a message (optional)',
+    addCustomName: 'Add display message',
   },
 
   /* ─── Share menu ───────────────────────────────────────── */
@@ -122,7 +129,7 @@ const enUS: Translations = {
     importLabel: 'Import accounts',
     addLabel: 'Add account',
     emptyTitle: 'No Accounts',
-    emptyHint: 'Add a bank account to start receiving payments via TWQR.',
+    emptyHint: 'Add a bank account to start receiving payments via OpenTWQR.',
     selectAccount: (name: string) => `Select ${name}`,
     editAccount: 'Edit account',
     deleteAccount: 'Delete account',
@@ -238,10 +245,10 @@ const enUS: Translations = {
   /* ─── BackupSection ────────────────────────────────────── */
   backup: {
     sectionTitle: 'Backup',
-    exportTitle: 'Export Accounts',
-    exportDesc: 'Generate a backup string to save or share',
-    importTitle: 'Import Accounts',
-    importDesc: 'Paste backup string to restore accounts',
+    exportTitle: 'Export Backup',
+    exportDesc: 'Choose what to include and generate a backup string',
+    importTitle: 'Import Backup',
+    importDesc: 'Paste a backup string to restore accounts or settings',
     storageWarning: 'Your data is stored only in this device\'s browser. Clearing browser data or uninstalling may cause data loss. Back up regularly.',
     storageWarningIOS: 'On iOS/iPadOS, if the app isn\'t added to the Home Screen, Safari may auto-clear data after 7 days of inactivity.',
     reminderTitle: 'Backup Reminder',
@@ -252,8 +259,18 @@ const enUS: Translations = {
 
   /* ─── ExportDialog ─────────────────────────────────────── */
   exportDialog: {
-    title: 'Export Accounts',
-    subtitle: 'Generate a backup string to save or send to yourself',
+    title: 'Export Backup',
+    subtitle: 'Choose what to include and generate a backup string',
+    categoriesLabel: 'Include',
+    catAccounts: 'Bank Accounts',
+    catAccountsDesc: (n: number) => `${n} account${n !== 1 ? 's' : ''}`,
+    catStyle: 'Style',
+    catStyleAccent: 'Accent Colour',
+    catStyleQR: 'QR Code Style',
+    catPreferences: 'Preferences',
+    catPrefsMode: 'Appearance Mode',
+    catPrefsLocale: 'Language',
+    catPaymentLinks: (n: number) => `Payment App Links (${n})`,
     passwordLabel: 'Set Password',
     passwordOptional: '(optional)',
     passwordPlaceholder: 'Leave blank for no password',
@@ -276,8 +293,8 @@ const enUS: Translations = {
 
   /* ─── ImportDialog ─────────────────────────────────────── */
   importDialog: {
-    title: 'Import Accounts',
-    subtitle: 'Paste your backup string to preview and restore accounts',
+    title: 'Import Backup',
+    subtitle: 'Paste your backup string to preview and select what to restore',
     inputPlaceholder: 'OTWQR1-...',
     inputLabel: 'Backup string',
     passwordLabel: 'Enter Password',
@@ -297,9 +314,22 @@ const enUS: Translations = {
     addNickname: 'Add nickname',
     selectLabel: (checked: boolean, name: string) =>
       `${checked ? 'Deselect' : 'Select'} ${name}`,
-    importCount: (n: number) => `Import ${n} Account${n !== 1 ? 's' : ''}`,
+    confirmImport: 'Confirm Import',
+    catAccounts: 'Bank Accounts',
+    catStyle: 'Style',
+    catStyleAccent: 'Accent Colour',
+    catStyleQR: 'QR Code Style',
+    catPreferences: 'Preferences',
+    catPrefsMode: 'Appearance Mode',
+    catPrefsLocale: 'Language',
+    catPaymentLinks: (n: number) => `Payment App Links (${n})`,
+    paymentLinkConflict: 'Already configured',
+    paymentLinkOverwrite: 'Overwrite',
+    paymentLinkKeep: 'Keep',
+    paymentLinksNewDesc: (n: number) => `+${n} new link${n !== 1 ? 's' : ''} will be added`,
     successTitle: 'Import Complete',
     successDesc: (n: number) => n === 0 ? 'Selected accounts are already up to date' : `Successfully processed ${n} account${n !== 1 ? 's' : ''}`,
+    settingsApplied: 'Style & preferences applied',
   },
 
   /* ─── SafetySection ────────────────────────────────────── */

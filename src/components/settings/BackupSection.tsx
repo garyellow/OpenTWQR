@@ -13,7 +13,8 @@ const isStandalone = () =>
 
 /**
  * Import/Export section for the Settings page.
- * Provides encrypted backup string generation and import with password support.
+ * Uses the unified category-based backup system — the user
+ * chooses what to include (accounts, settings, or both) in the dialog itself.
  */
 export const BackupSection = () => {
   const [showExport, setShowExport] = useState(false);

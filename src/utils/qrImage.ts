@@ -1,13 +1,14 @@
 /**
  * Optional text labels to render around the QR code in exported PNGs.
+ * Rendered in order: customName above QR, then bankLine + accountLine below.
  */
 export interface QRExportLabels {
-  /** Account line above QR, e.g. "(700) 1234567890". */
-  accountLine?: string;
-  /** Bank name below QR. */
-  bankName?: string;
-  /** Custom recipient name below bank name. */
+  /** Custom message / display name above QR (bold). */
   customName?: string;
+  /** Bank line below QR, e.g. "（013） 國泰世華商業銀行". */
+  bankLine?: string;
+  /** Account number below bank line (monospace). */
+  accountLine?: string;
 }
 
 /**
@@ -29,11 +30,12 @@ export const canvasToBlob = async (
   const COLOR_LIGHT = '#a1a1aa'; // zinc-400
   const COLOR_DARK = '#3f3f46';  // zinc-700
 
-  const topExtra = labels?.accountLine ? 22 : 0;
-  const hasBankName = Boolean(labels?.bankName);
   const hasCustomName = Boolean(labels?.customName);
-  const bottomExtra = (hasBankName || hasCustomName)
-    ? 10 + (hasBankName ? 16 : 0) + (hasCustomName ? 18 : 0) + (hasBankName && hasCustomName ? 2 : 0)
+  const hasBankLine = Boolean(labels?.bankLine);
+  const hasAccountLine = Boolean(labels?.accountLine);
+  const topExtra = hasCustomName ? 22 : 0;
+  const bottomExtra = (hasBankLine || hasAccountLine)
+    ? 10 + (hasBankLine ? 16 : 0) + (hasAccountLine ? 16 : 0) + (hasBankLine && hasAccountLine ? 2 : 0)
     : 0;
 
   const logicalW = qrSize + padding * 2;
@@ -56,34 +58,34 @@ export const canvasToBlob = async (
 
   const qrY = padding + topExtra;
 
-  /* ---- account line above QR ---- */
-  if (labels?.accountLine) {
-    ctx.font = FONT_ACCOUNT;
-    ctx.fillStyle = COLOR_LIGHT;
+  /* ---- custom name above QR ---- */
+  if (labels?.customName) {
+    ctx.font = FONT_NAME;
+    ctx.fillStyle = COLOR_DARK;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(labels.accountLine, logicalW / 2, qrY - 6);
+    ctx.fillText(labels.customName, logicalW / 2, qrY - 6);
   }
 
   /* ---- QR canvas ---- */
   ctx.drawImage(qrCanvas, padding, qrY, qrSize, qrSize);
 
   /* ---- labels below QR ---- */
-  if (hasBankName || hasCustomName) {
+  if (hasBankLine || hasAccountLine) {
     ctx.textAlign = 'center';
     let labelY = qrY + qrSize + 10;
-    if (labels?.bankName) {
+    if (labels?.bankLine) {
       ctx.font = FONT_BANK;
       ctx.fillStyle = COLOR_LIGHT;
       ctx.textBaseline = 'top';
-      ctx.fillText(labels.bankName, logicalW / 2, labelY);
-      labelY += 16 + (hasCustomName ? 2 : 0);
+      ctx.fillText(labels.bankLine, logicalW / 2, labelY);
+      labelY += 16 + (hasAccountLine ? 2 : 0);
     }
-    if (labels?.customName) {
-      ctx.font = FONT_NAME;
-      ctx.fillStyle = COLOR_DARK;
+    if (labels?.accountLine) {
+      ctx.font = FONT_ACCOUNT;
+      ctx.fillStyle = COLOR_LIGHT;
       ctx.textBaseline = 'top';
-      ctx.fillText(labels.customName, logicalW / 2, labelY);
+      ctx.fillText(labels.accountLine, logicalW / 2, labelY);
     }
   }
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QRDisplay } from '../components/receive/QRDisplay';
 import { parseShareUrl } from '../utils/share';
-import { generateTWQR } from '../utils/twqr';
+import { generateTWQR, stripCompanySuffix } from '../utils/twqr';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { Unlink, Lock, Clock } from 'lucide-react';
@@ -45,7 +45,8 @@ export const SharedPage = () => {
 
   const bankName = useMemo(() => {
     if (!shareData) return '';
-    return banks.find((b) => b.code === shareData.bankCode)?.name || shareData.bankCode;
+    const found = banks.find((b) => b.code === shareData.bankCode);
+    return found ? stripCompanySuffix(found.name) : shareData.bankCode;
   }, [banks, shareData]);
 
   const qrString = useMemo(() => {
@@ -99,7 +100,7 @@ export const SharedPage = () => {
             aria-describedby={result.status === 'wrong-password' ? 'shared-pw-error' : undefined}
             autoFocus
             autoComplete="off"
-            className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs text-center"
+            className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs text-center"
           />
           {result.status === 'wrong-password' && (
             <div

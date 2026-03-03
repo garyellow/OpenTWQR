@@ -3,7 +3,7 @@ import { QrCode, Save, X } from 'lucide-react';
 import { BankSelect } from '../accounts/BankSelect';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { QRDisplay } from './QRDisplay';
-import { generateTWQR, isValidAccount, removeInvisibleChars } from '../../utils/twqr';
+import { generateTWQR, isValidAccount, removeInvisibleChars, stripCompanySuffix } from '../../utils/twqr';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useAppStore } from '../../stores/useAppStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -35,7 +35,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
   const [hasGenerated, setHasGenerated] = useState(false);
 
   const bank = useMemo(() => banks.find((b) => b.code === bankCode), [banks, bankCode]);
-  const bankName = bank?.name || '';
+  const bankName = stripCompanySuffix(bank?.name || '');
   const bankIconUrl = useMemo(() => resolveIconSrc(bank?.url), [bank]);
 
   const numAmount = useMemo(() => {
@@ -101,7 +101,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
   }, [saved, bankCode, accountNumber, addAccount, selectAccount]);
 
   const inputClass =
-    'w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs';
+    'w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs';
 
   return (
     <>
@@ -119,7 +119,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
                 id="quick-qr-title"
                 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
               >
-                {t.receive.quickQRTitle}
+                {t.receive.quickAccessTitle}
               </h2>
               <button
                 type="button"
@@ -132,7 +132,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
             </div>
 
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {t.receive.quickQRDesc}
+              {t.receive.quickAccessDesc}
             </p>
 
             {/* Bank selector */}
@@ -211,16 +211,16 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
                 <button
                   type="button"
                   onClick={handleSave}
-                  aria-label={t.receive.quickQRSave}
+                  aria-label={t.receive.quickAccessSave}
                   className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   <Save size={18} aria-hidden="true" />
-                  <span>{t.receive.quickQRSave}</span>
+                  <span>{t.receive.quickAccessSave}</span>
                 </button>
               )}
               {saved && (
                 <div className="flex items-center px-4 py-3.5 rounded-xl text-sm font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10">
-                  {t.receive.quickQRSaved}
+                  {t.receive.quickAccessSaved}
                 </div>
               )}
               <button
@@ -229,7 +229,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
                 className="flex-1 flex items-center justify-center gap-2.5 py-3.5 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 <QrCode size={18} aria-hidden="true" />
-                {t.receive.quickQRGenerate}
+                {t.receive.quickAccessGenerate}
               </button>
             </div>
           </div>

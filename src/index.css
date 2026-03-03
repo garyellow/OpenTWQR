@@ -96,6 +96,14 @@ html.accent-animating {
   transition-duration: 150ms;
 }
 
+/* input-transition — For text inputs: animates only border-color and box-shadow
+ * (focus ring) to avoid layout-affecting transitions. */
+@utility input-transition {
+  transition-property: border-color, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
 /*
  * animate-shake — short horizontal shake for "rejected input" feedback.
  * Used by AmountInput when the user exceeds the max amount.

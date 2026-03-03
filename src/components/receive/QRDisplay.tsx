@@ -3,7 +3,7 @@ import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
-import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine } from 'lucide-react';
+import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, Pencil } from 'lucide-react';
 import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
@@ -60,8 +60,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const eyeStyle = isSharedView ? 'square' as const : storedEyeStyle;
   const errorLevel = isSharedView ? 'Q' as const : storedErrorLevel;
 
-  /** Whether any name/label info will be displayed BELOW the QR code. */
-  const hasLabelInfo = Boolean(customName.trim()) || (showBankNameSetting && Boolean(bankName));
+  /** Whether any bank label will be shown BELOW the QR code. */
+  const hasBankLabel = showBankNameSetting && Boolean(bankName) && Boolean(bankCode);
 
   /**
    * Bank icon info — dimensions + optional data URI for export-safe SVG.
@@ -139,6 +139,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
 
   const [qrSize, setQrSize] = useState(240);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  /** Local per-session custom name — seeded from store but editable without persisting. */
+  const [localCustomName, setLocalCustomName] = useState(customName);
+  const [isEditingName, setIsEditingName] = useState(false);
   const shareMenu = useAnimatedToggle();
   const linkSettingsToggle = useAnimatedToggle();
   const [linkAction, setLinkAction] = useState<'copy' | 'share'>('copy');
@@ -153,8 +156,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
    * toggles this independently of the setting; showAccountSetting is NOT
    * re-consulted after initialisation.
    *
-   * The account line above the QR is always kept in the DOM (visible only when
-   * accountRevealed is true) so toggling never causes layout shifts.
+   * Both masked and revealed strings always have the same character count
+   * (same padding algorithm), so swapping content never causes layout shifts.
    */
   const [accountRevealed, setAccountRevealed] = useState(showAccountSetting);
   const feedbackShowTimerRef = useRef<number | null>(null);
@@ -173,16 +176,17 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
 
   /**
    * Labels to include in exported PNG images.
-   * Account line follows the RUNTIME reveal state (accountRevealed) so that
-   * the exported / shared image is always consistent with what the user sees
-   * on screen — if they toggled the eye off, the account is omitted from the
-   * export too.
+   * Order: customName above QR, bankLine + accountLine below QR.
    */
   const exportLabels = useMemo(() => ({
-    accountLine: accountRevealed && bankCode && accountNumber ? `(${bankCode}) ${accountNumber}` : undefined,
-    bankName: showBankNameSetting && bankName ? bankName : undefined,
-    customName: customName.trim() || undefined,
-  }), [accountRevealed, bankCode, accountNumber, showBankNameSetting, bankName, customName]);
+    customName: localCustomName.trim() || undefined,
+    bankLine: showBankNameSetting && bankName && bankCode
+      ? `（${bankCode}） ${bankName}`
+      : undefined,
+    accountLine: accountRevealed && accountNumber
+      ? formatAccountDisplay(accountNumber)
+      : undefined,
+  }), [accountRevealed, accountNumber, showBankNameSetting, bankName, bankCode, localCustomName]);
 
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
 
@@ -427,23 +431,56 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           )}
         </div>
 
-        {/* QR Code — tappable for fullscreen */}
-        <div className="flex flex-col items-center justify-center px-6 gap-5">
+        {/* QR Code section */}
+        <div className="flex flex-col items-center justify-center px-6 gap-4">
+
+          {/* Custom name — editable per session (only in own QR view) */}
+          {!isSharedView && (
+            <div className="w-full flex items-center justify-center min-h-8">
+              {isEditingName ? (
+                <input
+                  type="text"
+                  value={localCustomName}
+                  onChange={(e) => setLocalCustomName(e.target.value.slice(0, 50))}
+                  onBlur={() => setIsEditingName(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === 'Escape') {
+                      e.preventDefault();
+                      setIsEditingName(false);
+                    }
+                  }}
+                  autoFocus
+                  placeholder={t.qr.customNamePlaceholder}
+                  aria-label={t.qr.editCustomName}
+                  className="w-full text-center text-sm font-semibold text-zinc-900 dark:text-zinc-100 bg-transparent border-b border-zinc-300 dark:border-zinc-600 focus-visible:outline-none focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 pb-0.5 placeholder-zinc-400 dark:placeholder-zinc-500"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingName(true)}
+                  aria-label={t.qr.editCustomName}
+                  className="group flex items-center justify-center gap-1.5 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg py-1 px-2"
+                >
+                  {localCustomName.trim() ? (
+                    <>
+                      <span>{localCustomName.trim()}</span>
+                      <Pencil size={12} className="text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" aria-hidden="true" />
+                    </>
+                  ) : (
+                    <span className="text-zinc-400 dark:text-zinc-500 font-normal">{t.qr.addCustomName}</span>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* QR Code — tappable for fullscreen */}
           <button
             type="button"
             onClick={() => setIsFullscreen(true)}
             aria-label={t.qr.enlargeQR}
             className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow active:scale-98 cursor-zoom-in"
           >
-            {/* Account number — always in DOM when data is available so toggling
-                the eye icon never causes layout shifts. Visibility is driven
-                entirely by accountRevealed; showAccountSetting only seeds the
-                initial revealed state and must NOT gate this render. */}
-            {accountNumber && bankCode && (
-              <p className={`text-center font-mono text-xs tracking-wider mb-1.5 ${accountRevealed ? 'text-zinc-400' : 'invisible'}`}>
-                ({bankCode}){' '}{accountNumber}
-              </p>
-            )}
             <StyledQRCode
               ref={qrRef}
               value={value}
@@ -453,16 +490,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
               errorLevel={errorLevel}
               centerImage={centerImageForQR}
             />
-            {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
-            {hasLabelInfo && (
-              <div className="text-center mt-1 space-y-0.5">
-                {showBankNameSetting && bankName && (
-                  <p className="text-xs text-zinc-400 leading-tight">{bankName}</p>
-                )}
-                {customName.trim() && (
-                  <p className="text-sm font-semibold text-zinc-700 leading-tight">{customName.trim()}</p>
-                )}
-              </div>
+            {/* Bank name + code below QR */}
+            {hasBankLabel && (
+              <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
+                （{bankCode}） {bankName}
+              </p>
             )}
           </button>
 
@@ -483,12 +515,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  {bankName && (
-                    <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">{bankName}</p>
+                  {bankName && bankCode && (
+                    <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">
+                      （{bankCode}） {bankName}
+                    </p>
                   )}
                   {accountNumber && (
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-                      {bankCode && `(${bankCode}) `}
                       {accountRevealed
                         ? formatAccountDisplay(accountNumber)
                         : maskAccount(accountNumber)}
@@ -634,7 +667,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         note={note}
         onExit={() => setIsFullscreen(false)}
         qrCenterImage={centerImageForQR}
-        customName={customName.trim() || undefined}
+        customName={localCustomName.trim() || undefined}
         showBankName={showBankNameSetting}
         accountNumber={accountNumber}
         bankCode={bankCode}

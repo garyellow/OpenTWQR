@@ -94,3 +94,11 @@ export const removeInvisibleChars = (str: string): string => {
   // eslint-disable-next-line no-control-regex
   return str.replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\uFEFF]/g, '');
 };
+
+/**
+ * Strip the legal entity suffix「股份有限公司」from the end of a bank name.
+ * Preserves institution types like「信用合作社」,「農業金庫」, etc.
+ * Returns the trimmed name, or the original if the suffix is absent.
+ */
+export const stripCompanySuffix = (name: string): string =>
+  name.replace(/股份有限公司$/, '').trim();

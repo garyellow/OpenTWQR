@@ -4,7 +4,7 @@ import { QRScanner } from '../components/scan/QRScanner';
 import { QRDisplay } from '../components/receive/QRDisplay';
 import { ScanRedirectView } from '../components/scan/ScanRedirectView';
 import { parseTWQR } from '../utils/parseTwqr';
-import { generateTWQR } from '../utils/twqr';
+import { generateTWQR, stripCompanySuffix } from '../utils/twqr';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { useUrlSchemeStore } from '../stores/useUrlSchemeStore';
@@ -126,7 +126,7 @@ export const ScanPage = () => {
   const qrDisplayProps = parsed && qrString ? {
     value: qrString,
     amount: parsed.amount,
-    bankName: bank?.name,
+    bankName: bank ? stripCompanySuffix(bank.name) : undefined,
     accountNumber: parsed.accountNumber,
     bankCode: parsed.bankCode,
     note: parsed.note,

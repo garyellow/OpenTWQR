@@ -4,8 +4,8 @@ import { AmountInput } from '../components/receive/AmountInput';
 import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
-import { generateTWQR, maskAccount, removeInvisibleChars } from '../utils/twqr';
-import { QrCode, ChevronRight, MessageSquare, X, Download, Zap, BookOpen } from 'lucide-react';
+import { generateTWQR, maskAccount, removeInvisibleChars, stripCompanySuffix } from '../utils/twqr';
+import { QrCode, ChevronRight, MessageSquare, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
@@ -21,7 +21,7 @@ export const ReceivePage = () => {
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [showQuickQR, setShowQuickQR] = useState(false);
+  const [showQuickAccess, setShowQuickAccess] = useState(false);
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ export const ReceivePage = () => {
     return banks.find((b) => b.code === selectedAccount?.bankCode);
   }, [banks, selectedAccount]);
 
-  const bankName = bank?.name || '';
+  const bankName = stripCompanySuffix(bank?.name || '');
 
   /** Resolved bank icon URL for QR center logo (when logoType is 'bank'). */
   const bankIconUrl = useMemo(() => {
@@ -114,9 +114,10 @@ export const ReceivePage = () => {
           <button
             type="button"
             onClick={() => navigate('/accounts', { viewTransition: true, state: { autoAdd: true } })}
-            className="w-full py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+            className="w-full flex items-center justify-center gap-2 py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
-            {t.receive.addBankAccount}
+            <Plus size={20} aria-hidden="true" />
+            {t.receive.addAccount}
           </button>
           <button
             type="button"
@@ -128,11 +129,11 @@ export const ReceivePage = () => {
           </button>
           <button
             type="button"
-            onClick={() => setShowQuickQR(true)}
+            onClick={() => setShowQuickAccess(true)}
             className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-lg"
           >
             <Zap size={20} aria-hidden="true" />
-            {t.receive.quickQR}
+            {t.receive.quickAccess}
           </button>
           <div className="relative flex items-center py-2">
             <div className="flex-1 border-t border-zinc-200 dark:border-zinc-800" />
@@ -143,21 +144,29 @@ export const ReceivePage = () => {
             type="button"
             onClick={() => {
               haptic();
-              addAccount({
-                id: generateId(),
-                bankCode: '004',
-                accountNumber: '0000123456789',
-                label: t.receive.loadSampleDesc,
-              });
+              const p = `(${t.receive.sampleLabel})`;
+              const samples = [
+                { bankCode: '700', accountNumber: '00100123456789', label: `${p} 中華郵政` },
+                { bankCode: '013', accountNumber: '1234567890',     label: `${p} 國泰世華` },
+                { bankCode: '822', accountNumber: '9876543210987654', label: `${p} 中國信託` },
+                { bankCode: '004', accountNumber: '00099876543210', label: `${p} 台灣銀行` },
+                { bankCode: '012', accountNumber: '5566112233',     label: `${p} 台北富邦` },
+              ];
+              for (const s of samples) {
+                addAccount({ id: generateId(), ...s });
+              }
             }}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-base"
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-100/60 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-700/40 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-base"
           >
             <BookOpen size={18} aria-hidden="true" />
             {t.receive.loadSample}
           </button>
+          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500 -mt-1">
+            {t.receive.loadSampleHint}
+          </p>
         </div>
         {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
-        {showQuickQR && <QuickQRModal onClose={() => setShowQuickQR(false)} />}
+        {showQuickAccess && <QuickQRModal onClose={() => setShowQuickAccess(false)} />}
       </div>
     );
   }
@@ -285,7 +294,7 @@ export const ReceivePage = () => {
                   autoFocus
                   autoComplete="off"
                   maxLength={19}
-                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"
+                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 dark:text-zinc-400 pointer-events-none">
                   {note.length}/19

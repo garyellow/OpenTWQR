@@ -19,9 +19,22 @@
  *     [iv:         12 bytes]   — AES-GCM nonce
  *     [ciphertext: variable]   — AES-GCM encrypted JSON (includes 16-byte auth tag)
  *     [rawKey:     32 bytes]   — the AES key itself, appended for self-contained decoding
+ *
+ * Payload JSON schema (v1 — flexible, category-based):
+ *   {
+ *     v: 1,
+ *     accounts?: BankAccount[],      // present if user chose to include accounts
+ *     style?: BackupStyle,           // accent colour + QR appearance
+ *     preferences?: BackupPreferences, // theme mode + locale
+ *     paymentLinks?: BankUrlConfig[], // payment app URL schemes
+ *     exportedAt: string,
+ *   }
  */
 
-import type { BankAccount } from '../types';
+import type { BankAccount, QRDotStyle, QREyeStyle, QRErrorLevel } from '../types';
+import type { QRLogoType } from '../stores/useQRSettingsStore';
+import type { BankUrlConfig } from '../stores/useUrlSchemeStore';
+import type { Locale } from '../stores/useLocaleStore';
 import {
   toBase64Url,
   fromBase64Url,
@@ -39,15 +52,37 @@ const PREFIX = 'OTWQR1-';
 const VERSION = 0x01;
 
 /* ------------------------------------------------------------------ */
-/*  Backup data schema                                                 */
+/*  Backup data schemas                                                */
 /* ------------------------------------------------------------------ */
 
+/** Style snapshot — accent colour and QR appearance */
+export interface BackupStyle {
+  accentHue?: number;
+  accentEnabled?: boolean;
+  qr?: {
+    logoType: QRLogoType;
+    showAccount: boolean;
+    showBankName: boolean;
+    customName: string;
+    dotStyle: QRDotStyle;
+    eyeStyle: QREyeStyle;
+    errorLevel: QRErrorLevel;
+  };
+}
+
+/** Preferences snapshot — theme mode and locale */
+export interface BackupPreferences {
+  mode?: 'system' | 'light' | 'dark';
+  locale?: Locale | null;
+}
+
+/** v1: flexible category-based backup — each section is optional */
 interface BackupPayload {
-  /** Schema version for future compatibility */
   v: 1;
-  /** Exported accounts */
-  accounts: BankAccount[];
-  /** ISO timestamp of export */
+  accounts?: BankAccount[];
+  style?: BackupStyle;
+  preferences?: BackupPreferences;
+  paymentLinks?: BankUrlConfig[];
   exportedAt: string;
 }
 
@@ -55,24 +90,44 @@ interface BackupPayload {
 /*  Export                                                              */
 /* ------------------------------------------------------------------ */
 
+/** What categories to include in the export */
+export interface ExportOptions {
+  accounts?: BankAccount[];
+  style?: BackupStyle;
+  preferences?: BackupPreferences;
+  paymentLinks?: BankUrlConfig[];
+}
+
 export type ExportResult =
   | { ok: true; data: string }
-  | { ok: false; error: 'encrypt-failed' };
+  | { ok: false; error: 'encrypt-failed' | 'empty' };
 
 /**
- * Encrypt account data into a compact, copy-pasteable string.
+ * Encrypt selected categories into a compact, copy-pasteable string.
  *
- * @param accounts  - Array of bank accounts to export
+ * @param options   - Categories to include (accounts, style, preferences, paymentLinks)
  * @param password  - Optional password; empty string means no password protection
  */
 export const exportBackup = async (
-  accounts: BankAccount[],
+  options: ExportOptions,
   password: string,
 ): Promise<ExportResult> => {
   try {
+    const hasAccounts = options.accounts && options.accounts.length > 0;
+    const hasStyle = options.style && Object.keys(options.style).length > 0;
+    const hasPreferences = options.preferences && Object.keys(options.preferences).length > 0;
+    const hasPaymentLinks = options.paymentLinks && options.paymentLinks.length > 0;
+
+    if (!hasAccounts && !hasStyle && !hasPreferences && !hasPaymentLinks) {
+      return { ok: false, error: 'empty' };
+    }
+
     const payload: BackupPayload = {
       v: 1,
-      accounts,
+      ...(hasAccounts ? { accounts: options.accounts } : {}),
+      ...(hasStyle ? { style: options.style } : {}),
+      ...(hasPreferences ? { preferences: options.preferences } : {}),
+      ...(hasPaymentLinks ? { paymentLinks: options.paymentLinks } : {}),
       exportedAt: new Date().toISOString(),
     };
 
@@ -134,7 +189,7 @@ export const exportBackup = async (
 /* ------------------------------------------------------------------ */
 
 export type ImportResult =
-  | { ok: true; accounts: BankAccount[] }
+  | { ok: true; accounts?: BankAccount[]; style?: BackupStyle; preferences?: BackupPreferences; paymentLinks?: BankUrlConfig[] }
   | { ok: false; error: 'invalid' | 'need-password' | 'wrong-password' | 'decrypt-error' };
 
 /**
@@ -161,13 +216,13 @@ export const importBackup = async (
     }
 
     const flags = bytes[1];
-    const hasPassword = (flags & 0x01) !== 0;
+    const hasPasswordFlag = (flags & 0x01) !== 0;
 
     let key: CryptoKey;
     let iv: Uint8Array<ArrayBuffer>;
     let ciphertext: Uint8Array<ArrayBuffer>;
 
-    if (hasPassword) {
+    if (hasPasswordFlag) {
       // Need at least header + salt + iv + 1 byte ciphertext
       if (bytes.length < 2 + SALT_LEN + IV_LEN + 1) {
         return { ok: false, error: 'invalid' };
@@ -208,41 +263,63 @@ export const importBackup = async (
         ciphertext,
       );
     } catch {
-      return { ok: false, error: hasPassword ? 'wrong-password' : 'decrypt-error' };
+      return { ok: false, error: hasPasswordFlag ? 'wrong-password' : 'decrypt-error' };
     }
 
-    const parsed: BackupPayload = JSON.parse(new TextDecoder().decode(plaintext));
+    const parsed = JSON.parse(new TextDecoder().decode(plaintext)) as Record<string, unknown>;
 
-    // Validate schema
-    if (parsed.v !== 1 || !Array.isArray(parsed.accounts)) {
+    // Only accept v:1
+    if (parsed.v !== 1) {
       return { ok: false, error: 'invalid' };
     }
 
-    // Validate each account
-    const validAccounts: BankAccount[] = [];
-    for (const acc of parsed.accounts) {
-      if (
-        typeof acc.id === 'string' &&
-        typeof acc.bankCode === 'string' &&
-        typeof acc.accountNumber === 'string' &&
-        /^\d{3}$/.test(acc.bankCode) &&
-        /^\d{10,16}$/.test(acc.accountNumber)
-      ) {
-        validAccounts.push({
-          id: acc.id,
-          bankCode: acc.bankCode,
-          accountNumber: acc.accountNumber,
-          label: typeof acc.label === 'string' ? acc.label : undefined,
-          iconUrl: typeof acc.iconUrl === 'string' ? acc.iconUrl : undefined,
-        });
+    // Validate accounts if present (optional)
+    let validAccounts: BankAccount[] | undefined;
+    if (Array.isArray(parsed.accounts)) {
+      const items: BankAccount[] = [];
+      for (const acc of parsed.accounts) {
+        if (
+          acc && typeof acc === 'object' &&
+          typeof (acc as Record<string, unknown>).id === 'string' &&
+          typeof (acc as Record<string, unknown>).bankCode === 'string' &&
+          typeof (acc as Record<string, unknown>).accountNumber === 'string' &&
+          /^\d{3}$/.test((acc as Record<string, unknown>).bankCode as string) &&
+          /^\d{10,16}$/.test((acc as Record<string, unknown>).accountNumber as string)
+        ) {
+          const a = acc as Record<string, unknown>;
+          items.push({
+            id: a.id as string,
+            bankCode: a.bankCode as string,
+            accountNumber: a.accountNumber as string,
+            label: typeof a.label === 'string' ? a.label : undefined,
+            iconUrl: typeof a.iconUrl === 'string' ? a.iconUrl : undefined,
+          });
+        }
       }
+      if (items.length > 0) validAccounts = items;
     }
 
-    if (validAccounts.length === 0) {
+    // Validate style if present (optional)
+    const validStyle = parsed.style ? validateStyle(parsed.style) : undefined;
+
+    // Validate preferences if present (optional)
+    const validPreferences = parsed.preferences ? validatePreferences(parsed.preferences) : undefined;
+
+    // Validate paymentLinks if present (optional)
+    const validPaymentLinks = parsed.paymentLinks ? validatePaymentLinks(parsed.paymentLinks) : undefined;
+
+    // Must have at least one category
+    if (!validAccounts && !validStyle && !validPreferences && !validPaymentLinks) {
       return { ok: false, error: 'invalid' };
     }
 
-    return { ok: true, accounts: validAccounts };
+    return {
+      ok: true,
+      ...(validAccounts ? { accounts: validAccounts } : {}),
+      ...(validStyle ? { style: validStyle } : {}),
+      ...(validPreferences ? { preferences: validPreferences } : {}),
+      ...(validPaymentLinks ? { paymentLinks: validPaymentLinks } : {}),
+    };
   } catch {
     return { ok: false, error: 'invalid' };
   }
@@ -265,3 +342,114 @@ export const isPasswordProtected = (input: string): boolean | null => {
     return null;
   }
 };
+
+/* ------------------------------------------------------------------ */
+/*  Validation helpers                                                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Validate and sanitise the style object from a v1 backup payload.
+ * Returns a clean BackupStyle or undefined if nothing is valid.
+ */
+function validateStyle(raw: unknown): BackupStyle | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+
+  const s = raw as Record<string, unknown>;
+  const result: BackupStyle = {};
+  let hasAny = false;
+
+  // Accent colour
+  if (typeof s.accentHue === 'number' && typeof s.accentEnabled === 'boolean') {
+    result.accentHue = s.accentHue;
+    result.accentEnabled = s.accentEnabled;
+    hasAny = true;
+  } else if (typeof s.accentHue === 'number') {
+    result.accentHue = s.accentHue;
+    hasAny = true;
+  } else if (typeof s.accentEnabled === 'boolean') {
+    result.accentEnabled = s.accentEnabled;
+    hasAny = true;
+  }
+
+  // QR settings
+  if (s.qr && typeof s.qr === 'object') {
+    const q = s.qr as Record<string, unknown>;
+    const validLogoTypes = ['opentwqr', 'bank'];
+    const validDotStyles = ['square', 'rounded', 'dots'];
+    const validEyeStyles = ['square', 'rounded'];
+    const validErrorLevels = ['L', 'M', 'Q', 'H'];
+
+    if (
+      validLogoTypes.includes(q.logoType as string) &&
+      typeof q.showAccount === 'boolean' &&
+      typeof q.showBankName === 'boolean' &&
+      typeof q.customName === 'string' &&
+      validDotStyles.includes(q.dotStyle as string) &&
+      validEyeStyles.includes(q.eyeStyle as string) &&
+      validErrorLevels.includes(q.errorLevel as string)
+    ) {
+      result.qr = {
+        logoType: q.logoType as QRLogoType,
+        showAccount: q.showAccount,
+        showBankName: q.showBankName,
+        customName: q.customName,
+        dotStyle: q.dotStyle as QRDotStyle,
+        eyeStyle: q.eyeStyle as QREyeStyle,
+        errorLevel: q.errorLevel as QRErrorLevel,
+      };
+      hasAny = true;
+    }
+  }
+
+  return hasAny ? result : undefined;
+}
+
+/**
+ * Validate and sanitise the preferences object from a v1 backup payload.
+ * Returns a clean BackupPreferences or undefined if nothing is valid.
+ */
+function validatePreferences(raw: unknown): BackupPreferences | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+
+  const s = raw as Record<string, unknown>;
+  const result: BackupPreferences = {};
+  let hasAny = false;
+
+  // Theme mode
+  if (s.mode === 'system' || s.mode === 'light' || s.mode === 'dark') {
+    result.mode = s.mode;
+    hasAny = true;
+  }
+
+  // Locale
+  if (s.locale === null || s.locale === 'zh-TW' || s.locale === 'en-US') {
+    result.locale = s.locale as Locale | null;
+    hasAny = true;
+  }
+
+  return hasAny ? result : undefined;
+}
+
+/**
+ * Validate and sanitise the paymentLinks array from a v1 backup payload.
+ * Returns a clean array or undefined if empty/invalid.
+ */
+function validatePaymentLinks(raw: unknown): BankUrlConfig[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+
+  const validConfigs: BankUrlConfig[] = [];
+  for (const c of raw) {
+    if (
+      c && typeof c === 'object' &&
+      typeof (c as Record<string, unknown>).bankCode === 'string' &&
+      typeof (c as Record<string, unknown>).urlTemplate === 'string' &&
+      /^\d{3}$/.test((c as Record<string, unknown>).bankCode as string)
+    ) {
+      validConfigs.push({
+        bankCode: (c as Record<string, unknown>).bankCode as string,
+        urlTemplate: (c as Record<string, unknown>).urlTemplate as string,
+      });
+    }
+  }
+  return validConfigs.length > 0 ? validConfigs : undefined;
+}

@@ -35,6 +35,10 @@ const PaymentLinksPage = lazy(() =>
   import('./pages/PaymentLinksPage').then((m) => ({ default: m.PaymentLinksPage })),
 );
 
+/** Routes that host the bottom tab bar — floating overlays are restricted to these
+ *  to prevent covering back-buttons on sub-pages (e.g. /settings/payment-links). */
+const TAB_ROUTES = ['/', '/scan', '/accounts', '/settings'] as const;
+
 function App() {
   const refreshBanks = useBanksStore((state) => state.refreshBanks);
   const mode = useThemeStore((state) => state.mode);
@@ -56,6 +60,10 @@ function App() {
 
   const showLockScreen = authEnabled && !authUnlocked && !isSharedPage && authHydrated;
   const showGlobalAssistiveUI = !isSharedPage && !isShareTargetPage && !showLockScreen;
+
+  /** Restrict floating overlays (BackupReminder, OnboardingOverlay)
+   *  to main tab routes to avoid covering back-buttons on sub-pages. */
+  const showOverlayUI = showGlobalAssistiveUI && (TAB_ROUTES as readonly string[]).includes(location.pathname);
 
   /* ---------- Auto-lock on visibility change ---------- */
   const hiddenAtRef = useRef<number | null>(null);
@@ -133,8 +141,8 @@ function App() {
       )}
       <ReloadPrompt />
       <InstallPrompt />
-      {showGlobalAssistiveUI && <BackupReminder />}
-      {showGlobalAssistiveUI && <OnboardingOverlay />}
+      {showOverlayUI && <BackupReminder />}
+      {showOverlayUI && <OnboardingOverlay />}
       <PrivacyScreen />
     </>
   );

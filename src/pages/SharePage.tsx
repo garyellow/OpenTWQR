@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { parseTWQR, isTWQR } from '../utils/parseTwqr';
@@ -23,21 +22,28 @@ export const SharePage = () => {
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((s) => s.banks);
 
-  const { sharedText, contentType } = useMemo(() => {
-    const candidates = [
-      params.get('text'),
-      params.get('url'),
-      params.get('title'),
-    ].filter(Boolean) as string[];
+  const candidates = [
+    params.get('text'),
+    params.get('url'),
+    params.get('title'),
+  ].filter(Boolean) as string[];
 
-    for (const c of candidates) {
-      const trimmed = c.trim();
-      if (trimmed.startsWith('OTWQR')) return { sharedText: trimmed, contentType: 'otwqr' as const };
-      if (isTWQR(trimmed)) return { sharedText: trimmed, contentType: 'twqr' as const };
+  let sharedText = '';
+  let contentType: 'otwqr' | 'twqr' | 'unknown' = 'unknown';
+
+  for (const candidate of candidates) {
+    const trimmed = candidate.trim();
+    if (trimmed.startsWith('OTWQR')) {
+      sharedText = trimmed;
+      contentType = 'otwqr';
+      break;
     }
-
-    return { sharedText: '', contentType: 'unknown' as const };
-  }, [params]);
+    if (isTWQR(trimmed)) {
+      sharedText = trimmed;
+      contentType = 'twqr';
+      break;
+    }
+  }
 
   if (!sharedText || contentType === 'unknown') return <Navigate to="/" replace />;
 

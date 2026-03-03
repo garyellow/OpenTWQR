@@ -219,7 +219,7 @@ export const QRCodeSection = () => {
                             type="button"
                             onClick={() => handleSetDotStyle(style)}
                             aria-pressed={dotStyle === style}
-                            className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all duration-150 border ${
+                            className={`flex-1 py-2 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
                               dotStyle === style
                                 ? 'border-transparent text-white'
                                 : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
@@ -244,7 +244,7 @@ export const QRCodeSection = () => {
                             type="button"
                             onClick={() => handleSetEyeStyle(style)}
                             aria-pressed={eyeStyle === style}
-                            className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all duration-150 border ${
+                            className={`flex-1 py-2 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
                               eyeStyle === style
                                 ? 'border-transparent text-white'
                                 : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
@@ -277,7 +277,7 @@ export const QRCodeSection = () => {
                               aria-pressed={isActive}
                               disabled={isDisabled}
                               title={isDisabled ? t.qrSettings.errorLevelDesc : undefined}
-                              className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all duration-150 border ${
+                              className={`flex-1 py-2 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
                                 isDisabled
                                   ? 'border-zinc-100 dark:border-zinc-800 text-zinc-300 dark:text-zinc-600 cursor-not-allowed'
                                   : isActive
@@ -353,7 +353,7 @@ export const QRCodeSection = () => {
                   autoFocus
                   autoComplete="off"
                   maxLength={20}
-                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 transition-all shadow-xs"
+                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 dark:text-zinc-400 pointer-events-none">
                   {draftName.length}/20

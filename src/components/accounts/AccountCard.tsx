@@ -2,7 +2,7 @@ import type { BankAccount } from '../../types';
 import { Trash2, Pencil, Check } from 'lucide-react';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
-import { maskAccount } from '../../utils/twqr';
+import { maskAccount, stripCompanySuffix } from '../../utils/twqr';
 import { BankIcon } from './BankIcon';
 
 interface AccountCardProps {
@@ -23,7 +23,7 @@ export const AccountCard = ({
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((state) => state.banks);
   const bank = banks.find((b) => b.code === account.bankCode);
-  const bankName = bank?.name || account.bankCode;
+  const bankName = stripCompanySuffix(bank?.name || account.bankCode);
   const displayName = account.label || bankName;
   const showBankSubtitle = Boolean(account.label);
 
