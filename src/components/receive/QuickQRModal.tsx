@@ -154,7 +154,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
                 autoComplete="off"
                 value={accountNumber}
                 onChange={(e) => {
-                  setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').slice(0, 16));
+                  setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
                   setError('');
                   setSaved(false);
                   setHasGenerated(false);

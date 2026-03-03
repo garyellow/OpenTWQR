@@ -31,11 +31,11 @@
     </td>
     <td align="center">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-mobile-dark.png" />
-        <img src="public/screenshots/receive-mobile-light.png" alt="OpenTWQR 收款畫面（手機版）" width="200" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/main-mobile-dark.png" />
+        <img src="public/screenshots/main-mobile-light.png" alt="OpenTWQR 主頁（手機版）" width="200" />
       </picture>
       <br />
-      <sub>收款畫面</sub>
+      <sub>主頁</sub>
     </td>
   </tr>
   <tr>
@@ -44,11 +44,11 @@
   <tr>
     <td align="center" colspan="2">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/receive-desktop-dark.png" />
-        <img src="public/screenshots/receive-desktop-light.png" alt="OpenTWQR 收款畫面（桌面版）" width="600" />
+        <source media="(prefers-color-scheme: dark)" srcset="public/screenshots/main-desktop-dark.png" />
+        <img src="public/screenshots/main-desktop-light.png" alt="OpenTWQR 主頁（桌面版）" width="600" />
       </picture>
       <br />
-      <sub>收款畫面</sub>
+      <sub>主頁</sub>
     </td>
   </tr>
 </table>
