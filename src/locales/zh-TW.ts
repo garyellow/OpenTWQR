@@ -40,7 +40,6 @@ const zhTW = {
     noteLabel: '交易備註',
     notePlaceholder: '輸入備註，最多 19 字…',
     clearNote: '清除備註',
-    bankCode: (code: string) => `（${code}）`,
   },
 
   /* ─── AmountInput ──────────────────────────────────────── */
@@ -186,7 +185,7 @@ const zhTW = {
     institutionNameTitle: '顯示機構名稱',
     institutionNameDesc: 'QR Code 下方標示金融機構名稱',
     customNameTitle: '個人訊息',
-    customNameDesc: '顯示於 QR Code 上方，可嵌入分享圖片中',
+    customNameDesc: 'QR Code 上方顯示個人訊息',
     customNamePlaceholder: '例如：小明…',
     customNameModalTitle: '個人訊息',
     customNameClear: '清除',

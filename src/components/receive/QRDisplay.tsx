@@ -4,7 +4,7 @@ import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, Pencil } from 'lucide-react';
-import { formatCurrency, formatAmount, formatAccountDisplay } from '../../utils/twqr';
+import { formatCurrency, formatAmount, formatAccountDisplay, maskAccount } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
 import { haptic } from '../../utils/haptics';
@@ -179,10 +179,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const exportLabels = useMemo(() => ({
     customName: localCustomName.trim() || undefined,
     bankLine: showBankNameSetting && bankName && bankCode
-      ? `（${bankCode}）${bankName}`
+      ? `(${bankCode}) ${bankName}`
       : undefined,
-    accountLine: accountRevealed && accountNumber
-      ? formatAccountDisplay(accountNumber)
+    accountLine: accountNumber
+      ? (accountRevealed ? accountNumber : '')
       : undefined,
   }), [accountRevealed, accountNumber, showBankNameSetting, bankName, bankCode, localCustomName]);
 
@@ -490,7 +490,13 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             {/* Bank name + code below QR */}
             {hasBankLabel && (
               <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-                （{bankCode}）{bankName}
+                ({bankCode}) {bankName}
+              </p>
+            )}
+            {/* Account number below bank name — invisible when hidden to preserve height */}
+            {accountNumber && (
+              <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${accountRevealed ? '' : ' invisible'}`}>
+                {accountNumber}
               </p>
             )}
           </button>
@@ -514,12 +520,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                 <div className="min-w-0 flex-1">
                   {bankName && bankCode && (
                     <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">
-                      （{bankCode}）{bankName}
+                      ({bankCode}) {bankName}
                     </p>
                   )}
-                  {accountNumber && accountRevealed && (
+                  {accountNumber && (
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-                      {formatAccountDisplay(accountNumber)}
+                      {accountRevealed ? formatAccountDisplay(accountNumber) : maskAccount(accountNumber)}
                     </p>
                   )}
                 </div>
@@ -666,7 +672,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         showBankName={showBankNameSetting}
         accountNumber={accountNumber}
         bankCode={bankCode}
-        showAccount={accountRevealed}
+        showAccount={Boolean(accountNumber)}
+        accountRevealed={accountRevealed}
         dotStyle={dotStyle}
         eyeStyle={eyeStyle}
       />

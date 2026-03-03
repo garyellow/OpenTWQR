@@ -206,7 +206,7 @@ export const ReceivePage = () => {
               </p>
               {selectedAccount.label && bankName && (
                 <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">
-                  {bankName}{t.receive.bankCode(selectedAccount.bankCode)}
+                  ({selectedAccount.bankCode}) {bankName}
                 </p>
               )}
             </div>

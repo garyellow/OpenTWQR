@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { formatAmount } from '../../utils/twqr';
+import { formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -24,6 +24,8 @@ interface QRFullscreenProps {
   bankCode?: string;
   /** Whether to show masked account number above QR. */
   showAccount?: boolean;
+  /** Whether to show revealed (unmasked) account number. */
+  accountRevealed?: boolean;
   /** QR dot shape — passed from QRDisplay to respect isSharedView defaults. */
   dotStyle?: QRDotStyle;
   /** QR finder-pattern shape. */
@@ -34,7 +36,7 @@ interface QRFullscreenProps {
  * Full-black QR Code view for in-store payments.
  * Includes Screen Wake Lock and landscape-aware sizing.
  */
-export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount, dotStyle = 'square', eyeStyle = 'square' }: QRFullscreenProps) => {
+export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount, accountRevealed = false, dotStyle = 'square', eyeStyle = 'square' }: QRFullscreenProps) => {
   const t = useLocaleStore((s) => s.t);
   const ref = useRef<HTMLDivElement>(null);
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
@@ -118,7 +120,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
         {/* Bank name + code below QR inside white card */}
         {showBankName && bankName && bankCode && (
           <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-            （{bankCode}）{bankName}
+            ({bankCode}) {bankName}
           </p>
         )}
       </div>
@@ -137,7 +139,7 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
         )}
         {showAccount && accountNumber && (
           <p className="font-mono text-sm text-white/60 tracking-wider">
-            {accountNumber}
+            {accountRevealed ? formatAccountDisplay(accountNumber) : maskAccount(accountNumber)}
           </p>
         )}
         {note && <p className="text-white/50 text-xs">{t.qr.notePrefix}{note}</p>}

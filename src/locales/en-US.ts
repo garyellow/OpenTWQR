@@ -42,7 +42,6 @@ const enUS: Translations = {
     noteLabel: 'Note',
     notePlaceholder: 'Up to 19 chars…',
     clearNote: 'Clear',
-    bankCode: (code: string) => `（${code}）`,
   },
 
   /* ─── AmountInput ──────────────────────────────────────── */
@@ -188,7 +187,7 @@ const enUS: Translations = {
     institutionNameTitle: 'Show Institution Name',
     institutionNameDesc: 'Show institution name below QR Code',
     customNameTitle: 'Personal Message',
-    customNameDesc: 'Shown above QR Code, embedded in shared image',
+    customNameDesc: 'Show personal message above QR Code',
     customNamePlaceholder: 'e.g., John…',
     customNameModalTitle: 'Personal Message',
     customNameClear: 'Clear',

@@ -5,7 +5,7 @@
 export interface QRExportLabels {
   /** Custom message / display name above QR (bold). */
   customName?: string;
-  /** Bank line below QR, e.g. "（013）國泰世華商業銀行". */
+  /** Bank line below QR, e.g. "(700) 中華郵政". */
   bankLine?: string;
   /** Account number below bank line (monospace). */
   accountLine?: string;
@@ -32,7 +32,7 @@ export const canvasToBlob = async (
 
   const hasCustomName = Boolean(labels?.customName);
   const hasBankLine = Boolean(labels?.bankLine);
-  const hasAccountLine = Boolean(labels?.accountLine);
+  const hasAccountLine = labels?.accountLine !== undefined;
   const topExtra = hasCustomName ? 22 : 0;
   const bottomExtra = (hasBankLine || hasAccountLine)
     ? 10 + (hasBankLine ? 16 : 0) + (hasAccountLine ? 16 : 0) + (hasBankLine && hasAccountLine ? 2 : 0)

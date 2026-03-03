@@ -50,7 +50,7 @@ export const PaymentLinksPage = () => {
       </a>
 
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
+      <header className="sticky top-0 z-20 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <button

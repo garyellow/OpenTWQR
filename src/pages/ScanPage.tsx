@@ -171,7 +171,7 @@ export const ScanPage = () => {
       )}
       {/* Header — hidden while scanning to maximise camera real-estate */}
       {!scanning && (
-        <header className="sticky top-0 z-10 shrink-0 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe animate-in fade-in duration-200">
+        <header className="sticky top-0 z-20 shrink-0 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe animate-in fade-in duration-200">
           <div className="flex items-center justify-between py-4 pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))]">
             <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 ml-1">
               {t.scan.title}
