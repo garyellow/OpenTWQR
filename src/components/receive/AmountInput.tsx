@@ -71,10 +71,10 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
   const formattedMax = new Intl.NumberFormat().format(maxAmount);
 
   const digitBtnClass =
-    'h-14 rounded-xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center';
+    'h-12 rounded-xl text-xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center';
 
   return (
-    <div className="w-full max-w-sm mx-auto flex flex-col gap-3">
+    <div className="w-full max-w-sm mx-auto flex flex-col gap-2">
       {/* Amount display */}
       <div className="flex flex-col items-center justify-center relative">
         <span className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-2">{t.amount.label}</span>
@@ -85,11 +85,11 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
           onAnimationEnd={() => setIsShaking(false)}
         >
           <div className="flex items-baseline gap-1">
-            <span className="text-[2.5rem] font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>
+            <span className="text-[2rem] font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>
               NT$
             </span>
             <span
-              className={`text-6xl font-semibold tracking-tight ${
+              className={`text-5xl font-semibold tracking-tight ${
                 value ? 'text-zinc-900 dark:text-white' : 'text-zinc-300 dark:text-zinc-700'
               }`}
               style={{ fontVariantNumeric: 'tabular-nums' }}
@@ -127,7 +127,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
       </div>
 
       {/* Keypad */}
-      <div role="group" aria-label={t.amount.keypad} className="grid grid-cols-3 gap-x-4 gap-y-1.5 select-none px-4 shrink-0">
+      <div role="group" aria-label={t.amount.keypad} className="grid grid-cols-3 gap-x-3 gap-y-1 select-none px-4 shrink-0">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}
@@ -148,7 +148,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
           type="button"
           onClick={handleBackspace}
           aria-label={t.amount.backspace}
-          className="h-14 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center"
+          className="h-12 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center"
         >
           <Delete size={28} aria-hidden="true" />
         </button>

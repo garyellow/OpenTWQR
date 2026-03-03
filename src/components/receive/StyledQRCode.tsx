@@ -187,6 +187,12 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
       [value, size, dotStyle, eyeStyle, centerImage],
     );
 
+    // Keep refs so async callbacks always read the latest values.
+    const buildOptsRef = useRef(buildOpts);
+    buildOptsRef.current = buildOpts;
+    const sizeRef = useRef(size);
+    sizeRef.current = size;
+
     // Initial mount: dynamically import and create the QR instance.
     useEffect(() => {
       let cancelled = false;
@@ -196,14 +202,14 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
         const QRCodeStyling = mod.default;
         if (cancelled || !containerRef.current) return;
 
-        const qr = new QRCodeStyling(buildOpts());
+        const qr = new QRCodeStyling(buildOptsRef.current());
         qrInstanceRef.current = qr;
 
         // Clear any previous content, then append the new canvas.
         containerRef.current.innerHTML = '';
         qr.append(containerRef.current);
         // Override the canvas CSS to display at cssSize while rendering at physicalSize.
-        fixCanvasCSS(containerRef.current, size);
+        fixCanvasCSS(containerRef.current, sizeRef.current);
         mountedRef.current = true;
       })();
 

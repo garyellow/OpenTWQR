@@ -6,7 +6,7 @@ import { useLocaleStore } from '../../stores/useLocaleStore';
 import type { BankAccount } from '../../types';
 import { isValidAccount, isShortAccount, removeInvisibleChars } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
-import { AlertCircle, AlertTriangle, Globe } from 'lucide-react';
+import { AlertCircle, TriangleAlert, Globe } from 'lucide-react';
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
@@ -213,7 +213,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
         >
           <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
-            <AlertTriangle size={18} className="shrink-0" aria-hidden="true" />
+            <TriangleAlert size={18} className="shrink-0" aria-hidden="true" />
             <span className="font-medium">{shortAccountWarning}</span>
           </div>
           <div className="flex gap-2 ml-7.5">
@@ -242,7 +242,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
         >
           <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
-            <AlertTriangle size={18} className="shrink-0" aria-hidden="true" />
+            <TriangleAlert size={18} className="shrink-0" aria-hidden="true" />
             <span className="font-medium">{duplicateWarning}</span>
           </div>
           <div className="flex gap-2 ml-7.5">

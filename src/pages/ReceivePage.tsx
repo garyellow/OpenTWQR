@@ -5,7 +5,7 @@ import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars, stripCompanySuffix } from '../utils/twqr';
-import { QrCode, ChevronRight, MessageSquare, Tag, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
+import { QrCode, ChevronRight, StickyNote, UserPen, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
@@ -187,14 +187,14 @@ export const ReceivePage = () => {
 
       <main id="receive-main" className="flex-1 flex flex-col min-h-0 max-w-md lg:max-w-lg mx-auto w-full pb-safe">
         {/* Header */}
-        <header className="shrink-0 flex justify-between items-center p-5 pt-[calc(1.25rem+env(safe-area-inset-top))]">
+        <header className="shrink-0 flex justify-between items-center px-5 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
           <h1>
             <OpenTWQRLogo className="h-7 w-auto" />
           </h1>
         </header>
 
         {/* Account selector */}
-        <div className="shrink-0 px-5 mb-2">
+        <div className="shrink-0 px-5 mb-1">
           <Link
             to="/accounts"
             viewTransition
@@ -229,35 +229,36 @@ export const ReceivePage = () => {
           <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
             <AmountInput value={amount} onChange={setAmount} />
 
-            {/* Transaction note & personal message */}
-            <div className="w-full max-w-sm mx-auto px-4 flex flex-col items-center">
+            {/* Transaction note & personal message — side by side */}
+            <div className="w-full max-w-sm mx-auto px-4 flex items-center justify-center gap-4">
               <button
                 type="button"
                 onClick={() => setShowNoteInput(true)}
-                className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg whitespace-nowrap focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
               >
-                <MessageSquare size={16} aria-hidden="true" />
-                <span>{note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}</span>
+                <StickyNote size={15} aria-hidden="true" className="shrink-0" />
+                <span className="truncate">{note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}</span>
               </button>
+              <span className="text-zinc-300 dark:text-zinc-700 select-none" aria-hidden="true">|</span>
               <button
                 type="button"
                 onClick={() => setShowMessageInput(true)}
-                className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg whitespace-nowrap focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
               >
-                <Tag size={16} aria-hidden="true" />
-                <span>{customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}</span>
+                <UserPen size={15} aria-hidden="true" className="shrink-0" />
+                <span className="truncate">{customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}</span>
               </button>
             </div>
           </div>
 
-          <div className="shrink-0 p-5 pt-2">
+          <div className="shrink-0 px-5 pb-4 pt-1">
             <button
               type="button"
               onClick={() => {
                 haptic();
                 setShowQR(true);
               }}
-              className="w-full flex items-center justify-center gap-2.5 py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <QrCode size={22} aria-hidden="true" />
               {t.receive.generateQR}

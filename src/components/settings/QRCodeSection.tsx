@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { QrCode, Tag, Landmark, X, CreditCard, ChevronRight, Shapes } from 'lucide-react';
+import { QrCode, UserPen, Landmark, X, CreditCard, ChevronRight, Shapes } from 'lucide-react';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { haptic } from '../../utils/haptics';
@@ -126,7 +126,7 @@ export const QRCodeSection = () => {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Tag size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                      <UserPen size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
                     </div>
                     <div className="text-left min-w-0">
                       <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.customNameTitle}</p>

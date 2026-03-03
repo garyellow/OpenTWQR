@@ -135,7 +135,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return { src: logo.src, width: logo.width, height: logo.height };
   }, [logoType, bankIconUrl, bankIconInfo]);
 
-  const [qrSize, setQrSize] = useState(240);
+  const [qrSize, setQrSize] = useState(() => {
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 390;
+    return Math.max(180, Math.min(280, Math.floor(vw * 0.58)));
+  });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const shareMenu = useAnimatedToggle();
   const linkSettingsToggle = useAnimatedToggle();
@@ -406,11 +409,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         role="dialog"
         aria-modal="true"
         aria-labelledby="qr-modal-title"
-        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 pb-3">
+        <div className="shrink-0 flex items-center justify-between p-5 pb-3">
           <h2 id="qr-modal-title" className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
             {title ?? t.qr.title}
           </h2>
@@ -426,111 +429,114 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           )}
         </div>
 
-        {/* QR Code section */}
-        <div className="flex flex-col items-center justify-center px-6 gap-4">
+        {/* QR Code section — scrollable on small screens */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex flex-col items-center px-6 gap-4 py-4">
 
-          {/* QR Code card — customName at top inside white card */}
-          <div className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow w-fit mx-auto">
+            {/* QR Code card — customName at top inside white card */}
+            <div className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow w-full flex flex-col items-center">
 
-            {/* Custom name — display only (edited on ReceivePage before generating QR) */}
-            {customName.trim() && (
-              <p className="text-sm font-semibold text-zinc-800 text-center mb-3">{customName.trim()}</p>
-            )}
+              {/* Custom name — display only (edited on ReceivePage before generating QR) */}
+              {customName.trim() && (
+                <p className="text-sm font-semibold text-zinc-800 text-center mb-3">{customName.trim()}</p>
+              )}
 
-            {/* QR Code — tappable for fullscreen */}
-            <button
-              type="button"
-              onClick={() => setIsFullscreen(true)}
-              aria-label={t.qr.enlargeQR}
-              className="block cursor-zoom-in active:scale-98 transition-transform"
-            >
-              <StyledQRCode
-                ref={qrRef}
-                value={value}
-                size={qrSize}
-                dotStyle={dotStyle}
-                eyeStyle={eyeStyle}
-                centerImage={centerImageForQR}
-              />
-            </button>
-            {/* Bank name + code below QR */}
-            {hasBankLabel && (
-              <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-                ({bankCode}) {bankName}
-              </p>
-            )}
-            {/* Account number below bank name — invisible when hidden to preserve height */}
-            {accountNumber && (
-              <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${accountRevealed ? '' : ' invisible'}`}>
-                {accountNumber}
-              </p>
-            )}
-          </div>
+              {/* QR Code — tappable for fullscreen */}
+              <button
+                type="button"
+                onClick={() => setIsFullscreen(true)}
+                aria-label={t.qr.enlargeQR}
+                className="block p-0 border-0 bg-transparent cursor-zoom-in active:scale-98 transition-transform leading-0"
+              >
+                <StyledQRCode
+                  ref={qrRef}
+                  value={value}
+                  size={qrSize}
+                  dotStyle={dotStyle}
+                  eyeStyle={eyeStyle}
+                  centerImage={centerImageForQR}
+                />
+              </button>
+              {/* Bank name + code below QR */}
+              {hasBankLabel && (
+                <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
+                  ({bankCode}) {bankName}
+                </p>
+              )}
+              {/* Account number below bank name — invisible when hidden to preserve height */}
+              {accountNumber && (
+                <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${accountRevealed ? '' : ' invisible'}`}>
+                  {accountNumber}
+                </p>
+              )}
+            </div>
 
-          {/* Amount & account info */}
-          <div className="space-y-2.5 w-full">
-            {amount != null && amount > 0 ? (
-              <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-2xl font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>NT$</span>
-                <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {formatAmount(amount)}
-                </span>
-              </div>
-            ) : (
-              <div className="text-lg font-medium text-zinc-500 dark:text-zinc-400 text-center">
-                {t.amount.payerEnter}
-              </div>
-            )}
-            <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-xs">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  {bankName && bankCode && (
-                    <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">
-                      ({bankCode}) {bankName}
-                    </p>
-                  )}
+            {/* Amount & account info */}
+            <div className="space-y-2.5 w-full">
+              {amount != null && amount > 0 ? (
+                <div className="flex items-baseline justify-center gap-0.5">
+                  <span className="text-2xl font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>NT$</span>
+                  <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {formatAmount(amount)}
+                  </span>
+                </div>
+              ) : (
+                <div className="text-lg font-medium text-zinc-500 dark:text-zinc-400 text-center">
+                  {t.amount.payerEnter}
+                </div>
+              )}
+              <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    {bankName && bankCode && (
+                      <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">
+                        ({bankCode}) {bankName}
+                      </p>
+                    )}
+                    {accountNumber && (
+                      <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
+                        {accountRevealed ? formatAccountDisplay(accountNumber) : maskAccount(accountNumber)}
+                      </p>
+                    )}
+                  </div>
                   {accountNumber && (
-                    <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-                      {accountRevealed ? formatAccountDisplay(accountNumber) : maskAccount(accountNumber)}
-                    </p>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleToggleReveal}
+                        aria-label={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
+                        aria-pressed={accountRevealed}
+                        title={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
+                        className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                      >
+                        {accountRevealed
+                          ? <Eye size={18} aria-hidden="true" />
+                          : <EyeOff size={18} aria-hidden="true" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopyAccount}
+                        aria-label={t.qr.copyAccount}
+                        title={t.qr.copyAccount}
+                        className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                      >
+                        <Copy size={18} aria-hidden="true" />
+                      </button>
+                    </div>
                   )}
                 </div>
-                {accountNumber && (
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <button
-                      type="button"
-                      onClick={handleToggleReveal}
-                      aria-label={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
-                      aria-pressed={accountRevealed}
-                      title={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                    >
-                      {accountRevealed
-                        ? <Eye size={18} aria-hidden="true" />
-                        : <EyeOff size={18} aria-hidden="true" />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopyAccount}
-                      aria-label={t.qr.copyAccount}
-                      title={t.qr.copyAccount}
-                      className="p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                    >
-                      <Copy size={18} aria-hidden="true" />
-                    </button>
-                  </div>
-                )}
               </div>
+              {note && (
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">{t.qr.notePrefix}{note}</p>
+              )}
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">{t.qr.safetyReminder}</p>
             </div>
-            {note && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">{t.qr.notePrefix}{note}</p>
-            )}
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">{t.qr.safetyReminder}</p>
+
           </div>
         </div>
 
         {/* Footer — action buttons */}
-        <div className="p-5 pt-5 relative space-y-3">
+        <div className="shrink-0 p-5 pt-5 relative space-y-3">
           {/* Feedback toast */}
           {feedback && (
             <div
