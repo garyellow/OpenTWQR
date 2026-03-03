@@ -4,7 +4,7 @@ import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { StyledQRCode, type StyledQRCodeCenterImage } from './StyledQRCode';
-import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../../types';
+import type { QRDotStyle, QREyeStyle } from '../../types';
 
 interface QRFullscreenProps {
   value: string;
@@ -28,15 +28,13 @@ interface QRFullscreenProps {
   dotStyle?: QRDotStyle;
   /** QR finder-pattern shape. */
   eyeStyle?: QREyeStyle;
-  /** Error correction level. */
-  errorLevel?: QRErrorLevel;
 }
 
 /**
  * Full-black QR Code view for in-store payments.
  * Includes Screen Wake Lock and landscape-aware sizing.
  */
-export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount, dotStyle = 'square', eyeStyle = 'square', errorLevel = 'Q' }: QRFullscreenProps) => {
+export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount, dotStyle = 'square', eyeStyle = 'square' }: QRFullscreenProps) => {
   const t = useLocaleStore((s) => s.t);
   const ref = useRef<HTMLDivElement>(null);
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
@@ -115,13 +113,12 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
           size={qrSize}
           dotStyle={dotStyle}
           eyeStyle={eyeStyle}
-          errorLevel={errorLevel}
           centerImage={qrCenterImage}
         />
         {/* Bank name + code below QR inside white card */}
         {showBankName && bankName && bankCode && (
           <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-            （{bankCode}） {bankName}
+            （{bankCode}）{bankName}
           </p>
         )}
       </div>

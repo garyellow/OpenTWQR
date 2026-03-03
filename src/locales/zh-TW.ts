@@ -77,9 +77,9 @@ const zhTW = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
-    editCustomName: '編輯顯示訊息',
-    customNamePlaceholder: '輸入顯示訊息（選填）',
-    addCustomName: '新增顯示訊息',
+    editCustomName: '編輯個人訊息',
+    customNamePlaceholder: '輸入個人訊息（選填）',
+    addCustomName: '新增個人訊息',
   },
 
   /* ─── Share menu ───────────────────────────────────────── */
@@ -176,19 +176,19 @@ const zhTW = {
 
   /* ─── QRSettingsSection ────────────────────────────────── */
   qrSettings: {
-    settingsTitle: '自訂 QR Code',
-    settingsDesc: '設定 QR Code 上要顯示哪些資訊',
-    settingsModalTitle: '自訂 QR Code',
-    logoTitle: '顯示銀行圖示',
-    logoDesc: '開啟後，QR Code 中央會嵌入銀行圖示',
-    showAccountTitle: '顯示帳戶號碼',
-    showAccountDesc: '在 QR Code 上方顯示帳戶號碼',
+    settingsTitle: 'QR Code 顯示設定',
+    settingsDesc: '自訂顯示內容與外觀樣式',
+    settingsModalTitle: 'QR Code 顯示設定',
+    logoTitle: '顯示銀行 Logo',
+    logoDesc: 'QR Code 中央嵌入銀行 Logo',
+    showAccountTitle: '顯示帳號',
+    showAccountDesc: '在 QR Code 下方顯示帳號',
     bankNameTitle: '顯示銀行名稱',
-    bankNameDesc: '在 QR Code 下方標示所屬銀行',
-    customNameTitle: '個人名稱',
-    customNameDesc: '在 QR Code 底部顯示收款人的名字',
+    bankNameDesc: 'QR Code 下方標示銀行名稱',
+    customNameTitle: '個人訊息',
+    customNameDesc: '顯示於 QR Code 上方，可嵌入分享圖片中',
     customNamePlaceholder: '例如：小明…',
-    customNameModalTitle: '個人名稱',
+    customNameModalTitle: '個人訊息',
     customNameClear: '清除',
     /* QR style settings */
     styleTitle: 'QR Code 外觀',
@@ -199,9 +199,6 @@ const zhTW = {
     eyeStyleTitle: '定位框形狀',
     eyeStyleSquare: '方形',
     eyeStyleRounded: '圓角',
-    errorLevelTitle: '誤差修正',
-    errorLevelDesc: '中央有圖示時，最低為 Q',
-    errorLevelAutoUpgrade: '已自動升至 Q（中央圖示需要）',
   },
 
   /* ─── PersonalizationSection (Accent + AppLock combined) ─ */
@@ -218,6 +215,8 @@ const zhTW = {
     /* App lock */
     appLockTitle: 'App 鎖定',
     appLockDesc: '使用裝置驗證保護帳戶資料',
+    appLockUnavailableDesc: '此裝置不支援生物辨識或螢幕鎖定',
+    appLockUnsupported: '此瀏覽器不支援 App 鎖定功能',
     lockTimeoutTitle: '背景鎖定時間',
     lockTimeoutLabel: '背景鎖定時間',
     lockTimeoutOptions: {
@@ -247,12 +246,10 @@ const zhTW = {
     exportDesc: '選擇要備份的項目，產生備份字串',
     importTitle: '匯入備份',
     importDesc: '貼上備份字串，還原帳戶或設定',
+    storageWarningTitle: '儲存注意事項',
     storageWarning: '你的資料僅儲存於此裝置的瀏覽器中，清除瀏覽資料或解除安裝可能導致資料遺失。建議定期備份。',
     storageWarningIOS: '在 iOS/iPadOS 上，若未將應用程式加入主畫面，Safari 可能在 7 天無使用後自動清除資料。',
-    reminderTitle: '備份提醒',
-    reminderDesc: '已超過 30 天未備份，建議立即備份以防資料遺失。',
-    reminderAction: '前往備份',
-    reminderDismiss: '稍後再說',
+    storageWarningBtn: '了解',
   },
 
   /* ─── ExportDialog ─────────────────────────────────────── */

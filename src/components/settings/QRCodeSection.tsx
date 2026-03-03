@@ -4,7 +4,7 @@ import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { haptic } from '../../utils/haptics';
 import { AnimatedModal } from '../ui/AnimatedModal';
-import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../../types';
+import type { QRDotStyle, QREyeStyle } from '../../types';
 
 /**
  * QR Code display settings — rendered as a single row in PersonalizationSection.
@@ -20,21 +20,27 @@ export const QRCodeSection = () => {
   const customName = useQRSettingsStore((s) => s.customName);
   const dotStyle = useQRSettingsStore((s) => s.dotStyle);
   const eyeStyle = useQRSettingsStore((s) => s.eyeStyle);
-  const errorLevel = useQRSettingsStore((s) => s.errorLevel);
   const setLogoType = useQRSettingsStore((s) => s.setLogoType);
   const setShowAccount = useQRSettingsStore((s) => s.setShowAccount);
   const setShowBankName = useQRSettingsStore((s) => s.setShowBankName);
   const setCustomName = useQRSettingsStore((s) => s.setCustomName);
   const setDotStyle = useQRSettingsStore((s) => s.setDotStyle);
   const setEyeStyle = useQRSettingsStore((s) => s.setEyeStyle);
-  const setErrorLevel = useQRSettingsStore((s) => s.setErrorLevel);
 
   const bankIconEnabled = logoType === 'bank';
 
   const [showSettings, setShowSettings] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showStyleModal, setShowStyleModal] = useState(false);
   const [draftName, setDraftName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /** Summary label of current dot + eye style, used as description in the settings row. */
+  const dotStyleLabel = dotStyle === 'square' ? t.qrSettings.dotStyleSquare
+    : dotStyle === 'rounded' ? t.qrSettings.dotStyleRounded
+    : t.qrSettings.dotStyleDots;
+  const eyeStyleLabel = eyeStyle === 'square' ? t.qrSettings.eyeStyleSquare : t.qrSettings.eyeStyleRounded;
+  const styleSummary = `${dotStyleLabel} · ${eyeStyleLabel}`;
 
   const handleToggleLogo = useCallback(() => { haptic(); setLogoType(bankIconEnabled ? 'opentwqr' : 'bank'); }, [bankIconEnabled, setLogoType]);
   const handleToggleAccount = useCallback(() => { haptic(); setShowAccount(!showAccount); }, [showAccount, setShowAccount]);
@@ -42,10 +48,6 @@ export const QRCodeSection = () => {
 
   const handleSetDotStyle = useCallback((s: QRDotStyle) => { haptic(); setDotStyle(s); }, [setDotStyle]);
   const handleSetEyeStyle = useCallback((s: QREyeStyle) => { haptic(); setEyeStyle(s); }, [setEyeStyle]);
-  const handleSetErrorLevel = useCallback((l: QRErrorLevel) => { haptic(); setErrorLevel(l); }, [setErrorLevel]);
-
-  /** Whether the selected error level is auto-upgraded due to active logo. */
-  const logoForcesUpgrade = bankIconEnabled && (errorLevel === 'L' || errorLevel === 'M');
 
   const handleOpenNameModal = useCallback(() => {
     setDraftName(customName);
@@ -199,104 +201,23 @@ export const QRCodeSection = () => {
                   </div>
                 </button>
 
-                {/* 5. QR Code appearance (dot / eye shape + error level) */}
-                <div className="px-5 py-4">
-                  <div className="flex items-center gap-2 mb-3">
+                {/* 5. QR Code appearance — opens style modal */}
+                <button
+                  type="button"
+                  onClick={() => setShowStyleModal(true)}
+                  className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
                       <Shapes size={18} className="text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
                     </div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.styleTitle}</p>
-                  </div>
-
-                  <div className="space-y-4 pl-12">
-                    {/* Dot style */}
-                    <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t.qrSettings.dotStyleTitle}</p>
-                      <div className="flex gap-2">
-                        {(['square', 'rounded', 'dots'] as const).map((style) => (
-                          <button
-                            key={style}
-                            type="button"
-                            onClick={() => handleSetDotStyle(style)}
-                            aria-pressed={dotStyle === style}
-                            className={`flex-1 py-2 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
-                              dotStyle === style
-                                ? 'border-transparent text-white'
-                                : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
-                            }`}
-                            style={dotStyle === style ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
-                          >
-                            {style === 'square' ? t.qrSettings.dotStyleSquare
-                              : style === 'rounded' ? t.qrSettings.dotStyleRounded
-                              : t.qrSettings.dotStyleDots}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Eye style */}
-                    <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t.qrSettings.eyeStyleTitle}</p>
-                      <div className="flex gap-2">
-                        {(['square', 'rounded'] as const).map((style) => (
-                          <button
-                            key={style}
-                            type="button"
-                            onClick={() => handleSetEyeStyle(style)}
-                            aria-pressed={eyeStyle === style}
-                            className={`flex-1 py-2 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
-                              eyeStyle === style
-                                ? 'border-transparent text-white'
-                                : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
-                            }`}
-                            style={eyeStyle === style ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
-                          >
-                            {style === 'square' ? t.qrSettings.eyeStyleSquare : t.qrSettings.eyeStyleRounded}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Error correction level */}
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{t.qrSettings.errorLevelTitle}</p>
-                        {logoForcesUpgrade && (
-                          <span className="text-[10px] text-amber-600 dark:text-amber-400">{t.qrSettings.errorLevelAutoUpgrade}</span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        {(['L', 'M', 'Q', 'H'] as const).map((level) => {
-                          const isActive = errorLevel === level;
-                          const isDisabled = bankIconEnabled && (level === 'L' || level === 'M');
-                          return (
-                            <button
-                              key={level}
-                              type="button"
-                              onClick={() => !isDisabled && handleSetErrorLevel(level)}
-                              aria-pressed={isActive}
-                              disabled={isDisabled}
-                              title={isDisabled ? t.qrSettings.errorLevelDesc : undefined}
-                              className={`flex-1 py-2 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
-                                isDisabled
-                                  ? 'border-zinc-100 dark:border-zinc-800 text-zinc-300 dark:text-zinc-600 cursor-not-allowed'
-                                  : isActive
-                                    ? 'border-transparent text-white'
-                                    : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
-                              }`}
-                              style={isActive && !isDisabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
-                            >
-                              {level}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {bankIconEnabled && (
-                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5">{t.qrSettings.errorLevelDesc}</p>
-                      )}
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.styleTitle}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{styleSummary}</p>
                     </div>
                   </div>
-                </div>
+                  <ChevronRight size={16} className="text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
+                </button>
               </div>
 
               <div className="px-5 pb-5 pt-3">
@@ -308,6 +229,92 @@ export const QRCodeSection = () => {
                   {t.common.done}
                 </button>
               </div>
+            </>
+          )}
+        </AnimatedModal>
+      )}
+
+      {/* ── Style modal — rendered above settings modal ── */}
+      {showStyleModal && (
+        <AnimatedModal
+          onClose={() => setShowStyleModal(false)}
+          overlayClass="z-[60]"
+          cardClass="max-w-sm p-6"
+          ariaLabelledby="style-modal-title"
+        >
+          {(requestClose) => (
+            <>
+              <div className="flex items-center justify-between mb-5">
+                <h2 id="style-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  {t.qrSettings.styleTitle}
+                </h2>
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  aria-label={t.common.close}
+                  className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                {/* Dot style */}
+                <div>
+                  <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t.qrSettings.dotStyleTitle}</p>
+                  <div className="flex gap-2">
+                    {(['square', 'rounded', 'dots'] as const).map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => handleSetDotStyle(style)}
+                        aria-pressed={dotStyle === style}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
+                          dotStyle === style
+                            ? 'border-transparent text-white'
+                            : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
+                        }`}
+                        style={dotStyle === style ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                      >
+                        {style === 'square' ? t.qrSettings.dotStyleSquare
+                          : style === 'rounded' ? t.qrSettings.dotStyleRounded
+                          : t.qrSettings.dotStyleDots}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Eye style */}
+                <div>
+                  <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">{t.qrSettings.eyeStyleTitle}</p>
+                  <div className="flex gap-2">
+                    {(['square', 'rounded'] as const).map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => handleSetEyeStyle(style)}
+                        aria-pressed={eyeStyle === style}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-[background-color,border-color,color] duration-150 border ${
+                          eyeStyle === style
+                            ? 'border-transparent text-white'
+                            : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
+                        }`}
+                        style={eyeStyle === style ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                      >
+                        {style === 'square' ? t.qrSettings.eyeStyleSquare : t.qrSettings.eyeStyleRounded}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={requestClose}
+                className="w-full py-3.5 mt-6 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              >
+                {t.common.done}
+              </button>
             </>
           )}
         </AnimatedModal>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Palette, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Palette, RotateCcw, ShieldCheck, ShieldOff } from 'lucide-react';
 import { useThemeStore, ACCENT_PRESETS, applyAccentHue } from '../../stores/useThemeStore';
 import { useAuthStore, LOCK_TIMEOUT_OPTIONS } from '../../stores/useAuthStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -93,6 +93,14 @@ export const PersonalizationSection = () => {
 
   const [webAuthnAvailable, setWebAuthnAvailable] = useState<boolean | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
+  const [lockToastVisible, setLockToastVisible] = useState(false);
+  const lockToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (lockToastTimerRef.current !== null) clearTimeout(lockToastTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     isWebAuthnSupported().then(setWebAuthnAvailable);
@@ -110,7 +118,15 @@ export const PersonalizationSection = () => {
     setAuthBusy(false);
   }, [authEnabled, authBusy, enableAuth, disableAuth]);
 
-  const showAppLock = webAuthnAvailable === true;
+  const showLockUnsupportedToast = useCallback(() => {
+    if (lockToastTimerRef.current !== null) clearTimeout(lockToastTimerRef.current);
+    setLockToastVisible(true);
+    lockToastTimerRef.current = setTimeout(() => setLockToastVisible(false), 2500);
+  }, []);
+
+  // Show the row once detection is complete; appLockSupported distinguishes enabled vs unavailable
+  const showAppLock = webAuthnAvailable !== null;
+  const appLockSupported = webAuthnAvailable === true;
 
   return (
     <div>
@@ -242,43 +258,68 @@ export const PersonalizationSection = () => {
         {/* ── App lock toggle ── */}
         {showAppLock && (
           <div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={authEnabled}
-              onClick={handleToggleLock}
-              disabled={authBusy}
-              className="w-full flex items-center justify-between p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
-                  <ShieldCheck size={18} className="text-green-600 dark:text-green-400" aria-hidden="true" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.personalization.appLockTitle}</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    {t.personalization.appLockDesc}
-                  </p>
-                </div>
-              </div>
-              {/* Toggle switch */}
-              <div
-                aria-hidden="true"
-                className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
-                  authEnabled ? '' : 'bg-zinc-300 dark:bg-zinc-600'
-                }`}
-                style={authEnabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+            {appLockSupported ? (
+              <button
+                type="button"
+                role="switch"
+                aria-checked={authEnabled}
+                onClick={handleToggleLock}
+                disabled={authBusy}
+                className="w-full flex items-center justify-between p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
               >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
+                    <ShieldCheck size={18} className="text-green-600 dark:text-green-400" aria-hidden="true" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.personalization.appLockTitle}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      {t.personalization.appLockDesc}
+                    </p>
+                  </div>
+                </div>
+                {/* Toggle switch */}
                 <div
-                  className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${
-                    authEnabled ? 'translate-x-5.25' : 'translate-x-0.75'
+                  aria-hidden="true"
+                  className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
+                    authEnabled ? '' : 'bg-zinc-300 dark:bg-zinc-600'
                   }`}
-                />
-              </div>
-            </button>
+                  style={authEnabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                >
+                  <div
+                    className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${
+                      authEnabled ? 'translate-x-5.25' : 'translate-x-0.75'
+                    }`}
+                  />
+                </div>
+              </button>
+            ) : (
+              /* Unsupported — show dimmed row; click reveals a brief toast */
+              <button
+                type="button"
+                aria-disabled="true"
+                onClick={showLockUnsupportedToast}
+                className="w-full flex items-center justify-between p-4 opacity-40 cursor-not-allowed focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <ShieldOff size={18} className="text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.personalization.appLockTitle}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      {t.personalization.appLockUnavailableDesc}
+                    </p>
+                  </div>
+                </div>
+                <div aria-hidden="true" className="relative shrink-0 w-11 h-6.5 rounded-full bg-zinc-300 dark:bg-zinc-600">
+                  <div className="absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs translate-x-0.75" />
+                </div>
+              </button>
+            )}
 
             {/* Lock timeout selector — inside the same <div> so divide-y does not add an extra line */}
-            {authEnabled && (
+            {appLockSupported && authEnabled && (
               <div className="px-4 pb-4">
                 <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">
                   {t.personalization.lockTimeoutTitle}
@@ -309,6 +350,20 @@ export const PersonalizationSection = () => {
         {/* ── QR Code display settings (inlined after App Lock) ── */}
         <QRCodeSection />
       </div>
+
+      {/* App-lock unsupported toast — floating pill, auto-dismisses */}
+      {lockToastVisible && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="fixed top-[calc(env(safe-area-inset-top)+1rem)] left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-in slide-in-from-top-4 fade-in duration-300"
+        >
+          <div className="bg-zinc-900/90 dark:bg-zinc-100/90 text-white dark:text-zinc-900 text-sm font-medium px-4 py-2.5 rounded-full shadow-lg whitespace-nowrap">
+            {t.personalization.appLockUnsupported}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

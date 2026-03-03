@@ -8,7 +8,6 @@ import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { PrivacyScreen } from './components/auth/PrivacyScreen';
 import { ReloadPrompt } from './components/layout/ReloadPrompt';
 import { InstallPrompt } from './components/layout/InstallPrompt';
-import { BackupReminder } from './components/layout/BackupReminder';
 import { OnboardingOverlay } from './components/layout/OnboardingOverlay';
 import { PageLoader } from './components/layout/PageLoader';
 import { TabLayout } from './components/layout/TabLayout';
@@ -61,7 +60,7 @@ function App() {
   const showLockScreen = authEnabled && !authUnlocked && !isSharedPage && authHydrated;
   const showGlobalAssistiveUI = !isSharedPage && !isShareTargetPage && !showLockScreen;
 
-  /** Restrict floating overlays (BackupReminder, OnboardingOverlay)
+  /** Restrict floating overlays (OnboardingOverlay, InstallPrompt)
    *  to main tab routes to avoid covering back-buttons on sub-pages. */
   const showOverlayUI = showGlobalAssistiveUI && (TAB_ROUTES as readonly string[]).includes(location.pathname);
 
@@ -141,7 +140,6 @@ function App() {
       )}
       <ReloadPrompt />
       <InstallPrompt />
-      {showOverlayUI && <BackupReminder />}
       {showOverlayUI && <OnboardingOverlay />}
       <PrivacyScreen />
     </>

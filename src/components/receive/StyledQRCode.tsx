@@ -6,6 +6,10 @@
  *
  * The underlying library is dynamically imported so it never blocks
  * the initial render (lazy loaded on first mount).
+ *
+ * Resolution: the canvas is rendered at physicalSize = cssSize × devicePixelRatio
+ * and then scaled back to cssSize via CSS, giving sharp output on Retina / HiDPI
+ * displays without any change to external layout measurements.
  */
 import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
 import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../../types';
@@ -29,11 +33,15 @@ function toCornerDotType(s: QREyeStyle): CornerDotType {
   return s === 'rounded' ? 'dot' : 'square';
 }
 
-/** When a center logo is present, ensure error level is at least Q. */
-function effectiveErrorLevel(level: QRErrorLevel, hasLogo: boolean): QRErrorLevel {
-  if (!hasLogo) return level;
-  const ORDER: QRErrorLevel[] = ['L', 'M', 'Q', 'H'];
-  return ORDER.indexOf(level) >= ORDER.indexOf('Q') ? level : 'Q';
+/**
+ * Best-practice error correction:
+ * - No logo  → M (15 % recovery, smaller QR modules)
+ * - With logo → Q (25 % recovery, logo obscures the centre)
+ *
+ * Error level is not user-configurable; it is derived automatically.
+ */
+function effectiveErrorLevel(hasLogo: boolean): QRErrorLevel {
+  return hasLogo ? 'Q' : 'M';
 }
 
 // ─── Props ────────────────────────────────────────────────────
@@ -50,14 +58,12 @@ export interface StyledQRCodeCenterImage {
 export interface StyledQRCodeProps {
   /** QR code content string. */
   value: string;
-  /** Canvas render size in CSS px (the canvas element will be exactly this size). */
+  /** Canvas render size in CSS px (the physical canvas will be size × devicePixelRatio). */
   size: number;
   /** Dot module shape. @default 'square' */
   dotStyle?: QRDotStyle;
   /** Finder-pattern (eye) shape. @default 'square' */
   eyeStyle?: QREyeStyle;
-  /** Error correction level. Auto-upgraded to Q when logo is shown. @default 'Q' */
-  errorLevel?: QRErrorLevel;
   /** Optional centre image. */
   centerImage?: StyledQRCodeCenterImage;
   className?: string;
@@ -73,20 +79,22 @@ export interface StyledQRCodeHandle {
 
 function buildOptions(
   value: string,
-  size: number,
+  /** CSS size in pixels — used for imageSize fraction calculation. */
+  cssSize: number,
+  /** Physical canvas size = cssSize × devicePixelRatio. */
+  physicalSize: number,
   dotStyle: QRDotStyle,
   eyeStyle: QREyeStyle,
-  errorLevel: QRErrorLevel,
   centerImage?: StyledQRCodeCenterImage,
 ): Options {
   const hasLogo = Boolean(centerImage);
-  const correctionLevel = effectiveErrorLevel(errorLevel, hasLogo);
+  const correctionLevel = effectiveErrorLevel(hasLogo);
   const dotType = toDotType(dotStyle);
 
   const opts: Options = {
     type: 'canvas',
-    width: size,
-    height: size,
+    width: physicalSize,
+    height: physicalSize,
     margin: 0,
     data: value,
     qrOptions: {
@@ -111,10 +119,11 @@ function buildOptions(
 
   if (centerImage) {
     opts.image = centerImage.src;
-    // imageSize fraction: the longer dimension as a proportion of QR size,
-    // clamped to 0.15–0.40 to keep the logo readable but not too big.
+    // imageSize fraction: the longer dimension as a proportion of CSS size
+    // (not physicalSize), so the logo occupies the same visual proportion
+    // regardless of display density.
     const longerDim = Math.max(centerImage.width, centerImage.height);
-    const fraction = Math.min(0.40, Math.max(0.15, longerDim / size));
+    const fraction = Math.min(0.40, Math.max(0.15, longerDim / cssSize));
     opts.imageOptions = {
       hideBackgroundDots: true,
       imageSize: fraction,
@@ -126,6 +135,23 @@ function buildOptions(
   return opts;
 }
 
+/** Scale CSS → physical pixels, capped at 3× to keep file sizes sane. */
+function getPhysicalSize(cssSize: number): number {
+  return Math.round(cssSize * Math.min(window.devicePixelRatio || 1, 3));
+}
+
+/**
+ * After qr-code-styling appends a canvas, override its CSS dimensions back
+ * to `cssSize` so it occupies the correct layout space while rendering at
+ * native resolution.
+ */
+function fixCanvasCSS(container: HTMLDivElement, cssSize: number) {
+  const canvas = container.querySelector('canvas');
+  if (!canvas) return;
+  canvas.style.width = `${cssSize}px`;
+  canvas.style.height = `${cssSize}px`;
+}
+
 export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
   (
     {
@@ -133,7 +159,6 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
       size,
       dotStyle = 'square',
       eyeStyle = 'square',
-      errorLevel = 'Q',
       centerImage,
       className,
     },
@@ -156,9 +181,10 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
     );
 
     // Build the options object without triggering renders.
+    // Physical size is computed from the current devicePixelRatio at call time.
     const buildOpts = useCallback(
-      () => buildOptions(value, size, dotStyle, eyeStyle, errorLevel, centerImage),
-      [value, size, dotStyle, eyeStyle, errorLevel, centerImage],
+      () => buildOptions(value, size, getPhysicalSize(size), dotStyle, eyeStyle, centerImage),
+      [value, size, dotStyle, eyeStyle, centerImage],
     );
 
     // Initial mount: dynamically import and create the QR instance.
@@ -176,6 +202,8 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
         // Clear any previous content, then append the new canvas.
         containerRef.current.innerHTML = '';
         qr.append(containerRef.current);
+        // Override the canvas CSS to display at cssSize while rendering at physicalSize.
+        fixCanvasCSS(containerRef.current, size);
         mountedRef.current = true;
       })();
 
@@ -189,7 +217,9 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
     useEffect(() => {
       if (!mountedRef.current || !qrInstanceRef.current) return;
       qrInstanceRef.current.update(buildOpts());
-    }, [buildOpts]);
+      // Re-apply CSS override after update (qr-code-styling resets style on update).
+      if (containerRef.current) fixCanvasCSS(containerRef.current, size);
+    }, [buildOpts, size]);
 
     return (
       <div

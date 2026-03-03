@@ -50,7 +50,6 @@ function applyBackupStyle(s: BackupStyle, sel: { accent: boolean; qr: boolean })
     qs.setCustomName(s.qr.customName);
     qs.setDotStyle(s.qr.dotStyle);
     qs.setEyeStyle(s.qr.eyeStyle);
-    qs.setErrorLevel(s.qr.errorLevel);
   }
 }
 

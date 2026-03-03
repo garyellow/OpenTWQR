@@ -4,7 +4,7 @@ import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, Pencil } from 'lucide-react';
-import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
+import { formatCurrency, formatAmount, formatAccountDisplay } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
 import { haptic } from '../../utils/haptics';
@@ -49,7 +49,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const storedCustomName = useQRSettingsStore((s) => s.customName);
   const storedDotStyle = useQRSettingsStore((s) => s.dotStyle);
   const storedEyeStyle = useQRSettingsStore((s) => s.eyeStyle);
-  const storedErrorLevel = useQRSettingsStore((s) => s.errorLevel);
 
   // Shared view always uses defaults — viewer's personal settings must not leak.
   const logoType = isSharedView ? 'opentwqr' as const : storedLogoType;
@@ -58,7 +57,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const customName = isSharedView ? '' : storedCustomName;
   const dotStyle = isSharedView ? 'square' as const : storedDotStyle;
   const eyeStyle = isSharedView ? 'square' as const : storedEyeStyle;
-  const errorLevel = isSharedView ? 'Q' as const : storedErrorLevel;
 
   /** Whether any bank label will be shown BELOW the QR code. */
   const hasBankLabel = showBankNameSetting && Boolean(bankName) && Boolean(bankCode);
@@ -181,7 +179,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const exportLabels = useMemo(() => ({
     customName: localCustomName.trim() || undefined,
     bankLine: showBankNameSetting && bankName && bankCode
-      ? `（${bankCode}） ${bankName}`
+      ? `（${bankCode}）${bankName}`
       : undefined,
     accountLine: accountRevealed && accountNumber
       ? formatAccountDisplay(accountNumber)
@@ -487,13 +485,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
               size={qrSize}
               dotStyle={dotStyle}
               eyeStyle={eyeStyle}
-              errorLevel={errorLevel}
               centerImage={centerImageForQR}
             />
             {/* Bank name + code below QR */}
             {hasBankLabel && (
               <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-                （{bankCode}） {bankName}
+                （{bankCode}）{bankName}
               </p>
             )}
           </button>
@@ -517,14 +514,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                 <div className="min-w-0 flex-1">
                   {bankName && bankCode && (
                     <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">
-                      （{bankCode}） {bankName}
+                      （{bankCode}）{bankName}
                     </p>
                   )}
-                  {accountNumber && (
+                  {accountNumber && accountRevealed && (
                     <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-                      {accountRevealed
-                        ? formatAccountDisplay(accountNumber)
-                        : maskAccount(accountNumber)}
+                      {formatAccountDisplay(accountNumber)}
                     </p>
                   )}
                 </div>
@@ -674,7 +669,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         showAccount={accountRevealed}
         dotStyle={dotStyle}
         eyeStyle={eyeStyle}
-        errorLevel={errorLevel}
       />
     )}
     </>

@@ -79,9 +79,9 @@ const enUS: Translations = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
-    editCustomName: 'Edit display message',
-    customNamePlaceholder: 'Enter a message (optional)',
-    addCustomName: 'Add display message',
+    editCustomName: 'Edit personal message',
+    customNamePlaceholder: 'Enter a personal message (optional)',
+    addCustomName: 'Add personal message',
   },
 
   /* ─── Share menu ───────────────────────────────────────── */
@@ -178,19 +178,19 @@ const enUS: Translations = {
 
   /* ─── QRSettingsSection ────────────────────────────────── */
   qrSettings: {
-    settingsTitle: 'Customize QR Code',
-    settingsDesc: 'Choose what to display on your QR Code',
-    settingsModalTitle: 'Customize QR Code',
-    logoTitle: 'Show Bank Icon',
-    logoDesc: 'Embed bank icon in the center of QR Code',
-    showAccountTitle: 'Show Account Number',
-    showAccountDesc: 'Display account number above QR Code',
+    settingsTitle: 'QR Code Display',
+    settingsDesc: 'Customize content and appearance',
+    settingsModalTitle: 'QR Code Display',
+    logoTitle: 'Show Bank Logo',
+    logoDesc: 'Embed bank logo in QR Code center',
+    showAccountTitle: 'Show Account',
+    showAccountDesc: 'Show account number below QR Code',
     bankNameTitle: 'Show Bank Name',
     bankNameDesc: 'Show bank name below QR Code',
-    customNameTitle: 'Display Name',
-    customNameDesc: 'Show recipient name at bottom of QR Code',
+    customNameTitle: 'Personal Message',
+    customNameDesc: 'Shown above QR Code, embedded in shared image',
     customNamePlaceholder: 'e.g., John…',
-    customNameModalTitle: 'Display Name',
+    customNameModalTitle: 'Personal Message',
     customNameClear: 'Clear',
     /* QR style settings */
     styleTitle: 'QR Code Appearance',
@@ -201,9 +201,6 @@ const enUS: Translations = {
     eyeStyleTitle: 'Finder Pattern',
     eyeStyleSquare: 'Square',
     eyeStyleRounded: 'Rounded',
-    errorLevelTitle: 'Error Correction',
-    errorLevelDesc: 'When center logo is shown, minimum is Q',
-    errorLevelAutoUpgrade: 'Auto-upgraded to Q (required for logo)',
   },
 
   /* ─── PersonalizationSection (Accent + AppLock combined) ─ */
@@ -220,6 +217,8 @@ const enUS: Translations = {
     /* App lock */
     appLockTitle: 'App Lock',
     appLockDesc: 'Use device auth to protect data',
+    appLockUnavailableDesc: 'This device has no biometrics or screen lock',
+    appLockUnsupported: 'App Lock is not supported in this browser',
     lockTimeoutTitle: 'Lock Timeout',
     lockTimeoutLabel: 'Lock timeout',
     lockTimeoutOptions: {
@@ -249,12 +248,10 @@ const enUS: Translations = {
     exportDesc: 'Choose what to include and generate a backup string',
     importTitle: 'Import Backup',
     importDesc: 'Paste a backup string to restore accounts or settings',
+    storageWarningTitle: 'Storage Notice',
     storageWarning: 'Your data is stored only in this device\'s browser. Clearing browser data or uninstalling may cause data loss. Back up regularly.',
     storageWarningIOS: 'On iOS/iPadOS, if the app isn\'t added to the Home Screen, Safari may auto-clear data after 7 days of inactivity.',
-    reminderTitle: 'Backup Reminder',
-    reminderDesc: 'It\'s been over 30 days since your last backup. Back up now to prevent data loss.',
-    reminderAction: 'Go to Backup',
-    reminderDismiss: 'Later',
+    storageWarningBtn: 'Got it',
   },
 
   /* ─── ExportDialog ─────────────────────────────────────── */

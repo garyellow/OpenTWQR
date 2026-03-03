@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/safeStorage';
-import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../types';
+import type { QRDotStyle, QREyeStyle } from '../types';
 
 export type QRLogoType = 'opentwqr' | 'bank';
 
@@ -18,15 +18,12 @@ interface QRSettingsState {
   dotStyle: QRDotStyle;
   /** QR finder-pattern (eye) shape: square / rounded. */
   eyeStyle: QREyeStyle;
-  /** Error correction level. Auto-upgraded to Q when logo is shown. */
-  errorLevel: QRErrorLevel;
   setLogoType: (type: QRLogoType) => void;
   setShowAccount: (show: boolean) => void;
   setShowBankName: (show: boolean) => void;
   setCustomName: (name: string) => void;
   setDotStyle: (style: QRDotStyle) => void;
   setEyeStyle: (style: QREyeStyle) => void;
-  setErrorLevel: (level: QRErrorLevel) => void;
 }
 
 /**
@@ -52,14 +49,12 @@ export const useQRSettingsStore = create<QRSettingsState>()(
       customName: '',
       dotStyle: 'square',
       eyeStyle: 'square',
-      errorLevel: 'Q',
       setLogoType: (logoType) => set({ logoType }),
       setShowAccount: (showAccount) => set({ showAccount }),
       setShowBankName: (showBankName) => set({ showBankName }),
       setCustomName: (customName) => set({ customName }),
       setDotStyle: (dotStyle) => set({ dotStyle }),
       setEyeStyle: (eyeStyle) => set({ eyeStyle }),
-      setErrorLevel: (errorLevel) => set({ errorLevel }),
     }),
     {
       name: 'opentwqr-qr-settings',

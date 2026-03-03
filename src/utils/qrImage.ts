@@ -5,7 +5,7 @@
 export interface QRExportLabels {
   /** Custom message / display name above QR (bold). */
   customName?: string;
-  /** Bank line below QR, e.g. "（013） 國泰世華商業銀行". */
+  /** Bank line below QR, e.g. "（013）國泰世華商業銀行". */
   bankLine?: string;
   /** Account number below bank line (monospace). */
   accountLine?: string;

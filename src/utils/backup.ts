@@ -31,7 +31,7 @@
  *   }
  */
 
-import type { BankAccount, QRDotStyle, QREyeStyle, QRErrorLevel } from '../types';
+import type { BankAccount, QRDotStyle, QREyeStyle } from '../types';
 import type { QRLogoType } from '../stores/useQRSettingsStore';
 import type { BankUrlConfig } from '../stores/useUrlSchemeStore';
 import type { Locale } from '../stores/useLocaleStore';
@@ -66,7 +66,6 @@ export interface BackupStyle {
     customName: string;
     dotStyle: QRDotStyle;
     eyeStyle: QREyeStyle;
-    errorLevel: QRErrorLevel;
   };
 }
 
@@ -377,7 +376,6 @@ function validateStyle(raw: unknown): BackupStyle | undefined {
     const validLogoTypes = ['opentwqr', 'bank'];
     const validDotStyles = ['square', 'rounded', 'dots'];
     const validEyeStyles = ['square', 'rounded'];
-    const validErrorLevels = ['L', 'M', 'Q', 'H'];
 
     if (
       validLogoTypes.includes(q.logoType as string) &&
@@ -385,8 +383,7 @@ function validateStyle(raw: unknown): BackupStyle | undefined {
       typeof q.showBankName === 'boolean' &&
       typeof q.customName === 'string' &&
       validDotStyles.includes(q.dotStyle as string) &&
-      validEyeStyles.includes(q.eyeStyle as string) &&
-      validErrorLevels.includes(q.errorLevel as string)
+      validEyeStyles.includes(q.eyeStyle as string)
     ) {
       result.qr = {
         logoType: q.logoType as QRLogoType,
@@ -395,7 +392,7 @@ function validateStyle(raw: unknown): BackupStyle | undefined {
         customName: q.customName,
         dotStyle: q.dotStyle as QRDotStyle,
         eyeStyle: q.eyeStyle as QREyeStyle,
-        errorLevel: q.errorLevel as QRErrorLevel,
+        // errorLevel removed — now derived automatically from logo presence
       };
       hasAny = true;
     }

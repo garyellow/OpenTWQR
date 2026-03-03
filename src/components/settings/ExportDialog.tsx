@@ -99,7 +99,6 @@ export const ExportDialog = ({ onClose }: ExportDialogProps) => {
           customName: qs.customName,
           dotStyle: qs.dotStyle,
           eyeStyle: qs.eyeStyle,
-          errorLevel: qs.errorLevel,
         };
       }
     }
@@ -128,7 +127,6 @@ export const ExportDialog = ({ onClose }: ExportDialogProps) => {
     if (res.ok) {
       setResult(res.data);
       haptic();
-      try { localStorage.setItem('opentwqr-last-backup', String(Date.now())); } catch { /* noop */ }
     } else {
       setError(t.exportDialog.exportFailed);
     }
