@@ -42,11 +42,11 @@ const enUS: Translations = {
     noteLabel: 'Note',
     notePlaceholder: 'Up to 19 chars…',
     clearNote: 'Clear',
-    addMessage: 'Add Default Personal Message',
-    messageTitle: 'Default Personal Message',
+    addMessage: 'Add Personal Message',
+    messageTitle: 'Personal Message',
     messagePlaceholder: 'e.g., John…',
-    messagePrefix: 'Default Message: ',
-    clearMessage: 'Clear Default Message',
+    messagePrefix: 'Message: ',
+    clearMessage: 'Clear',
   },
 
   /* ─── AmountInput ──────────────────────────────────────── */
