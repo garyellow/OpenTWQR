@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState, useCallback, useMemo, memo } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
-import { X, Share2, Check, Eye, EyeOff, Copy } from 'lucide-react';
+import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine } from 'lucide-react';
 import { formatCurrency, formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
-import { svgToBlob, downloadBlob } from '../../utils/qrImage';
+import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
 import { haptic } from '../../utils/haptics';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -16,9 +15,7 @@ import { ShareMenu } from '../share/ShareMenu';
 import { LinkSettingsDialog } from '../share/LinkSettingsDialog';
 import type { ShareData, ExpiryOption } from '../../types';
 import { QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
-
-/** Memoised QR Code to avoid re-rendering when parent state changes. */
-const MemoQRCode = memo(QRCodeSVG);
+import { StyledQRCode, type StyledQRCodeHandle, type StyledQRCodeCenterImage } from './StyledQRCode';
 
 interface QRDisplayProps {
   value: string;
@@ -33,20 +30,35 @@ interface QRDisplayProps {
   isSharedView?: boolean;
   /** Bank favicon / icon URL for centre logo when logo type is 'bank'. */
   bankIconUrl?: string;
+  /** URL scheme / Universal Link for the payer's bank app (scan result context). */
+  bankUrl?: string;
+  /** When provided, a "重新掃描" button is shown and the modal acts as a scan result view. */
+  onRescan?: () => void;
+  /** Override the modal header title (defaults to t.qr.title). */
+  title?: string;
+  /** When true, hides the X close button and disables backdrop-click-to-close.
+   *  Used when QRDisplay is the primary scan result view (no underlying content). */
+  hideClose?: boolean;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl, bankUrl, onRescan, title, hideClose = false }: QRDisplayProps) => {
   const t = useLocaleStore((s) => s.t);
   const storedLogoType = useQRSettingsStore((s) => s.logoType);
   const storedShowAccount = useQRSettingsStore((s) => s.showAccount);
   const storedShowBankName = useQRSettingsStore((s) => s.showBankName);
   const storedCustomName = useQRSettingsStore((s) => s.customName);
+  const storedDotStyle = useQRSettingsStore((s) => s.dotStyle);
+  const storedEyeStyle = useQRSettingsStore((s) => s.eyeStyle);
+  const storedErrorLevel = useQRSettingsStore((s) => s.errorLevel);
 
   // Shared view always uses defaults — viewer's personal settings must not leak.
   const logoType = isSharedView ? 'opentwqr' as const : storedLogoType;
   const showAccountSetting = isSharedView ? false : storedShowAccount;
   const showBankNameSetting = isSharedView ? false : storedShowBankName;
   const customName = isSharedView ? '' : storedCustomName;
+  const dotStyle = isSharedView ? 'square' as const : storedDotStyle;
+  const eyeStyle = isSharedView ? 'square' as const : storedEyeStyle;
+  const errorLevel = isSharedView ? 'Q' as const : storedErrorLevel;
 
   /** Whether any name/label info will be displayed BELOW the QR code. */
   const hasLabelInfo = Boolean(customName.trim()) || (showBankNameSetting && Boolean(bankName));
@@ -108,19 +120,21 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   }, [logoType, bankIconUrl]);
 
   /**
-   * QR center image — always the vertical (stacked) OpenTWQR logo,
-   * unless logoType is 'bank' and the icon has loaded successfully.
+   * QR center image passed to StyledQRCode.
+   *
+   * Bank icon: only shown once the data URI is available (avoids canvas
+   * taint from external URLs, which would break PNG export).
+   * OpenTWQR logo: always available as a data URI.
    */
-  const qrCenterImage = useMemo(() => {
-    if (logoType === 'bank' && bankIconUrl && bankIconInfo?.url === bankIconUrl) {
-      return {
-        src: bankIconInfo.dataUri ?? bankIconUrl,
-        width: bankIconInfo.width,
-        height: bankIconInfo.height,
-        excavate: true,
-      };
+  const centerImageForQR = useMemo((): StyledQRCodeCenterImage | undefined => {
+    if (logoType === 'bank') {
+      if (bankIconUrl && bankIconInfo?.url === bankIconUrl && bankIconInfo?.dataUri) {
+        return { src: bankIconInfo.dataUri, width: bankIconInfo.width, height: bankIconInfo.height };
+      }
+      return undefined; // not yet loaded or CORS blocked
     }
-    return { ...QR_CENTER_IMAGE_VERTICAL };
+    const logo = QR_CENTER_IMAGE_VERTICAL;
+    return { src: logo.src, width: logo.width, height: logo.height };
   }, [logoType, bankIconUrl, bankIconInfo]);
 
   const [qrSize, setQrSize] = useState(240);
@@ -145,45 +159,16 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const [accountRevealed, setAccountRevealed] = useState(showAccountSetting);
   const feedbackShowTimerRef = useRef<number | null>(null);
   const feedbackHideTimerRef = useRef<number | null>(null);
-  const qrRef = useRef<HTMLDivElement>(null);
+  const qrRef = useRef<StyledQRCodeHandle>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Returns an export-safe SVG clone — replaces any external (https://) centre
-   * image href with an embedded data-URI OpenTWQR logo so that exported PNGs
-   * always render the logo.
-   *
-   * Background: browsers block external resources when an SVG is loaded via
-   * `<img src="blob:...">` (the technique used by svgToBlob). Data-URI sources
-   * are not affected, but bank favicon URLs (https://) go missing in exports.
+   * Returns the underlying QR canvas element for PNG export.
+   * StyledQRCode always uses data URIs for the centre logo, so the canvas
+   * is never tainted by cross-origin resources.
    */
-  const getExportSvgEl = useCallback((): SVGSVGElement | null => {
-    const svgEl = qrRef.current?.querySelector('svg') as SVGSVGElement | null;
-    if (!svgEl) return null;
-    const imageEl = svgEl.querySelector('image');
-    const href =
-      imageEl?.getAttribute('href') ??
-      imageEl?.getAttributeNS('http://www.w3.org/1999/xlink', 'href') ??
-      '';
-    // data: URIs are embedded and safe — return the original element directly.
-    if (!href.startsWith('https://')) return svgEl;
-    // External URL blocked in blob export — swap with vertical OpenTWQR logo.
-    const clone = svgEl.cloneNode(true) as SVGSVGElement;
-    const cloneImg = clone.querySelector('image');
-    if (cloneImg) {
-      const fallback = QR_CENTER_IMAGE_VERTICAL;
-      cloneImg.setAttribute('href', fallback.src);
-      cloneImg.removeAttributeNS('http://www.w3.org/1999/xlink', 'href');
-      // Re-centre the fallback logo (dimensions differ from bank icon).
-      const svgW = parseFloat(clone.getAttribute('width') || '0');
-      if (svgW > 0) {
-        cloneImg.setAttribute('width', String(fallback.width));
-        cloneImg.setAttribute('height', String(fallback.height));
-        cloneImg.setAttribute('x', String((svgW - fallback.width) / 2));
-        cloneImg.setAttribute('y', String((svgW - fallback.height) / 2));
-      }
-    }
-    return clone;
+  const getExportCanvas = useCallback((): HTMLCanvasElement | null => {
+    return qrRef.current?.getCanvas() ?? null;
   }, []);
 
   /**
@@ -333,10 +318,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
 
   const handleShareImage = useCallback(async () => {
     try {
-      const svgEl = getExportSvgEl();
-      if (!svgEl) return;
+      const qrCanvas = getExportCanvas();
+      if (!qrCanvas) return;
 
-      const pngBlob = await svgToBlob(svgEl, qrSize, 32, exportLabels);
+      const pngBlob = await canvasToBlob(qrCanvas, qrSize, 32, exportLabels);
       const file = new File([pngBlob], 'opentwqr.png', { type: 'image/png' });
 
       if (navigator.canShare?.({ files: [file] })) {
@@ -353,28 +338,28 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       showFeedback(t.share.shareFailed);
       shareMenu.close();
     }
-  }, [getExportSvgEl, qrSize, exportLabels, shareMenu, showFeedback, t]);
+  }, [getExportCanvas, qrSize, exportLabels, shareMenu, showFeedback, t]);
 
   const handleDownloadImage = useCallback(async () => {
     try {
-      const svgEl = getExportSvgEl();
-      if (!svgEl) return;
+      const qrCanvas = getExportCanvas();
+      if (!qrCanvas) return;
 
-      const pngBlob = await svgToBlob(svgEl, qrSize, 32, exportLabels);
+      const pngBlob = await canvasToBlob(qrCanvas, qrSize, 32, exportLabels);
       downloadBlob(pngBlob, 'opentwqr.png');
       showFeedback(t.share.downloadedImage);
     } catch {
       showFeedback(t.share.downloadFailed);
     }
     shareMenu.close();
-  }, [getExportSvgEl, qrSize, exportLabels, shareMenu, showFeedback, t]);
+  }, [getExportCanvas, qrSize, exportLabels, shareMenu, showFeedback, t]);
 
   const handleCopyImage = useCallback(async () => {
     try {
-      const svgEl = getExportSvgEl();
-      if (!svgEl) return;
+      const qrCanvas = getExportCanvas();
+      if (!qrCanvas) return;
 
-      const pngBlob = await svgToBlob(svgEl, qrSize, 32, exportLabels);
+      const pngBlob = await canvasToBlob(qrCanvas, qrSize, 32, exportLabels);
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': pngBlob }),
       ]);
@@ -383,7 +368,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       showFeedback(t.qr.copyFailed);
     }
     shareMenu.close();
-  }, [getExportSvgEl, qrSize, exportLabels, shareMenu, showFeedback, t]);
+  }, [getExportCanvas, qrSize, exportLabels, shareMenu, showFeedback, t]);
 
   /* --- Link settings actions --- */
 
@@ -412,7 +397,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         className={`absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${
           isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
         }`}
-        onClick={requestClose}
+        onClick={hideClose ? undefined : requestClose}
         aria-hidden="true"
       />
 
@@ -428,16 +413,18 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         {/* Header */}
         <div className="flex items-center justify-between p-5 pb-3">
           <h2 id="qr-modal-title" className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            {t.qr.title}
+            {title ?? t.qr.title}
           </h2>
-          <button
-            type="button"
-            onClick={requestClose}
-            aria-label={t.common.close}
-            className="p-2.5 min-w-11 min-h-11 -mr-2 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-          >
-            <X size={20} aria-hidden="true" />
-          </button>
+          {!hideClose && (
+            <button
+              type="button"
+              onClick={requestClose}
+              aria-label={t.common.close}
+              className="p-2.5 min-w-11 min-h-11 -mr-2 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+          )}
         </div>
 
         {/* QR Code — tappable for fullscreen */}
@@ -457,17 +444,15 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                 ({bankCode}){' '}{accountNumber}
               </p>
             )}
-            <div ref={qrRef}>
-              <MemoQRCode
-                value={value}
-                size={qrSize}
-                level="Q"
-                marginSize={4}
-                bgColor="#ffffff"
-                fgColor="#000000"
-                imageSettings={qrCenterImage}
-              />
-            </div>
+            <StyledQRCode
+              ref={qrRef}
+              value={value}
+              size={qrSize}
+              dotStyle={dotStyle}
+              eyeStyle={eyeStyle}
+              errorLevel={errorLevel}
+              centerImage={centerImageForQR}
+            />
             {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
             {hasLabelInfo && (
               <div className="text-center mt-1 space-y-0.5">
@@ -544,8 +529,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           </div>
         </div>
 
-        {/* Footer — Share button */}
-        <div className="p-5 pt-5 relative">
+        {/* Footer — action buttons */}
+        <div className="p-5 pt-5 relative space-y-3">
           {/* Feedback toast */}
           {feedback && (
             <div
@@ -562,14 +547,43 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             </div>
           )}
 
+          {/* Bank app button — primary action in scan context */}
+          {bankUrl && (
+            <a
+              href={bankUrl}
+              onClick={() => haptic()}
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl btn-accent active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+            >
+              <ExternalLink size={18} aria-hidden="true" />
+              {t.scan.openBankApp}
+            </a>
+          )}
+
+          {/* Share button — accent when standalone, secondary when bank button is present */}
           {!isSharedView && (
             <button
               type="button"
               onClick={() => shareMenu.open()}
-              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl btn-accent active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              className={`w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl active:scale-98 action-transition font-semibold focus-visible:outline-hidden focus-visible:ring-2 ${
+                bankUrl
+                  ? 'text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100'
+                  : 'btn-accent shadow-xs focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950'
+              }`}
             >
               <Share2 size={18} aria-hidden="true" />
               <span>{t.qr.share}</span>
+            </button>
+          )}
+
+          {/* Rescan button — only in scan result context */}
+          {onRescan && (
+            <button
+              type="button"
+              onClick={() => { haptic(); onRescan(); }}
+              className="w-full flex items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2 text-sm font-medium rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+            >
+              <ScanLine size={16} aria-hidden="true" />
+              {t.scan.rescan}
             </button>
           )}
         </div>
@@ -619,12 +633,15 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         bankName={bankName}
         note={note}
         onExit={() => setIsFullscreen(false)}
-        qrCenterImage={qrCenterImage}
+        qrCenterImage={centerImageForQR}
         customName={customName.trim() || undefined}
         showBankName={showBankNameSetting}
         accountNumber={accountNumber}
         bankCode={bankCode}
         showAccount={accountRevealed}
+        dotStyle={dotStyle}
+        eyeStyle={eyeStyle}
+        errorLevel={errorLevel}
       />
     )}
     </>

@@ -168,7 +168,7 @@ export default defineConfig({
         // can cache them independently from application code.
         manualChunks: {
           'vendor-router': ['react-router-dom'],
-          'vendor-qr': ['qrcode.react'],
+          // qrcode.react removed — replaced by lazily-imported qr-code-styling
         },
       },
     },

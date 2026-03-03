@@ -1,23 +1,35 @@
 import { useState, useCallback, useMemo } from 'react';
 import { QRScanner } from '../components/scan/QRScanner';
-import { ScanResult } from '../components/scan/ScanResult';
 import { QRDisplay } from '../components/receive/QRDisplay';
+import { ScanRedirectView } from '../components/scan/ScanRedirectView';
 import { parseTWQR } from '../utils/parseTwqr';
 import { generateTWQR } from '../utils/twqr';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
+import { useUrlSchemeStore } from '../stores/useUrlSchemeStore';
 import { haptic } from '../utils/haptics';
 import { resolveIconSrc } from '../utils/favicon';
+import { buildBankUrl } from '../utils/urlScheme';
 import { Copy, Check, ScanLine, ExternalLink } from 'lucide-react';
 
+/**
+ * ScanPage state machine:
+ *
+ * 1. scanning=true  → camera active
+ * 2. scanning=false, parsed, bankUrl, showQR=false → ScanRedirectView
+ * 3. scanning=false, parsed, bankUrl, showQR=true  → QRDisplay overlay (X → back to redirect)
+ * 4. scanning=false, parsed, !bankUrl              → QRDisplay directly (hideClose, only rescan)
+ * 5. scanning=false, !parsed                       → raw result card
+ */
 export const ScanPage = () => {
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((s) => s.banks);
 
   const [scanResult, setScanResult] = useState<string | null>(null);
-  const [showQR, setShowQR] = useState(false);
   const [scanning, setScanning] = useState(true);
   const [copied, setCopied] = useState(false);
+  /** When true, QRDisplay is shown as overlay on top of ScanRedirectView. */
+  const [showQR, setShowQR] = useState(false);
 
   const parsed = useMemo(() => {
     if (!scanResult) return null;
@@ -28,16 +40,13 @@ export const ScanPage = () => {
     haptic();
     setScanResult(value);
     setScanning(false);
+    setShowQR(false);
   }, []);
 
   const handleRescan = useCallback(() => {
     setScanResult(null);
-    setShowQR(false);
     setScanning(true);
-  }, []);
-
-  const handleShowQR = useCallback(() => {
-    setShowQR(true);
+    setShowQR(false);
   }, []);
 
   /* ---------- QR Data for QRDisplay ---------- */
@@ -61,6 +70,23 @@ export const ScanPage = () => {
     [bank],
   );
 
+  /* ---------- Bank URL scheme ---------- */
+  const getConfig = useUrlSchemeStore((s) => s.getConfig);
+  const urlConfig = useMemo(
+    () => (parsed ? getConfig(parsed.bankCode) : null),
+    [getConfig, parsed],
+  );
+  const bankUrl = useMemo(() => {
+    if (!urlConfig || !parsed) return undefined;
+    return buildBankUrl(urlConfig.urlTemplate, {
+      bankCode: parsed.bankCode,
+      account: parsed.accountNumber,
+      paddedAccount: parsed.accountNumber.padStart(16, '0'),
+      amount: parsed.amount,
+      note: parsed.note,
+    });
+  }, [urlConfig, parsed]);
+
   /* ---------- Copy raw result ---------- */
   const handleCopyRaw = useCallback(async () => {
     if (!scanResult) return;
@@ -74,6 +100,28 @@ export const ScanPage = () => {
     }
   }, [scanResult]);
 
+  /* ---------- Derived state for readability ---------- */
+  const hasBankUrl = Boolean(bankUrl);
+
+  /* ---------- Shared QRDisplay props ---------- */
+  const qrDisplayProps = parsed && qrString ? {
+    value: qrString,
+    amount: parsed.amount,
+    bankName: bank?.name,
+    accountNumber: parsed.accountNumber,
+    bankCode: parsed.bankCode,
+    note: parsed.note,
+    shareData: {
+      bankCode: parsed.bankCode,
+      accountNumber: parsed.accountNumber,
+      amount: parsed.amount > 0 ? parsed.amount : undefined,
+      note: parsed.note,
+    },
+    bankIconUrl,
+    title: t.scan.title,
+    onRescan: handleRescan,
+  } : null;
+
   /* ---------- Layout ---------- */
   return (
     <div className="h-svh flex flex-col bg-zinc-50 dark:bg-zinc-950 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
@@ -86,17 +134,11 @@ export const ScanPage = () => {
         </header>
       )}
 
-      {/* Scanner or result */}
-      {scanning ? (
-        <QRScanner onScan={handleScan} active={scanning} />
-      ) : parsed ? (
-        <ScanResult
-          parsed={parsed}
-          onRescan={handleRescan}
-          onShowQR={handleShowQR}
-        />
-      ) : (
-        /* Non-TWQR scan result */
+      {/* Scanner */}
+      {scanning && <QRScanner onScan={handleScan} active={scanning} />}
+
+      {/* Non-TWQR scan result */}
+      {!scanning && !parsed && (
         <div className="flex-1 flex flex-col items-center justify-center p-5 gap-5">
           <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-lg p-6">
             <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-medium mb-3">
@@ -106,9 +148,7 @@ export const ScanPage = () => {
               {scanResult}
             </p>
 
-            {/* Actions for non-TWQR */}
             <div className="flex gap-3 mt-5">
-              {/* If it looks like a URL, offer to open it */}
               {scanResult && /^https?:\/\//i.test(scanResult) && (
                 <a
                   href={scanResult}
@@ -146,23 +186,33 @@ export const ScanPage = () => {
         </div>
       )}
 
-      {/* QR Display modal — reuses existing component for consistent UI */}
-      {showQR && qrString && parsed && (
-        <QRDisplay
-          value={qrString}
-          amount={parsed.amount}
-          bankName={bank?.name}
-          accountNumber={parsed.accountNumber}
-          bankCode={parsed.bankCode}
-          note={parsed.note}
-          shareData={{
-            bankCode: parsed.bankCode,
-            accountNumber: parsed.accountNumber,
-            amount: parsed.amount > 0 ? parsed.amount : undefined,
-            note: parsed.note,
-          }}
-          onClose={() => setShowQR(false)}
+      {/* TWQR with bank URL → redirect view (unless QR overlay shown) */}
+      {!scanning && parsed && hasBankUrl && !showQR && (
+        <ScanRedirectView
+          parsed={parsed}
+          bankUrl={bankUrl!}
+          bank={bank ?? null}
           bankIconUrl={bankIconUrl}
+          onShowQR={() => setShowQR(true)}
+          onRescan={handleRescan}
+        />
+      )}
+
+      {/* TWQR with bank URL + QR overlay — X closes overlay back to redirect view */}
+      {!scanning && parsed && hasBankUrl && showQR && qrDisplayProps && (
+        <QRDisplay
+          {...qrDisplayProps}
+          onClose={() => setShowQR(false)}
+          bankUrl={bankUrl}
+        />
+      )}
+
+      {/* TWQR without bank URL → QRDisplay directly, no X, only rescan */}
+      {!scanning && parsed && !hasBankUrl && qrDisplayProps && (
+        <QRDisplay
+          {...qrDisplayProps}
+          onClose={handleRescan}
+          hideClose
         />
       )}
     </div>

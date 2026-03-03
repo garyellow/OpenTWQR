@@ -29,6 +29,9 @@ const SharedPage = lazy(() =>
 const ImportPage = lazy(() =>
   import('./pages/ImportPage').then((m) => ({ default: m.ImportPage })),
 );
+const PaymentLinksPage = lazy(() =>
+  import('./pages/PaymentLinksPage').then((m) => ({ default: m.PaymentLinksPage })),
+);
 
 function App() {
   const refreshBanks = useBanksStore((state) => state.refreshBanks);
@@ -118,6 +121,7 @@ function App() {
             </Route>
             <Route path="/s/:data" element={<SharedPage />} />
             <Route path="/import" element={<ImportPage />} />
+            <Route path="/settings/payment-links" element={<PaymentLinksPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

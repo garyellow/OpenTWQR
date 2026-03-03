@@ -1,13 +1,10 @@
-import { useEffect, useRef, useState, memo } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import { useEffect, useRef, useState } from 'react';
 import { formatAmount } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useLocaleStore } from '../../stores/useLocaleStore';
-import type { QRCenterImageSettings } from '../../utils/qrLabel';
-
-/** Memoised QR Code to avoid re-rendering when parent state changes. */
-const MemoQRCode = memo(QRCodeSVG);
+import { StyledQRCode, type StyledQRCodeCenterImage } from './StyledQRCode';
+import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../../types';
 
 interface QRFullscreenProps {
   value: string;
@@ -16,7 +13,7 @@ interface QRFullscreenProps {
   note?: string;
   onExit: () => void;
   /** Dynamic center image settings (passed from QRDisplay). */
-  qrCenterImage: QRCenterImageSettings;
+  qrCenterImage: StyledQRCodeCenterImage | undefined;
   /** Custom display name from QR settings. */
   customName?: string;
   /** Whether to show bank name label from QR settings. */
@@ -27,13 +24,19 @@ interface QRFullscreenProps {
   bankCode?: string;
   /** Whether to show masked account number above QR. */
   showAccount?: boolean;
+  /** QR dot shape — passed from QRDisplay to respect isSharedView defaults. */
+  dotStyle?: QRDotStyle;
+  /** QR finder-pattern shape. */
+  eyeStyle?: QREyeStyle;
+  /** Error correction level. */
+  errorLevel?: QRErrorLevel;
 }
 
 /**
  * Full-black QR Code view for in-store payments.
  * Includes Screen Wake Lock and landscape-aware sizing.
  */
-export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount }: QRFullscreenProps) => {
+export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount, dotStyle = 'square', eyeStyle = 'square', errorLevel = 'Q' }: QRFullscreenProps) => {
   const t = useLocaleStore((s) => s.t);
   const ref = useRef<HTMLDivElement>(null);
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
@@ -108,14 +111,13 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
             ({bankCode}){' '}{accountNumber}
           </p>
         )}
-        <MemoQRCode
+        <StyledQRCode
           value={value}
           size={qrSize}
-          level="Q"
-          marginSize={4}
-          bgColor="#ffffff"
-          fgColor="#000000"
-          imageSettings={qrCenterImage}
+          dotStyle={dotStyle}
+          eyeStyle={eyeStyle}
+          errorLevel={errorLevel}
+          centerImage={qrCenterImage}
         />
         {/* Labels below QR: bank name (xs, light) then custom name (sm, semibold) */}
         {(customName || (showBankName && bankName)) && (
