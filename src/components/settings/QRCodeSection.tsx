@@ -29,14 +29,12 @@ export const QRCodeSection = () => {
   const setEyeStyle = useQRSettingsStore((s) => s.setEyeStyle);
   const setErrorLevel = useQRSettingsStore((s) => s.setErrorLevel);
 
-  const hasLogo = logoType === 'bank';
+  const bankIconEnabled = logoType === 'bank';
 
   const [showSettings, setShowSettings] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [draftName, setDraftName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const bankIconEnabled = logoType === 'bank';
 
   const handleToggleLogo = useCallback(() => { haptic(); setLogoType(bankIconEnabled ? 'opentwqr' : 'bank'); }, [bankIconEnabled, setLogoType]);
   const handleToggleAccount = useCallback(() => { haptic(); setShowAccount(!showAccount); }, [showAccount, setShowAccount]);
@@ -47,7 +45,7 @@ export const QRCodeSection = () => {
   const handleSetErrorLevel = useCallback((l: QRErrorLevel) => { haptic(); setErrorLevel(l); }, [setErrorLevel]);
 
   /** Whether the selected error level is auto-upgraded due to active logo. */
-  const logoForcesUpgrade = hasLogo && (errorLevel === 'L' || errorLevel === 'M');
+  const logoForcesUpgrade = bankIconEnabled && (errorLevel === 'L' || errorLevel === 'M');
 
   const handleOpenNameModal = useCallback(() => {
     setDraftName(customName);
@@ -270,7 +268,7 @@ export const QRCodeSection = () => {
                       <div className="flex gap-2">
                         {(['L', 'M', 'Q', 'H'] as const).map((level) => {
                           const isActive = errorLevel === level;
-                          const isDisabled = hasLogo && (level === 'L' || level === 'M');
+                          const isDisabled = bankIconEnabled && (level === 'L' || level === 'M');
                           return (
                             <button
                               key={level}
@@ -293,7 +291,7 @@ export const QRCodeSection = () => {
                           );
                         })}
                       </div>
-                      {hasLogo && (
+                      {bankIconEnabled && (
                         <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5">{t.qrSettings.errorLevelDesc}</p>
                       )}
                     </div>

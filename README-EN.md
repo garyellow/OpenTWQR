@@ -84,7 +84,9 @@ OpenTWQR lets you quickly generate personal payment QR Codes that comply with th
 - **Quick QR** — Generate a QR Code instantly by entering a bank code and account number, no saved account needed
 - **Multi-Account Management** — Support multiple bank accounts with nicknames for quick switching
 - **Bank Icons** — Automatically displays official bank icons, with the option to set custom icons
-- **QR Display Settings** — Customize the center logo (OpenTWQR / bank icon), name label, and bank name display
+- **QR Code Appearance & Display Settings** — Customize the center logo (OpenTWQR / bank icon), name label, and QR dot/eye shape
+- **TWQR Scanning** — Scan TWQR QR Codes to auto-parse payment info and display an outbound QR Code
+- **Payment App Integration** — Set up URL templates for your bank’s payment app; open it with one tap after scanning
 - **Secure Sharing** — Share payment codes via encrypted links with optional password and expiration
 - **Backup & Transfer** — Export encrypted backup strings to easily transfer data to other devices
 - **Offline Ready** — Installable as a PWA; generates payment codes without an internet connection

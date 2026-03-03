@@ -382,7 +382,7 @@ const zhTW = {
     phNote: '備註（已 URL 編碼）',
 
     deleteTitle: '刪除支付連動',
-    deleteConfirm: '確定要刪除此銀行的連動設定嗎？此操作無法復原。',
+    deleteConfirm: '確定要刪除此支付連動設定嗎？此操作無法復原。',
     save: '儲存',
   },
 

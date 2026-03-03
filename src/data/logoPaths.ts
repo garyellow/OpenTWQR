@@ -80,7 +80,7 @@ export const VERTICAL_OPEN_Y = 0;
 export const VERTICAL_TWQR_X = 2.35;
 export const VERTICAL_TWQR_Y = 44;
 
-/* ── Pre-built SVG strings (for data-URI / qrcode.react) ── */
+/* ── Pre-built SVG strings (exported as data-URI for QR center image) ── */
 
 /** Shared TWQR sub-paths fragment (no wrapping `<g>`). */
 const twqrPaths =

@@ -107,7 +107,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           if (!cancelled) setBankIconInfo({ ...info, dataUri: uri });
         })
         .catch(() => {
-          /* CORS blocked — getExportSvgEl will fall back to vertical OpenTWQR */
+          /* CORS blocked — centerImageForQR will be undefined; QR renders without bank icon */
         });
     };
     img.onerror = () => {
