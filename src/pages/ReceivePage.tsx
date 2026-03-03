@@ -5,7 +5,7 @@ import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars } from '../utils/twqr';
-import { QrCode, ChevronRight, MessageSquare, X, Download, Zap } from 'lucide-react';
+import { QrCode, ChevronRight, MessageSquare, X, Download, Zap, BookOpen } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
@@ -14,9 +14,10 @@ import { BankIcon } from '../components/accounts/BankIcon';
 import { haptic } from '../utils/haptics';
 import { resolveIconSrc } from '../utils/favicon';
 import { QuickQRModal } from '../components/receive/QuickQRModal';
+import { generateId } from '../utils/generateId';
 
 export const ReceivePage = () => {
-  const { accounts, selectedAccountId, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
+  const { accounts, selectedAccountId, addAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showImport, setShowImport] = useState(false);
@@ -132,6 +133,27 @@ export const ReceivePage = () => {
           >
             <Zap size={20} aria-hidden="true" />
             {t.receive.quickQR}
+          </button>
+          <div className="relative flex items-center py-2">
+            <div className="flex-1 border-t border-zinc-200 dark:border-zinc-800" />
+            <span className="px-3 text-xs text-zinc-400 dark:text-zinc-500">{t.common.or}</span>
+            <div className="flex-1 border-t border-zinc-200 dark:border-zinc-800" />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              haptic();
+              addAccount({
+                id: generateId(),
+                bankCode: '004',
+                accountNumber: '0000123456789',
+                label: t.receive.loadSampleDesc,
+              });
+            }}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-base"
+          >
+            <BookOpen size={18} aria-hidden="true" />
+            {t.receive.loadSample}
           </button>
         </div>
         {showImport && <ImportDialog onClose={() => setShowImport(false)} />}

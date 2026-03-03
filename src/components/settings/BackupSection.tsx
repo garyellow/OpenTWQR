@@ -1,8 +1,15 @@
-import { useState } from 'react';
-import { Download, Upload } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Download, Upload, TriangleAlert } from 'lucide-react';
 import { ExportDialog } from './ExportDialog';
 import { ImportDialog } from './ImportDialog';
 import { useLocaleStore } from '../../stores/useLocaleStore';
+
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+const isStandalone = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  (navigator as unknown as { standalone?: boolean }).standalone === true;
 
 /**
  * Import/Export section for the Settings page.
@@ -12,6 +19,9 @@ export const BackupSection = () => {
   const [showExport, setShowExport] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const t = useLocaleStore((s) => s.t);
+
+  /** Show the iOS-specific warning only on iOS Safari, not in standalone mode. */
+  const showIOSWarning = useMemo(() => isIOS() && !isStandalone(), []);
 
   return (
     <div>
@@ -54,6 +64,17 @@ export const BackupSection = () => {
 
       {showExport && <ExportDialog onClose={() => setShowExport(false)} />}
       {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
+
+      {/* Storage risk reminder */}
+      <div className="mt-3 flex items-start gap-2.5 px-1">
+        <TriangleAlert size={14} className="text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+        <div className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          <p>{t.backup.storageWarning}</p>
+          {showIOSWarning && (
+            <p className="mt-1 text-amber-600 dark:text-amber-400">{t.backup.storageWarningIOS}</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

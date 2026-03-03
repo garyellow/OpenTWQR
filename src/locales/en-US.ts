@@ -14,6 +14,7 @@ const enUS: Translations = {
     goHome: 'Go to Home',
     understand: 'Got it',
     loading: 'Loading',
+    or: 'or',
   },
 
   /* ─── ReceivePage ──────────────────────────────────────── */
@@ -23,6 +24,8 @@ const enUS: Translations = {
     addBankAccount: 'Add Bank Account',
     importAccounts: 'Import Accounts',
     emptyHint: 'Add a bank account to start generating QR Codes.',
+    loadSample: 'Load Sample Account',
+    loadSampleDesc: 'Try it out first — delete it later in Accounts',
     generateQR: 'Generate QR',
     quickQR: 'Quick QR',
     quickQRDesc: 'Generate QR without saving an account',
@@ -239,6 +242,12 @@ const enUS: Translations = {
     exportDesc: 'Generate a backup string to save or share',
     importTitle: 'Import Accounts',
     importDesc: 'Paste backup string to restore accounts',
+    storageWarning: 'Your data is stored only in this device\'s browser. Clearing browser data or uninstalling may cause data loss. Back up regularly.',
+    storageWarningIOS: 'On iOS/iPadOS, if the app isn\'t added to the Home Screen, Safari may auto-clear data after 7 days of inactivity.',
+    reminderTitle: 'Backup Reminder',
+    reminderDesc: 'It\'s been over 30 days since your last backup. Back up now to prevent data loss.',
+    reminderAction: 'Go to Backup',
+    reminderDismiss: 'Later',
   },
 
   /* ─── ExportDialog ─────────────────────────────────────── */
@@ -314,6 +323,14 @@ const enUS: Translations = {
     sponsorDesc: 'Feed some tokens to the AI',
     githubTitle: 'GitHub Source',
     githubDesc: 'View source, report issues, contribute',
+    versionTitle: 'Version Info',
+    versionDesc: (hash: string) => `Build: ${hash}`,
+    checkUpdateTitle: 'Check for Updates',
+    checkUpdateDesc: 'Manually check for a new version',
+    checkingUpdate: 'Checking…',
+    upToDate: 'Already up to date',
+    updateAvailable: 'New version found, updating',
+    checkFailed: 'Check failed, try again later',
   },
 
   /* ─── Bottom Navigation ────────────────────────────────── */
@@ -450,6 +467,37 @@ const enUS: Translations = {
     title: 'Something went wrong',
     desc: 'An unexpected error has occurred. Please refresh and try again.',
     refresh: 'Refresh',
+  },
+  /* ─── ShareTarget ─────────────────────────────────────── */
+  shareTarget: {
+    prompt: 'What would you like to do with this account?',
+    addAccount: 'Save as My Account',
+    addAccountDesc: 'Add to your accounts list for quick QR generation',
+    pay: 'Go to Payment',
+    payDesc: 'View payment details and open payment app or QR Code',
+  },
+  /* ─── DangerSection ─────────────────────────────────── */
+  danger: {
+    sectionTitle: 'Danger Zone',
+    resetTitle: 'Reset All Data',
+    resetDesc: 'Clear all accounts, settings, and preferences',
+    resetConfirmTitle: 'Reset all data?',
+    resetConfirmDesc: 'This will permanently delete all accounts, backups, preferences, and app data. This cannot be undone.',
+    resetConfirm: 'Reset All Data',
+    resetCancel: 'Cancel',
+  },
+
+  /* ─── Onboarding ──────────────────────────────────── */
+  onboarding: {
+    skip: 'Skip',
+    next: 'Next',
+    getStarted: 'Get Started',
+    step1Title: 'Welcome to OpenTWQR',
+    step1Desc: 'Generate TWQR payment QR Codes for free. Recipients scan with their banking app to transfer money.',
+    step2Title: 'Add Your Bank Account',
+    step2Desc: 'Start by adding a receiving account, then quickly generate payment QR Codes anytime.',
+    step3Title: 'Share & Backup',
+    step3Desc: 'Share payment links or images, and encrypt-backup your account data for safekeeping.',
   },
 } as const;
 

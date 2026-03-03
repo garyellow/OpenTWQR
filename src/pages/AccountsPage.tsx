@@ -17,11 +17,15 @@ export const AccountsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  /* Auto-open add form when navigated with autoAdd state (e.g. from empty ReceivePage).
-     Derive initial value from location.state so no effect / setState is needed. */
+  // Read navigation state once — both isAdding and prefillData draw from the same
+  // location snapshot, so we cast it once here rather than repeating inside each initializer.
+  type LocationState = { autoAdd?: boolean; prefill?: { bankCode: string; accountNumber: string } } | null;
+  const locationState = location.state as LocationState;
+
+  /* Auto-open add form when navigated with autoAdd state (e.g. from empty ReceivePage
+     or Web Share Target). Derive initial value from location.state so no effect / setState is needed. */
   const [isAdding, setIsAdding] = useState(() => {
-    const state = location.state as { autoAdd?: boolean } | null;
-    if (state?.autoAdd) {
+    if (locationState?.autoAdd) {
       // Clear only the user state; preserve React Router's internal keys (key, idx)
       const hs = window.history.state;
       window.history.replaceState(hs ? { ...hs, usr: undefined } : {}, '');
@@ -29,6 +33,8 @@ export const AccountsPage = () => {
     }
     return false;
   });
+  /** Pre-fill bankCode/accountNumber when arriving from Web Share Target disambiguation. */
+  const prefillData = locationState?.prefill ?? null;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
@@ -167,7 +173,13 @@ export const AccountsPage = () => {
                 {editingId ? t.accounts.editTitle : t.accounts.addTitle}
               </h2>
               <AccountForm
-                initialData={editingId ? accounts.find((a) => a.id === editingId) : undefined}
+                initialData={
+                  editingId
+                    ? accounts.find((a) => a.id === editingId)
+                    : prefillData
+                      ? { bankCode: prefillData.bankCode, accountNumber: prefillData.accountNumber }
+                      : undefined
+                }
                 editingId={editingId ?? undefined}
                 onSubmit={
                   editingId

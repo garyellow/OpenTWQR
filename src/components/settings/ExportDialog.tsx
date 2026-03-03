@@ -45,6 +45,8 @@ export const ExportDialog = ({ onClose }: { onClose: () => void }) => {
     if (res.ok) {
       setResult(res.data);
       haptic();
+      // Record last backup timestamp for the backup reminder feature
+      try { localStorage.setItem('opentwqr-last-backup', String(Date.now())); } catch { /* noop */ }
     } else {
       setError(t.exportDialog.exportFailed);
     }

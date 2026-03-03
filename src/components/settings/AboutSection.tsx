@@ -1,4 +1,5 @@
-import { Heart } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Heart, Info, RefreshCw } from 'lucide-react';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 
 /** GitHub logo from Simple Icons (MIT). Avoids deprecated lucide brand icons. */
@@ -22,6 +23,59 @@ const GithubIcon = ({ size = 18, className }: { size?: number; className?: strin
  */
 export const AboutSection = () => {
   const t = useLocaleStore((s) => s.t);
+  const [checkState, setCheckState] = useState<'idle' | 'checking' | 'up-to-date' | 'found' | 'error'>('idle');
+  const resetTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current !== null) {
+        window.clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleCheckUpdate = useCallback(async () => {
+    if (checkState === 'checking') return;
+    setCheckState('checking');
+    try {
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if (!reg) {
+        setCheckState('error');
+        return;
+      }
+
+      const hadWaiting = Boolean(reg.waiting);
+      let updateFound = false;
+      const onUpdateFound = () => {
+        updateFound = true;
+      };
+
+      reg.addEventListener('updatefound', onUpdateFound);
+      await reg.update();
+      reg.removeEventListener('updatefound', onUpdateFound);
+
+      if (updateFound || (!hadWaiting && Boolean(reg.waiting || reg.installing))) {
+        setCheckState('found');
+      } else {
+        setCheckState('up-to-date');
+      }
+    } catch {
+      setCheckState('error');
+    }
+
+    if (resetTimerRef.current !== null) {
+      window.clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = window.setTimeout(() => setCheckState('idle'), 3000);
+  }, [checkState]);
+
+  const checkLabel = {
+    idle: t.about.checkUpdateDesc,
+    checking: t.about.checkingUpdate,
+    'up-to-date': t.about.upToDate,
+    found: t.about.updateAvailable,
+    error: t.about.checkFailed,
+  }[checkState];
 
   return (
     <div>
@@ -62,6 +116,37 @@ export const AboutSection = () => {
             </p>
           </div>
         </a>
+
+        {/* Version info */}
+        <div className="w-full flex items-center gap-3 p-4">
+          <div className="w-9 h-9 rounded-xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
+            <Info size={18} className="text-violet-600 dark:text-violet-400" aria-hidden="true" />
+          </div>
+          <div className="text-left flex-1">
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.versionTitle}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono">
+              {t.about.versionDesc(__BUILD_HASH__)}
+            </p>
+          </div>
+        </div>
+
+        {/* Check for updates */}
+        <button
+          type="button"
+          onClick={handleCheckUpdate}
+          disabled={checkState === 'checking'}
+          className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+        >
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+            <RefreshCw size={18} className={`text-emerald-600 dark:text-emerald-400 ${checkState === 'checking' ? 'animate-spin' : ''}`} aria-hidden="true" />
+          </div>
+          <div className="text-left flex-1">
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.checkUpdateTitle}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {checkLabel}
+            </p>
+          </div>
+        </button>
       </div>
     </div>
   );

@@ -29,10 +29,20 @@ export const useAppStore = create<AppState>()(
       receiveAmount: '',
       receiveNote: '',
       addAccount: (account) =>
-        set((state) => ({
-          accounts: [...state.accounts, account],
-          selectedAccountId: state.accounts.length === 0 ? account.id : state.selectedAccountId,
-        })),
+        set((state) => {
+          const isFirst = state.accounts.length === 0;
+
+          // Request persistent storage on first account add (fire-and-forget).
+          // Chrome auto-grants for installed PWAs; Safari/Firefox may prompt.
+          if (isFirst && navigator.storage?.persist) {
+            navigator.storage.persist().catch(() => { /* noop */ });
+          }
+
+          return {
+            accounts: [...state.accounts, account],
+            selectedAccountId: isFirst ? account.id : state.selectedAccountId,
+          };
+        }),
       removeAccount: (id) =>
         set((state) => {
           const nextAccounts = state.accounts.filter((a) => a.id !== id);

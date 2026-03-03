@@ -1,9 +1,21 @@
 import { defineConfig } from 'vite'
+import { execSync } from 'node:child_process'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const commitHash = (() => {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim()
+  } catch {
+    return 'dev'
+  }
+})()
+
 export default defineConfig({
+  define: {
+    __BUILD_HASH__: JSON.stringify(commitHash),
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -91,11 +103,11 @@ export default defineConfig({
             url: '/settings',
           },
         ],
-        // Web Share Target: allow users to share an OTWQR backup string
-        // TO this app via the system share sheet (Chromium PWA only).
+        // Web Share Target: allow users to share OTWQR backup strings and TWQR
+        // payment codes TO this app via the system share sheet (Chromium PWA only).
         ...({
           share_target: {
-            action: '/import',
+            action: '/share',
             method: 'GET',
             params: { text: 'text', title: 'title', url: 'url' },
           },

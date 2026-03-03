@@ -8,6 +8,8 @@ import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { PrivacyScreen } from './components/auth/PrivacyScreen';
 import { ReloadPrompt } from './components/layout/ReloadPrompt';
 import { InstallPrompt } from './components/layout/InstallPrompt';
+import { BackupReminder } from './components/layout/BackupReminder';
+import { OnboardingOverlay } from './components/layout/OnboardingOverlay';
 import { PageLoader } from './components/layout/PageLoader';
 import { TabLayout } from './components/layout/TabLayout';
 
@@ -26,8 +28,8 @@ const ScanPage = lazy(() =>
 const SharedPage = lazy(() =>
   import('./pages/SharedPage').then((m) => ({ default: m.SharedPage })),
 );
-const ImportPage = lazy(() =>
-  import('./pages/ImportPage').then((m) => ({ default: m.ImportPage })),
+const SharePage = lazy(() =>
+  import('./pages/SharePage').then((m) => ({ default: m.SharePage })),
 );
 const PaymentLinksPage = lazy(() =>
   import('./pages/PaymentLinksPage').then((m) => ({ default: m.PaymentLinksPage })),
@@ -41,6 +43,7 @@ function App() {
   /* ---------- Auth lock state ---------- */
   const location = useLocation();
   const isSharedPage = location.pathname.startsWith('/s/');
+  const isShareTargetPage = location.pathname.startsWith('/share');
   const authHydrated = useAuthStore((s) => s.isHydrated);
   const authEnabled = useAuthStore((s) => s.isEnabled);
   const authUnlocked = useAuthStore((s) => s.isUnlocked);
@@ -52,6 +55,7 @@ function App() {
   const appHydrated = useAppStore((s) => s.isHydrated);
 
   const showLockScreen = authEnabled && !authUnlocked && !isSharedPage && authHydrated;
+  const showGlobalAssistiveUI = !isSharedPage && !isShareTargetPage && !showLockScreen;
 
   /* ---------- Auto-lock on visibility change ---------- */
   const hiddenAtRef = useRef<number | null>(null);
@@ -120,7 +124,8 @@ function App() {
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="/s/:data" element={<SharedPage />} />
-            <Route path="/import" element={<ImportPage />} />
+            <Route path="/share" element={<SharePage />} />
+            <Route path="/import" element={<SharePage />} />
             <Route path="/settings/payment-links" element={<PaymentLinksPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -128,6 +133,8 @@ function App() {
       )}
       <ReloadPrompt />
       <InstallPrompt />
+      {showGlobalAssistiveUI && <BackupReminder />}
+      {showGlobalAssistiveUI && <OnboardingOverlay />}
       <PrivacyScreen />
     </>
   );

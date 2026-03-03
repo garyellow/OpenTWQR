@@ -12,6 +12,7 @@ const zhTW = {
     goHome: '前往首頁',
     understand: '了解',
     loading: '載入中',
+    or: '或',
   },
 
   /* ─── ReceivePage ──────────────────────────────────────── */
@@ -21,6 +22,8 @@ const zhTW = {
     addBankAccount: '新增銀行帳戶',
     importAccounts: '匯入帳戶',
     emptyHint: '新增銀行帳戶即可開始產生收款 QR Code。',
+    loadSample: '載入範例帳戶',
+    loadSampleDesc: '先體驗看看，之後可在帳戶管理中刪除',
     generateQR: '產生 QR Code',
     quickQR: '快速產碼',
     quickQRDesc: '不建立帳戶，直接輸入帳號產生 QR Code',
@@ -237,6 +240,12 @@ const zhTW = {
     exportDesc: '產生備份字串，可複製保存或傳送',
     importTitle: '匯入帳戶',
     importDesc: '貼上備份字串以還原帳戶資料',
+    storageWarning: '你的資料僅儲存於此裝置的瀏覽器中，清除瀏覽資料或解除安裝可能導致資料遺失。建議定期備份。',
+    storageWarningIOS: '在 iOS/iPadOS 上，若未將應用程式加入主畫面，Safari 可能在 7 天無使用後自動清除資料。',
+    reminderTitle: '備份提醒',
+    reminderDesc: '已超過 30 天未備份，建議立即備份以防資料遺失。',
+    reminderAction: '前往備份',
+    reminderDismiss: '稍後再說',
   },
 
   /* ─── ExportDialog ─────────────────────────────────────── */
@@ -312,6 +321,14 @@ const zhTW = {
     sponsorDesc: '請 AI 吃點 Token，支持專案持續維護',
     githubTitle: 'GitHub 原始碼',
     githubDesc: '檢視原始碼、回報問題或參與貢獻',
+    versionTitle: '版本資訊',
+    versionDesc: (hash: string) => `建置版本：${hash}`,
+    checkUpdateTitle: '檢查更新',
+    checkUpdateDesc: '手動檢查是否有新版本可用',
+    checkingUpdate: '檢查中…',
+    upToDate: '已是最新版本',
+    updateAvailable: '發現新版本，即將更新',
+    checkFailed: '檢查失敗，請稍後再試',
   },
 
   /* ─── Bottom Navigation ────────────────────────────────── */
@@ -450,7 +467,37 @@ const zhTW = {
     desc: '應用程式發生預期外的錯誤，請重新整理後再試。',
     refresh: '重新整理',
   },
+  /* ─── ShareTarget ─────────────────────────────────────── */
+  shareTarget: {
+    prompt: '要用這個收款帳號做什麼？',
+    addAccount: '存為我的帳號',
+    addAccountDesc: '加入收款帳號清單，方便下次產生 QR Code',
+    pay: '前往支付',
+    payDesc: '查看付款資訊，並開啟支付 App 或 QR Code',
+  },
+  /* ─── DangerSection ─────────────────────────────────── */
+  danger: {
+    sectionTitle: '危險操作',
+    resetTitle: '重置所有資料',
+    resetDesc: '清除所有帳戶、設定與偏好設定，回復初始狀態',
+    resetConfirmTitle: '確定要重置所有資料？',
+    resetConfirmDesc: '此操作將永久刪除所有帳戶、備份、偏好設定和應用程式資料，無法復原。',
+    resetConfirm: '重置所有資料',
+    resetCancel: '取消',
+  },
 
+  /* ─── Onboarding ──────────────────────────────────── */
+  onboarding: {
+    skip: '略過',
+    next: '下一步',
+    getStarted: '開始使用',
+    step1Title: '歡迎使用 OpenTWQR',
+    step1Desc: '免費產生 TWQR 個人收款 QR Code，對方用銀行 App 掃碼即可轉帳。',
+    step2Title: '新增你的銀行帳戶',
+    step2Desc: '先新增一個收款帳戶，之後就能快速產生收款 QR Code。',
+    step3Title: '分享與備份',
+    step3Desc: '支援分享連結、下載圖片，也能加密備份帳戶資料。',
+  },
 } as const;
 
 /**

@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { QRScanner } from '../components/scan/QRScanner';
 import { QRDisplay } from '../components/receive/QRDisplay';
 import { ScanRedirectView } from '../components/scan/ScanRedirectView';
@@ -15,6 +16,7 @@ import { Copy, Check, ScanLine, ExternalLink } from 'lucide-react';
 /**
  * ScanPage state machine:
  *
+ * 0. scanning=false (preloadedResult from Share Target) → jump to state 2–4
  * 1. scanning=true  → camera active
  * 2. scanning=false, parsed, bankUrl, showQR=false → ScanRedirectView
  * 3. scanning=false, parsed, bankUrl, showQR=true  → QRDisplay overlay (X → back to redirect)
@@ -24,9 +26,26 @@ import { Copy, Check, ScanLine, ExternalLink } from 'lucide-react';
 export const ScanPage = () => {
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((s) => s.banks);
+  const location = useLocation();
+  const preloadedFromShare = (location.state as { preloadedResult?: string } | null)?.preloadedResult;
 
-  const [scanResult, setScanResult] = useState<string | null>(null);
-  const [scanning, setScanning] = useState(true);
+  /**
+   * When navigating here from the Share Target disambiguation screen
+   * (`location.state.preloadedResult` is set), skip the camera and jump
+   * directly to the result view. Clear navigation state immediately so
+   * a back-then-forward doesn't re-trigger the preload.
+   */
+  const [scanResult, setScanResult] = useState<string | null>(() => {
+    if (preloadedFromShare) {
+      const hs = window.history.state;
+      window.history.replaceState(hs ? { ...hs, usr: undefined } : {}, '');
+      return preloadedFromShare;
+    }
+    return null;
+  });
+  const [scanning, setScanning] = useState(
+    !preloadedFromShare,
+  );
   const [copied, setCopied] = useState(false);
   /** When true, QRDisplay is shown as overlay on top of ScanRedirectView. */
   const [showQR, setShowQR] = useState(false);
