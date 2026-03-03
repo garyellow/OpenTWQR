@@ -5,7 +5,7 @@ import { QRDisplay } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars, stripCompanySuffix } from '../utils/twqr';
-import { QrCode, ChevronRight, MessageSquare, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
+import { QrCode, ChevronRight, MessageSquare, Tag, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
@@ -15,16 +15,20 @@ import { haptic } from '../utils/haptics';
 import { resolveIconSrc } from '../utils/favicon';
 import { QuickQRModal } from '../components/receive/QuickQRModal';
 import { generateId } from '../utils/generateId';
+import { useQRSettingsStore } from '../stores/useQRSettingsStore';
 
 export const ReceivePage = () => {
   const { accounts, selectedAccountId, addAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
   const [showNoteInput, setShowNoteInput] = useState(false);
+  const [showMessageInput, setShowMessageInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showQuickAccess, setShowQuickAccess] = useState(false);
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
+  const customName = useQRSettingsStore((s) => s.customName);
+  const setCustomName = useQRSettingsStore((s) => s.setCustomName);
 
   const selectedAccount = useMemo(
     () => accounts.find((a) => a.id === selectedAccountId) || accounts[0],
@@ -79,7 +83,7 @@ export const ReceivePage = () => {
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
       // Enter — generate / show QR Code
-      if (e.key === 'Enter' && !showQR && !showNoteInput && !showImport) {
+      if (e.key === 'Enter' && !showQR && !showNoteInput && !showMessageInput && !showImport) {
         e.preventDefault();
         haptic();
         setShowQR(true);
@@ -88,7 +92,7 @@ export const ReceivePage = () => {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [accounts.length, showQR, showNoteInput, showImport]);
+  }, [accounts.length, showQR, showNoteInput, showMessageInput, showImport]);
 
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
@@ -225,15 +229,23 @@ export const ReceivePage = () => {
           <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
             <AmountInput value={amount} onChange={setAmount} />
 
-            {/* Transaction note toggle */}
-            <div className="w-full max-w-sm mx-auto px-4">
+            {/* Transaction note & personal message */}
+            <div className="w-full max-w-sm mx-auto px-4 flex flex-col items-center">
               <button
                 type="button"
                 onClick={() => setShowNoteInput(true)}
-                className="flex items-center gap-2 mx-auto text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-3 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
               >
                 <MessageSquare size={16} aria-hidden="true" />
                 <span>{note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowMessageInput(true)}
+                className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+              >
+                <Tag size={16} aria-hidden="true" />
+                <span>{customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}</span>
               </button>
             </div>
           </div>
@@ -311,6 +323,78 @@ export const ReceivePage = () => {
                     className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                   >
                     {t.receive.clearNote}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="flex-2 py-4 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  {t.common.confirm}
+                </button>
+              </div>
+            </>
+          )}
+        </AnimatedModal>
+      )}
+
+      {/* Personal message modal — AnimatedModal */}
+      {showMessageInput && (
+        <AnimatedModal
+          onClose={() => setShowMessageInput(false)}
+          overlayClass="z-50"
+          cardClass="max-w-sm p-6"
+          ariaLabelledby="message-modal-title"
+        >
+          {(requestClose) => (
+            <>
+              <div className="flex items-center justify-between mb-5">
+                <h2 id="message-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  {t.receive.messageTitle}
+                </h2>
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  aria-label={t.common.close}
+                  className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="message-modal-input"
+                  aria-label={t.receive.messageTitle}
+                  value={customName}
+                  onChange={(e) => setCustomName(removeInvisibleChars(e.target.value).slice(0, 20))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      requestClose();
+                    }
+                  }}
+                  placeholder={t.receive.messagePlaceholder}
+                  autoFocus
+                  autoComplete="off"
+                  maxLength={20}
+                  className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 dark:text-zinc-400 pointer-events-none">
+                  {customName.length}/20
+                </span>
+              </div>
+              <div className="flex gap-3 mt-4">
+                {customName && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomName('');
+                      requestClose();
+                    }}
+                    className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  >
+                    {t.receive.clearMessage}
                   </button>
                 )}
                 <button

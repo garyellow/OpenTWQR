@@ -40,6 +40,11 @@ const zhTW = {
     noteLabel: '交易備註',
     notePlaceholder: '輸入備註，最多 19 字…',
     clearNote: '清除備註',
+    addMessage: '新增個人訊息',
+    messageTitle: '個人訊息',
+    messagePlaceholder: '例如：小明…',
+    messagePrefix: '訊息：',
+    clearMessage: '清除訊息',
   },
 
   /* ─── AmountInput ──────────────────────────────────────── */
@@ -76,9 +81,6 @@ const zhTW = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
-    editCustomName: '編輯個人訊息',
-    customNamePlaceholder: '輸入個人訊息（選填）',
-    addCustomName: '新增個人訊息',
   },
 
   /* ─── Share menu ───────────────────────────────────────── */

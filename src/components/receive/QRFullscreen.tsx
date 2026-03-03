@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { formatAmount, maskAccount, formatAccountDisplay } from '../../utils/twqr';
+import { formatAmount } from '../../utils/twqr';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -104,12 +104,11 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
       onClick={requestClose}
       onAnimationEnd={onAnimationEnd}
     >
-      {/* Custom name above QR card */}
-      {customName && (
-        <p className="text-sm font-semibold text-white/80 mb-4 text-center px-6">{customName}</p>
-      )}
-
       <div className="bg-white p-8 rounded-2xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
+        {/* Custom name inside white card, above QR */}
+        {customName && (
+          <p className="text-sm font-semibold text-zinc-800 text-center mb-4">{customName}</p>
+        )}
         <StyledQRCode
           value={value}
           size={qrSize}
@@ -121,6 +120,12 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
         {showBankName && bankName && bankCode && (
           <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
             ({bankCode}) {bankName}
+          </p>
+        )}
+        {/* Account number — invisible when hidden to preserve height */}
+        {showAccount && accountNumber && (
+          <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${accountRevealed ? '' : ' invisible'}`}>
+            {accountNumber}
           </p>
         )}
       </div>
@@ -136,11 +141,6 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
           </div>
         ) : (
           <p className="text-lg font-medium text-white/50">{t.amount.payerEnter}</p>
-        )}
-        {showAccount && accountNumber && (
-          <p className="font-mono text-sm text-white/60 tracking-wider">
-            {accountRevealed ? formatAccountDisplay(accountNumber) : maskAccount(accountNumber)}
-          </p>
         )}
         {note && <p className="text-white/50 text-xs">{t.qr.notePrefix}{note}</p>}
       </div>

@@ -42,6 +42,11 @@ const enUS: Translations = {
     noteLabel: 'Note',
     notePlaceholder: 'Up to 19 chars…',
     clearNote: 'Clear',
+    addMessage: 'Add Personal Message',
+    messageTitle: 'Personal Message',
+    messagePlaceholder: 'e.g., John…',
+    messagePrefix: 'Message: ',
+    clearMessage: 'Clear',
   },
 
   /* ─── AmountInput ──────────────────────────────────────── */
@@ -78,9 +83,6 @@ const enUS: Translations = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
-    editCustomName: 'Edit personal message',
-    customNamePlaceholder: 'Enter a personal message (optional)',
-    addCustomName: 'Add personal message',
   },
 
   /* ─── Share menu ───────────────────────────────────────── */

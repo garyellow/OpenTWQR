@@ -118,7 +118,30 @@ export const QRCodeSection = () => {
               </div>
 
               <div className="divide-y divide-zinc-100 dark:divide-zinc-800/50 mt-4">
-                {/* 1. Bank icon toggle */}
+                {/* 1. Custom name — taps into name edit modal */}
+                <button
+                  type="button"
+                  onClick={handleOpenNameModal}
+                  className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
+                      <Tag size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.customNameTitle}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t.qrSettings.customNameDesc}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                    {customName.trim() && (
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-20">{customName.trim()}</span>
+                    )}
+                    <ChevronRight size={16} className="text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
+                  </div>
+                </button>
+
+                {/* 2. Bank icon toggle */}
                 <button
                   type="button"
                   role="switch"
@@ -136,26 +159,6 @@ export const QRCodeSection = () => {
                     </div>
                   </div>
                   {toggleSwitch(bankIconEnabled)}
-                </button>
-
-                {/* 2. Show account number toggle */}
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={showAccount}
-                  onClick={handleToggleAccount}
-                  className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center shrink-0">
-                      <CreditCard size={18} className="text-violet-600 dark:text-violet-400" aria-hidden="true" />
-                    </div>
-                    <div className="text-left min-w-0">
-                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.showAccountTitle}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t.qrSettings.showAccountDesc}</p>
-                    </div>
-                  </div>
-                  {toggleSwitch(showAccount)}
                 </button>
 
                 {/* 3. Show bank name toggle */}
@@ -178,27 +181,24 @@ export const QRCodeSection = () => {
                   {toggleSwitch(showBankName)}
                 </button>
 
-                {/* 4. Custom name — taps into name edit modal */}
+                {/* 4. Show account number toggle */}
                 <button
                   type="button"
-                  onClick={handleOpenNameModal}
+                  role="switch"
+                  aria-checked={showAccount}
+                  onClick={handleToggleAccount}
                   className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Tag size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                    <div className="w-9 h-9 rounded-xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center shrink-0">
+                      <CreditCard size={18} className="text-violet-600 dark:text-violet-400" aria-hidden="true" />
                     </div>
                     <div className="text-left min-w-0">
-                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.customNameTitle}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t.qrSettings.customNameDesc}</p>
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.showAccountTitle}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t.qrSettings.showAccountDesc}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 ml-3">
-                    {customName.trim() && (
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-20">{customName.trim()}</span>
-                    )}
-                    <ChevronRight size={16} className="text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
-                  </div>
+                  {toggleSwitch(showAccount)}
                 </button>
 
                 {/* 5. QR Code appearance — opens style modal */}
