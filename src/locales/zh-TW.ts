@@ -354,7 +354,7 @@ const zhTW = {
     checkUpdateDesc: '手動檢查是否有新版本可用',
     checkingUpdate: '檢查中…',
     upToDate: '已是最新版本',
-    updateAvailable: '發現新版本，即將更新',
+    updateAvailable: '發現新版本，點此重新載入',
     checkFailed: '檢查失敗，請稍後再試',
   },
 

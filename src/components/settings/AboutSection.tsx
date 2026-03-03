@@ -36,6 +36,13 @@ export const AboutSection = () => {
 
   const handleCheckUpdate = useCallback(async () => {
     if (checkState === 'checking') return;
+
+    // If update already found, just reload the page — new SW is already active.
+    if (checkState === 'found') {
+      window.location.reload();
+      return;
+    }
+
     setCheckState('checking');
     try {
       const reg = await navigator.serviceWorker?.getRegistration();
@@ -54,11 +61,11 @@ export const AboutSection = () => {
       await reg.update();
       reg.removeEventListener('updatefound', onUpdateFound);
 
-      if (updateFound || (!hadWaiting && Boolean(reg.waiting || reg.installing))) {
+      if (hadWaiting || updateFound || Boolean(reg.waiting || reg.installing)) {
         setCheckState('found');
-      } else {
-        setCheckState('up-to-date');
+        return;
       }
+      setCheckState('up-to-date');
     } catch {
       setCheckState('error');
     }
@@ -138,11 +145,11 @@ export const AboutSection = () => {
           className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
           <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
-            <RefreshCw size={18} className={`text-emerald-600 dark:text-emerald-400 ${checkState === 'checking' ? 'animate-spin' : ''}`} aria-hidden="true" />
+            <RefreshCw size={18} className={`text-emerald-600 dark:text-emerald-400 ${checkState === 'checking' ? 'animate-spin' : checkState === 'found' ? 'animate-pulse' : ''}`} aria-hidden="true" />
           </div>
           <div className="text-left flex-1">
             <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.checkUpdateTitle}</p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            <p className={`text-xs mt-0.5 ${checkState === 'found' ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}>
               {checkLabel}
             </p>
           </div>

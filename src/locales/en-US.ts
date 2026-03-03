@@ -356,7 +356,7 @@ const enUS: Translations = {
     checkUpdateDesc: 'Manually check for a new version',
     checkingUpdate: 'Checking…',
     upToDate: 'Already up to date',
-    updateAvailable: 'New version found, updating',
+    updateAvailable: 'New version found — tap to reload',
     checkFailed: 'Check failed, try again later',
   },
 
