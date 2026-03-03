@@ -51,7 +51,7 @@ export const PaymentLinksPage = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-20 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
-        <div className="p-4 flex items-center justify-between">
+        <div className="px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -77,7 +77,7 @@ export const PaymentLinksPage = () => {
       </header>
 
       {/* Content */}
-      <main id="payment-links-main" className="flex-1 p-5 max-w-md lg:max-w-lg mx-auto w-full">
+      <main id="payment-links-main" className="flex-1 px-6 py-5 max-w-md lg:max-w-lg mx-auto w-full">
         {configs.length === 0 ? (
           /* Empty state — mirrors AccountsPage */
           <div className="flex flex-col items-center justify-center py-24 text-center gap-6">

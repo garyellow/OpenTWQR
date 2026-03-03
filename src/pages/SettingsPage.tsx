@@ -22,8 +22,8 @@ export const SettingsPage = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-20 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
-        <div className="p-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 ml-1">{t.settings.title}</h1>
+        <div className="px-6 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t.settings.title}</h1>
           <div className="flex items-center">
             <LanguageToggle />
             <ThemeToggle />
@@ -32,7 +32,7 @@ export const SettingsPage = () => {
       </header>
 
       {/* Content */}
-      <main id="settings-main" className="flex-1 p-5 max-w-md lg:max-w-lg mx-auto w-full">
+      <main id="settings-main" className="flex-1 px-6 py-5 max-w-md lg:max-w-lg mx-auto w-full">
         <div className="space-y-8 pb-8">
           <PersonalizationSection />
           <UrlSchemeSection />

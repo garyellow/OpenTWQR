@@ -187,14 +187,22 @@ export const ReceivePage = () => {
 
       <main id="receive-main" className="flex-1 flex flex-col min-h-0 max-w-md lg:max-w-lg mx-auto w-full pb-safe">
         {/* Header */}
-        <header className="shrink-0 flex justify-between items-center px-5 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+        <header className="shrink-0 flex justify-between items-center px-6 py-4 pt-[calc(1rem+env(safe-area-inset-top))]">
           <h1>
-            <OpenTWQRLogo className="h-7 w-auto" />
+            <OpenTWQRLogo className="h-8 w-auto" />
           </h1>
+          <button
+            type="button"
+            onClick={() => setShowQuickAccess(true)}
+            aria-label={t.receive.quickAccess}
+            className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+          >
+            <Zap size={20} aria-hidden="true" />
+          </button>
         </header>
 
         {/* Account selector */}
-        <div className="shrink-0 px-5 mb-1">
+        <div className="shrink-0 px-6 mb-3">
           <Link
             to="/accounts"
             viewTransition
@@ -226,39 +234,47 @@ export const ReceivePage = () => {
 
         {/* Amount input, transaction note & generate button */}
         <div className="flex-1 flex flex-col justify-between min-h-0">
-          <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 min-h-0">
             <AmountInput value={amount} onChange={setAmount} />
 
-            {/* Transaction note & personal message — side by side */}
-            <div className="w-full max-w-sm mx-auto px-4 flex items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={() => setShowNoteInput(true)}
-                className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg whitespace-nowrap focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-              >
-                <StickyNote size={15} aria-hidden="true" className="shrink-0" />
-                <span className="truncate">{note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}</span>
-              </button>
-              <span className="text-zinc-300 dark:text-zinc-700 select-none" aria-hidden="true">|</span>
-              <button
-                type="button"
-                onClick={() => setShowMessageInput(true)}
-                className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2.5 min-h-11 rounded-lg whitespace-nowrap focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-              >
-                <UserPen size={15} aria-hidden="true" className="shrink-0" />
-                <span className="truncate">{customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}</span>
-              </button>
+            {/* Transaction note & personal message — two rows in a card */}
+            <div className="w-full px-6">
+              <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowNoteInput(true)}
+                  className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <StickyNote size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
+                  <span className={`flex-1 text-left truncate ${note ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                    {note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}
+                  </span>
+                  {note && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{note.length}/19</span>}
+                </button>
+                <div className="h-px bg-zinc-100 dark:bg-zinc-800 mx-4" aria-hidden="true" />
+                <button
+                  type="button"
+                  onClick={() => setShowMessageInput(true)}
+                  className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <UserPen size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
+                  <span className={`flex-1 text-left truncate ${customName ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                    {customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}
+                  </span>
+                  {customName && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{customName.length}/20</span>}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="shrink-0 px-5 pb-4 pt-1">
+          <div className="shrink-0 px-6 pb-5 pt-3">
             <button
               type="button"
               onClick={() => {
                 haptic();
                 setShowQR(true);
               }}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              className="w-full flex items-center justify-center gap-2.5 py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
               <QrCode size={22} aria-hidden="true" />
               {t.receive.generateQR}

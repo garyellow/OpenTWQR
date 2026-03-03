@@ -10,11 +10,33 @@ import { haptic } from '../utils/haptics';
 import { UserPlus, CreditCard, Banknote, StickyNote } from 'lucide-react';
 
 /**
+ * Returns true when `value` looks like one of our own encrypted share URLs,
+ * i.e. matches `<origin>/s/<base64url>#<base64url>`.
+ *
+ * The `#` arrives percent-encoded (%23) in the query-parameter value, but
+ * `URLSearchParams.get()` decodes it back to `#` before we see it here, so
+ * we can simply parse it with the `URL` constructor.
+ */
+function isOwnShareUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.origin === window.location.origin &&
+      /^\/s\/[A-Za-z0-9_-]+$/.test(url.pathname) &&
+      url.hash.length > 1
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Web Share Target landing page — `/share?text=<shared-text>`.
  * Routes shared content to the appropriate handler based on content type:
- *  - OTWQR backup string → ImportDialog
- *  - TWQR QR code string → disambiguation (save account vs. pay)
- *  - Otherwise           → redirect home
+ *  - OTWQR backup string      → ImportDialog
+ *  - TWQR QR code string      → disambiguation (save account vs. pay)
+ *  - OpenTWQR share URL       → redirect to /s/:data#fragment (SharedPage)
+ *  - Otherwise                → redirect home
  */
 export const SharePage = () => {
   const [params] = useSearchParams();
@@ -29,7 +51,7 @@ export const SharePage = () => {
   ].filter(Boolean) as string[];
 
   let sharedText = '';
-  let contentType: 'otwqr' | 'twqr' | 'unknown' = 'unknown';
+  let contentType: 'otwqr' | 'twqr' | 'shareurl' | 'unknown' = 'unknown';
 
   for (const candidate of candidates) {
     const trimmed = candidate.trim();
@@ -43,9 +65,23 @@ export const SharePage = () => {
       contentType = 'twqr';
       break;
     }
+    // Detect an encrypted OpenTWQR payment-link URL shared from another device.
+    // URLSearchParams.get() already percent-decodes the value, so the `#`
+    // fragment separator is restored from %23 before we reach this check.
+    if (contentType === 'unknown' && isOwnShareUrl(trimmed)) {
+      sharedText = trimmed;
+      contentType = 'shareurl';
+      // Don't break — a later candidate might be a higher-priority OTWQR/TWQR string.
+    }
   }
 
   if (!sharedText || contentType === 'unknown') return <Navigate to="/" replace />;
+
+  // Encrypted share URL → hand off to SharedPage which handles decryption.
+  if (contentType === 'shareurl') {
+    const { pathname, hash } = new URL(sharedText);
+    return <Navigate to={`${pathname}${hash}`} replace />;
+  }
 
   if (contentType === 'otwqr') {
     return (

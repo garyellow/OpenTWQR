@@ -172,8 +172,8 @@ export const ScanPage = () => {
       {/* Header — hidden while scanning to maximise camera real-estate */}
       {!scanning && (
         <header className="sticky top-0 z-20 shrink-0 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe animate-in fade-in duration-200">
-          <div className="flex items-center justify-between py-4 pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))]">
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 ml-1">
+          <div className="flex items-center justify-between py-4 pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))]">
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
               {t.scan.title}
             </h1>
           </div>
@@ -193,7 +193,7 @@ export const ScanPage = () => {
         <main id="scan-main" className="flex-1 flex flex-col min-h-0">
           {/* Non-TWQR scan result */}
           {!parsed && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-5 py-5 pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))]">
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 py-5 pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))]">
               <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-lg p-6">
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-medium mb-3">
                   {t.scan.rawResult}

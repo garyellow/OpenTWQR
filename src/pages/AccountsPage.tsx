@@ -78,8 +78,8 @@ export const AccountsPage = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-20 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
-        <div className="p-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 ml-1">{t.accounts.title}</h1>
+        <div className="px-6 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t.accounts.title}</h1>
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -102,7 +102,7 @@ export const AccountsPage = () => {
       </header>
 
       {/* Content */}
-      <main id="accounts-main" className="flex-1 p-5 max-w-md lg:max-w-lg mx-auto w-full">
+      <main id="accounts-main" className="flex-1 px-6 py-5 max-w-md lg:max-w-lg mx-auto w-full">
         {accounts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
             <div className="w-24 h-24 rounded-2xl bg-white dark:bg-zinc-900 text-zinc-300 dark:text-zinc-700 border border-zinc-200/50 dark:border-zinc-800/50 flex items-center justify-center shadow-xs">
