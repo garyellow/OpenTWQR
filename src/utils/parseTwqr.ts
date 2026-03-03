@@ -16,13 +16,28 @@ export interface ParsedTWQR {
 /**
  * Parse a TWQR protocol string into structured payment data.
  * Returns `null` if the string is not a valid TWQR format.
+ *
+ * Handles both raw (`TWQRP://...`) and URL-encoded (`TWQRP%3A%2F%2F...`)
+ * input — the latter can occur when a QR code encodes a percent-encoded URL.
  */
 export function parseTWQR(qrString: string): ParsedTWQR | null {
-  if (!qrString || !qrString.startsWith('TWQRP://')) return null;
+  if (!qrString) return null;
+
+  // Decode URL-encoded input (e.g. TWQRP%3A%2F%2F...) before checking the prefix.
+  let decoded = qrString;
+  if (qrString.includes('%')) {
+    try {
+      decoded = decodeURIComponent(qrString);
+    } catch {
+      // If decoding fails keep the original string and let the prefix check below handle it.
+    }
+  }
+
+  if (!decoded.startsWith('TWQRP://')) return null;
 
   try {
     // Replace custom TWQRP:// scheme with https:// so URL constructor can parse it
-    const urlString = qrString.replace('TWQRP://', 'https://');
+    const urlString = decoded.replace('TWQRP://', 'https://');
     const url = new URL(urlString);
     const params = url.searchParams;
 
@@ -46,7 +61,17 @@ export function parseTWQR(qrString: string): ParsedTWQR | null {
   }
 }
 
-/** Check if a string looks like a TWQR code. */
+/** Check if a string looks like a TWQR code (raw or URL-encoded). */
 export function isTWQR(value: string): boolean {
-  return typeof value === 'string' && value.startsWith('TWQRP://');
+  if (typeof value !== 'string') return false;
+  if (value.startsWith('TWQRP://')) return true;
+  // Also accept URL-encoded variant (TWQRP%3A%2F%2F...)
+  if (value.includes('%')) {
+    try {
+      return decodeURIComponent(value).startsWith('TWQRP://');
+    } catch {
+      return false;
+    }
+  }
+  return false;
 }

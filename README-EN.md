@@ -82,15 +82,16 @@ OpenTWQR lets you quickly generate personal payment QR Codes that comply with th
 
 - **Quick Payments** — Select an account, enter an amount, and generate a payment QR Code with one tap
 - **Quick QR** — Generate a QR Code instantly by entering a bank code and account number, no saved account needed
-- **Multi-Account Management** — Support multiple bank accounts with nicknames for quick switching
-- **Bank Icons** — Automatically displays official bank icons, with the option to set custom icons
-- **QR Code Appearance & Display Settings** — Customize the center logo (OpenTWQR / bank icon), name label, and QR dot/eye shape
+- **Multi-Account Management** — Support multiple accounts with nicknames for quick switching
+- **Institution Icons** — Automatically displays official institution icons, with the option to set custom icons
+- **QR Code Appearance & Display Settings** — Customize the center logo (OpenTWQR / institution icon), name label, and QR dot and finder pattern shapes
 - **TWQR Scanning** — Scan TWQR QR Codes to auto-parse payment info and display an outbound QR Code
-- **Payment App Integration** — Set up URL templates for your bank’s payment app; open it with one tap after scanning
+- **Payment App Integration** — Set up URL templates for your payment app; open it with one tap after scanning, supporting multiple institution configurations
 - **Secure Sharing** — Share payment codes via encrypted links with optional password and expiration
 - **Backup & Transfer** — Export encrypted backup strings to easily transfer data to other devices
 - **Offline Ready** — Installable as a PWA; generates payment codes without an internet connection
 - **Dark Mode & App Lock** — Light / Dark / System theme modes; enable device authentication (Face ID, fingerprint, etc.) to protect account data
+- **Language Toggle** — Switch between Traditional Chinese and English
 - **Custom Accent Color** — Choose your preferred accent color from presets or a hue slider with live preview
 
 ## Privacy & Security
@@ -134,7 +135,7 @@ OpenTWQR is a fully client-side application. Everything runs in your browser: ac
 </details>
 
 <details>
-<summary><strong>How often is the bank list updated?</strong></summary>
+<summary><strong>How often is the institution list updated?</strong></summary>
 <br />
 
 The financial institution list is primarily sourced from public data provided by the Financial Supervisory Commission (FSC) Banking Bureau, covering domestic banks, foreign banks, credit cooperatives, Mainland Chinese banks, and electronic payment institutions. If FSC Banking Bureau data is unavailable, the system automatically falls back to data from FISC and FSC open data. The list is updated daily via GitHub Actions. A built-in list ensures offline functionality.
@@ -151,7 +152,7 @@ All major browsers are supported, including Chrome, Safari, Edge, and Firefox. O
 <summary><strong>Is there a maximum payment amount?</strong></summary>
 <br />
 
-OpenTWQR sets a maximum of NT$2,000,000 per transaction. If you leave the amount blank, the payer can enter any amount in their banking app. Actual transfer limits are subject to each bank's policies.
+OpenTWQR sets a maximum of NT$2,000,000 per transaction. If you leave the amount blank, the payer can enter any amount in their banking app. Actual transfer limits vary by institution.
 </details>
 
 <details>

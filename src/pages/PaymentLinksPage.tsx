@@ -41,7 +41,7 @@ export const PaymentLinksPage = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-safe">
       <a
         href="#payment-links-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -49,8 +49,8 @@ export const PaymentLinksPage = () => {
         {t.common.skipToMain}
       </a>
 
-      {/* Header — mirrors AccountsPage */}
-      <div className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <button
@@ -74,7 +74,7 @@ export const PaymentLinksPage = () => {
             <Plus size={20} aria-hidden="true" />
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
       <main id="payment-links-main" className="flex-1 p-5 max-w-md lg:max-w-lg mx-auto w-full">

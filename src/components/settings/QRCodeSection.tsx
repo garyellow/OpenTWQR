@@ -40,7 +40,7 @@ export const QRCodeSection = () => {
     : dotStyle === 'rounded' ? t.qrSettings.dotStyleRounded
     : t.qrSettings.dotStyleDots;
   const eyeStyleLabel = eyeStyle === 'square' ? t.qrSettings.eyeStyleSquare : t.qrSettings.eyeStyleRounded;
-  const styleSummary = `${dotStyleLabel} · ${eyeStyleLabel}`;
+  const styleSummary = t.qrSettings.styleSummary(dotStyleLabel, eyeStyleLabel);
 
   const handleToggleLogo = useCallback(() => { haptic(); setLogoType(bankIconEnabled ? 'opentwqr' : 'bank'); }, [bankIconEnabled, setLogoType]);
   const handleToggleAccount = useCallback(() => { haptic(); setShowAccount(!showAccount); }, [showAccount, setShowAccount]);
@@ -171,8 +171,8 @@ export const QRCodeSection = () => {
                       <Landmark size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
                     </div>
                     <div className="text-left min-w-0">
-                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.bankNameTitle}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t.qrSettings.bankNameDesc}</p>
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.qrSettings.institutionNameTitle}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t.qrSettings.institutionNameDesc}</p>
                     </div>
                   </div>
                   {toggleSwitch(showBankName)}
