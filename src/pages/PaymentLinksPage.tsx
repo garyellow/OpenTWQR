@@ -4,7 +4,7 @@ import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { UrlSchemeEditor } from '../components/settings/UrlSchemeEditor';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { haptic } from '../utils/haptics';
 import { buildBankUrl } from '../utils/urlScheme';
@@ -25,6 +25,9 @@ export const PaymentLinksPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [deletingBankCode, setDeletingBankCode] = useState<string | null>(null);
   const [testingBankCode, setTestingBankCode] = useState<string | null>(null);
+  const [testAccount, setTestAccount] = useState('');
+  const [testAmount, setTestAmount] = useState('');
+  const [testNote, setTestNote] = useState('');
 
   const sortedConfigs = useMemo(
     () => [...configs].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
@@ -45,18 +48,17 @@ export const PaymentLinksPage = () => {
     ? banks.find((b) => b.code === testingConfig.bankCode)
     : null;
 
-  /** Build the test URL with mock data */
+  /** Build the test URL from user-provided data */
   const testUrl = useMemo(() => {
-    if (!testingConfig) return '';
-    const account = t.urlScheme.testAccount;
+    if (!testingConfig || !testAccount) return '';
     return buildBankUrl(testingConfig.urlTemplate, {
       bankCode: testingConfig.bankCode,
-      account,
-      paddedAccount: account.padStart(16, '0'),
-      amount: Number(t.urlScheme.testAmount),
-      note: t.urlScheme.testNote,
+      account: testAccount,
+      paddedAccount: testAccount.padStart(16, '0'),
+      amount: testAmount ? Number(testAmount) : 0,
+      note: testNote,
     });
-  }, [testingConfig, t]);
+  }, [testingConfig, testAccount, testAmount, testNote]);
 
   const goBack = useCallback(() => {
     navigate('/settings', { viewTransition: true });
@@ -168,6 +170,9 @@ export const PaymentLinksPage = () => {
                         type="button"
                         onClick={() => {
                           haptic();
+                          setTestAccount('');
+                          setTestAmount('');
+                          setTestNote('');
                           setTestingBankCode(config.bankCode);
                         }}
                         aria-label={t.urlScheme.testLabel}
@@ -265,78 +270,176 @@ export const PaymentLinksPage = () => {
         </AnimatedModal>
       )}
 
-      {/* Test confirmation modal */}
+      {/* Test modal */}
       {testingConfig && (
         <AnimatedModal
           onClose={() => setTestingBankCode(null)}
           overlayClass="z-60"
-          cardClass="max-w-sm p-6"
+          cardClass="max-w-sm max-h-[90svh] overflow-y-auto"
           ariaLabelledby="payment-link-test-title"
           ariaDescribedby="payment-link-test-desc"
         >
           {(requestClose) => (
-            <>
-              <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center mb-5 mx-auto">
-                <FlaskConical size={24} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
+                    <FlaskConical size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                  </div>
+                  <h2
+                    id="payment-link-test-title"
+                    className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug"
+                  >
+                    {t.urlScheme.testTitle}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  aria-label={t.common.close}
+                  className="p-2.5 -mr-2 -mt-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
               </div>
-              <h2
-                id="payment-link-test-title"
-                className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-center"
-              >
-                {t.urlScheme.testTitle}
-              </h2>
+
               <p
                 id="payment-link-test-desc"
-                className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed text-pretty"
+                className="text-sm text-zinc-500 dark:text-zinc-400 mb-5 leading-relaxed"
               >
                 {t.urlScheme.testDesc}
               </p>
 
-              {/* Mock data card */}
-              <div className="mt-5 text-sm bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3.5 border border-zinc-200/50 dark:border-zinc-700/50 space-y-2">
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-center">
-                  {testingBank?.name || testingConfig.bankCode}
-                </p>
-                <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
-                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phBankCode}</span>
-                  <span className="font-mono text-zinc-700 dark:text-zinc-300">{testingConfig.bankCode}</span>
-                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phAccount}</span>
-                  <span className="font-mono text-zinc-700 dark:text-zinc-300">{t.urlScheme.testAccount}</span>
-                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phAmount}</span>
-                  <span className="font-mono text-zinc-700 dark:text-zinc-300">NT${t.urlScheme.testAmount}</span>
-                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phNote}</span>
-                  <span className="font-mono text-zinc-700 dark:text-zinc-300">{t.urlScheme.testNote}</span>
+              <div className="space-y-4">
+                {/* Fixed bank info */}
+                <div className="flex items-center gap-3 px-4 py-3 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50 rounded-xl">
+                  <div className="w-8 h-8 rounded-lg bg-zinc-200/80 dark:bg-zinc-700/80 flex items-center justify-center shrink-0">
+                    <Building2 size={16} className="text-zinc-500 dark:text-zinc-400" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                      {testingBank?.name || testingConfig.bankCode}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">
+                      {t.urlScheme.phBankCode}：{testingConfig.bankCode}
+                    </p>
+                  </div>
                 </div>
-                <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 break-all pt-1 border-t border-zinc-200/50 dark:border-zinc-700/50">
-                  {testUrl}
+
+                {/* Account input */}
+                <div>
+                  <label
+                    htmlFor="test-account-input"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 ml-1"
+                  >
+                    {t.urlScheme.testAccountLabel}
+                  </label>
+                  <input
+                    id="test-account-input"
+                    type="text"
+                    inputMode="numeric"
+                    value={testAccount}
+                    onChange={(e) => setTestAccount(e.target.value.replace(/\D/g, '').slice(0, 16))}
+                    placeholder={t.urlScheme.testAccountPlaceholder}
+                    autoComplete="off"
+                    className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs font-mono"
+                  />
+                </div>
+
+                {/* Amount input */}
+                <div>
+                  <label
+                    htmlFor="test-amount-input"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 ml-1"
+                  >
+                    {t.urlScheme.testAmountLabel}
+                  </label>
+                  <input
+                    id="test-amount-input"
+                    type="text"
+                    inputMode="numeric"
+                    value={testAmount}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, '');
+                      if (raw === '') { setTestAmount(''); return; }
+                      setTestAmount(String(Math.min(Number(raw), 2_000_000)));
+                    }}
+                    placeholder={t.urlScheme.testAmountPlaceholder}
+                    autoComplete="off"
+                    className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs font-mono"
+                  />
+                </div>
+
+                {/* Note input */}
+                <div>
+                  <label
+                    htmlFor="test-note-input"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 ml-1"
+                  >
+                    {t.urlScheme.testNoteLabel}
+                  </label>
+                  <input
+                    id="test-note-input"
+                    type="text"
+                    value={testNote}
+                    onChange={(e) => setTestNote(e.target.value.slice(0, 19))}
+                    placeholder={t.urlScheme.testNotePlaceholder}
+                    autoComplete="off"
+                    className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs"
+                  />
+                </div>
+
+                {/* URL preview */}
+                {testAccount && (
+                  <div className="px-3.5 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50">
+                    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1.5">
+                      {t.urlScheme.testPreviewLabel}
+                    </p>
+                    <p className="font-mono text-xs text-zinc-700 dark:text-zinc-300 break-all">
+                      {testUrl}
+                    </p>
+                  </div>
+                )}
+
+                {/* App not supported hint */}
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed">
+                  {t.urlScheme.testAppHint}
                 </p>
               </div>
-              <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500 text-center">
-                {t.urlScheme.testMockHint}
-              </p>
 
               <div className="mt-6 flex gap-3">
                 <button
                   type="button"
                   onClick={requestClose}
-                  className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  className="flex-1 py-3.5 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   {t.common.cancel}
                 </button>
-                <a
-                  href={testUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    haptic();
-                    requestClose();
-                  }}
-                  className="flex-1 py-4 rounded-xl font-semibold text-center btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-                >
-                  {t.urlScheme.testOpen}
-                </a>
+                {testAccount ? (
+                  <a
+                    href={testUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      haptic();
+                      requestClose();
+                    }}
+                    className="flex-1 py-3.5 rounded-xl font-semibold text-center btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  >
+                    {t.urlScheme.testOpen}
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="flex-1 py-3.5 rounded-xl font-semibold btn-accent shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {t.urlScheme.testOpen}
+                  </button>
+                )}
               </div>
-            </>
+            </div>
           )}
         </AnimatedModal>
       )}

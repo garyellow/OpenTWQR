@@ -80,19 +80,14 @@ Completely free, open source, no sign-up required — account data is stored onl
 
 ## Features
 
-- **Quick Payments** — Select an account, enter an amount, and generate a payment QR Code with one tap
-- **Quick QR** — Generate a QR Code instantly by entering a bank code and account number, no saved account needed
-- **Multi-Account Management** — Support multiple accounts with nicknames for quick switching
-- **Institution Icons** — Automatically displays official institution icons, with the option to set custom icons
-- **QR Code Appearance & Display Settings** — Customize the center logo (OpenTWQR / institution icon), name label, and QR dot and finder pattern shapes
-- **TWQR Scanning** — Scan TWQR QR Codes to auto-parse payment info and display an outbound QR Code
-- **Payment App Integration** — Set up URL templates for your payment app; open it with one tap after scanning, supporting multiple institution configurations
-- **Secure Sharing** — Share payment codes via encrypted links with optional password and expiration
-- **Backup & Transfer** — Export encrypted backup strings to easily transfer data to other devices
-- **Offline Ready** — Installable as a PWA; generates payment codes without an internet connection
-- **Dark Mode & App Lock** — Light / Dark / System theme modes; enable device authentication (Face ID, fingerprint, etc.) to protect account data
-- **Language Toggle** — Switch between Traditional Chinese and English
-- **Custom Accent Color** — Choose your preferred accent color from presets or a hue slider with live preview
+- **Instant QR Generation** — Pick an account or just enter your bank details directly — a TWQR payment QR Code is ready in seconds, no sign-up or app install required
+- **Multi-Account Management** — Save multiple accounts with nicknames for one-tap switching
+- **Scan & Pay** — Scan any TWQR QR Code to auto-parse payment details, then share a payment QR Code or deep-link straight into your payment app
+- **Payment App Integration** — Define a URL template with dynamic placeholders; after scanning, the URL is resolved with the parsed account, amount, and note, then launched directly into the target app
+- **Secure Sharing** — Share payment codes via end-to-end encrypted links with optional password protection and expiration
+- **Backup & Transfer** — Export encrypted backup strings to restore accounts and settings on any device, anytime
+- **Offline Ready** — Install as a PWA and generate QR Codes without an internet connection
+- **Full Personalization** — Dark mode, App Lock (Face ID / fingerprint), custom accent color, and a bilingual interface (English / Chinese)
 
 ## Privacy & Security
 
@@ -110,7 +105,7 @@ Completely free, open source, no sign-up required — account data is stored onl
 <summary><strong>How is this different from the Taiwan Pay app?</strong></summary>
 <br />
 
-Taiwan Pay is a payment app by FISC that supports purchases, transfers, and bill payments. OpenTWQR only **generates personal transfer QR Codes** so that others can scan and transfer money using their own banking app. It is not a payment app, does not process any transactions, and does not require you to log in to your bank account.
+Taiwan Pay is a payment app by FISC that handles purchases, transfers, and bill payments. OpenTWQR does something entirely different: it **generates personal transfer QR Codes** so others can send you money using their own banking app. It is not a payment app, processes no transactions, and requires no bank login.
 </details>
 
 <details>
@@ -131,42 +126,28 @@ No. The payer only needs any banking or e-payment app that supports TWQR to scan
 <summary><strong>Is my data safe?</strong></summary>
 <br />
 
-All account data is stored entirely on your device (in the browser's IndexedDB) and is never uploaded to any server. Share links use end-to-end encryption — even if a link passes through a server, the server cannot access your account information.
-</details>
-
-<details>
-<summary><strong>Why is no backend server needed?</strong></summary>
-<br />
-
-OpenTWQR is a fully client-side application. Everything runs in your browser: account data is stored in a local database, QR Codes are computed on-device, and encryption/decryption happens client-side. The server only serves the static web files and never touches any user data.
+All account data is stored entirely on your device (browser IndexedDB) and is never uploaded to any server. Share links are end-to-end encrypted — even if a link is relayed through a server, the server cannot read your account information.
 </details>
 
 <details>
 <summary><strong>How often is the institution list updated?</strong></summary>
 <br />
 
-The financial institution list is primarily sourced from public data provided by the Financial Supervisory Commission (FSC) Banking Bureau, covering domestic banks, foreign banks, credit cooperatives, Mainland Chinese banks, and electronic payment institutions. If FSC Banking Bureau data is unavailable, the system automatically falls back to data from FISC and FSC open data. The list is updated daily via GitHub Actions. A built-in list ensures offline functionality.
+The financial institution list is sourced from public data provided by the Financial Supervisory Commission (FSC) Banking Bureau, covering domestic banks, foreign banks, credit cooperatives, Mainland Chinese banks, and electronic payment institutions. The list is updated daily via GitHub Actions. A bundled fallback list ensures full offline functionality.
 </details>
 
 <details>
 <summary><strong>Which browsers are supported?</strong></summary>
 <br />
 
-All major browsers are supported, including Chrome, Safari, Edge, and Firefox. On iOS Safari or Android Chrome, you can install it as a PWA app.
+All major browsers are supported, including Chrome, Safari, Edge, and Firefox. On iOS Safari or Android Chrome, you can install it as a PWA.
 </details>
 
 <details>
 <summary><strong>Is there a maximum payment amount?</strong></summary>
 <br />
 
-OpenTWQR sets a maximum of NT$2,000,000 per transaction. If you leave the amount blank, the payer can enter any amount in their banking app. Actual transfer limits vary by institution.
-</details>
-
-<details>
-<summary><strong>How many accounts can I manage?</strong></summary>
-<br />
-
-There is no hard limit. Account data is stored in the browser's local database (IndexedDB), which has far more capacity than typical usage requires.
+OpenTWQR caps single-transaction amounts at NT$2,000,000. Leave the amount blank and the payer can enter any amount in their banking app. Actual transfer limits depend on each institution's policies.
 </details>
 
 ## Self-Hosting

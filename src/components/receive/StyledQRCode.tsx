@@ -216,7 +216,6 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
       return () => {
         cancelled = true;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
     }, []);
 
     // Subsequent updates: call .update() instead of recreating.
