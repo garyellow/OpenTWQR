@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Palette, RotateCcw, ShieldCheck, ShieldOff } from 'lucide-react';
+import { Palette, RotateCcw, ShieldCheck, ShieldOff, EyeOff } from 'lucide-react';
 import { useThemeStore, ACCENT_PRESETS, applyAccentHue } from '../../stores/useThemeStore';
 import { useAuthStore, LOCK_TIMEOUT_OPTIONS } from '../../stores/useAuthStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -90,6 +90,8 @@ export const PersonalizationSection = () => {
   const enableAuth = useAuthStore((s) => s.enable);
   const disableAuth = useAuthStore((s) => s.disable);
   const setLockTimeout = useAuthStore((s) => s.setLockTimeout);
+  const privacyBlurEnabled = useAuthStore((s) => s.privacyBlurEnabled);
+  const setPrivacyBlurEnabled = useAuthStore((s) => s.setPrivacyBlurEnabled);
 
   const [webAuthnAvailable, setWebAuthnAvailable] = useState<boolean | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
@@ -347,9 +349,43 @@ export const PersonalizationSection = () => {
           </div>
         )}
 
+        {/* ── Background auto-blur toggle ── */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={privacyBlurEnabled}
+          onClick={() => { haptic(); setPrivacyBlurEnabled(!privacyBlurEnabled); }}
+          className="w-full flex items-center justify-between p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center">
+              <EyeOff size={18} className="text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.personalization.privacyBlurTitle}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                {t.personalization.privacyBlurDesc}
+              </p>
+            </div>
+          </div>
+          {/* Toggle switch */}
+          <div
+            aria-hidden="true"
+            className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
+              privacyBlurEnabled ? '' : 'bg-zinc-300 dark:bg-zinc-600'
+            }`}
+            style={privacyBlurEnabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+          >
+            <div
+              className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${
+                privacyBlurEnabled ? 'translate-x-5.25' : 'translate-x-0.75'
+              }`}
+            />
+          </div>
+        </button>
+
         {/* ── QR Code display settings (inlined after App Lock) ── */}
-        <QRCodeSection />
-      </div>
+        <QRCodeSection />      </div>
 
       {/* App-lock unsupported toast — floating pill, auto-dismisses */}
       {lockToastVisible && (

@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { Check, Loader2, Lock, AlertCircle, Pencil, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
-import { useThemeStore, applyTheme, applyAccentHue } from '../../stores/useThemeStore';
+import { useThemeStore, applyTheme } from '../../stores/useThemeStore';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useUrlSchemeStore } from '../../stores/useUrlSchemeStore';
 import { useBanksStore } from '../../stores/useBanksStore';
@@ -36,7 +36,6 @@ function applyBackupStyle(s: BackupStyle, sel: { accent: boolean; qr: boolean })
     const ts = useThemeStore.getState();
     if (s.accentHue !== undefined) {
       ts.setAccentHue(s.accentHue);
-      applyAccentHue(s.accentHue);
     }
     if (s.accentEnabled !== undefined) {
       ts.setAccentEnabled(s.accentEnabled);

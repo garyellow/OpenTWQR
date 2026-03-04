@@ -195,6 +195,7 @@ export const ReceivePage = () => {
             type="button"
             onClick={() => setShowQuickAccess(true)}
             aria-label={t.receive.quickAccess}
+            title={t.receive.quickAccessDesc}
             className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
           >
             <Zap size={20} aria-hidden="true" />
@@ -246,7 +247,7 @@ export const ReceivePage = () => {
                   className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                 >
                   <StickyNote size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
-                  <span className={`flex-1 text-left truncate ${note ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                  <span className={`flex-1 text-left truncate ${note ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`} title={note ? `${t.qr.notePrefix}${note}` : undefined}>
                     {note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}
                   </span>
                   {note && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{note.length}/19</span>}
@@ -258,7 +259,7 @@ export const ReceivePage = () => {
                   className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                 >
                   <UserPen size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
-                  <span className={`flex-1 text-left truncate ${customName ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                  <span className={`flex-1 text-left truncate ${customName ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`} title={customName ? `${t.receive.messagePrefix}${customName}` : undefined}>
                     {customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}
                   </span>
                   {customName && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{customName.length}/20</span>}
@@ -440,6 +441,8 @@ export const ReceivePage = () => {
           bankIconUrl={bankIconUrl}
         />
       )}
+
+      {showQuickAccess && <QuickQRModal onClose={() => setShowQuickAccess(false)} />}
 
     </div>
   );

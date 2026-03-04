@@ -216,7 +216,7 @@ const zhTW = {
     resetColorShort: '還原預設',
     /* App lock */
     appLockTitle: '鎖定保護',
-    appLockDesc: '使用裝置驗證保護帳戶資料',
+    appLockDesc: '透過指紋、Face ID 或螢幕解鎖保護 App',
     appLockUnavailableDesc: '此裝置不支援生物辨識或螢幕鎖定',
     appLockUnsupported: '此瀏覽器不支援鎖定保護',
     lockTimeoutTitle: '背景鎖定時間',
@@ -228,6 +228,9 @@ const zhTW = {
       300_000: '5 分',
       3_600_000: '1 小時',
     } as Record<number, string>,
+    /* Privacy blur */
+    privacyBlurTitle: '背景自動模糊',
+    privacyBlurDesc: '切換至背景時自動顯示模糊畫面，保護隱私',
   },
 
   /* ─── AccentColor presets ──────────────────────────────── */
@@ -336,11 +339,11 @@ const zhTW = {
     infoDesc: '了解資料保護與轉帳安全注意事項',
     modalTitle: '隱私與安全',
     privacyTitle: '隱私聲明',
-    privacyDesc: 'QR Code 皆在您的瀏覽器本地產生，帳戶資料僅儲存於此裝置，不會上傳至任何伺服器。',
+    privacyDesc: '所有 QR Code 皆在裝置上產生，帳戶資料不會上傳至任何伺服器。',
     securityTitle: '安全提醒',
-    securityDesc: '轉帳前請務必於銀行 App 中核對收款帳號與戶名，確認無誤後再執行轉帳。',
-    scamTitle: '防範三方詐騙',
-    scamDesc: '切勿依不明來源提供的帳號進行轉帳。若有人要求您代為收款再轉出，很可能是三方詐騙手法，請提高警覺。',
+    securityDesc: '轉帳前請於銀行 App 核對收款帳號與戶名，確認無誤再執行。',
+    scamTitle: '防範詐騙',
+    scamDesc: '切勿依不明來源帳號轉帳。若被要求代收再轉出，極可能為詐騙手法。',
   },
 
   /* ─── AboutSection ─────────────────────────────────────── */
@@ -432,6 +435,14 @@ const zhTW = {
     deleteTitle: '刪除支付連動',
     deleteConfirm: '確定要刪除此支付連動設定嗎？此操作無法復原。',
     save: '儲存',
+    testLabel: '測試連動',
+    testTitle: '測試支付連動',
+    testDesc: '將以模擬資料開啟支付 App，確認連動設定是否正確。',
+    testAccount: '0123456789',
+    testAmount: '123',
+    testNote: '測試',
+    testOpen: '開啟測試連結',
+    testMockHint: '以下為模擬測試資料，並非真實交易',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */

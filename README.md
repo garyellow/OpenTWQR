@@ -71,9 +71,9 @@
 
 ## TWQR 是什麼？
 
-**TWQR（Taiwan QR Code）** 是由財金資訊股份有限公司制定的 QR Code 共通支付標準，統一了國內銀行與電子支付機構的 QR Code 格式。目前大多數銀行的行動銀行 App 都支援掃描 TWQR 格式的 QR Code 進行轉帳付款。
+**TWQR（Taiwan QR Code）** 是由財金資訊股份有限公司制定的 QR Code 共通支付標準，統一了國內銀行與電子支付機構的 QR Code 格式。TWQR 涵蓋了多種使用場景，包括商家購物付款、個人轉帳、繳費、繳稅等。
 
-OpenTWQR 能讓你快速產生符合 TWQR 標準的個人收款 QR Code——對方只要用自己的銀行 App 掃碼，就能直接轉帳給你，不需額外安裝任何 App。
+**OpenTWQR 專注於「個人轉帳收款」這個場景**——讓你快速產生含有自己銀行帳號的 QR Code，對方用銀行 App 掃碼即可直接轉帳給你，不需額外安裝任何 App。這與商家在店面使用的 TWQR 購物付款碼是不同的用途。
 
 > [!NOTE]
 > TWQR 是 QR Code「格式標準」，而台灣 Pay 是財金公司推出的「支付 App」，兩者並不相同。OpenTWQR 產生的 QR Code 可被所有支援 TWQR 的銀行 App 及電子支付 App 掃描，不限於台灣 Pay。
@@ -82,9 +82,9 @@ OpenTWQR 能讓你快速產生符合 TWQR 標準的個人收款 QR Code——對
 
 - **快速收款** — 選擇帳戶、輸入金額，一鍵產生收款 QR Code
 - **快速產碼** — 無需先建立帳戶，輸入銀行代碼與帳號即可立即產碼
-- **多帳戶管理** — 支援多組收款帳戶，設定欱稱快速切換
+- **多帳戶管理** — 支援多組收款帳戶，設定暱稱快速切換
 - **機構圖示** — 自動顯示各家金融機構官方圖示，也可自訂圖示覆蓋預設値
-- **QR Code 外覹與顯示設定** — 自訂中心 Logo（OpenTWQR / 機構圖示）、名稱標籤、QR Code 點陣形狀與定位框形狀
+- **QR Code 外觀與顯示設定** — 自訂中心 Logo（OpenTWQR / 機構圖示）、名稱標籤、QR Code 點陣形狀與定位框形狀
 - **TWQR 掃描** — 掃描 TWQR 格式 QR Code，自動解析付款資訊並顯示收款碼
 - **支付 App 連動** — 設定支付 App URL 範本，掃描後一鍵開啟，支援多間機構自訂設定
 - **安全分享** — 透過加密連結分享收款碼，可設密碼與有效期限
@@ -110,7 +110,14 @@ OpenTWQR 能讓你快速產生符合 TWQR 標準的個人收款 QR Code——對
 <summary><strong>這跟台灣 Pay App 有什麼不同？</strong></summary>
 <br />
 
-台灣 Pay 是財金公司推出的支付 App，可用於購物、轉帳、繳費等。OpenTWQR 則只負責「產生收款 QR Code」，讓對方用自己的銀行 App 掃碼轉帳——它不是支付 App，不會處理任何金流，也不需要你登入銀行帳號。
+台灣 Pay 是財金公司推出的支付 App，可用於購物、轉帳、繳費等。OpenTWQR 只負責「產生個人收款 QR Code」，讓對方用銀行 App 掃碼轉帳——它不是支付 App，不處理任何金流，也不需要登入銀行帳號。
+</details>
+
+<details>
+<summary><strong>OpenTWQR 產生的 QR Code 跟商家的 TWQR 付款碼有什麼不同？</strong></summary>
+<br />
+
+TWQR 標準涵蓋多種場景：商家購物付款、個人轉帳、繳費、繳稅等。OpenTWQR 產生的是「個人轉帳」用途的 QR Code——內含你的銀行帳號資訊，對方掃碼後會透過銀行 App 直接轉帳，並非商家購物付款的流程。
 </details>
 
 <details>

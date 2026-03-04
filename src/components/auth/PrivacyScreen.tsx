@@ -27,8 +27,8 @@ import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
  *   re-render required.  This guarantees the overlay paints before the OS
  *   captures the app-switcher screenshot.
  *
- * The component renders nothing (and registers no listeners) when app lock
- * is disabled.
+ * The component renders nothing (and registers no listeners) when background
+ * blur is disabled.
  *
  * ## Event strategy
  *
@@ -48,11 +48,11 @@ import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
  * that briefly steal focus without actually backgrounding the app.
  */
 export const PrivacyScreen = () => {
-  const authEnabled = useAuthStore((s) => s.isEnabled);
+  const privacyBlurEnabled = useAuthStore((s) => s.privacyBlurEnabled);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!authEnabled) return;
+    if (!privacyBlurEnabled) return;
 
     const show = () => {
       const el = overlayRef.current;
@@ -93,9 +93,9 @@ export const PrivacyScreen = () => {
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [authEnabled]);
+  }, [privacyBlurEnabled]);
 
-  if (!authEnabled) return null;
+  if (!privacyBlurEnabled) return null;
 
   return (
     <div

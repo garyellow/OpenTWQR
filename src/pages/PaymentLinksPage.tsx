@@ -4,9 +4,10 @@ import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { UrlSchemeEditor } from '../components/settings/UrlSchemeEditor';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { ArrowLeft, Plus, Link2, ChevronRight, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { haptic } from '../utils/haptics';
+import { buildBankUrl } from '../utils/urlScheme';
 
 /**
  * Full-page management screen for payment app integrations.
@@ -23,6 +24,7 @@ export const PaymentLinksPage = () => {
   const [editingBankCode, setEditingBankCode] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingBankCode, setDeletingBankCode] = useState<string | null>(null);
+  const [testingBankCode, setTestingBankCode] = useState<string | null>(null);
 
   const sortedConfigs = useMemo(
     () => [...configs].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
@@ -35,6 +37,26 @@ export const PaymentLinksPage = () => {
   const deletingBank = deletingConfig
     ? banks.find((b) => b.code === deletingConfig.bankCode)
     : null;
+
+  const testingConfig = testingBankCode
+    ? configs.find((c) => c.bankCode === testingBankCode)
+    : null;
+  const testingBank = testingConfig
+    ? banks.find((b) => b.code === testingConfig.bankCode)
+    : null;
+
+  /** Build the test URL with mock data */
+  const testUrl = useMemo(() => {
+    if (!testingConfig) return '';
+    const account = t.urlScheme.testAccount;
+    return buildBankUrl(testingConfig.urlTemplate, {
+      bankCode: testingConfig.bankCode,
+      account,
+      paddedAccount: account.padStart(16, '0'),
+      amount: Number(t.urlScheme.testAmount),
+      note: t.urlScheme.testNote,
+    });
+  }, [testingConfig, t]);
 
   const goBack = useCallback(() => {
     navigate('/settings', { viewTransition: true });
@@ -57,6 +79,7 @@ export const PaymentLinksPage = () => {
               type="button"
               onClick={goBack}
               aria-label={t.common.back}
+              title={t.common.back}
               className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
               <ArrowLeft size={20} aria-hidden="true" />
@@ -69,6 +92,7 @@ export const PaymentLinksPage = () => {
             type="button"
             onClick={() => setIsAdding(true)}
             aria-label={t.urlScheme.addLabel}
+            title={t.urlScheme.addBank}
             className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
           >
             <Plus size={20} aria-hidden="true" />
@@ -138,8 +162,20 @@ export const PaymentLinksPage = () => {
                       <ChevronRight size={16} className="text-zinc-400 dark:text-zinc-600 shrink-0" aria-hidden="true" />
                     </button>
 
-                    {/* Delete button */}
+                    {/* Test & Delete buttons */}
                     <div className="border-l border-zinc-100 dark:border-zinc-800/50 flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          haptic();
+                          setTestingBankCode(config.bankCode);
+                        }}
+                        aria-label={t.urlScheme.testLabel}
+                        title={t.urlScheme.testLabel}
+                        className="p-4 text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500"
+                      >
+                        <FlaskConical size={16} aria-hidden="true" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => {
@@ -147,6 +183,7 @@ export const PaymentLinksPage = () => {
                           setDeletingBankCode(config.bankCode);
                         }}
                         aria-label={t.common.delete}
+                        title={t.common.delete}
                         className="p-4 text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
                       >
                         <Trash2 size={16} aria-hidden="true" />
@@ -222,6 +259,82 @@ export const PaymentLinksPage = () => {
                 >
                   {t.common.delete}
                 </button>
+              </div>
+            </>
+          )}
+        </AnimatedModal>
+      )}
+
+      {/* Test confirmation modal */}
+      {testingConfig && (
+        <AnimatedModal
+          onClose={() => setTestingBankCode(null)}
+          overlayClass="z-60"
+          cardClass="max-w-sm p-6"
+          ariaLabelledby="payment-link-test-title"
+          ariaDescribedby="payment-link-test-desc"
+        >
+          {(requestClose) => (
+            <>
+              <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center mb-5 mx-auto">
+                <FlaskConical size={24} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+              </div>
+              <h2
+                id="payment-link-test-title"
+                className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-center"
+              >
+                {t.urlScheme.testTitle}
+              </h2>
+              <p
+                id="payment-link-test-desc"
+                className="mt-3 text-zinc-500 dark:text-zinc-400 text-center leading-relaxed text-pretty"
+              >
+                {t.urlScheme.testDesc}
+              </p>
+
+              {/* Mock data card */}
+              <div className="mt-5 text-sm bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-4 py-3.5 border border-zinc-200/50 dark:border-zinc-700/50 space-y-2">
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-center">
+                  {testingBank?.name || testingConfig.bankCode}
+                </p>
+                <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phBankCode}</span>
+                  <span className="font-mono text-zinc-700 dark:text-zinc-300">{testingConfig.bankCode}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phAccount}</span>
+                  <span className="font-mono text-zinc-700 dark:text-zinc-300">{t.urlScheme.testAccount}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phAmount}</span>
+                  <span className="font-mono text-zinc-700 dark:text-zinc-300">NT${t.urlScheme.testAmount}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">{t.urlScheme.phNote}</span>
+                  <span className="font-mono text-zinc-700 dark:text-zinc-300">{t.urlScheme.testNote}</span>
+                </div>
+                <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 break-all pt-1 border-t border-zinc-200/50 dark:border-zinc-700/50">
+                  {testUrl}
+                </p>
+              </div>
+              <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500 text-center">
+                {t.urlScheme.testMockHint}
+              </p>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="flex-1 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  {t.common.cancel}
+                </button>
+                <a
+                  href={testUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    haptic();
+                    requestClose();
+                  }}
+                  className="flex-1 py-4 rounded-xl font-semibold text-center btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  {t.urlScheme.testOpen}
+                </a>
               </div>
             </>
           )}

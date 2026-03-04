@@ -9,6 +9,8 @@ interface AuthState {
   credentialId: string | null;
   /** Auto-lock timeout in milliseconds when app goes to background (persisted). */
   lockTimeout: number;
+  /** Whether to show a blur overlay when the app goes to the background (persisted). */
+  privacyBlurEnabled: boolean;
   /** Whether the store has been rehydrated from IndexedDB. */
   isHydrated: boolean;
   /** Whether the current session is unlocked (transient, not persisted). */
@@ -19,6 +21,7 @@ interface AuthState {
   unlock: () => void;
   lock: () => void;
   setLockTimeout: (ms: number) => void;
+  setPrivacyBlurEnabled: (enabled: boolean) => void;
 }
 
 /** Available lock timeout presets (milliseconds). */
@@ -36,6 +39,7 @@ export const useAuthStore = create<AuthState>()(
       isEnabled: false,
       credentialId: null,
       lockTimeout: 10_000,
+      privacyBlurEnabled: true,
       isHydrated: false,
       isUnlocked: false,
 
@@ -44,6 +48,7 @@ export const useAuthStore = create<AuthState>()(
       unlock: () => set({ isUnlocked: true }),
       lock: () => set({ isUnlocked: false }),
       setLockTimeout: (ms) => set({ lockTimeout: ms }),
+      setPrivacyBlurEnabled: (enabled) => set({ privacyBlurEnabled: enabled }),
     }),
     {
       name: 'opentwqr-auth',
@@ -53,6 +58,7 @@ export const useAuthStore = create<AuthState>()(
         isEnabled: state.isEnabled,
         credentialId: state.credentialId,
         lockTimeout: state.lockTimeout,
+        privacyBlurEnabled: state.privacyBlurEnabled,
       }),
       migrate: (persisted, fromVersion) => {
         const state = persisted as Partial<AuthState>;

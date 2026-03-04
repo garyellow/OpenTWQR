@@ -32,6 +32,7 @@ export const BottomNav = () => {
             to={path}
             end={path === '/'}
             onClick={() => haptic()}
+            title={labels[labelKey]}
             className="flex flex-col items-center justify-center gap-0.5 min-w-16 py-1.5 rounded-xl transition-colors"
           >
             {({ isActive }) => (

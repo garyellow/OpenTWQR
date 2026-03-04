@@ -218,7 +218,7 @@ const enUS: Translations = {
     resetColorShort: 'Reset',
     /* App lock */
     appLockTitle: 'App Lock',
-    appLockDesc: 'Use device auth to protect data',
+    appLockDesc: 'Protect app with fingerprint, Face ID, or screen lock',
     appLockUnavailableDesc: 'This device has no biometrics or screen lock',
     appLockUnsupported: 'Not supported in this browser',
     lockTimeoutTitle: 'Lock Timeout',
@@ -230,6 +230,9 @@ const enUS: Translations = {
       300_000: '5m',
       3_600_000: '1h',
     } as Record<number, string>,
+    /* Privacy blur */
+    privacyBlurTitle: 'Background Auto-blur',
+    privacyBlurDesc: 'Show blur overlay when app is in the background',
   },
 
   /* ─── AccentColor presets ──────────────────────────────── */
@@ -433,6 +436,14 @@ const enUS: Translations = {
     deleteTitle: 'Remove Payment Link',
     deleteConfirm: 'Are you sure you want to remove this payment link configuration? This cannot be undone.',
     save: 'Save',
+    testLabel: 'Test',
+    testTitle: 'Test Payment Link',
+    testDesc: 'Open the payment app with mock data to verify the configuration works correctly.',
+    testAccount: '0123456789',
+    testAmount: '123',
+    testNote: 'Test',
+    testOpen: 'Open Test Link',
+    testMockHint: 'This uses mock data — not a real transaction',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */
@@ -524,7 +535,7 @@ const enUS: Translations = {
     next: 'Next',
     getStarted: 'Get Started',
     step1Title: 'Welcome to OpenTWQR',
-    step1Desc: 'Generate TWQR payment QR Codes for free. Recipients scan with their banking app to transfer money.',
+    step1Desc: 'Generate free TWQR QR Codes for receiving money. Recipients scan with their banking app to transfer directly to you.',
     step2Title: 'Add Your Account',
     step2Desc: 'Start by adding a receiving account, then quickly generate payment QR Codes anytime.',
     step3Title: 'Share & Backup',
