@@ -504,7 +504,7 @@ export const PaymentLinksPage = () => {
                     <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep1Title}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep1Desc}</p>
                     <a
-                      href="intent://#Intent;action=android.intent.action.MAIN;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
+                      href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"
@@ -517,9 +517,6 @@ export const PaymentLinksPage = () => {
                       <Smartphone size={13} aria-hidden="true" />
                       {t.urlScheme.guideStep1Launch}
                     </a>
-                    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5 leading-relaxed">
-                      {t.urlScheme.guideStep1LaunchHint}
-                    </p>
                   </div>
                 </li>
 
@@ -551,37 +548,10 @@ export const PaymentLinksPage = () => {
                 </li>
               </ol>
 
-              {/* Notices */}
-              <div className="mt-5 space-y-2">
-                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
-                  {t.urlScheme.guideAndroidOnly}
-                </p>
-                <div>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed mb-2">
-                    {t.urlScheme.guideAltApps}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href="intent://#Intent;action=android.intent.action.MAIN;package=com.sika524.android.quickshortcut;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.sika524.android.quickshortcut;end"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
-                    >
-                      <Smartphone size={11} aria-hidden="true" />
-                      QuickShortcutMaker
-                    </a>
-                    <a
-                      href="intent://#Intent;action=android.intent.action.MAIN;package=de.szalkowski.activitylauncher;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dde.szalkowski.activitylauncher;end"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
-                    >
-                      <Smartphone size={11} aria-hidden="true" />
-                      Activity Launcher
-                    </a>
-                  </div>
-                </div>
-              </div>
+              {/* Note about format */}
+              <p className="mt-5 text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed bg-amber-50 dark:bg-amber-500/10 rounded-lg px-3 py-2.5 border border-amber-200/50 dark:border-amber-500/20">
+                {t.urlScheme.guideNote}
+              </p>
 
               <button
                 type="button"

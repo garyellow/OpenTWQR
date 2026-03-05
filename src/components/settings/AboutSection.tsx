@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Heart, Info, RefreshCw, Scale } from 'lucide-react';
+import { Heart, Info, RefreshCw, Scale, ShieldAlert, Eye, TriangleAlert, X } from 'lucide-react';
+import { AnimatedModal } from '../ui/AnimatedModal';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 
 /** GitHub logo from Simple Icons (MIT). Avoids deprecated lucide brand icons. */
@@ -23,6 +24,8 @@ const GithubIcon = ({ size = 18, className }: { size?: number; className?: strin
  */
 export const AboutSection = () => {
   const t = useLocaleStore((s) => s.t);
+  const [showSafety, setShowSafety] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [checkState, setCheckState] = useState<'idle' | 'checking' | 'up-to-date' | 'found' | 'error'>('idle');
   const resetTimerRef = useRef<number | null>(null);
 
@@ -124,6 +127,40 @@ export const AboutSection = () => {
           </div>
         </a>
 
+        {/* Privacy & Security */}
+        <button
+          type="button"
+          onClick={() => setShowSafety(true)}
+          className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+        >
+          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+            <ShieldAlert size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+          </div>
+          <div className="text-left flex-1">
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.infoTitle}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {t.safety.infoDesc}
+            </p>
+          </div>
+        </button>
+
+        {/* Disclaimer */}
+        <button
+          type="button"
+          onClick={() => setShowDisclaimer(true)}
+          className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+        >
+          <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+            <Scale size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          </div>
+          <div className="text-left flex-1">
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.disclaimerTitle}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {t.about.disclaimerHint}
+            </p>
+          </div>
+        </button>
+
         {/* Version info */}
         <div className="w-full flex items-center gap-3 p-4">
           <div className="w-9 h-9 rounded-xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
@@ -154,20 +191,132 @@ export const AboutSection = () => {
             </p>
           </div>
         </button>
-
-        {/* Disclaimer */}
-        <div className="w-full flex items-start gap-3 p-4">
-          <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
-            <Scale size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
-          </div>
-          <div className="text-left flex-1">
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.disclaimerTitle}</p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-              {t.about.disclaimerDesc}
-            </p>
-          </div>
-        </div>
       </div>
+
+      {/* Privacy & Security modal */}
+      {showSafety && (
+        <AnimatedModal
+          onClose={() => setShowSafety(false)}
+          overlayClass="z-50"
+          cardClass="max-w-sm"
+          ariaLabelledby="safety-modal-title"
+        >
+          {(requestClose) => (
+            <>
+              <div className="flex items-center justify-between p-5 pb-0">
+                <h2 id="safety-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  {t.safety.modalTitle}
+                </h2>
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  aria-label={t.common.close}
+                  className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="p-5 pt-4 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Eye size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.privacyTitle}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                      {t.safety.privacyDesc}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <ShieldAlert size={18} className="text-orange-600 dark:text-orange-400" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.securityTitle}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                      {t.safety.securityDesc}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <TriangleAlert size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.safety.scamTitle}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                      {t.safety.scamDesc}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-5 pb-5">
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="w-full py-3.5 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  {t.common.understand}
+                </button>
+              </div>
+            </>
+          )}
+        </AnimatedModal>
+      )}
+
+      {/* Disclaimer modal */}
+      {showDisclaimer && (
+        <AnimatedModal
+          onClose={() => setShowDisclaimer(false)}
+          overlayClass="z-50"
+          cardClass="max-w-sm"
+          ariaLabelledby="disclaimer-modal-title"
+        >
+          {(requestClose) => (
+            <>
+              <div className="flex items-center justify-between p-5 pb-0">
+                <h2 id="disclaimer-modal-title" className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  {t.about.disclaimerTitle}
+                </h2>
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  aria-label={t.common.close}
+                  className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="p-5 pt-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Scale size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                  </div>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                    {t.about.disclaimerDesc}
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-5 pb-5">
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="w-full py-3.5 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  {t.common.understand}
+                </button>
+              </div>
+            </>
+          )}
+        </AnimatedModal>
+      )}
     </div>
   );
 };

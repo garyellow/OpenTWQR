@@ -336,7 +336,6 @@ const enUS: Translations = {
 
   /* ─── SafetySection ────────────────────────────────────── */
   safety: {
-    sectionTitle: 'Privacy & Security',
     infoTitle: 'Privacy & Security Info',
     infoDesc: 'Data protection & transfer safety',
     modalTitle: 'Privacy & Security',
@@ -355,6 +354,9 @@ const enUS: Translations = {
     sponsorDesc: 'Feed some tokens to the AI',
     githubTitle: 'GitHub Source',
     githubDesc: 'View source, report issues, contribute',
+    disclaimerTitle: 'Disclaimer',
+    disclaimerHint: 'Project disclaimer & legal info',
+    disclaimerDesc: 'OpenTWQR is a community-maintained open-source project with no affiliation, endorsement, or partnership with FISC, TWQR, or Taiwan Pay. This project does not process any financial transactions — it only generates, displays, and shares QR codes.',
     versionTitle: 'Version Info',
     versionDesc: (hash: string) => `Build: ${hash}`,
     checkUpdateTitle: 'Check for Updates',
@@ -363,8 +365,6 @@ const enUS: Translations = {
     upToDate: 'Already up to date',
     updateAvailable: 'New version found — tap to reload',
     checkFailed: 'Check failed, try again later',
-    disclaimerTitle: 'Disclaimer',
-    disclaimerDesc: 'OpenTWQR is a community-maintained open-source project with no affiliation, endorsement, or partnership with FISC, TWQR, or Taiwan Pay. This project does not process any financial transactions — it only generates, displays, and shares QR codes.',
   },
 
   /* ─── Bottom Navigation ────────────────────────────────── */
@@ -412,7 +412,6 @@ const enUS: Translations = {
   /* ─── URL Scheme Settings ──────────────────────────────── */
   urlScheme: {
     sectionTitle: 'Payment App Integration',
-    sectionDesc: 'Quickly open payment app after scanning',
     infoTitle: 'Payment App Integration',
     infoDesc: 'After scanning a QR Code, your configured payment app opens automatically with the account, amount, and note pre-filled — no manual entry needed. Useful for users who regularly pay via a specific app.',
     manageTitle: 'Payment App Integration',
@@ -458,7 +457,6 @@ const enUS: Translations = {
     packageDesc: 'Enter the app\'s package name to generate a launch link. If the app is not installed, it redirects to Google Play Store.',
     importIntentDesc: 'Paste the intent info copied from Shortcut Maker to auto-generate an intent:// link. Supports both multi-line and Intent URI formats.',
     importLaunchApp: 'Open Shortcut Maker',
-    importLaunchAppHint: 'Opens the app, or redirects to Play Store to install',
     importPasteLabel: 'Paste Intent Info',
     importPastePlaceholder: 'Action=android.intent.action.VIEW\nPackage Name=com.example.app\nClass Name=...\nExtras=>\nkey:value\n\nor #Intent;action=...;package=...;end',
     importParse: 'Parse',
@@ -478,15 +476,13 @@ const enUS: Translations = {
     guideStep1Title: 'Install Shortcut Maker',
     guideStep1Desc: 'Download "Shortcut Maker" (by Rushikesh Kamewar) from Google Play Store.',
     guideStep1Launch: 'Open Shortcut Maker',
-    guideStep1LaunchHint: 'Opens the app if installed, or redirects to Play Store',
-    guideStep2Title: 'Find the Payment App Activity',
-    guideStep2Desc: 'Open Shortcut Maker → Select "Activities" → Search for your payment app → Find the activity for scanning or payment.',
-    guideStep3Title: 'Copy the Intent Info',
-    guideStep3Desc: 'Tap the activity to enter the "Inner Link" channel. You\'ll see Action, Package Name, Class Name, and Extras. You can also tap "Edit Intent" to get the Intent string (#Intent;...;end format). Both formats are accepted.',
-    guideStep4Title: 'Paste into OpenTWQR',
-    guideStep4Desc: 'Return to this page, switch to the "Intent Import" tab, paste the copied content, and the link will be auto-generated.',
-    guideAndroidOnly: 'This feature only works on Chrome-based browsers on Android devices.',
-    guideAltApps: 'You can also use QuickShortcutMaker or Activity Launcher as alternatives.',
+    guideStep2Title: 'Identify the Payment App Activity',
+    guideStep2Desc: 'You need to find the Activity name responsible for the scan or payment function in the target app (e.g., SafePay LTB in JKOPay).',
+    guideStep3Title: 'Search for the Activity',
+    guideStep3Desc: 'Open Shortcut Maker, select "Activities" or "Innerlinks", search for your payment app, and locate the Activity for scanning or payment.',
+    guideStep4Title: 'Copy the Activity Info',
+    guideStep4Desc: 'Tap the Activity to view its details, then tap the copy button in the top-right corner.',
+    guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format and cannot be used directly. Return to the "Intent Import" tab on this page, paste it, and OpenTWQR will automatically convert it into a usable link.',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */

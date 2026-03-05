@@ -3,7 +3,6 @@ import { LanguageToggle } from '../components/ui/LanguageToggle';
 import { PersonalizationSection } from '../components/settings/PersonalizationSection';
 import { UrlSchemeSection } from '../components/settings/UrlSchemeSection';
 import { BackupSection } from '../components/settings/BackupSection';
-import { SafetySection } from '../components/settings/SafetySection';
 import { AboutSection } from '../components/settings/AboutSection';
 import { DangerSection } from '../components/settings/DangerSection';
 import { useLocaleStore } from '../stores/useLocaleStore';
@@ -37,7 +36,6 @@ export const SettingsPage = () => {
           <PersonalizationSection />
           <UrlSchemeSection />
           <BackupSection />
-          <SafetySection />
           <AboutSection />
           <DangerSection />
         </div>

@@ -246,21 +246,16 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
             {mode === 'intent' && android && (
               <div className="space-y-3.5">                {/* Quick launch — smart open or install */}
                 <a
-                  href="intent://#Intent;action=android.intent.action.MAIN;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
+                  href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between gap-3 w-full px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Smartphone size={16} className="text-zinc-500 dark:text-zinc-400 shrink-0" aria-hidden="true" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 leading-tight">
-                        {t.urlScheme.importLaunchApp}
-                      </p>
-                      <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-                        {t.urlScheme.importLaunchAppHint}
-                      </p>
-                    </div>
+                    <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 leading-tight">
+                      {t.urlScheme.importLaunchApp}
+                    </p>
                   </div>
                   <ExternalLink size={14} className="text-zinc-400 dark:text-zinc-500 shrink-0 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" aria-hidden="true" />
                 </a>                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">

@@ -342,6 +342,7 @@ export function buildPackageOnlyUrl(
   const parts = [
     'intent://#Intent',
     ';action=android.intent.action.MAIN',
+    ';category=android.intent.category.LAUNCHER',
     `;package=${packageName}`,
   ];
   if (fallback) {

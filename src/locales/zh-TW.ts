@@ -334,7 +334,6 @@ const zhTW = {
 
   /* ─── SafetySection ────────────────────────────────────── */
   safety: {
-    sectionTitle: '隱私與安全',
     infoTitle: '隱私與安全資訊',
     infoDesc: '了解資料保護與轉帳安全注意事項',
     modalTitle: '隱私與安全',
@@ -353,6 +352,9 @@ const zhTW = {
     sponsorDesc: '請 AI 吃點 Token，支持專案持續維護',
     githubTitle: 'GitHub 原始碼',
     githubDesc: '檢視原始碼、回報問題或參與貢獻',
+    disclaimerTitle: '免責聲明',
+    disclaimerHint: '瞭解本專案聲明與責任範圍',
+    disclaimerDesc: 'OpenTWQR 為社群獨立開發的開源專案，與財金資訊股份有限公司及 TWQR、台灣 Pay 等無任何隸屬或背書關係。本專案不處理任何金流，僅提供 QR Code 的產生、顯示與分享功能。',
     versionTitle: '版本資訊',
     versionDesc: (hash: string) => `建置版本：${hash}`,
     checkUpdateTitle: '檢查更新',
@@ -361,8 +363,6 @@ const zhTW = {
     upToDate: '已是最新版本',
     updateAvailable: '發現新版本，點此重新載入',
     checkFailed: '檢查失敗，請稍後再試',
-    disclaimerTitle: '免責聲明',
-    disclaimerDesc: 'OpenTWQR 為社群獨立開發的開源專案，與財金資訊股份有限公司及 TWQR、台灣 Pay 等無任何隸屬或背書關係。本專案不處理任何金流，僅提供 QR Code 的產生、顯示與分享功能。',
   },
 
   /* ─── Bottom Navigation ────────────────────────────────── */
@@ -410,7 +410,6 @@ const zhTW = {
   /* ─── URL Scheme Settings ──────────────────────────────── */
   urlScheme: {
     sectionTitle: '支付 App 連動',
-    sectionDesc: '掃描後快速開啟支付 App',
     infoTitle: '支付 App 連動',
     infoDesc: '掃描 QR Code 後，可自動開啟你設定的支付 App，並帶入帳號、金額等資訊，省去手動輸入。適合習慣使用特定支付 App 轉帳的使用者。',
     manageTitle: '支付 App 連動',
@@ -457,7 +456,6 @@ const zhTW = {
     packageDesc: '輸入 App 的套件名稱，即可產生一鍵開啟連結。若裝置未安裝該 App，會自動導向 Google Play 商店。',
     importIntentDesc: '貼上從 Shortcut Maker 複製的 Intent 資訊，自動轉換為 intent:// 連結。支援多行格式與 Intent URI 格式。',
     importLaunchApp: '開啟 Shortcut Maker',
-    importLaunchAppHint: '若未安裝，將自動轉至 Play 商店',
     importPasteLabel: '貼上 Intent 資訊',
     importPastePlaceholder: 'Action=android.intent.action.VIEW\nPackage Name=com.example.app\nClass Name=...\nExtras=>\nkey:value\n\n或 #Intent;action=...;package=...;end',
     importParse: '解析',
@@ -477,15 +475,13 @@ const zhTW = {
     guideStep1Title: '安裝 Shortcut Maker',
     guideStep1Desc: '從 Google Play 商店下載「Shortcut Maker」（開發者：Rushikesh Kamewar）。',
     guideStep1Launch: '開啟 Shortcut Maker',
-    guideStep1LaunchHint: '若未安裝，將自動引導至 Play 商店',
     guideStep2Title: '找到支付 App 的 Activity',
-    guideStep2Desc: '開啟 Shortcut Maker → 選擇「Activities」→ 搜尋你的支付 App → 找到含有掃碼或付款功能的 Activity。',
-    guideStep3Title: '複製 Intent 資訊',
-    guideStep3Desc: '點擊該 Activity 進入「Inner Link」頻道，即可看到 Action、Package Name、Class Name 與 Extras 等資訊。你也可以點「Edit Intent」取得 Intent 字串（#Intent;...;end 格式）。兩種格式皆可貼上。',
-    guideStep4Title: '貼上到 OpenTWQR',
-    guideStep4Desc: '回到本頁面，選擇「Intent 匯入」頁籤，貼上剛才複製的內容，即可自動產生連結。',
-    guideAndroidOnly: '此功能僅適用於 Android 裝置上的 Chrome 系列瀏覽器。',
-    guideAltApps: '也可使用 QuickShortcutMaker 或 Activity Launcher 等類似工具。',
+    guideStep2Desc: '你需要找到支付 App 中負責掃碼或付款功能的 Activity 名稱（例如：街口支付中的 SafePay LTB）。',
+    guideStep3Title: '搜尋目標 Activity',
+    guideStep3Desc: '開啟 Shortcut Maker 後，選擇「Activities」或「Innerlinks」，搜尋支付 App 名稱，找到具備掃碼或付款功能的 Activity。',
+    guideStep4Title: '複製 Activity 資訊',
+    guideStep4Desc: '點擊該 Activity 進入詳情頁面，點擊右上角的複製按鈕即可複製相關資訊。',
+    guideNote: '注意：Shortcut Maker 複製的內容並不是標準 Intent 格式，無法直接使用。請回到本頁的「Intent 匯入」頁籤貼上，由 OpenTWQR 自動轉換為可用的連結格式。',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */
