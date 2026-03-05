@@ -4,6 +4,7 @@ import { useLocaleStore } from '../../stores/useLocaleStore';
 import { maskAccount, formatCurrency } from '../../utils/twqr';
 import { BankIcon } from '../accounts/BankIcon';
 import { haptic } from '../../utils/haptics';
+import { isIntentUrl } from '../../utils/urlScheme';
 import type { Bank } from '../../types';
 import type { ParsedTWQR } from '../../utils/parseTwqr';
 
@@ -106,9 +107,13 @@ export const ScanRedirectView = ({
           )}
         </div>
 
-        {/* Primary action — open payment app */}
+        {/* Primary action — open payment app.
+         *  intent:// links use target="_blank" so the WebAPK (PWA standalone
+         *  shell) delegates to Chrome, which properly handles intent:// resolution.
+         *  Regular URLs (https://, custom schemes) stay in-context. */}
         <a
           href={bankUrl}
+          {...(isIntentUrl(bankUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
           onClick={() => haptic()}
           className="w-full flex items-center justify-center gap-2.5 px-5 py-4 rounded-xl btn-accent active:scale-98 action-transition shadow-xs font-semibold text-base focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >

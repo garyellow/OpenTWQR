@@ -8,6 +8,7 @@ import { formatCurrency, formatAmount, formatAccountDisplay, maskAccount } from 
 import { buildShareUrl } from '../../utils/share';
 import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
 import { haptic } from '../../utils/haptics';
+import { isIntentUrl } from '../../utils/urlScheme';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { QRFullscreen } from './QRFullscreen';
@@ -557,6 +558,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           {bankUrl && (
             <a
               href={bankUrl}
+              {...(isIntentUrl(bankUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
               onClick={() => haptic()}
               className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl btn-accent active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >

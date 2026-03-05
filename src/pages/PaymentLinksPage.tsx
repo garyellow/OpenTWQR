@@ -504,7 +504,7 @@ export const PaymentLinksPage = () => {
                     <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep1Title}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep1Desc}</p>
                     <a
-                      href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
+                      href="intent://#Intent;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"

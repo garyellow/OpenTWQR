@@ -471,6 +471,12 @@ const enUS: Translations = {
     importFallback: 'Redirect to Google Play if app is not installed',
     importParseError: 'Unable to parse. Please check the format. At least a Package Name is required.',
 
+    // Form validation
+    errorSelectBank: 'Please select an institution first',
+    errorPackageName: 'Please enter a package name',
+    errorUrlTemplate: 'Please enter a URL template',
+    errorParseFirst: 'Please paste and parse intent info first',
+
     // Intent guide
     guideTitle: 'How to Get Intent Info',
     guideStep1Title: 'Open Shortcut Maker',

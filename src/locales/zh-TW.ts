@@ -470,6 +470,12 @@ const zhTW = {
     importFallback: '未安裝時導向 Google Play 商店',
     importParseError: '無法解析，請確認格式正確。至少需包含「套件名稱」（Package Name）。',
 
+    // Form validation
+    errorSelectBank: '請先選擇金融機構',
+    errorPackageName: '請輸入套件名稱',
+    errorUrlTemplate: '請輸入 URL 範本',
+    errorParseFirst: '請先貼上並解析 Intent 資訊',
+
     // Intent guide
     guideTitle: '如何取得 Intent 資訊',
     guideStep1Title: '開啟 Shortcut Maker',

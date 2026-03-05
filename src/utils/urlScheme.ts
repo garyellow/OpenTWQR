@@ -24,9 +24,12 @@ export interface UrlSchemeParams {
 
 /**
  * Build a concrete URL from a user-defined template by replacing placeholders.
+ *
+ * Automatically normalises intent:// URLs so that previously-stored
+ * templates with incompatible MAIN/LAUNCHER flags still work.
  */
 export function buildBankUrl(template: string, params: UrlSchemeParams): string {
-  return template
+  return normalizeIntentUrl(template)
     .replace(/\{account\}/g, params.account)
     .replace(/\{paddedAccount\}/g, params.paddedAccount)
     .replace(/\{bankCode\}/g, params.bankCode)
@@ -279,7 +282,12 @@ export function buildIntentUrl(
 
   parts.push('#Intent');
   if (intentScheme) parts.push(`;scheme=${intentScheme}`);
-  if (parsed.action) parts.push(`;action=${parsed.action}`);
+  // Skip action=MAIN — it targets the launcher activity which never
+  // declares CATEGORY_BROWSABLE.  Chrome auto-adds BROWSABLE to all
+  // web-initiated intents, so MAIN would cause resolution failure.
+  if (parsed.action && parsed.action !== 'android.intent.action.MAIN') {
+    parts.push(`;action=${parsed.action}`);
+  }
   if (parsed.packageName) parts.push(`;package=${parsed.packageName}`);
   if (parsed.className) parts.push(`;component=${parsed.className}`);
 
@@ -309,28 +317,48 @@ export function isIntentUrl(url: string): boolean {
 }
 
 /**
- * Normalise an intent URL to the Chrome web format (`intent://`).
+ * Normalise an intent URL to the Chrome web format (`intent://`) and strip
+ * flags that are incompatible with Chrome's web-initiated intent handling.
  *
- * Android's `Intent.toUri(URI_INTENT_SCHEME)` produces `intent:#Intent;…;end`
- * (no double-slash). Chrome on Android handles this, but the `intent://` form
- * is the officially documented web format and is more reliably intercepted.
+ * 1. `intent:#Intent;…;end` → `intent://#Intent;…;end`
+ *    Android's `Intent.toUri(URI_INTENT_SCHEME)` omits the double-slash;
+ *    the `intent://` form is the officially documented web format.
  *
- * If the input is already `intent://…` or is not an intent URL at all, it is
- * returned unchanged.
+ * 2. Removes `action=android.intent.action.MAIN` and
+ *    `category=android.intent.category.LAUNCHER`.
+ *    Chrome automatically adds `CATEGORY_BROWSABLE` to every web-initiated
+ *    intent.  Launcher activities typically only declare MAIN + LAUNCHER
+ *    (without BROWSABLE), so keeping these flags causes intent resolution
+ *    to fail and triggers the Play Store fallback.
+ *
+ * If the input is not an intent URL it is returned unchanged.
  */
 export function normalizeIntentUrl(url: string): string {
+  if (!isIntentUrl(url)) return url;
+
+  let result = url;
+
   // intent:#Intent;… → intent://#Intent;…
-  if (/^intent:#Intent;/i.test(url)) {
-    return 'intent://' + url.slice('intent:'.length);
+  if (/^intent:#Intent;/i.test(result)) {
+    result = 'intent://' + result.slice('intent:'.length);
   }
-  return url;
+
+  // Strip MAIN action — incompatible with Chrome's auto-added BROWSABLE.
+  result = result.replace(/;action=android\.intent\.action\.MAIN/gi, '');
+  // Strip LAUNCHER category — same conflict.
+  result = result.replace(/;category=android\.intent\.category\.LAUNCHER/gi, '');
+
+  return result;
 }
 
 /**
  * Build a minimal intent:// URL that simply launches an app by its package name.
  *
- * Uses MAIN/LAUNCHER so the app opens its default (home) activity —
- * the same behaviour as tapping the icon in the launcher.
+ * Omits `action` and `category` entirely — Chrome automatically adds
+ * `CATEGORY_BROWSABLE` to all web-initiated intents, which conflicts with
+ * launcher activities that only declare `MAIN + LAUNCHER`.  Leaving both
+ * flags out lets Chrome resolve the intent without that contradiction.
+ *
  * Includes a Play Store fallback by default.
  */
 export function buildPackageOnlyUrl(
@@ -339,10 +367,13 @@ export function buildPackageOnlyUrl(
 ): string {
   if (!packageName) return '';
   const { fallback = true } = options;
+  // Do NOT include action=MAIN or category=LAUNCHER here.
+  // Chrome automatically adds CATEGORY_BROWSABLE to all web-initiated
+  // intents.  Launcher activities typically only declare MAIN+LAUNCHER
+  // (without BROWSABLE), so including them causes intent resolution to
+  // fail and Chrome falls back to the Play Store URL.
   const parts = [
     'intent://#Intent',
-    ';action=android.intent.action.MAIN',
-    ';category=android.intent.category.LAUNCHER',
     `;package=${packageName}`,
   ];
   if (fallback) {

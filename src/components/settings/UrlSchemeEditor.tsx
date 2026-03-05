@@ -4,7 +4,7 @@ import { BankSelect } from '../accounts/BankSelect';
 import { useUrlSchemeStore } from '../../stores/useUrlSchemeStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useBanksStore } from '../../stores/useBanksStore';
-import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, Package, ExternalLink } from 'lucide-react';
+import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, Package, ExternalLink, AlertCircle } from 'lucide-react';
 import { haptic } from '../../utils/haptics';
 import { parseIntentInput, buildIntentUrl, buildPackageOnlyUrl, isAndroid, normalizeIntentUrl, type ParsedIntent } from '../../utils/urlScheme';
 
@@ -41,6 +41,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
   const [bankCode, setBankCode] = useState(existingConfig?.bankCode || '');
   const [urlTemplate, setUrlTemplate] = useState(existingConfig?.urlTemplate || '');
   const [showHelp, setShowHelp] = useState(false);
+  const [error, setError] = useState('');
 
   // Android input mode: when editing, default to manual to show existing URL
   const [mode, setMode] = useState<InputMode>(
@@ -66,7 +67,14 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
   );
 
   const handleSave = () => {
-    if (!bankCode || !urlTemplate.trim()) return;
+    if (!bankCode) {
+      setError(t.urlScheme.errorSelectBank);
+      return;
+    }
+    if (!urlTemplate.trim()) {
+      setError(t.urlScheme.errorUrlTemplate);
+      return;
+    }
     haptic();
     addConfig({ bankCode, urlTemplate: normalizeIntentUrl(urlTemplate.trim()) });
     requestCloseRef.current?.();
@@ -103,22 +111,34 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
   }, []);
 
   const handleSaveIntent = useCallback(() => {
-    if (!bankCode || !parsedIntent) return;
+    if (!bankCode) {
+      setError(t.urlScheme.errorSelectBank);
+      return;
+    }
+    if (!parsedIntent) {
+      setError(t.urlScheme.errorParseFirst);
+      return;
+    }
     haptic();
     const url = buildIntentUrl(parsedIntent, { fallback: intentFallback });
     addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
     requestCloseRef.current?.();
-  }, [bankCode, parsedIntent, intentFallback, addConfig]);
+  }, [bankCode, parsedIntent, intentFallback, addConfig, t]);
 
   const handleSavePackage = useCallback(() => {
-    if (!bankCode || !packageInput.trim()) return;
+    if (!bankCode) {
+      setError(t.urlScheme.errorSelectBank);
+      return;
+    }
+    if (!packageInput.trim()) {
+      setError(t.urlScheme.errorPackageName);
+      return;
+    }
     haptic();
     const url = buildPackageOnlyUrl(packageInput.trim(), { fallback: packageFallback });
     addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
     requestCloseRef.current?.();
-  }, [bankCode, packageInput, packageFallback, addConfig]);
-
-  const isValid = bankCode && urlTemplate.trim();
+  }, [bankCode, packageInput, packageFallback, addConfig, t]);
 
   return (
     <AnimatedModal
@@ -173,7 +193,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
               </div>
             ) : (
               /* Adding: BankSelect component */
-              <BankSelect value={bankCode} onChange={setBankCode} />
+              <BankSelect value={bankCode} onChange={(v) => { setBankCode(v); setError(''); }} />
             )}
 
             {/* ─── Mode selector (Android only) ────────────── */}
@@ -187,7 +207,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setMode(key)}
+                    onClick={() => { setMode(key); setError(''); }}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${
                       mode === key
                         ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
@@ -219,7 +239,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                     id="package-name-input"
                     type="text"
                     value={packageInput}
-                    onChange={(e) => setPackageInput(e.target.value)}
+                    onChange={(e) => { setPackageInput(e.target.value); setError(''); }}
                     placeholder="com.example.app"
                     autoComplete="off"
                     className="w-full bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono"
@@ -250,11 +270,17 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   </div>
                 )}
 
+                {error && mode === 'package' && (
+                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
+                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+                    <span className="font-medium">{error}</span>
+                  </div>
+                )}
+
                 <button
                   type="button"
                   onClick={handleSavePackage}
-                  disabled={!bankCode || !packageInput.trim()}
-                  className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs disabled:opacity-40 disabled:active:scale-100"
+                  className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
                 >
                   {t.urlScheme.save}
                 </button>
@@ -265,7 +291,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
             {mode === 'intent' && android && (
               <div className="space-y-3.5">                {/* Quick launch — smart open or install */}
                 <a
-                  href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
+                  href="intent://#Intent;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between gap-3 w-full px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 active:scale-98 action-transition group"
@@ -395,18 +421,24 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                         {buildIntentUrl(parsedIntent, { fallback: intentFallback })}
                       </p>
                     </div>
-
-                    {/* Save button */}
-                    <button
-                      type="button"
-                      onClick={handleSaveIntent}
-                      disabled={!bankCode}
-                      className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs disabled:opacity-40 disabled:active:scale-100"
-                    >
-                      {t.urlScheme.save}
-                    </button>
                   </div>
                 )}
+
+                {error && mode === 'intent' && (
+                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
+                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+                    <span className="font-medium">{error}</span>
+                  </div>
+                )}
+
+                {/* Save button — always visible so validation errors can surface */}
+                <button
+                  type="button"
+                  onClick={handleSaveIntent}
+                  className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
+                >
+                  {t.urlScheme.save}
+                </button>
               </div>
             )}
 
@@ -434,7 +466,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   id="url-template-input"
                   type="text"
                   value={urlTemplate}
-                  onChange={(e) => setUrlTemplate(e.target.value)}
+                  onChange={(e) => { setUrlTemplate(e.target.value); setError(''); }}
                   placeholder={t.urlScheme.urlPlaceholder}
                   autoComplete="off"
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs font-mono"
@@ -489,14 +521,21 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
 
             {/* Save — only shown in manual mode; package and intent modes have inline save buttons */}
             {mode === 'manual' && (
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!isValid}
-                className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-              >
-                {t.urlScheme.save}
-              </button>
+              <>
+                {error && (
+                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
+                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+                    <span className="font-medium">{error}</span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                >
+                  {t.urlScheme.save}
+                </button>
+              </>
             )}
           </div>
         </div>
