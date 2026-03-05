@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Heart, Info, RefreshCw } from 'lucide-react';
+import { Heart, Info, RefreshCw, Scale } from 'lucide-react';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 
 /** GitHub logo from Simple Icons (MIT). Avoids deprecated lucide brand icons. */
@@ -154,6 +154,19 @@ export const AboutSection = () => {
             </p>
           </div>
         </button>
+
+        {/* Disclaimer */}
+        <div className="w-full flex items-start gap-3 p-4">
+          <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
+            <Scale size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          </div>
+          <div className="text-left flex-1">
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{t.about.disclaimerTitle}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+              {t.about.disclaimerDesc}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

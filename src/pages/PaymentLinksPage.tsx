@@ -4,10 +4,10 @@ import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { UrlSchemeEditor } from '../components/settings/UrlSchemeEditor';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X, CircleHelp, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { haptic } from '../utils/haptics';
-import { buildBankUrl } from '../utils/urlScheme';
+import { buildBankUrl, isAndroid } from '../utils/urlScheme';
 
 /**
  * Full-page management screen for payment app integrations.
@@ -28,6 +28,8 @@ export const PaymentLinksPage = () => {
   const [testAccount, setTestAccount] = useState('');
   const [testAmount, setTestAmount] = useState('');
   const [testNote, setTestNote] = useState('');
+  const [showGuide, setShowGuide] = useState(false);
+  const android = useMemo(() => isAndroid(), []);
 
   const sortedConfigs = useMemo(
     () => [...configs].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
@@ -90,15 +92,28 @@ export const PaymentLinksPage = () => {
               {t.urlScheme.manageTitle}
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsAdding(true)}
-            aria-label={t.urlScheme.addLabel}
-            title={t.urlScheme.addBank}
-            className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
-          >
-            <Plus size={20} aria-hidden="true" />
-          </button>
+          <div className="flex items-center gap-1">
+            {android && (
+            <button
+              type="button"
+              onClick={() => setShowGuide(true)}
+              aria-label={t.urlScheme.guideTitle}
+              title={t.urlScheme.guideTitle}
+              className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+            >
+              <CircleHelp size={20} aria-hidden="true" />
+            </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setIsAdding(true)}
+              aria-label={t.urlScheme.addLabel}
+              title={t.urlScheme.addBank}
+              className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
+            >
+              <Plus size={20} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -439,6 +454,113 @@ export const PaymentLinksPage = () => {
                   </button>
                 )}
               </div>
+            </div>
+          )}
+        </AnimatedModal>
+      )}
+
+      {/* Guide modal — step-by-step Shortcut Maker instructions */}
+      {showGuide && (
+        <AnimatedModal
+          onClose={() => setShowGuide(false)}
+          overlayClass="z-60"
+          cardClass="max-w-sm max-h-[90svh] overflow-y-auto"
+          ariaLabelledby="payment-link-guide-title"
+        >
+          {(requestClose) => (
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 12%, transparent)' }}
+                  >
+                    <CircleHelp size={18} style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }} aria-hidden="true" />
+                  </div>
+                  <h2
+                    id="payment-link-guide-title"
+                    className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug"
+                  >
+                    {t.urlScheme.guideTitle}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  aria-label={t.common.close}
+                  className="p-2.5 -mr-2 -mt-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Steps */}
+              <ol className="space-y-5">
+                {/* Step 1 */}
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">1</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep1Title}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep1Desc}</p>
+                    <a
+                      href="https://play.google.com/store/apps/details?id=rk.android.app.shortcutmaker"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium transition-colors"
+                      style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+                    >
+                      <ExternalLink size={12} aria-hidden="true" />
+                      {t.urlScheme.guideStep1Link}
+                    </a>
+                  </div>
+                </li>
+
+                {/* Step 2 */}
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">2</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep2Title}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep2Desc}</p>
+                  </div>
+                </li>
+
+                {/* Step 3 */}
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">3</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep3Title}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep3Desc}</p>
+                  </div>
+                </li>
+
+                {/* Step 4 */}
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">4</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep4Title}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep4Desc}</p>
+                  </div>
+                </li>
+              </ol>
+
+              {/* Notices */}
+              <div className="mt-5 space-y-2">
+                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
+                  {t.urlScheme.guideAndroidOnly}
+                </p>
+                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
+                  {t.urlScheme.guideAltApps}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={requestClose}
+                className="w-full py-3.5 mt-6 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              >
+                {t.common.understand}
+              </button>
             </div>
           )}
         </AnimatedModal>

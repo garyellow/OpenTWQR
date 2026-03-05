@@ -363,6 +363,8 @@ const enUS: Translations = {
     upToDate: 'Already up to date',
     updateAvailable: 'New version found — tap to reload',
     checkFailed: 'Check failed, try again later',
+    disclaimerTitle: 'Disclaimer',
+    disclaimerDesc: 'OpenTWQR is a community-maintained open-source project with no affiliation, endorsement, or partnership with FISC, TWQR, or Taiwan Pay. This project does not process any financial transactions — it only generates, displays, and shares QR codes.',
   },
 
   /* ─── Bottom Navigation ────────────────────────────────── */
@@ -448,6 +450,40 @@ const enUS: Translations = {
     testPreviewLabel: 'Generated URL',
     testOpen: 'Open Test Link',
     testAppHint: 'If the app doesn\'t open automatically, the corresponding app may not be installed, or the URL template may be incorrect.',
+
+    // Intent import
+    modePackage: 'Package',
+    modeIntent: 'Intent Import',
+    modeManual: 'Custom URL',
+    packageDesc: 'Enter the app\'s package name to generate a launch link. If the app is not installed, it redirects to Google Play Store.',
+    importIntentDesc: 'Paste the intent info copied from Shortcut Maker to auto-generate an intent:// link. Supports both multi-line and Intent URI formats.',
+    importPasteLabel: 'Paste Intent Info',
+    importPastePlaceholder: 'Action=android.intent.action.VIEW\nPackage Name=com.example.app\nClass Name=...\nExtras=>\nkey:value\n\nor #Intent;action=...;package=...;end',
+    importParse: 'Parse',
+    importApply: 'Apply',
+    importParsed: 'Parsed Result',
+    importAction: 'Action',
+    importPackage: 'Package Name',
+    importClass: 'Class Name',
+    importData: 'Data URI',
+    importExtras: 'Extras',
+    importPreview: 'Generated Intent URL',
+    importFallback: 'Redirect to Google Play if app is not installed',
+    importParseError: 'Unable to parse. Please check the format. At least a Package Name is required.',
+
+    // Intent guide
+    guideTitle: 'How to Get Intent Info',
+    guideStep1Title: 'Install Shortcut Maker',
+    guideStep1Desc: 'Download "Shortcut Maker" (by Rushikesh Kamewar) from Google Play Store.',
+    guideStep1Link: 'Open Google Play',
+    guideStep2Title: 'Find the Payment App Activity',
+    guideStep2Desc: 'Open Shortcut Maker → Select "Activities" → Search for your payment app → Find the activity for scanning or payment.',
+    guideStep3Title: 'Copy the Intent Info',
+    guideStep3Desc: 'Tap the activity to enter the "Inner Link" channel. You\'ll see Action, Package Name, Class Name, and Extras. You can also tap "Edit Intent" to get the Intent string (#Intent;...;end format). Both formats are accepted.',
+    guideStep4Title: 'Paste into OpenTWQR',
+    guideStep4Desc: 'Return to this page, switch to the "Intent Import" tab, paste the copied content, and the link will be auto-generated.',
+    guideAndroidOnly: 'This feature only works on Chrome-based browsers on Android devices.',
+    guideAltApps: 'You can also use QuickShortcutMaker or Activity Launcher as alternatives.',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */

@@ -361,6 +361,8 @@ const zhTW = {
     upToDate: '已是最新版本',
     updateAvailable: '發現新版本，點此重新載入',
     checkFailed: '檢查失敗，請稍後再試',
+    disclaimerTitle: '免責聲明',
+    disclaimerDesc: 'OpenTWQR 為社群獨立開發的開源專案，與財金資訊股份有限公司及 TWQR、台灣 Pay 等無任何隸屬或背書關係。本專案不處理任何金流，僅提供 QR Code 的產生、顯示與分享功能。',
   },
 
   /* ─── Bottom Navigation ────────────────────────────────── */
@@ -447,6 +449,40 @@ const zhTW = {
     testPreviewLabel: '產生的連結',
     testOpen: '開啟測試連結',
     testAppHint: '若無法自動開啟，可能是此裝置未安裝對應 App，或 URL 範本有誤。',
+
+    // Intent import
+    modePackage: '套件名稱',
+    modeIntent: 'Intent 匯入',
+    modeManual: '自訂 URL',
+    packageDesc: '輸入 App 的套件名稱，即可產生一鍵開啟連結。若裝置未安裝該 App，會自動導向 Google Play 商店。',
+    importIntentDesc: '貼上從 Shortcut Maker 複製的 Intent 資訊，自動轉換為 intent:// 連結。支援多行格式與 Intent URI 格式。',
+    importPasteLabel: '貼上 Intent 資訊',
+    importPastePlaceholder: 'Action=android.intent.action.VIEW\nPackage Name=com.example.app\nClass Name=...\nExtras=>\nkey:value\n\n或 #Intent;action=...;package=...;end',
+    importParse: '解析',
+    importApply: '套用',
+    importParsed: '解析結果',
+    importAction: '動作',
+    importPackage: '套件名稱',
+    importClass: '類別名稱',
+    importData: 'Data URI',
+    importExtras: '附加參數',
+    importPreview: '產生的 Intent URL',
+    importFallback: '未安裝時導向 Google Play 商店',
+    importParseError: '無法解析，請確認格式正確。至少需包含「套件名稱」（Package Name）。',
+
+    // Intent guide
+    guideTitle: '如何取得 Intent 資訊',
+    guideStep1Title: '安裝 Shortcut Maker',
+    guideStep1Desc: '從 Google Play 商店下載「Shortcut Maker」（開發者：Rushikesh Kamewar）。',
+    guideStep1Link: '前往 Google Play',
+    guideStep2Title: '找到支付 App 的 Activity',
+    guideStep2Desc: '開啟 Shortcut Maker → 選擇「Activities」→ 搜尋你的支付 App → 找到含有掃碼或付款功能的 Activity。',
+    guideStep3Title: '複製 Intent 資訊',
+    guideStep3Desc: '點擊該 Activity 進入「Inner Link」頻道，即可看到 Action、Package Name、Class Name 與 Extras 等資訊。你也可以點「Edit Intent」取得 Intent 字串（#Intent;...;end 格式）。兩種格式皆可貼上。',
+    guideStep4Title: '貼上到 OpenTWQR',
+    guideStep4Desc: '回到本頁面，選擇「Intent 匯入」頁籤，貼上剛才複製的內容，即可自動產生連結。',
+    guideAndroidOnly: '此功能僅適用於 Android 裝置上的 Chrome 系列瀏覽器。',
+    guideAltApps: '也可使用 QuickShortcutMaker 或 Activity Launcher 等類似工具。',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */
