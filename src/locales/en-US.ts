@@ -473,15 +473,15 @@ const enUS: Translations = {
 
     // Intent guide
     guideTitle: 'How to Get Intent Info',
-    guideStep1Title: 'Install Shortcut Maker',
-    guideStep1Desc: 'Download "Shortcut Maker" (by Rushikesh Kamewar) from Google Play Store.',
+    guideStep1Title: 'Open Shortcut Maker',
+    guideStep1Desc: 'Tap the button below to open Shortcut Maker.',
     guideStep1Launch: 'Open Shortcut Maker',
-    guideStep2Title: 'Identify the Payment App Activity',
-    guideStep2Desc: 'You need to find the Activity name responsible for the scan or payment function in the target app (e.g., SafePay LTB in JKOPay).',
-    guideStep3Title: 'Search for the Activity',
-    guideStep3Desc: 'Open Shortcut Maker, select "Activities" or "Innerlinks", search for your payment app, and locate the Activity for scanning or payment.',
+    guideStep2Title: 'Enter the App List',
+    guideStep2Desc: 'Tap "Activity", "Inner Link", or any other relevant section to open the app list.',
+    guideStep3Title: 'Select an App & Activity',
+    guideStep3Desc: 'Find your target app in the list, then select the corresponding Intent or Activity.',
     guideStep4Title: 'Copy the Activity Info',
-    guideStep4Desc: 'Tap the Activity to view its details, then tap the copy button in the top-right corner.',
+    guideStep4Desc: 'Inside the Activity details, tap the "Edit Intent" button, then tap the copy button in the top-right corner to get the full info.',
     guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format and cannot be used directly. Return to the "Intent Import" tab on this page, paste it, and OpenTWQR will automatically convert it into a usable link.',
   },
 

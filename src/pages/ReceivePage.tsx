@@ -177,7 +177,7 @@ export const ReceivePage = () => {
 
   /* ---------- Main layout ---------- */
   return (
-    <div className="h-svh flex flex-col overflow-hidden px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+    <div className="h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
       <a
         href="#receive-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -234,36 +234,44 @@ export const ReceivePage = () => {
         </div>
 
         {/* Amount input, transaction note & generate button */}
-        <div className="flex-1 flex flex-col justify-between min-h-0">
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 min-h-0">
-            <AmountInput value={amount} onChange={setAmount} />
+        {/* App Shell pattern: scrollable body + fixed bottom action button.
+            The scroll area uses the "center-when-fits, scroll-when-not" technique:
+            min-h-full + my-auto centres content in large viewports (PWA),
+            and gracefully scrolls from the top in compact browser viewports. */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto overscroll-contain min-h-0">
+            <div className="min-h-full flex flex-col">
+              <div className="my-auto py-3 flex flex-col items-center gap-3">
+                <AmountInput value={amount} onChange={setAmount} />
 
-            {/* Transaction note & personal message — two rows in a card */}
-            <div className="w-full px-6">
-              <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs">
-                <button
-                  type="button"
-                  onClick={() => setShowNoteInput(true)}
-                  className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                >
-                  <StickyNote size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
-                  <span className={`flex-1 text-left truncate ${note ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`} title={note ? `${t.qr.notePrefix}${note}` : undefined}>
-                    {note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}
-                  </span>
-                  {note && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{note.length}/19</span>}
-                </button>
-                <div className="h-px bg-zinc-100 dark:bg-zinc-800 mx-4" aria-hidden="true" />
-                <button
-                  type="button"
-                  onClick={() => setShowMessageInput(true)}
-                  className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                >
-                  <UserPen size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
-                  <span className={`flex-1 text-left truncate ${customName ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`} title={customName ? `${t.receive.messagePrefix}${customName}` : undefined}>
-                    {customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}
-                  </span>
-                  {customName && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{customName.length}/20</span>}
-                </button>
+                {/* Transaction note & personal message — two rows in a card */}
+                <div className="w-full px-6">
+                  <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => setShowNoteInput(true)}
+                      className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                    >
+                      <StickyNote size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
+                      <span className={`flex-1 text-left truncate ${note ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`} title={note ? `${t.qr.notePrefix}${note}` : undefined}>
+                        {note ? `${t.qr.notePrefix}${note}` : t.receive.addNote}
+                      </span>
+                      {note && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{note.length}/19</span>}
+                    </button>
+                    <div className="h-px bg-zinc-100 dark:bg-zinc-800 mx-4" aria-hidden="true" />
+                    <button
+                      type="button"
+                      onClick={() => setShowMessageInput(true)}
+                      className="flex items-center gap-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors py-3 px-4 min-h-11 w-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                    >
+                      <UserPen size={15} aria-hidden="true" className="shrink-0 text-zinc-400 dark:text-zinc-500" />
+                      <span className={`flex-1 text-left truncate ${customName ? 'text-zinc-800 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500'}`} title={customName ? `${t.receive.messagePrefix}${customName}` : undefined}>
+                        {customName ? `${t.receive.messagePrefix}${customName}` : t.receive.addMessage}
+                      </span>
+                      {customName && <span className="text-xs text-zinc-400 dark:text-zinc-500 shrink-0">{customName.length}/20</span>}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

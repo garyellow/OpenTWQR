@@ -71,7 +71,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
   const formattedMax = new Intl.NumberFormat().format(maxAmount);
 
   const digitBtnClass =
-    'h-14 rounded-xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center';
+    'h-14 [@media(max-height:720px)]:h-11 rounded-xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center';
 
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-2">

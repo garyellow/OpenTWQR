@@ -472,15 +472,15 @@ const zhTW = {
 
     // Intent guide
     guideTitle: '如何取得 Intent 資訊',
-    guideStep1Title: '安裝 Shortcut Maker',
-    guideStep1Desc: '從 Google Play 商店下載「Shortcut Maker」（開發者：Rushikesh Kamewar）。',
+    guideStep1Title: '開啟 Shortcut Maker',
+    guideStep1Desc: '點擊下方按鈕開啟 Shortcut Maker。',
     guideStep1Launch: '開啟 Shortcut Maker',
-    guideStep2Title: '找到支付 App 的 Activity',
-    guideStep2Desc: '你需要找到支付 App 中負責掃碼或付款功能的 Activity 名稱（例如：街口支付中的 SafePay LTB）。',
-    guideStep3Title: '搜尋目標 Activity',
-    guideStep3Desc: '開啟 Shortcut Maker 後，選擇「Activities」或「Innerlinks」，搜尋支付 App 名稱，找到具備掃碼或付款功能的 Activity。',
+    guideStep2Title: '進入 App 列表',
+    guideStep2Desc: '點擊「Activity」、「Inner Link」或其他相關區塊，進入 App 列表頁面。',
+    guideStep3Title: '選擇 App 與 Activity',
+    guideStep3Desc: '在列表中找到目標 App，並選擇對應的 Intent 或 Activity。',
     guideStep4Title: '複製 Activity 資訊',
-    guideStep4Desc: '點擊該 Activity 進入詳情頁面，點擊右上角的複製按鈕即可複製相關資訊。',
+    guideStep4Desc: '點進 Activity 詳情頁面後，點擊「編輯 Intent」按鈕，再點擊右上角的複製按鈕即可取得完整資訊。',
     guideNote: '注意：Shortcut Maker 複製的內容並不是標準 Intent 格式，無法直接使用。請回到本頁的「Intent 匯入」頁籤貼上，由 OpenTWQR 自動轉換為可用的連結格式。',
   },
 
