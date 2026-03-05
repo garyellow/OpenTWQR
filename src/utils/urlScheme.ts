@@ -300,9 +300,30 @@ export function buildIntentUrl(
   return parts.join('');
 }
 
-/** Quick check whether a string looks like an intent:// URL. */
+/** Quick check whether a string looks like an intent:// URL.
+ * Recognises both the Chrome web format (`intent://`) and Android's
+ * native `Intent.toUri()` format (`intent:#Intent;…;end`).
+ */
 export function isIntentUrl(url: string): boolean {
-  return url.startsWith('intent://');
+  return /^intent:(?:\/\/|#Intent;)/i.test(url);
+}
+
+/**
+ * Normalise an intent URL to the Chrome web format (`intent://`).
+ *
+ * Android's `Intent.toUri(URI_INTENT_SCHEME)` produces `intent:#Intent;…;end`
+ * (no double-slash). Chrome on Android handles this, but the `intent://` form
+ * is the officially documented web format and is more reliably intercepted.
+ *
+ * If the input is already `intent://…` or is not an intent URL at all, it is
+ * returned unchanged.
+ */
+export function normalizeIntentUrl(url: string): string {
+  // intent:#Intent;… → intent://#Intent;…
+  if (/^intent:#Intent;/i.test(url)) {
+    return 'intent://' + url.slice('intent:'.length);
+  }
+  return url;
 }
 
 /**

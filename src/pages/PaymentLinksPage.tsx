@@ -4,7 +4,7 @@ import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { UrlSchemeEditor } from '../components/settings/UrlSchemeEditor';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X, CircleHelp, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X, CircleHelp, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { haptic } from '../utils/haptics';
 import { buildBankUrl, isAndroid } from '../utils/urlScheme';
@@ -50,9 +50,9 @@ export const PaymentLinksPage = () => {
     ? banks.find((b) => b.code === testingConfig.bankCode)
     : null;
 
-  /** Build the test URL from user-provided data */
+  /** Build the test URL from user-provided data — account is optional */
   const testUrl = useMemo(() => {
-    if (!testingConfig || !testAccount) return '';
+    if (!testingConfig) return '';
     return buildBankUrl(testingConfig.urlTemplate, {
       bankCode: testingConfig.bankCode,
       account: testAccount,
@@ -406,7 +406,7 @@ export const PaymentLinksPage = () => {
                 </div>
 
                 {/* URL preview */}
-                {testAccount && (
+                {testUrl && (
                   <div className="px-3.5 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50">
                     <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1.5">
                       {t.urlScheme.testPreviewLabel}
@@ -431,7 +431,7 @@ export const PaymentLinksPage = () => {
                 >
                   {t.common.cancel}
                 </button>
-                {testAccount ? (
+                {testUrl ? (
                   <a
                     href={testUrl}
                     target="_blank"
@@ -504,15 +504,22 @@ export const PaymentLinksPage = () => {
                     <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep1Title}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep1Desc}</p>
                     <a
-                      href="https://play.google.com/store/apps/details?id=rk.android.app.shortcutmaker"
+                      href="intent://#Intent;action=android.intent.action.MAIN;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium transition-colors"
-                      style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+                      className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"
+                      style={{
+                        color: 'light-dark(var(--accent), var(--accent-dark))',
+                        borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 30%, transparent)',
+                        backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 8%, transparent)',
+                      }}
                     >
-                      <ExternalLink size={12} aria-hidden="true" />
-                      {t.urlScheme.guideStep1Link}
+                      <Smartphone size={13} aria-hidden="true" />
+                      {t.urlScheme.guideStep1Launch}
                     </a>
+                    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5 leading-relaxed">
+                      {t.urlScheme.guideStep1LaunchHint}
+                    </p>
                   </div>
                 </li>
 
@@ -549,9 +556,31 @@ export const PaymentLinksPage = () => {
                 <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
                   {t.urlScheme.guideAndroidOnly}
                 </p>
-                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
-                  {t.urlScheme.guideAltApps}
-                </p>
+                <div>
+                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed mb-2">
+                    {t.urlScheme.guideAltApps}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href="intent://#Intent;action=android.intent.action.MAIN;package=com.sika524.android.quickshortcut;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.sika524.android.quickshortcut;end"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+                    >
+                      <Smartphone size={11} aria-hidden="true" />
+                      QuickShortcutMaker
+                    </a>
+                    <a
+                      href="intent://#Intent;action=android.intent.action.MAIN;package=de.szalkowski.activitylauncher;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dde.szalkowski.activitylauncher;end"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+                    >
+                      <Smartphone size={11} aria-hidden="true" />
+                      Activity Launcher
+                    </a>
+                  </div>
+                </div>
               </div>
 
               <button
