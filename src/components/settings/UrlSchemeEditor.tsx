@@ -83,21 +83,40 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
     }
   }, [importText]);
 
-  const handleApplyIntent = useCallback(() => {
-    if (!parsedIntent) return;
+  const handlePasteAndParse = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text.trim()) return;
+      haptic();
+      setImportText(text);
+      setParseError(false);
+      const parsed = parseIntentInput(text);
+      if (parsed) {
+        setParsedIntent(parsed);
+      } else {
+        setParsedIntent(null);
+        setParseError(true);
+      }
+    } catch {
+      // Clipboard permission denied — user can still manually paste into the textarea
+    }
+  }, []);
+
+  const handleSaveIntent = useCallback(() => {
+    if (!bankCode || !parsedIntent) return;
     haptic();
     const url = buildIntentUrl(parsedIntent, { fallback: intentFallback });
-    setUrlTemplate(url);
-    setMode('manual');
-  }, [parsedIntent, intentFallback]);
+    addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
+    requestCloseRef.current?.();
+  }, [bankCode, parsedIntent, intentFallback, addConfig]);
 
-  const handleApplyPackage = useCallback(() => {
-    if (!packageInput.trim()) return;
+  const handleSavePackage = useCallback(() => {
+    if (!bankCode || !packageInput.trim()) return;
     haptic();
     const url = buildPackageOnlyUrl(packageInput.trim(), { fallback: packageFallback });
-    setUrlTemplate(url);
-    setMode('manual');
-  }, [packageInput, packageFallback]);
+    addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
+    requestCloseRef.current?.();
+  }, [bankCode, packageInput, packageFallback, addConfig]);
 
   const isValid = bankCode && urlTemplate.trim();
 
@@ -233,11 +252,11 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
 
                 <button
                   type="button"
-                  onClick={handleApplyPackage}
-                  disabled={!packageInput.trim()}
+                  onClick={handleSavePackage}
+                  disabled={!bankCode || !packageInput.trim()}
                   className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs disabled:opacity-40 disabled:active:scale-100"
                 >
-                  {t.urlScheme.importApply}
+                  {t.urlScheme.save}
                 </button>
               </div>
             )}
@@ -249,7 +268,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   href="intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between gap-3 w-full px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors group"
+                  className="flex items-center justify-between gap-3 w-full px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 active:scale-98 action-transition group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Smartphone size={16} className="text-zinc-500 dark:text-zinc-400 shrink-0" aria-hidden="true" />
@@ -264,12 +283,22 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
 
                 {/* Paste area */}
                 <div>
-                  <label
-                    htmlFor="import-intent-input"
-                    className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5"
-                  >
-                    {t.urlScheme.importPasteLabel}
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label
+                      htmlFor="import-intent-input"
+                      className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
+                    >
+                      {t.urlScheme.importPasteLabel}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handlePasteAndParse}
+                      className="flex items-center gap-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <ClipboardPaste size={12} aria-hidden="true" />
+                      {t.urlScheme.importPasteBtn}
+                    </button>
+                  </div>
                   <textarea
                     id="import-intent-input"
                     value={importText}
@@ -367,13 +396,14 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                       </p>
                     </div>
 
-                    {/* Apply button */}
+                    {/* Save button */}
                     <button
                       type="button"
-                      onClick={handleApplyIntent}
-                      className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
+                      onClick={handleSaveIntent}
+                      disabled={!bankCode}
+                      className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs disabled:opacity-40 disabled:active:scale-100"
                     >
-                      {t.urlScheme.importApply}
+                      {t.urlScheme.save}
                     </button>
                   </div>
                 )}
@@ -457,15 +487,17 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
               </div>
             )}
 
-            {/* Save */}
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={!isValid}
-              className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-            >
-              {t.urlScheme.save}
-            </button>
+            {/* Save — only shown in manual mode; package and intent modes have inline save buttons */}
+            {mode === 'manual' && (
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={!isValid}
+                className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              >
+                {t.urlScheme.save}
+              </button>
+            )}
           </div>
         </div>
         );

@@ -460,7 +460,7 @@ const enUS: Translations = {
     importPasteLabel: 'Paste Intent Info',
     importPastePlaceholder: 'Action=android.intent.action.VIEW\nPackage Name=com.example.app\nClass Name=...\nExtras=>\nkey:value\n\nor #Intent;action=...;package=...;end',
     importParse: 'Parse',
-    importApply: 'Apply',
+    importPasteBtn: 'Paste & Parse',
     importParsed: 'Parsed Result',
     importAction: 'Action',
     importPackage: 'Package Name',

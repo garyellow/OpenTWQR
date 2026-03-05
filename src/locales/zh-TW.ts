@@ -459,7 +459,7 @@ const zhTW = {
     importPasteLabel: '貼上 Intent 資訊',
     importPastePlaceholder: 'Action=android.intent.action.VIEW\nPackage Name=com.example.app\nClass Name=...\nExtras=>\nkey:value\n\n或 #Intent;action=...;package=...;end',
     importParse: '解析',
-    importApply: '套用',
+    importPasteBtn: '貼上並解析',
     importParsed: '解析結果',
     importAction: '動作',
     importPackage: '套件名稱',
