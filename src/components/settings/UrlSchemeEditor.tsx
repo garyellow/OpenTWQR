@@ -4,11 +4,11 @@ import { BankSelect } from '../accounts/BankSelect';
 import { useUrlSchemeStore } from '../../stores/useUrlSchemeStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useBanksStore } from '../../stores/useBanksStore';
-import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, Package, ExternalLink, AlertCircle } from 'lucide-react';
+import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, ExternalLink, AlertCircle, FileText } from 'lucide-react';
 import { haptic } from '../../utils/haptics';
-import { parseIntentInput, buildIntentUrl, buildPackageOnlyUrl, isAndroid, normalizeIntentUrl, type ParsedIntent } from '../../utils/urlScheme';
+import { parseIntentInput, buildIntentUrl, isAndroid, normalizeIntentUrl, parseManifestXml, type ParsedIntent, type ManifestDeepLink } from '../../utils/urlScheme';
 
-type InputMode = 'package' | 'intent' | 'manual';
+type InputMode = 'intent' | 'manifest' | 'manual';
 
 interface UrlSchemeEditorProps {
   /** Existing bank code for editing. Undefined for new entry. */
@@ -20,8 +20,8 @@ interface UrlSchemeEditorProps {
  * Modal form for adding/editing a bank URL scheme configuration.
  *
  * On Android, offers three input modes:
- *   1. Package Name — simplest: just enter a package name to open the app.
- *   2. Import Intent — paste from Shortcut Maker to target a specific Activity.
+ *   1. Import Intent — paste from Shortcut Maker to target a specific Activity.
+ *   2. Manifest — paste AndroidManifest.xml from App Manager to auto-detect BROWSABLE deep links.
  *   3. Manual URL — free-form URL template with placeholder support.
  *
  * On non-Android, only the manual URL mode is shown.
@@ -45,18 +45,21 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
 
   // Android input mode: when editing, default to manual to show existing URL
   const [mode, setMode] = useState<InputMode>(
-    android && !existingConfig?.urlTemplate ? 'package' : 'manual',
+    android && !existingConfig?.urlTemplate ? 'intent' : 'manual',
   );
-
-  // Package Name mode state
-  const [packageInput, setPackageInput] = useState('');
-  const [packageFallback, setPackageFallback] = useState(true);
 
   // Import Intent mode state
   const [importText, setImportText] = useState('');
   const [parsedIntent, setParsedIntent] = useState<ParsedIntent | null>(null);
   const [parseError, setParseError] = useState(false);
   const [intentFallback, setIntentFallback] = useState(true);
+
+  // Manifest mode state
+  const [manifestText, setManifestText] = useState('');
+  const [manifestLinks, setManifestLinks] = useState<ManifestDeepLink[]>([]);
+  const [manifestParseError, setManifestParseError] = useState(false);
+  const [selectedLinkIdx, setSelectedLinkIdx] = useState<number>(0);
+  const [manifestFallback, setManifestFallback] = useState(true);
 
   /** Captures requestClose for exit animation. */
   const requestCloseRef = useRef<(() => void) | null>(null);
@@ -110,6 +113,60 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
     }
   }, []);
 
+  const handleParseManifest = useCallback(() => {
+    const links = parseManifestXml(manifestText);
+    if (links.length > 0) {
+      setManifestLinks(links);
+      setManifestParseError(false);
+      setSelectedLinkIdx(0);
+    } else {
+      setManifestLinks([]);
+      setManifestParseError(true);
+    }
+  }, [manifestText]);
+
+  const handlePasteAndParseManifest = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text.trim()) return;
+      haptic();
+      setManifestText(text);
+      setManifestParseError(false);
+      const links = parseManifestXml(text);
+      if (links.length > 0) {
+        setManifestLinks(links);
+        setSelectedLinkIdx(0);
+      } else {
+        setManifestLinks([]);
+        setManifestParseError(true);
+      }
+    } catch {
+      // Clipboard permission denied
+    }
+  }, []);
+
+  const handleSaveManifest = useCallback(() => {
+    if (!bankCode) {
+      setError(t.urlScheme.errorSelectBank);
+      return;
+    }
+    if (manifestLinks.length === 0) {
+      setError(t.urlScheme.errorParseManifestFirst);
+      return;
+    }
+    haptic();
+    const link = manifestLinks[selectedLinkIdx];
+    // Build an intent:// URL so Chrome can use the fallback mechanism
+    const intentParsed: ParsedIntent = {
+      action: 'android.intent.action.VIEW',
+      packageName: link.packageName,
+      dataUri: link.url,
+    };
+    const url = buildIntentUrl(intentParsed, { fallback: manifestFallback });
+    addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
+    requestCloseRef.current?.();
+  }, [bankCode, manifestLinks, selectedLinkIdx, manifestFallback, addConfig, t]);
+
   const handleSaveIntent = useCallback(() => {
     if (!bankCode) {
       setError(t.urlScheme.errorSelectBank);
@@ -124,21 +181,6 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
     addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
     requestCloseRef.current?.();
   }, [bankCode, parsedIntent, intentFallback, addConfig, t]);
-
-  const handleSavePackage = useCallback(() => {
-    if (!bankCode) {
-      setError(t.urlScheme.errorSelectBank);
-      return;
-    }
-    if (!packageInput.trim()) {
-      setError(t.urlScheme.errorPackageName);
-      return;
-    }
-    haptic();
-    const url = buildPackageOnlyUrl(packageInput.trim(), { fallback: packageFallback });
-    addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
-    requestCloseRef.current?.();
-  }, [bankCode, packageInput, packageFallback, addConfig, t]);
 
   return (
     <AnimatedModal
@@ -200,14 +242,14 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
             {android && (
               <div className="flex rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden">
                 {([
-                  { key: 'package' as const, icon: <Package size={14} aria-hidden="true" />, label: t.urlScheme.modePackage },
                   { key: 'intent' as const, icon: <Smartphone size={14} aria-hidden="true" />, label: t.urlScheme.modeIntent },
+                  { key: 'manifest' as const, icon: <FileText size={14} aria-hidden="true" />, label: t.urlScheme.modeManifest },
                   { key: 'manual' as const, icon: <Link size={14} aria-hidden="true" />, label: t.urlScheme.modeManual },
                 ]).map(({ key, icon, label }) => (
                   <button
                     key={key}
                     type="button"
-                    onClick={() => { setMode(key); setError(''); }}
+                    onClick={() => { setMode(key); setError(''); setParseError(false); setManifestParseError(false); }}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${
                       mode === key
                         ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
@@ -218,72 +260,6 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                     {label}
                   </button>
                 ))}
-              </div>
-            )}
-
-            {/* ─── Package Name Only mode ──────────────────── */}
-            {mode === 'package' && android && (
-              <div className="space-y-3.5">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  {t.urlScheme.packageDesc}
-                </p>
-
-                <div>
-                  <label
-                    htmlFor="package-name-input"
-                    className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5"
-                  >
-                    {t.urlScheme.importPackage}
-                  </label>
-                  <input
-                    id="package-name-input"
-                    type="text"
-                    value={packageInput}
-                    onChange={(e) => { setPackageInput(e.target.value); setError(''); }}
-                    placeholder="com.example.app"
-                    autoComplete="off"
-                    className="w-full bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono"
-                  />
-                </div>
-
-                <label className="flex items-center gap-2.5 py-1">
-                  <input
-                    type="checkbox"
-                    checked={packageFallback}
-                    onChange={(e) => setPackageFallback(e.target.checked)}
-                    className="w-4 h-4 rounded accent-current"
-                  />
-                  <span className="text-xs text-zinc-600 dark:text-zinc-400">
-                    {t.urlScheme.importFallback}
-                  </span>
-                </label>
-
-                {/* Preview */}
-                {packageInput.trim() && (
-                  <div className="px-3 py-2.5 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-700/50">
-                    <p className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 mb-1">
-                      {t.urlScheme.importPreview}
-                    </p>
-                    <p className="font-mono text-[11px] text-zinc-700 dark:text-zinc-300 break-all leading-relaxed">
-                      {buildPackageOnlyUrl(packageInput.trim(), { fallback: packageFallback })}
-                    </p>
-                  </div>
-                )}
-
-                {error && mode === 'package' && (
-                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
-                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
-                    <span className="font-medium">{error}</span>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleSavePackage}
-                  className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
-                >
-                  {t.urlScheme.save}
-                </button>
               </div>
             )}
 
@@ -303,7 +279,9 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                     </p>
                   </div>
                   <ExternalLink size={14} className="text-zinc-400 dark:text-zinc-500 shrink-0 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" aria-hidden="true" />
-                </a>                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                </a>
+
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
                   {t.urlScheme.importIntentDesc}
                 </p>
 
@@ -435,6 +413,162 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                 <button
                   type="button"
                   onClick={handleSaveIntent}
+                  className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
+                >
+                  {t.urlScheme.save}
+                </button>
+              </div>
+            )}
+
+            {/* ─── Manifest mode (AppManager) ──────────────── */}
+            {mode === 'manifest' && android && (
+              <div className="space-y-3.5">
+                {/* Quick launch — smart open or install */}
+                <a
+                  href="intent://#Intent;package=io.github.muntashirakon.AppManager;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dio.github.muntashirakon.AppManager;end"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between gap-3 w-full px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 active:scale-98 action-transition group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <FileText size={16} className="text-zinc-500 dark:text-zinc-400 shrink-0" aria-hidden="true" />
+                    <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 leading-tight">
+                      {t.urlScheme.manifestLaunchApp}
+                    </p>
+                  </div>
+                  <ExternalLink size={14} className="text-zinc-400 dark:text-zinc-500 shrink-0 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" aria-hidden="true" />
+                </a>
+
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {t.urlScheme.manifestDesc}
+                </p>
+
+                {/* Paste area */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label
+                      htmlFor="manifest-input"
+                      className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
+                    >
+                      {t.urlScheme.manifestPasteLabel}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handlePasteAndParseManifest}
+                      className="flex items-center gap-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <ClipboardPaste size={12} aria-hidden="true" />
+                      {t.urlScheme.importPasteBtn}
+                    </button>
+                  </div>
+                  <textarea
+                    id="manifest-input"
+                    value={manifestText}
+                    onChange={(e) => {
+                      setManifestText(e.target.value);
+                      setManifestParseError(false);
+                      setManifestLinks([]);
+                    }}
+                    placeholder={t.urlScheme.manifestPastePlaceholder}
+                    rows={5}
+                    autoComplete="off"
+                    className="w-full bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono resize-none"
+                  />
+                </div>
+
+                {/* Parse button */}
+                <button
+                  type="button"
+                  onClick={handleParseManifest}
+                  disabled={!manifestText.trim()}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 active:scale-98 action-transition disabled:opacity-40 disabled:active:scale-100"
+                >
+                  <ClipboardPaste size={14} aria-hidden="true" />
+                  {t.urlScheme.importParse}
+                </button>
+
+                {/* Parse error */}
+                {manifestParseError && (
+                  <p className="text-xs text-red-500 dark:text-red-400">
+                    {t.urlScheme.manifestParseError}
+                  </p>
+                )}
+
+                {/* Parsed results — deep link picker */}
+                {manifestLinks.length > 0 && (
+                  <div className="space-y-2.5">
+                    <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                      {t.urlScheme.manifestResultTitle} ({manifestLinks.length})
+                    </p>
+
+                    <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                      {manifestLinks.map((link, i) => (
+                        <label
+                          key={`${link.activityName}-${link.url}-${i}`}
+                          className={`flex items-start gap-2.5 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors ${
+                            selectedLinkIdx === i
+                              ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800/80'
+                              : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="manifest-link"
+                            checked={selectedLinkIdx === i}
+                            onChange={() => setSelectedLinkIdx(i)}
+                            className="mt-0.5 w-3.5 h-3.5 accent-current shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <p className="font-mono text-xs text-zinc-800 dark:text-zinc-200 break-all leading-relaxed">
+                              {link.url}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 break-all">
+                              {link.activityName}
+                            </p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* Fallback toggle */}
+                    <label className="flex items-center gap-2.5 py-1">
+                      <input
+                        type="checkbox"
+                        checked={manifestFallback}
+                        onChange={(e) => setManifestFallback(e.target.checked)}
+                        className="w-4 h-4 rounded accent-current"
+                      />
+                      <span className="text-xs text-zinc-600 dark:text-zinc-400">
+                        {t.urlScheme.importFallback}
+                      </span>
+                    </label>
+
+                    {/* Preview */}
+                    <div className="px-3 py-2.5 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-700/50">
+                      <p className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 mb-1">
+                        {t.urlScheme.importPreview}
+                      </p>
+                      <p className="font-mono text-[11px] text-zinc-700 dark:text-zinc-300 break-all leading-relaxed">
+                        {buildIntentUrl(
+                          { action: 'android.intent.action.VIEW', packageName: manifestLinks[selectedLinkIdx]?.packageName, dataUri: manifestLinks[selectedLinkIdx]?.url },
+                          { fallback: manifestFallback },
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {error && mode === 'manifest' && (
+                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
+                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+                    <span className="font-medium">{error}</span>
+                  </div>
+                )}
+
+                {/* Save button */}
+                <button
+                  type="button"
+                  onClick={handleSaveManifest}
                   className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
                 >
                   {t.urlScheme.save}

@@ -352,42 +352,6 @@ export function normalizeIntentUrl(url: string): string {
 }
 
 /**
- * Build a minimal intent:// URL that simply launches an app by its package name.
- *
- * Omits `action` and `category` entirely — Chrome automatically adds
- * `CATEGORY_BROWSABLE` to all web-initiated intents, which conflicts with
- * launcher activities that only declare `MAIN + LAUNCHER`.  Leaving both
- * flags out lets Chrome resolve the intent without that contradiction.
- *
- * Includes a Play Store fallback by default.
- */
-export function buildPackageOnlyUrl(
-  packageName: string,
-  options: BuildIntentUrlOptions = {},
-): string {
-  if (!packageName) return '';
-  const { fallback = true } = options;
-  // Do NOT include action=MAIN or category=LAUNCHER here.
-  // Chrome automatically adds CATEGORY_BROWSABLE to all web-initiated
-  // intents.  Launcher activities typically only declare MAIN+LAUNCHER
-  // (without BROWSABLE), so including them causes intent resolution to
-  // fail and Chrome falls back to the Play Store URL.
-  const parts = [
-    'intent://#Intent',
-    `;package=${packageName}`,
-  ];
-  if (fallback) {
-    parts.push(
-      `;S.browser_fallback_url=${encodeURIComponent(
-        `https://play.google.com/store/apps/details?id=${packageName}`,
-      )}`,
-    );
-  }
-  parts.push(';end');
-  return parts.join('');
-}
-
-/**
  * Detect whether the current browser environment is Android.
  *
  * Uses `navigator.userAgentData` (high entropy, Chromium-only) with a
@@ -400,4 +364,152 @@ export function isAndroid(): boolean {
 
   // Fallback: legacy User-Agent string
   return /android/i.test(navigator.userAgent);
+}
+
+/* ─── AndroidManifest.xml Parser ─────────────────────────── */
+
+/**
+ * A launchable deep link extracted from an AndroidManifest.xml intent-filter.
+ *
+ * Only intent-filters with ACTION_VIEW + CATEGORY_BROWSABLE are included,
+ * because Chrome enforces the BROWSABLE category for all web-initiated intents.
+ */
+export interface ManifestDeepLink {
+  /** Activity name, e.g. `com.example.app/.DeepLinkActivity` */
+  activityName: string;
+  /** Reconstructed URL scheme, e.g. `myapp://host/path` or `https://example.com/path` */
+  url: string;
+  /** Raw scheme, e.g. `myapp`, `https` */
+  scheme: string;
+  /** Optional host */
+  host?: string;
+  /** Optional path / pathPrefix / pathPattern */
+  path?: string;
+  /** Package name inferred from manifest */
+  packageName?: string;
+}
+
+/**
+ * Parse an AndroidManifest.xml string and extract all launchable deep links.
+ *
+ * Searches for `<activity>` elements that contain `<intent-filter>` blocks with:
+ *   - `<action android:name="android.intent.action.VIEW" />`
+ *   - `<category android:name="android.intent.category.BROWSABLE" />`
+ *   - At least one `<data android:scheme="…" />` element
+ *
+ * Returns an array of `ManifestDeepLink` objects sorted by scheme then activity.
+ * Returns an empty array if no launchable deep links are found.
+ */
+export function parseManifestXml(xml: string): ManifestDeepLink[] {
+  const results: ManifestDeepLink[] = [];
+
+  // Extract package name from <manifest package="...">
+  const pkgMatch = xml.match(/<manifest\b[^>]*\bpackage\s*=\s*"([^"]+)"/i);
+  const packageName = pkgMatch?.[1] || undefined;
+
+  // Use regex-based approach for robustness (no DOMParser dependency for XML namespaces)
+  // Match each <activity ...>...</activity> block (non-greedy, supports self-closing)
+  const activityRegex = /<activity\b([^>]*)>([\s\S]*?)<\/activity>/gi;
+  let actMatch: RegExpExecArray | null;
+
+  while ((actMatch = activityRegex.exec(xml)) !== null) {
+    const actAttrs = actMatch[1];
+    const actBody = actMatch[2];
+
+    // Extract activity name
+    const nameMatch = actAttrs.match(/android:name\s*=\s*"([^"]+)"/);
+    if (!nameMatch) continue;
+    const activityName = nameMatch[1];
+
+    // Find all intent-filter blocks within this activity
+    const filterRegex = /<intent-filter\b[^>]*>([\s\S]*?)<\/intent-filter>/gi;
+    let filterMatch: RegExpExecArray | null;
+
+    while ((filterMatch = filterRegex.exec(actBody)) !== null) {
+      const filterBody = filterMatch[1];
+
+      // Check for ACTION_VIEW
+      if (!/android:name\s*=\s*"android\.intent\.action\.VIEW"/i.test(filterBody)) continue;
+
+      // Check for CATEGORY_BROWSABLE
+      if (!/android:name\s*=\s*"android\.intent\.category\.BROWSABLE"/i.test(filterBody)) continue;
+
+      // Extract all <data> elements — handle / and special chars inside quoted attribute values
+      const dataRegex = /<data\s+((?:[^"'>]|"[^"]*"|'[^']*')*)\/?\s*>/gi;
+      let dataMatch: RegExpExecArray | null;
+
+      // Collect scheme/host/path attributes across all <data> elements in this filter
+      // Per Android docs, attributes from multiple <data> elements are combined.
+      const schemes: string[] = [];
+      const hosts: string[] = [];
+      const paths: string[] = [];
+
+      while ((dataMatch = dataRegex.exec(filterBody)) !== null) {
+        const attrs = dataMatch[1];
+
+        const schemeMatch = attrs.match(/android:scheme\s*=\s*"([^"]+)"/);
+        if (schemeMatch && !schemes.includes(schemeMatch[1])) schemes.push(schemeMatch[1]);
+
+        const hostMatch = attrs.match(/android:host\s*=\s*"([^"]+)"/);
+        if (hostMatch && !hosts.includes(hostMatch[1])) hosts.push(hostMatch[1]);
+
+        // Prefer pathPrefix > path > pathPattern
+        const pathPrefixMatch = attrs.match(/android:pathPrefix\s*=\s*"([^"]+)"/);
+        const pathExactMatch = attrs.match(/android:path\s*=\s*"([^"]+)"/);
+        const pathPatternMatch = attrs.match(/android:pathPattern\s*=\s*"([^"]+)"/);
+        const p = pathPrefixMatch?.[1] || pathExactMatch?.[1] || pathPatternMatch?.[1];
+        if (p && !paths.includes(p)) paths.push(p);
+      }
+
+      if (schemes.length === 0) continue;
+
+      // Generate combinations of scheme × host × path
+      // If no hosts, just scheme. If no paths, scheme://host.
+      for (const scheme of schemes) {
+        if (hosts.length === 0) {
+          results.push({
+            activityName,
+            url: `${scheme}://`,
+            scheme,
+            packageName,
+          });
+        } else {
+          for (const host of hosts) {
+            if (paths.length === 0) {
+              results.push({
+                activityName,
+                url: `${scheme}://${host}`,
+                scheme,
+                host,
+                packageName,
+              });
+            } else {
+              for (const path of paths) {
+                results.push({
+                  activityName,
+                  url: `${scheme}://${host}${path}`,
+                  scheme,
+                  host,
+                  path,
+                  packageName,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Sort: custom schemes first, then by scheme name, then by activity
+  results.sort((a, b) => {
+    const aIsHttp = a.scheme === 'http' || a.scheme === 'https';
+    const bIsHttp = b.scheme === 'http' || b.scheme === 'https';
+    if (aIsHttp !== bIsHttp) return aIsHttp ? 1 : -1;
+    const schemeCmp = a.scheme.localeCompare(b.scheme);
+    if (schemeCmp !== 0) return schemeCmp;
+    return a.activityName.localeCompare(b.activityName);
+  });
+
+  return results;
 }

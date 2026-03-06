@@ -451,10 +451,9 @@ const enUS: Translations = {
     testAppHint: 'If the app doesn\'t open automatically, the corresponding app may not be installed, or the URL template may be incorrect.',
 
     // Intent import
-    modePackage: 'Package',
     modeIntent: 'Intent Import',
+    modeManifest: 'Manifest',
     modeManual: 'Custom URL',
-    packageDesc: 'Enter the app\'s package name to generate a launch link. If the app is not installed, it redirects to Google Play Store.',
     importIntentDesc: 'Paste the intent info copied from Shortcut Maker to auto-generate an intent:// link. Supports both multi-line and Intent URI formats.',
     importLaunchApp: 'Open Shortcut Maker',
     importPasteLabel: 'Paste Intent Info',
@@ -471,9 +470,17 @@ const enUS: Translations = {
     importFallback: 'Redirect to Google Play if app is not installed',
     importParseError: 'Unable to parse. Please check the format. At least a Package Name is required.',
 
+    // Manifest import
+    manifestLaunchApp: 'Open App Manager',
+    manifestDesc: 'Paste the AndroidManifest.xml content copied from App Manager to automatically extract available deep links. Only activities with BROWSABLE can be launched from the web.',
+    manifestPasteLabel: 'Paste AndroidManifest.xml',
+    manifestPastePlaceholder: '<?xml version="1.0" encoding="utf-8"?>\n<manifest package="com.example.app">\n  <application>\n    <activity android:name="...">\n      <intent-filter>...</intent-filter>\n    </activity>\n  </application>\n</manifest>',
+    manifestParseError: 'No usable deep links found. Please ensure the content is a complete AndroidManifest.xml and the app declares BROWSABLE intent filters.',
+    manifestResultTitle: 'Deep links found',
+    errorParseManifestFirst: 'Please paste and parse the AndroidManifest.xml first',
+
     // Form validation
     errorSelectBank: 'Please select an institution first',
-    errorPackageName: 'Please enter a package name',
     errorUrlTemplate: 'Please enter a URL template',
     errorParseFirst: 'Please paste and parse intent info first',
 
@@ -485,10 +492,10 @@ const enUS: Translations = {
     guideStep2Title: 'Enter the App List',
     guideStep2Desc: 'Tap "Activity", "Inner Link", or any other relevant section to open the app list.',
     guideStep3Title: 'Select an App & Activity',
-    guideStep3Desc: 'Find your target app in the list, then select the corresponding Intent or Activity.',
+    guideStep3Desc: 'Find your target app in the list. Look for activities that include a Data URI (custom URL scheme, e.g. myapp://…). Only these activities declare CATEGORY_BROWSABLE and can be launched from Chrome. The standard launcher / MAIN activity cannot be opened from Chrome.',
     guideStep4Title: 'Copy the Activity Info',
     guideStep4Desc: 'Inside the Activity details, tap the "Edit Intent" button, then tap the copy button in the top-right corner to get the full info.',
-    guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format and cannot be used directly. Return to the "Intent Import" tab on this page, paste it, and OpenTWQR will automatically convert it into a usable link.',
+    guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format. Paste it into the Intent Import tab and OpenTWQR will auto-convert it. Tip: Only activities with a Data URI (custom URL scheme or HTTPS App Links) can be launched from Chrome. Receive-money or transfer screens are usually in a dedicated deep link activity.',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */

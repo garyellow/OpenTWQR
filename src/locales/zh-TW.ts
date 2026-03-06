@@ -450,10 +450,9 @@ const zhTW = {
     testAppHint: '若無法自動開啟，可能是此裝置未安裝對應 App，或 URL 範本有誤。',
 
     // Intent import
-    modePackage: '套件名稱',
     modeIntent: 'Intent 匯入',
+    modeManifest: 'Manifest 解析',
     modeManual: '自訂 URL',
-    packageDesc: '輸入 App 的套件名稱，即可產生一鍵開啟連結。若裝置未安裝該 App，會自動導向 Google Play 商店。',
     importIntentDesc: '貼上從 Shortcut Maker 複製的 Intent 資訊，自動轉換為 intent:// 連結。支援多行格式與 Intent URI 格式。',
     importLaunchApp: '開啟 Shortcut Maker',
     importPasteLabel: '貼上 Intent 資訊',
@@ -470,9 +469,17 @@ const zhTW = {
     importFallback: '未安裝時導向 Google Play 商店',
     importParseError: '無法解析，請確認格式正確。至少需包含「套件名稱」（Package Name）。',
 
+    // Manifest import
+    manifestLaunchApp: '開啟 App Manager',
+    manifestDesc: '貼上從 App Manager 複製的 AndroidManifest.xml 內容，自動解析可用的深層連結（Deep Link）。僅含有 BROWSABLE 的 Activity 才能從網頁開啟。',
+    manifestPasteLabel: '貼上 AndroidManifest.xml',
+    manifestPastePlaceholder: '<?xml version="1.0" encoding="utf-8"?>\n<manifest package="com.example.app">\n  <application>\n    <activity android:name="...">\n      <intent-filter>...</intent-filter>\n    </activity>\n  </application>\n</manifest>',
+    manifestParseError: '找不到可用的深層連結。請確認貼上的內容為完整的 AndroidManifest.xml，且 App 有宣告含 BROWSABLE 的 Intent Filter。',
+    manifestResultTitle: '找到的深層連結',
+    errorParseManifestFirst: '請先貼上並解析 AndroidManifest.xml',
+
     // Form validation
     errorSelectBank: '請先選擇金融機構',
-    errorPackageName: '請輸入套件名稱',
     errorUrlTemplate: '請輸入 URL 範本',
     errorParseFirst: '請先貼上並解析 Intent 資訊',
 
@@ -484,10 +491,10 @@ const zhTW = {
     guideStep2Title: '進入 App 列表',
     guideStep2Desc: '點擊「Activity」、「Inner Link」或其他相關區塊，進入 App 列表頁面。',
     guideStep3Title: '選擇 App 與 Activity',
-    guideStep3Desc: '在列表中找到目標 App，並選擇對應的 Intent 或 Activity。',
+    guideStep3Desc: '在列表中找到目標 App，並尋找含有 Data URI（自訂 URL scheme，例如 myapp://…）的 Activity。只有這類 Activity 才宣告了 CATEGORY_BROWSABLE，才能從 Chrome 直接啟動。主啟動器（Launcher / MAIN）Activity 無法從 Chrome 直接開啟。',
     guideStep4Title: '複製 Activity 資訊',
     guideStep4Desc: '點進 Activity 詳情頁面後，點擊「編輯 Intent」按鈕，再點擊右上角的複製按鈕即可取得完整資訊。',
-    guideNote: '注意：Shortcut Maker 複製的內容並不是標準 Intent 格式，無法直接使用。請回到本頁的「Intent 匯入」頁籤貼上，由 OpenTWQR 自動轉換為可用的連結格式。',
+    guideNote: '注意：Shortcut Maker 複製的內容並非標準 Intent 格式，貼到「Intent 匯入」頁籤後 OpenTWQR 會自動轉換。提示：只有含有 Data URI（自訂 URL scheme 或 HTTPS App Links）的 Activity 才能從 Chrome 啟動，收款或轉帳功能通常在獨立的深層連結（deep link）Activity 中。',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */
