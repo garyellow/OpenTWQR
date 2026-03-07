@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { BankSelect } from '../accounts/BankSelect';
+import { InfoTip } from '../ui/InfoTip';
 import { useUrlSchemeStore, type BankUrlConfig } from '../../stores/useUrlSchemeStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useBanksStore } from '../../stores/useBanksStore';
@@ -293,19 +294,22 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   <ExternalLink size={14} className="text-zinc-400 dark:text-zinc-500 shrink-0 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" aria-hidden="true" />
                 </a>
 
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  {t.urlScheme.importIntentDesc}
-                </p>
-
                 {/* Paste area */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label
-                      htmlFor="import-intent-input"
-                      className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
-                    >
-                      {t.urlScheme.importPasteLabel}
-                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <label
+                        htmlFor="import-intent-input"
+                        className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
+                      >
+                        {t.urlScheme.importPasteLabel}
+                      </label>
+                      <InfoTip
+                        title={t.urlScheme.modeIntent}
+                        content={t.urlScheme.importIntentDesc}
+                        size={12}
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={handlePasteAndParse}
@@ -436,19 +440,22 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   <ExternalLink size={14} className="text-zinc-400 dark:text-zinc-500 shrink-0 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" aria-hidden="true" />
                 </a>
 
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  {t.urlScheme.manifestDesc}
-                </p>
-
                 {/* Paste area */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label
-                      htmlFor="manifest-input"
-                      className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
-                    >
-                      {t.urlScheme.manifestPasteLabel}
-                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <label
+                        htmlFor="manifest-input"
+                        className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
+                      >
+                        {t.urlScheme.manifestPasteLabel}
+                      </label>
+                      <InfoTip
+                        title={t.urlScheme.modeManifest}
+                        content={t.urlScheme.manifestDesc}
+                        size={12}
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={handlePasteAndParseManifest}
