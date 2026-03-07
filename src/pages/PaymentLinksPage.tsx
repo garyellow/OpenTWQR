@@ -79,7 +79,7 @@ export const PaymentLinksPage = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-20 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-zinc-800/50 pt-safe">
-        <div className="px-5 py-4 flex items-center justify-between">
+        <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -177,6 +177,11 @@ export const PaymentLinksPage = () => {
                         <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5 font-mono">
                           {config.urlTemplate}
                         </p>
+                        {config.sameInstitutionOnly && (
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-medium truncate">
+                            {t.urlScheme.sameInstitutionOnlyLabel}{config.launchUrl ? ` · ${t.scan.launchOnly}` : ''}
+                          </p>
+                        )}
                       </div>
                       <ChevronRight size={16} className="text-zinc-400 dark:text-zinc-600 shrink-0" aria-hidden="true" />
                     </button>

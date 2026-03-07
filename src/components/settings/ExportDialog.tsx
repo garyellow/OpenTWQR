@@ -309,8 +309,8 @@ export const ExportDialog = ({ onClose }: ExportDialogProps) => {
               </p>
 
               {error && (
-                <div role="alert" className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm mb-4">
-                  <AlertCircle size={16} aria-hidden="true" />
+                <div role="alert" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm mb-4">
+                  <AlertCircle size={18} aria-hidden="true" />
                   <span>{error}</span>
                 </div>
               )}

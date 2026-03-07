@@ -4,7 +4,7 @@ import { BankSelect } from '../accounts/BankSelect';
 import { useUrlSchemeStore, type BankUrlConfig } from '../../stores/useUrlSchemeStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useBanksStore } from '../../stores/useBanksStore';
-import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, ExternalLink, AlertCircle, FileText, ToggleLeft, ToggleRight } from 'lucide-react';
+import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, ExternalLink, AlertCircle, FileText } from 'lucide-react';
 import { haptic } from '../../utils/haptics';
 import { parseIntentInput, buildIntentUrl, isAndroid, normalizeIntentUrl, parseManifestXml, type ParsedIntent, type ManifestDeepLink } from '../../utils/urlScheme';
 
@@ -414,47 +414,6 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   </div>
                 )}
 
-                {error && mode === 'intent' && (
-                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
-                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
-                    <span className="font-medium">{error}</span>
-                  </div>
-                )}
-
-                {/* Same-institution-only toggle + launch URL */}
-                <div className="space-y-3 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setSameInstitutionOnly(!sameInstitutionOnly)}
-                    className="flex items-center gap-3 w-full text-left group"
-                    aria-pressed={sameInstitutionOnly}
-                  >
-                    {sameInstitutionOnly
-                      ? <ToggleRight size={22} className="text-zinc-900 dark:text-zinc-100 shrink-0" aria-hidden="true" />
-                      : <ToggleLeft size={22} className="text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
-                    }
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{t.urlScheme.sameInstitutionOnlyLabel}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
-                    </div>
-                  </button>
-                  {sameInstitutionOnly && (
-                    <div>
-                      <label htmlFor="launch-url-intent" className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5 ml-1">{t.urlScheme.launchUrlLabel}</label>
-                      <input id="launch-url-intent" type="text" value={launchUrl} onChange={(e) => setLaunchUrl(e.target.value)} placeholder={t.urlScheme.launchUrlPlaceholder} autoComplete="off" className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono" />
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 ml-1 leading-relaxed">{t.urlScheme.launchUrlHint}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Save button — always visible so validation errors can surface */}
-                <button
-                  type="button"
-                  onClick={handleSaveIntent}
-                  className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
-                >
-                  {t.urlScheme.save}
-                </button>
               </div>
             )}
 
@@ -596,47 +555,6 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   </div>
                 )}
 
-                {error && mode === 'manifest' && (
-                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
-                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
-                    <span className="font-medium">{error}</span>
-                  </div>
-                )}
-
-                {/* Same-institution-only toggle + launch URL */}
-                <div className="space-y-3 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setSameInstitutionOnly(!sameInstitutionOnly)}
-                    className="flex items-center gap-3 w-full text-left group"
-                    aria-pressed={sameInstitutionOnly}
-                  >
-                    {sameInstitutionOnly
-                      ? <ToggleRight size={22} className="text-zinc-900 dark:text-zinc-100 shrink-0" aria-hidden="true" />
-                      : <ToggleLeft size={22} className="text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
-                    }
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{t.urlScheme.sameInstitutionOnlyLabel}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
-                    </div>
-                  </button>
-                  {sameInstitutionOnly && (
-                    <div>
-                      <label htmlFor="launch-url-manifest" className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5 ml-1">{t.urlScheme.launchUrlLabel}</label>
-                      <input id="launch-url-manifest" type="text" value={launchUrl} onChange={(e) => setLaunchUrl(e.target.value)} placeholder={t.urlScheme.launchUrlPlaceholder} autoComplete="off" className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono" />
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 ml-1 leading-relaxed">{t.urlScheme.launchUrlHint}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Save button */}
-                <button
-                  type="button"
-                  onClick={handleSaveManifest}
-                  className="w-full py-2.5 rounded-lg text-sm font-semibold btn-accent active:scale-98 action-transition shadow-xs"
-                >
-                  {t.urlScheme.save}
-                </button>
               </div>
             )}
 
@@ -717,64 +635,70 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
               </div>
             )}
 
-            {/* Save — only shown in manual mode; package and intent modes have inline save buttons */}
-            {mode === 'manual' && (
-              <>
-                {/* Same-institution-only toggle + launch URL (shared across modes but rendered here for manual) */}
-                <div className="space-y-3">
-                  <button
-                    type="button"
-                    onClick={() => setSameInstitutionOnly(!sameInstitutionOnly)}
-                    className="flex items-center gap-3 w-full text-left group"
-                    aria-pressed={sameInstitutionOnly}
-                  >
-                    {sameInstitutionOnly
-                      ? <ToggleRight size={22} className="text-zinc-900 dark:text-zinc-100 shrink-0" aria-hidden="true" />
-                      : <ToggleLeft size={22} className="text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
-                    }
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{t.urlScheme.sameInstitutionOnlyLabel}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
-                    </div>
-                  </button>
-
-                  {sameInstitutionOnly && (
-                    <div>
-                      <label
-                        htmlFor="launch-url-input"
-                        className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5 ml-1"
-                      >
-                        {t.urlScheme.launchUrlLabel}
-                      </label>
-                      <input
-                        id="launch-url-input"
-                        type="text"
-                        value={launchUrl}
-                        onChange={(e) => setLaunchUrl(e.target.value)}
-                        placeholder={t.urlScheme.launchUrlPlaceholder}
-                        autoComplete="off"
-                        className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono"
-                      />
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 ml-1 leading-relaxed">{t.urlScheme.launchUrlHint}</p>
-                    </div>
-                  )}
-                </div>
-
-                {error && (
-                  <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
-                    <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
-                    <span className="font-medium">{error}</span>
-                  </div>
-                )}
+            {/* ─── Same-institution toggle + launch URL + save (shared across all modes) ─── */}
+            <div className="space-y-3.5">
+              <div className="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 overflow-hidden shadow-xs">
                 <button
                   type="button"
-                  onClick={handleSave}
-                  className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+                  role="switch"
+                  aria-checked={sameInstitutionOnly}
+                  onClick={() => { haptic(); setSameInstitutionOnly(!sameInstitutionOnly); }}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                 >
-                  {t.urlScheme.save}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <Building2 size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.urlScheme.sameInstitutionOnlyLabel}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
+                    </div>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${sameInstitutionOnly ? '' : 'bg-zinc-300 dark:bg-zinc-600'}`}
+                    style={sameInstitutionOnly ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                  >
+                    <div className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${sameInstitutionOnly ? 'translate-x-5.25' : 'translate-x-0.75'}`} />
+                  </div>
                 </button>
-              </>
-            )}
+
+                {sameInstitutionOnly && (
+                  <div className="px-4 pt-3 pb-4 border-t border-zinc-100 dark:border-zinc-800/50">
+                    <label
+                      htmlFor="launch-url-input"
+                      className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5 ml-1"
+                    >
+                      {t.urlScheme.launchUrlLabel}
+                    </label>
+                    <input
+                      id="launch-url-input"
+                      type="text"
+                      value={launchUrl}
+                      onChange={(e) => setLaunchUrl(e.target.value)}
+                      placeholder={t.urlScheme.launchUrlPlaceholder}
+                      autoComplete="off"
+                      className="w-full bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono"
+                    />
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 ml-1 leading-relaxed">{t.urlScheme.launchUrlHint}</p>
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
+                  <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+                  <span className="font-medium">{error}</span>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={mode === 'intent' ? handleSaveIntent : mode === 'manifest' ? handleSaveManifest : handleSave}
+                className="w-full py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+              >
+                {t.urlScheme.save}
+              </button>
+            </div>
           </div>
         </div>
         );
