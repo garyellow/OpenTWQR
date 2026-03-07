@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { QRScanner } from '../components/scan/QRScanner';
 import { QRDisplay } from '../components/receive/QRDisplay';
 import { ScanRedirectView } from '../components/scan/ScanRedirectView';
+import type { PaymentAppEntry } from '../components/scan/ScanRedirectView';
 import { parseTWQR } from '../utils/parseTwqr';
 import { generateTWQR, stripCompanySuffix } from '../utils/twqr';
 import { useBanksStore } from '../stores/useBanksStore';
@@ -106,22 +107,37 @@ export const ScanPage = () => {
     [bank],
   );
 
-  /* ---------- Bank URL scheme ---------- */
-  const getConfig = useUrlSchemeStore((s) => s.getConfig);
-  const urlConfig = useMemo(
-    () => (parsed ? getConfig(parsed.bankCode) : null),
-    [getConfig, parsed],
-  );
-  const bankUrl = useMemo(() => {
-    if (!urlConfig || !parsed) return undefined;
-    return buildBankUrl(urlConfig.urlTemplate, {
-      bankCode: parsed.bankCode,
-      account: parsed.accountNumber,
-      paddedAccount: parsed.accountNumber.padStart(16, '0'),
-      amount: parsed.amount,
-      note: parsed.note,
+  /* ---------- Build all payment app entries from configured URL schemes ---------- */
+  const configs = useUrlSchemeStore((s) => s.configs);
+  const paymentApps = useMemo<PaymentAppEntry[]>(() => {
+    if (!parsed || configs.length === 0) return [];
+
+    const entries: PaymentAppEntry[] = configs.map((config) => {
+      const configBank = banks.find((b) => b.code === config.bankCode);
+      const url = buildBankUrl(config.urlTemplate, {
+        bankCode: parsed.bankCode,
+        account: parsed.accountNumber,
+        paddedAccount: parsed.accountNumber.padStart(16, '0'),
+        amount: parsed.amount,
+        note: parsed.note,
+      });
+      return {
+        bankCode: config.bankCode,
+        bankName: configBank?.name || config.bankCode,
+        bankUrl: url,
+        bankIconUrl: configBank?.url ? resolveIconSrc(configBank.url) : undefined,
+        isSameInstitution: config.bankCode === parsed.bankCode,
+      };
     });
-  }, [urlConfig, parsed]);
+
+    // Sort: same institution first, then by bankCode
+    return entries.sort((a, b) => {
+      if (a.isSameInstitution !== b.isSameInstitution) return a.isSameInstitution ? -1 : 1;
+      return a.bankCode.localeCompare(b.bankCode);
+    });
+  }, [configs, parsed, banks]);
+
+  const hasPaymentApps = paymentApps.length > 0;
 
   /* ---------- Copy raw result ---------- */
   const handleCopyRaw = useCallback(async () => {
@@ -137,9 +153,9 @@ export const ScanPage = () => {
   }, [scanResult]);
 
   /* ---------- Derived state for readability ---------- */
-  const hasBankUrl = Boolean(bankUrl);
 
   /* ---------- Shared QRDisplay props ---------- */
+  const bankUrl = hasPaymentApps ? paymentApps[0].bankUrl : undefined;
   const qrDisplayProps = parsed && qrString ? {
     value: qrString,
     amount: parsed.amount,
@@ -240,20 +256,20 @@ export const ScanPage = () => {
             </div>
           )}
 
-          {/* TWQR with bank URL → redirect view (unless QR overlay shown) */}
-          {parsed && hasBankUrl && !showQR && (
+          {/* TWQR with payment apps → redirect view (unless QR overlay shown) */}
+          {parsed && hasPaymentApps && !showQR && (
             <ScanRedirectView
               parsed={parsed}
-              bankUrl={bankUrl!}
               bank={bank ?? null}
               bankIconUrl={bankIconUrl}
+              paymentApps={paymentApps}
               onShowQR={() => setShowQR(true)}
               onRescan={handleRescan}
             />
           )}
 
-          {/* TWQR with bank URL + QR overlay — X closes overlay back to redirect view */}
-          {parsed && hasBankUrl && showQR && qrDisplayProps && (
+          {/* TWQR with payment apps + QR overlay — X closes overlay back to redirect view */}
+          {parsed && hasPaymentApps && showQR && qrDisplayProps && (
             <QRDisplay
               {...qrDisplayProps}
               onClose={() => setShowQR(false)}
@@ -261,8 +277,8 @@ export const ScanPage = () => {
             />
           )}
 
-          {/* TWQR without bank URL → QRDisplay directly, no X, only rescan */}
-          {parsed && !hasBankUrl && qrDisplayProps && (
+          {/* TWQR without payment apps → QRDisplay directly, no X, only rescan */}
+          {parsed && !hasPaymentApps && qrDisplayProps && (
             <QRDisplay
               {...qrDisplayProps}
               onClose={handleRescan}

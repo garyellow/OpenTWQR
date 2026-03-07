@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useBanksStore } from './stores/useBanksStore';
 import { useThemeStore, applyTheme, applyAccentHue } from './stores/useThemeStore';
-import { useAuthStore } from './stores/useAuthStore';
+import { useAuthStore, readLastActiveTimestamp, writeLastActiveTimestamp } from './stores/useAuthStore';
 import { useAppStore } from './stores/useAppStore';
 import { AuthLockScreen } from './components/auth/AuthLockScreen';
 import { PrivacyScreen } from './components/auth/PrivacyScreen';
@@ -73,17 +73,52 @@ function App() {
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden') {
         hiddenAtRef.current = Date.now();
+        // Pre-write to IDB so the startup check has a recent timestamp if the app is killed while hidden
+        if (lockTimeout > 0) writeLastActiveTimestamp();
       } else if (document.visibilityState === 'visible' && hiddenAtRef.current !== null) {
         const elapsed = Date.now() - hiddenAtRef.current;
         hiddenAtRef.current = null;
-        // Re-lock after configured timeout in the background
         if (elapsed > lockTimeout) lock();
       }
     };
 
+    const handlePageHide = () => {
+      if (lockTimeout > 0) writeLastActiveTimestamp();
+    };
+
     document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
+    // pagehide fires on iOS PWA swipe-away; beforeunload covers desktop unloads
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('beforeunload', handlePageHide);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('beforeunload', handlePageHide);
+    };
   }, [authEnabled, lock, lockTimeout]);
+
+  /* ---------- Heartbeat: persist last-active timestamp every 5s ---------- */
+  useEffect(() => {
+    if (!authEnabled || lockTimeout === 0) return;
+    const id = window.setInterval(() => writeLastActiveTimestamp(), 5_000);
+    return () => window.clearInterval(id);
+  }, [authEnabled, lockTimeout]);
+
+  /* ---------- On startup: auto-unlock if within lock timeout ---------- */
+  const startupCheckedRef = useRef(false);
+  useEffect(() => {
+    if (!authHydrated || !authEnabled || startupCheckedRef.current) return;
+    startupCheckedRef.current = true;
+
+    // lockTimeout === 0 means "always lock" — skip timestamp check
+    if (lockTimeout === 0) return;
+
+    readLastActiveTimestamp().then((ts) => {
+      if (ts !== null && Date.now() - ts <= lockTimeout) {
+        useAuthStore.getState().unlock();
+      }
+    });
+  }, [authHydrated, authEnabled, lockTimeout]);
 
   useEffect(() => {
     applyTheme(mode);

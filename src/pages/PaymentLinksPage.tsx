@@ -10,9 +10,9 @@ import { haptic } from '../utils/haptics';
 import { buildBankUrl, isAndroid } from '../utils/urlScheme';
 
 /**
- * Full-page management screen for payment app integrations.
+ * Full-page management screen for transfer app integrations.
  * Mirrors AccountsPage patterns: sticky header, sorted list, modals for add/edit/delete.
- * Accessed from Settings → "支付 App 連動" row.
+ * Accessed from Settings → "轉帳 App 連動" row.
  */
 export const PaymentLinksPage = () => {
   const t = useLocaleStore((s) => s.t);
@@ -25,6 +25,7 @@ export const PaymentLinksPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [deletingBankCode, setDeletingBankCode] = useState<string | null>(null);
   const [testingBankCode, setTestingBankCode] = useState<string | null>(null);
+  const [testBankCode, setTestBankCode] = useState('');
   const [testAccount, setTestAccount] = useState('');
   const [testAmount, setTestAmount] = useState('');
   const [testNote, setTestNote] = useState('');
@@ -55,13 +56,13 @@ export const PaymentLinksPage = () => {
   const testUrl = useMemo(() => {
     if (!testingConfig) return '';
     return buildBankUrl(testingConfig.urlTemplate, {
-      bankCode: testingConfig.bankCode,
+      bankCode: testBankCode || testingConfig.bankCode,
       account: testAccount,
       paddedAccount: testAccount.padStart(16, '0'),
       amount: testAmount ? Number(testAmount) : 0,
       note: testNote,
     });
-  }, [testingConfig, testAccount, testAmount, testNote]);
+  }, [testingConfig, testBankCode, testAccount, testAmount, testNote]);
 
   const goBack = useCallback(() => {
     navigate('/settings', { viewTransition: true });
@@ -186,6 +187,7 @@ export const PaymentLinksPage = () => {
                         type="button"
                         onClick={() => {
                           haptic();
+                          setTestBankCode('');
                           setTestAccount('');
                           setTestAmount('');
                           setTestNote('');
@@ -341,6 +343,26 @@ export const PaymentLinksPage = () => {
                       {t.urlScheme.phBankCode}：{testingConfig.bankCode}
                     </p>
                   </div>
+                </div>
+
+                {/* Institution code input */}
+                <div>
+                  <label
+                    htmlFor="test-bankcode-input"
+                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 ml-1"
+                  >
+                    {t.urlScheme.testBankCodeLabel}
+                  </label>
+                  <input
+                    id="test-bankcode-input"
+                    type="text"
+                    inputMode="numeric"
+                    value={testBankCode}
+                    onChange={(e) => setTestBankCode(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                    placeholder={t.urlScheme.testBankCodePlaceholder}
+                    autoComplete="off"
+                    className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs font-mono"
+                  />
                 </div>
 
                 {/* Account input */}

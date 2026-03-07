@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { idbStorage } from './idbStorage';
+import { get, set } from 'idb-keyval';
+
+/** IndexedDB key for the last-active heartbeat timestamp. */
+const LAST_ACTIVE_KEY = 'opentwqr-last-active-ts';
 
 interface AuthState {
   /** Whether app lock is enabled by the user (persisted). */
@@ -32,6 +36,24 @@ export const LOCK_TIMEOUT_OPTIONS = [
   { value: 300_000 },
   { value: 3_600_000 },
 ] as const;
+
+/** Write the current timestamp to IndexedDB. Fire-and-forget. */
+export const writeLastActiveTimestamp = (): void => {
+  set(LAST_ACTIVE_KEY, Date.now()).catch(() => {});
+};
+
+/**
+ * Read the last-active timestamp from IndexedDB.
+ * Returns `null` when no value has been stored yet.
+ */
+export const readLastActiveTimestamp = async (): Promise<number | null> => {
+  try {
+    const ts = await get<number>(LAST_ACTIVE_KEY);
+    return ts ?? null;
+  } catch {
+    return null;
+  }
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
