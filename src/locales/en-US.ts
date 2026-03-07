@@ -472,7 +472,7 @@ const enUS: Translations = {
 
     // Manifest import
     manifestLaunchApp: 'Open App Manager',
-    manifestDesc: 'Paste the AndroidManifest.xml content copied from App Manager to automatically extract available deep links. Only activities with BROWSABLE can be launched from the web.',
+    manifestDesc: 'Paste the AndroidManifest.xml content from App Manager to automatically extract available deep links. Only activities with BROWSABLE can be launched from the web. App Manager is available for free on F-Droid.',
     manifestPasteLabel: 'Paste AndroidManifest.xml',
     manifestPastePlaceholder: '<?xml version="1.0" encoding="utf-8"?>\n<manifest package="com.example.app">\n  <application>\n    <activity android:name="...">\n      <intent-filter>...</intent-filter>\n    </activity>\n  </application>\n</manifest>',
     manifestParseError: 'No usable deep links found. Please ensure the content is a complete AndroidManifest.xml and the app declares BROWSABLE intent filters.',
@@ -485,7 +485,9 @@ const enUS: Translations = {
     errorParseFirst: 'Please paste and parse intent info first',
 
     // Intent guide
-    guideTitle: 'How to Get Intent Info',
+    guideTitle: 'Setup Guide',
+    guideTabIntent: 'Intent Import',
+    guideTabManifest: 'Manifest',
     guideStep1Title: 'Open Shortcut Maker',
     guideStep1Desc: 'Tap the button below to open Shortcut Maker.',
     guideStep1Launch: 'Open Shortcut Maker',
@@ -496,6 +498,18 @@ const enUS: Translations = {
     guideStep4Title: 'Copy the Activity Info',
     guideStep4Desc: 'Inside the Activity details, tap the "Edit Intent" button, then tap the copy button in the top-right corner to get the full info.',
     guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format. Paste it into the Intent Import tab and OpenTWQR will auto-convert it. Tip: Only activities with a Data URI (custom URL scheme or HTTPS App Links) can be launched from Chrome. Receive-money or transfer screens are usually in a dedicated deep link activity.',
+
+    // Manifest guide steps
+    guideManifestStep1Title: 'Install & Open App Manager',
+    guideManifestStep1Desc: 'Tap the button below to launch App Manager. If not installed, you\'ll be directed to the F-Droid download page. (Note: App Manager is not on Google Play.)',
+    guideManifestStep1Launch: 'Open App Manager',
+    guideManifestStep2Title: 'Find Your App',
+    guideManifestStep2Desc: 'In the App Manager app list, find the payment app you want to link and tap it to open its details.',
+    guideManifestStep3Title: 'View the Manifest',
+    guideManifestStep3Desc: 'In the app details, tap the "Manifest" tab to view the full AndroidManifest.xml content.',
+    guideManifestStep4Title: 'Copy & Paste',
+    guideManifestStep4Desc: 'Tap the copy or share button in the top-right corner of the Manifest view to copy all XML content. Then return to OpenTWQR and paste it into the Manifest tab.',
+    guideManifestNote: 'Only activities declaring CATEGORY_BROWSABLE can be opened from the web. If no deep links are found after parsing, the app may not support this type of integration.',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */

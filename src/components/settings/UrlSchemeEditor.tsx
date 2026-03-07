@@ -425,13 +425,13 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
               <div className="space-y-3.5">
                 {/* Quick launch — smart open or install */}
                 <a
-                  href="intent://#Intent;package=io.github.muntashirakon.AppManager;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dio.github.muntashirakon.AppManager;end"
+                  href="intent://#Intent;package=io.github.muntashirakon.AppManager;S.browser_fallback_url=https%3A%2F%2Ff-droid.org%2Fpackages%2Fio.github.muntashirakon.AppManager%2F;end"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between gap-3 w-full px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 active:scale-98 action-transition group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <FileText size={16} className="text-zinc-500 dark:text-zinc-400 shrink-0" aria-hidden="true" />
+                    <Smartphone size={16} className="text-zinc-500 dark:text-zinc-400 shrink-0" aria-hidden="true" />
                     <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 leading-tight">
                       {t.urlScheme.manifestLaunchApp}
                     </p>

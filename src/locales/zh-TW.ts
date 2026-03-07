@@ -471,7 +471,7 @@ const zhTW = {
 
     // Manifest import
     manifestLaunchApp: '開啟 App Manager',
-    manifestDesc: '貼上從 App Manager 複製的 AndroidManifest.xml 內容，自動解析可用的深層連結（Deep Link）。僅含有 BROWSABLE 的 Activity 才能從網頁開啟。',
+    manifestDesc: '貼上從 App Manager 複製的 AndroidManifest.xml 內容，自動解析可用的深層連結（Deep Link）。僅含有 BROWSABLE 的 Activity 才能從網頁開啟。App Manager 可透過 F-Droid 免費下載。',
     manifestPasteLabel: '貼上 AndroidManifest.xml',
     manifestPastePlaceholder: '<?xml version="1.0" encoding="utf-8"?>\n<manifest package="com.example.app">\n  <application>\n    <activity android:name="...">\n      <intent-filter>...</intent-filter>\n    </activity>\n  </application>\n</manifest>',
     manifestParseError: '找不到可用的深層連結。請確認貼上的內容為完整的 AndroidManifest.xml，且 App 有宣告含 BROWSABLE 的 Intent Filter。',
@@ -484,7 +484,9 @@ const zhTW = {
     errorParseFirst: '請先貼上並解析 Intent 資訊',
 
     // Intent guide
-    guideTitle: '如何取得 Intent 資訊',
+    guideTitle: '設定指南',
+    guideTabIntent: 'Intent 匯入',
+    guideTabManifest: 'Manifest 解析',
     guideStep1Title: '開啟 Shortcut Maker',
     guideStep1Desc: '點擊下方按鈕開啟 Shortcut Maker。',
     guideStep1Launch: '開啟 Shortcut Maker',
@@ -495,6 +497,18 @@ const zhTW = {
     guideStep4Title: '複製 Activity 資訊',
     guideStep4Desc: '點進 Activity 詳情頁面後，點擊「編輯 Intent」按鈕，再點擊右上角的複製按鈕即可取得完整資訊。',
     guideNote: '注意：Shortcut Maker 複製的內容並非標準 Intent 格式，貼到「Intent 匯入」頁籤後 OpenTWQR 會自動轉換。提示：只有含有 Data URI（自訂 URL scheme 或 HTTPS App Links）的 Activity 才能從 Chrome 啟動，收款或轉帳功能通常在獨立的深層連結（deep link）Activity 中。',
+
+    // Manifest guide steps
+    guideManifestStep1Title: '安裝並開啟 App Manager',
+    guideManifestStep1Desc: '點擊下方按鈕開啟 App Manager。若尚未安裝，將前往 F-Droid 下載頁面（此 App 不在 Google Play 上架）。',
+    guideManifestStep1Launch: '開啟 App Manager',
+    guideManifestStep2Title: '找到目標 App',
+    guideManifestStep2Desc: '在 App Manager 的 App 清單中，找到要連動的支付 App，點擊進入詳細頁面。',
+    guideManifestStep3Title: '查看 Manifest',
+    guideManifestStep3Desc: '在 App 詳細頁中，點擊「Manifest」頁籤，即可查看完整的 AndroidManifest.xml 內容。',
+    guideManifestStep4Title: '複製並貼上',
+    guideManifestStep4Desc: '點擊 Manifest 頁面右上角的複製或分享按鈕，複製全部 XML 內容。回到 OpenTWQR 後，在「Manifest 解析」頁籤貼上即可自動解析。',
+    guideManifestNote: '只有宣告 CATEGORY_BROWSABLE 的 Activity 才能從網頁開啟。若解析後找不到深層連結，代表該 App 沒有宣告對應的 deep link，此方法無法使用。',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */

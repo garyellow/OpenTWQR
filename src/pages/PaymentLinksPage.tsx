@@ -29,6 +29,7 @@ export const PaymentLinksPage = () => {
   const [testAmount, setTestAmount] = useState('');
   const [testNote, setTestNote] = useState('');
   const [showGuide, setShowGuide] = useState(false);
+  const [guideTab, setGuideTab] = useState<'intent' | 'manifest'>('intent');
   const android = useMemo(() => isAndroid(), []);
 
   const sortedConfigs = useMemo(
@@ -459,10 +460,10 @@ export const PaymentLinksPage = () => {
         </AnimatedModal>
       )}
 
-      {/* Guide modal — step-by-step Shortcut Maker instructions */}
+      {/* Guide modal — step-by-step instructions for both Intent Import and Manifest methods */}
       {showGuide && (
         <AnimatedModal
-          onClose={() => setShowGuide(false)}
+          onClose={() => { setShowGuide(false); setGuideTab('intent'); }}
           overlayClass="z-60"
           cardClass="max-w-sm max-h-[90svh] overflow-y-auto"
           ariaLabelledby="payment-link-guide-title"
@@ -470,7 +471,7 @@ export const PaymentLinksPage = () => {
           {(requestClose) => (
             <div className="p-6">
               {/* Header */}
-              <div className="flex items-start justify-between mb-5">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2.5">
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
@@ -495,63 +496,148 @@ export const PaymentLinksPage = () => {
                 </button>
               </div>
 
-              {/* Steps */}
-              <ol className="space-y-5">
-                {/* Step 1 */}
-                <li className="flex gap-3">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">1</span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep1Title}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep1Desc}</p>
-                    <a
-                      href="intent://#Intent;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"
-                      style={{
-                        color: 'light-dark(var(--accent), var(--accent-dark))',
-                        borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 30%, transparent)',
-                        backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 8%, transparent)',
-                      }}
-                    >
-                      <Smartphone size={13} aria-hidden="true" />
-                      {t.urlScheme.guideStep1Launch}
-                    </a>
-                  </div>
-                </li>
+              {/* Tab selector */}
+              <div className="flex rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden mb-5">
+                {([
+                  { key: 'intent' as const, label: t.urlScheme.guideTabIntent },
+                  { key: 'manifest' as const, label: t.urlScheme.guideTabManifest },
+                ]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setGuideTab(key)}
+                    className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
+                      guideTab === key
+                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
 
-                {/* Step 2 */}
-                <li className="flex gap-3">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">2</span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep2Title}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep2Desc}</p>
-                  </div>
-                </li>
+              {/* ── Intent Import guide ── */}
+              {guideTab === 'intent' && (
+                <>
+                  <ol className="space-y-5">
+                    {/* Step 1 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">1</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep1Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep1Desc}</p>
+                        <a
+                          href="intent://#Intent;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"
+                          style={{
+                            color: 'light-dark(var(--accent), var(--accent-dark))',
+                            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 30%, transparent)',
+                            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 8%, transparent)',
+                          }}
+                        >
+                          <Smartphone size={13} aria-hidden="true" />
+                          {t.urlScheme.guideStep1Launch}
+                        </a>
+                      </div>
+                    </li>
 
-                {/* Step 3 */}
-                <li className="flex gap-3">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">3</span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep3Title}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep3Desc}</p>
-                  </div>
-                </li>
+                    {/* Step 2 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">2</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep2Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep2Desc}</p>
+                      </div>
+                    </li>
 
-                {/* Step 4 */}
-                <li className="flex gap-3">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">4</span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep4Title}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep4Desc}</p>
-                  </div>
-                </li>
-              </ol>
+                    {/* Step 3 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">3</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep3Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep3Desc}</p>
+                      </div>
+                    </li>
 
-              {/* Note about format */}
-              <p className="mt-5 text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed bg-amber-50 dark:bg-amber-500/10 rounded-lg px-3 py-2.5 border border-amber-200/50 dark:border-amber-500/20">
-                {t.urlScheme.guideNote}
-              </p>
+                    {/* Step 4 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">4</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideStep4Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideStep4Desc}</p>
+                      </div>
+                    </li>
+                  </ol>
+
+                  <p className="mt-5 text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed bg-amber-50 dark:bg-amber-500/10 rounded-lg px-3 py-2.5 border border-amber-200/50 dark:border-amber-500/20">
+                    {t.urlScheme.guideNote}
+                  </p>
+                </>
+              )}
+
+              {/* ── Manifest guide ── */}
+              {guideTab === 'manifest' && (
+                <>
+                  <ol className="space-y-5">
+                    {/* Step 1 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">1</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideManifestStep1Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideManifestStep1Desc}</p>
+                        <a
+                          href="intent://#Intent;package=io.github.muntashirakon.AppManager;S.browser_fallback_url=https%3A%2F%2Ff-droid.org%2Fpackages%2Fio.github.muntashirakon.AppManager%2F;end"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"
+                          style={{
+                            color: 'light-dark(var(--accent), var(--accent-dark))',
+                            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 30%, transparent)',
+                            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 8%, transparent)',
+                          }}
+                        >
+                          <Smartphone size={13} aria-hidden="true" />
+                          {t.urlScheme.guideManifestStep1Launch}
+                        </a>
+                      </div>
+                    </li>
+
+                    {/* Step 2 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">2</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideManifestStep2Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideManifestStep2Desc}</p>
+                      </div>
+                    </li>
+
+                    {/* Step 3 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">3</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideManifestStep3Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideManifestStep3Desc}</p>
+                      </div>
+                    </li>
+
+                    {/* Step 4 */}
+                    <li className="flex gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 mt-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">4</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t.urlScheme.guideManifestStep4Title}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{t.urlScheme.guideManifestStep4Desc}</p>
+                      </div>
+                    </li>
+                  </ol>
+
+                  <p className="mt-5 text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed bg-amber-50 dark:bg-amber-500/10 rounded-lg px-3 py-2.5 border border-amber-200/50 dark:border-amber-500/20">
+                    {t.urlScheme.guideManifestNote}
+                  </p>
+                </>
+              )}
 
               <button
                 type="button"
