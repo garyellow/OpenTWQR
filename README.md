@@ -5,7 +5,7 @@
 [![Deploy](https://img.shields.io/github/deployments/garyellow/OpenTWQR/github-pages?label=deploy&logo=github)](https://pay.garyellow.app)
 [![License](https://img.shields.io/github/license/garyellow/OpenTWQR)](./LICENSE)
 [![Fork](https://img.shields.io/github/forks/garyellow/OpenTWQR?style=flat&logo=github&logoColor=white)](https://github.com/garyellow/OpenTWQR/fork)
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-%E8%B4%8A%E5%8A%A9%E9%96%8B%E7%99%BC%E8%80%85-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/garyellow)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-請%20AI%20吃點%20Token-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/garyellow)
 
 [English](README-EN.md) ·
 [繁體中文](README.md)
@@ -206,10 +206,10 @@ Fork 後，**刪除**以下兩個檔案（它們指向原作者的自訂網域�
 
 ## 贊助
 
-覺得好用的話，餵我的 AI 一點 Token 吧 🤖✨
+覺得好用的話，請我的 AI 吃點 Token 吧 🤖✨
 
 <a href="https://ko-fi.com/garyellow">
-  <img src="https://img.shields.io/badge/Ko--fi-%E8%B4%8A%E5%8A%A9%E9%96%8B%E7%99%BC%E8%80%85-72a4f2?style=for-the-badge&logo=ko-fi&logoColor=white" alt="在 Ko-fi 上贊助開發者" height="36" />
+  <img src="https://img.shields.io/badge/Ko--fi-請%20AI%20吃點%20Token-72a4f2?style=for-the-badge&logo=ko-fi&logoColor=white" alt="在 Ko-fi 上贊助開發者" height="36" />
 </a>
 
 ## 商標與聲明
