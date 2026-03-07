@@ -248,7 +248,7 @@ export const ExportDialog = ({ onClose }: ExportDialogProps) => {
                   />
                 </ExpandableCategory>
 
-                {/* 支付 App 連結 */}
+                {/* 轉帳 App 連結 */}
                 {urlConfigs.length > 0 && (
                   <CategoryCheckbox
                     checked={includePaymentLinks}

@@ -82,8 +82,8 @@ Completely free, open source, no sign-up required — account data is stored onl
 
 - **Instant QR Generation** — Pick an account or just enter your bank details directly — a TWQR payment QR Code is ready in seconds, no sign-up or app install required
 - **Multi-Account Management** — Save multiple accounts with nicknames for one-tap switching
-- **Scan & Pay** — Scan any TWQR QR Code to auto-parse payment details, then share a payment QR Code or deep-link straight into your payment app
-- **Payment App Integration** — Define a URL template with dynamic placeholders; after scanning, the URL is resolved with the parsed account, amount, and note, then launched directly into the target app
+- **Scan & Pay** — Scan any TWQR QR Code to auto-parse payment details, then share a payment QR Code or deep-link straight into your transfer app
+- **Transfer App Integration** — Define a URL template with dynamic placeholders; after scanning, the URL is resolved with the parsed account, amount, and note, then launched directly into the target app
 - **Secure Sharing** — Share payment codes via end-to-end encrypted links with optional password protection and expiration
 - **Backup & Transfer** — Export encrypted backup strings to restore accounts and settings on any device, anytime
 - **Offline Ready** — Install as a PWA and generate QR Codes without an internet connection

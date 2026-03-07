@@ -6,6 +6,10 @@ export interface BankUrlConfig {
   bankCode: string;
   /** URL template with placeholders like {account}, {amount}, etc. */
   urlTemplate: string;
+  /** When true, only show this config for same-institution QR codes. */
+  sameInstitutionOnly?: boolean;
+  /** Optional URL to simply open the app (no account pre-fill) when cross-institution. */
+  launchUrl?: string;
 }
 
 interface UrlSchemeState {
@@ -35,8 +39,12 @@ export const useUrlSchemeStore = create<UrlSchemeState>()(
     }),
     {
       name: 'opentwqr-url-schemes',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => idbStorage),
+      migrate: (persisted) => {
+        // v2 → v3: new optional fields (sameInstitutionOnly, launchUrl) default to undefined
+        return persisted as UrlSchemeState;
+      },
     },
   ),
 );

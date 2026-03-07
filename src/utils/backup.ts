@@ -26,7 +26,7 @@
  *     accounts?: BankAccount[],      // present if user chose to include accounts
  *     style?: BackupStyle,           // accent colour + QR appearance
  *     preferences?: BackupPreferences, // theme mode + locale
- *     paymentLinks?: BankUrlConfig[], // payment app URL schemes
+ *     paymentLinks?: BankUrlConfig[], // transfer app URL schemes
  *     exportedAt: string,
  *   }
  */
@@ -442,10 +442,17 @@ function validatePaymentLinks(raw: unknown): BankUrlConfig[] | undefined {
       typeof (c as Record<string, unknown>).urlTemplate === 'string' &&
       /^\d{3}$/.test((c as Record<string, unknown>).bankCode as string)
     ) {
-      validConfigs.push({
+      const entry: BankUrlConfig = {
         bankCode: (c as Record<string, unknown>).bankCode as string,
         urlTemplate: (c as Record<string, unknown>).urlTemplate as string,
-      });
+      };
+      if ((c as Record<string, unknown>).sameInstitutionOnly === true) {
+        entry.sameInstitutionOnly = true;
+      }
+      if (typeof (c as Record<string, unknown>).launchUrl === 'string') {
+        entry.launchUrl = (c as Record<string, unknown>).launchUrl as string;
+      }
+      validConfigs.push(entry);
     }
   }
   return validConfigs.length > 0 ? validConfigs : undefined;

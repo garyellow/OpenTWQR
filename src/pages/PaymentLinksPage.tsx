@@ -482,7 +482,7 @@ export const PaymentLinksPage = () => {
         </AnimatedModal>
       )}
 
-      {/* Guide modal — step-by-step instructions for both Intent Import and Manifest methods */}
+      {/* Guide modal — step-by-step instructions for both Intent Parse and Manifest methods */}
       {showGuide && (
         <AnimatedModal
           onClose={() => { setShowGuide(false); setGuideTab('intent'); }}
@@ -539,7 +539,7 @@ export const PaymentLinksPage = () => {
                 ))}
               </div>
 
-              {/* ── Intent Import guide ── */}
+              {/* ── Intent Parse guide ── */}
               {guideTab === 'intent' && (
                 <>
                   <ol className="space-y-5">

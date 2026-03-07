@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ExternalLink, QrCode, Copy, Check, ScanLine, Banknote, StickyNote, CircleAlert, X } from 'lucide-react';
+import { ExternalLink, QrCode, Copy, Check, ScanLine, Banknote, StickyNote, CircleAlert, X, Rocket } from 'lucide-react';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { maskAccount, formatCurrency } from '../../utils/twqr';
 import { BankIcon } from '../accounts/BankIcon';
@@ -14,6 +14,8 @@ export interface PaymentAppEntry {
   bankUrl: string;
   bankIconUrl?: string;
   isSameInstitution: boolean;
+  /** True when cross-institution + sameInstitutionOnly — opens app without pre-filling data. */
+  launchOnly?: boolean;
 }
 
 interface ScanRedirectViewProps {
@@ -165,11 +167,21 @@ export const ScanRedirectView = ({
               href={app.bankUrl}
               {...(isIntentUrl(app.bankUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
               onClick={() => haptic()}
-              className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-semibold text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition border border-zinc-200/50 dark:border-zinc-700/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-semibold text-sm text-zinc-700 dark:text-zinc-300 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
+                app.launchOnly
+                  ? 'bg-zinc-50 dark:bg-zinc-800/50 border border-dashed border-zinc-300 dark:border-zinc-600'
+                  : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200/50 dark:border-zinc-700/50'
+              }`}
             >
               <BankIcon iconUrl={app.bankIconUrl} bankCode={app.bankCode} size="sm" />
               <span className="flex-1 min-w-0 truncate">{app.bankName}</span>
-              <ExternalLink size={14} className="shrink-0 text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
+              {app.launchOnly && (
+                <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-normal shrink-0">{t.scan.launchOnly}</span>
+              )}
+              {app.launchOnly
+                ? <Rocket size={14} className="shrink-0 text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
+                : <ExternalLink size={14} className="shrink-0 text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
+              }
             </a>
           ))}
 

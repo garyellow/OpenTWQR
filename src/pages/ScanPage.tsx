@@ -107,13 +107,33 @@ export const ScanPage = () => {
     [bank],
   );
 
-  /* ---------- Build all payment app entries from configured URL schemes ---------- */
+  /* ---------- Build all transfer app entries from configured URL schemes ---------- */
   const configs = useUrlSchemeStore((s) => s.configs);
   const paymentApps = useMemo<PaymentAppEntry[]>(() => {
     if (!parsed || configs.length === 0) return [];
 
-    const entries: PaymentAppEntry[] = configs.map((config) => {
+    const entries: PaymentAppEntry[] = [];
+
+    for (const config of configs) {
       const configBank = banks.find((b) => b.code === config.bankCode);
+      const isSameInstitution = config.bankCode === parsed.bankCode;
+
+      // sameInstitutionOnly: cross-institution → use launchUrl if available, otherwise skip
+      if (config.sameInstitutionOnly && !isSameInstitution) {
+        if (config.launchUrl) {
+          entries.push({
+            bankCode: config.bankCode,
+            bankName: configBank?.name || config.bankCode,
+            bankUrl: config.launchUrl,
+            bankIconUrl: configBank?.url ? resolveIconSrc(configBank.url) : undefined,
+            isSameInstitution: false,
+            launchOnly: true,
+          });
+        }
+        // No launchUrl → skip entirely
+        continue;
+      }
+
       const url = buildBankUrl(config.urlTemplate, {
         bankCode: parsed.bankCode,
         account: parsed.accountNumber,
@@ -121,14 +141,14 @@ export const ScanPage = () => {
         amount: parsed.amount,
         note: parsed.note,
       });
-      return {
+      entries.push({
         bankCode: config.bankCode,
         bankName: configBank?.name || config.bankCode,
         bankUrl: url,
         bankIconUrl: configBank?.url ? resolveIconSrc(configBank.url) : undefined,
-        isSameInstitution: config.bankCode === parsed.bankCode,
-      };
-    });
+        isSameInstitution,
+      });
+    }
 
     // Sort: same institution first, then by bankCode
     return entries.sort((a, b) => {
@@ -151,8 +171,6 @@ export const ScanPage = () => {
       // Clipboard not available
     }
   }, [scanResult]);
-
-  /* ---------- Derived state for readability ---------- */
 
   /* ---------- Shared QRDisplay props ---------- */
   const bankUrl = hasPaymentApps ? paymentApps[0].bankUrl : undefined;
@@ -256,7 +274,7 @@ export const ScanPage = () => {
             </div>
           )}
 
-          {/* TWQR with payment apps → redirect view (unless QR overlay shown) */}
+          {/* TWQR with transfer apps → redirect view (unless QR overlay shown) */}
           {parsed && hasPaymentApps && !showQR && (
             <ScanRedirectView
               parsed={parsed}
@@ -268,7 +286,7 @@ export const ScanPage = () => {
             />
           )}
 
-          {/* TWQR with payment apps + QR overlay — X closes overlay back to redirect view */}
+          {/* TWQR with transfer apps + QR overlay — X closes overlay back to redirect view */}
           {parsed && hasPaymentApps && showQR && qrDisplayProps && (
             <QRDisplay
               {...qrDisplayProps}
@@ -277,7 +295,7 @@ export const ScanPage = () => {
             />
           )}
 
-          {/* TWQR without payment apps → QRDisplay directly, no X, only rescan */}
+          {/* TWQR without transfer apps → QRDisplay directly, no X, only rescan */}
           {parsed && !hasPaymentApps && qrDisplayProps && (
             <QRDisplay
               {...qrDisplayProps}

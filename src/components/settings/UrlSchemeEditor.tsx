@@ -1,10 +1,10 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { BankSelect } from '../accounts/BankSelect';
-import { useUrlSchemeStore } from '../../stores/useUrlSchemeStore';
+import { useUrlSchemeStore, type BankUrlConfig } from '../../stores/useUrlSchemeStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useBanksStore } from '../../stores/useBanksStore';
-import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, ExternalLink, AlertCircle, FileText } from 'lucide-react';
+import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, ExternalLink, AlertCircle, FileText, ToggleLeft, ToggleRight } from 'lucide-react';
 import { haptic } from '../../utils/haptics';
 import { parseIntentInput, buildIntentUrl, isAndroid, normalizeIntentUrl, parseManifestXml, type ParsedIntent, type ManifestDeepLink } from '../../utils/urlScheme';
 
@@ -20,7 +20,7 @@ interface UrlSchemeEditorProps {
  * Modal form for adding/editing a bank URL scheme configuration.
  *
  * On Android, offers three input modes:
- *   1. Import Intent — paste from Shortcut Maker to target a specific Activity.
+ *   1. Intent Parse — paste from Shortcut Maker to target a specific Activity.
  *   2. Manifest — paste AndroidManifest.xml from App Manager to auto-detect BROWSABLE deep links.
  *   3. Manual URL — free-form URL template with placeholder support.
  *
@@ -40,6 +40,8 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
 
   const [bankCode, setBankCode] = useState(existingConfig?.bankCode || '');
   const [urlTemplate, setUrlTemplate] = useState(existingConfig?.urlTemplate || '');
+  const [sameInstitutionOnly, setSameInstitutionOnly] = useState(existingConfig?.sameInstitutionOnly ?? false);
+  const [launchUrl, setLaunchUrl] = useState(existingConfig?.launchUrl || '');
   const [showHelp, setShowHelp] = useState(false);
   const [error, setError] = useState('');
 
@@ -48,7 +50,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
     android && !existingConfig?.urlTemplate ? 'intent' : 'manual',
   );
 
-  // Import Intent mode state
+  // Intent Parse mode state
   const [importText, setImportText] = useState('');
   const [parsedIntent, setParsedIntent] = useState<ParsedIntent | null>(null);
   const [parseError, setParseError] = useState(false);
@@ -79,7 +81,10 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
       return;
     }
     haptic();
-    addConfig({ bankCode, urlTemplate: normalizeIntentUrl(urlTemplate.trim()) });
+    const config: BankUrlConfig = { bankCode, urlTemplate: normalizeIntentUrl(urlTemplate.trim()) };
+    if (sameInstitutionOnly) config.sameInstitutionOnly = true;
+    if (sameInstitutionOnly && launchUrl.trim()) config.launchUrl = normalizeIntentUrl(launchUrl.trim());
+    addConfig(config);
     requestCloseRef.current?.();
   };
 
@@ -163,9 +168,12 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
       dataUri: link.url,
     };
     const url = buildIntentUrl(intentParsed, { fallback: manifestFallback });
-    addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
+    const config: BankUrlConfig = { bankCode, urlTemplate: normalizeIntentUrl(url) };
+    if (sameInstitutionOnly) config.sameInstitutionOnly = true;
+    if (sameInstitutionOnly && launchUrl.trim()) config.launchUrl = normalizeIntentUrl(launchUrl.trim());
+    addConfig(config);
     requestCloseRef.current?.();
-  }, [bankCode, manifestLinks, selectedLinkIdx, manifestFallback, addConfig, t]);
+  }, [bankCode, manifestLinks, selectedLinkIdx, manifestFallback, sameInstitutionOnly, launchUrl, addConfig, t]);
 
   const handleSaveIntent = useCallback(() => {
     if (!bankCode) {
@@ -178,9 +186,12 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
     }
     haptic();
     const url = buildIntentUrl(parsedIntent, { fallback: intentFallback });
-    addConfig({ bankCode, urlTemplate: normalizeIntentUrl(url) });
+    const config: BankUrlConfig = { bankCode, urlTemplate: normalizeIntentUrl(url) };
+    if (sameInstitutionOnly) config.sameInstitutionOnly = true;
+    if (sameInstitutionOnly && launchUrl.trim()) config.launchUrl = normalizeIntentUrl(launchUrl.trim());
+    addConfig(config);
     requestCloseRef.current?.();
-  }, [bankCode, parsedIntent, intentFallback, addConfig, t]);
+  }, [bankCode, parsedIntent, intentFallback, sameInstitutionOnly, launchUrl, addConfig, t]);
 
   return (
     <AnimatedModal
@@ -263,9 +274,10 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
               </div>
             )}
 
-            {/* ─── Import Intent mode (Shortcut Maker) ─────── */}
+            {/* ─── Intent Parse mode (Shortcut Maker) ─────── */}
             {mode === 'intent' && android && (
-              <div className="space-y-3.5">                {/* Quick launch — smart open or install */}
+              <div className="space-y-3.5">
+                {/* Quick launch — smart open or install */}
                 <a
                   href="intent://#Intent;package=rk.android.app.shortcutmaker;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Drk.android.app.shortcutmaker;end"
                   target="_blank"
@@ -408,6 +420,32 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                     <span className="font-medium">{error}</span>
                   </div>
                 )}
+
+                {/* Same-institution-only toggle + launch URL */}
+                <div className="space-y-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setSameInstitutionOnly(!sameInstitutionOnly)}
+                    className="flex items-center gap-3 w-full text-left group"
+                    aria-pressed={sameInstitutionOnly}
+                  >
+                    {sameInstitutionOnly
+                      ? <ToggleRight size={22} className="text-zinc-900 dark:text-zinc-100 shrink-0" aria-hidden="true" />
+                      : <ToggleLeft size={22} className="text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
+                    }
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{t.urlScheme.sameInstitutionOnlyLabel}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
+                    </div>
+                  </button>
+                  {sameInstitutionOnly && (
+                    <div>
+                      <label htmlFor="launch-url-intent" className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5 ml-1">{t.urlScheme.launchUrlLabel}</label>
+                      <input id="launch-url-intent" type="text" value={launchUrl} onChange={(e) => setLaunchUrl(e.target.value)} placeholder={t.urlScheme.launchUrlPlaceholder} autoComplete="off" className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono" />
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 ml-1 leading-relaxed">{t.urlScheme.launchUrlHint}</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Save button — always visible so validation errors can surface */}
                 <button
@@ -565,6 +603,32 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   </div>
                 )}
 
+                {/* Same-institution-only toggle + launch URL */}
+                <div className="space-y-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setSameInstitutionOnly(!sameInstitutionOnly)}
+                    className="flex items-center gap-3 w-full text-left group"
+                    aria-pressed={sameInstitutionOnly}
+                  >
+                    {sameInstitutionOnly
+                      ? <ToggleRight size={22} className="text-zinc-900 dark:text-zinc-100 shrink-0" aria-hidden="true" />
+                      : <ToggleLeft size={22} className="text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
+                    }
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{t.urlScheme.sameInstitutionOnlyLabel}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
+                    </div>
+                  </button>
+                  {sameInstitutionOnly && (
+                    <div>
+                      <label htmlFor="launch-url-manifest" className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5 ml-1">{t.urlScheme.launchUrlLabel}</label>
+                      <input id="launch-url-manifest" type="text" value={launchUrl} onChange={(e) => setLaunchUrl(e.target.value)} placeholder={t.urlScheme.launchUrlPlaceholder} autoComplete="off" className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono" />
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 ml-1 leading-relaxed">{t.urlScheme.launchUrlHint}</p>
+                    </div>
+                  )}
+                </div>
+
                 {/* Save button */}
                 <button
                   type="button"
@@ -656,6 +720,46 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
             {/* Save — only shown in manual mode; package and intent modes have inline save buttons */}
             {mode === 'manual' && (
               <>
+                {/* Same-institution-only toggle + launch URL (shared across modes but rendered here for manual) */}
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setSameInstitutionOnly(!sameInstitutionOnly)}
+                    className="flex items-center gap-3 w-full text-left group"
+                    aria-pressed={sameInstitutionOnly}
+                  >
+                    {sameInstitutionOnly
+                      ? <ToggleRight size={22} className="text-zinc-900 dark:text-zinc-100 shrink-0" aria-hidden="true" />
+                      : <ToggleLeft size={22} className="text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
+                    }
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{t.urlScheme.sameInstitutionOnlyLabel}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
+                    </div>
+                  </button>
+
+                  {sameInstitutionOnly && (
+                    <div>
+                      <label
+                        htmlFor="launch-url-input"
+                        className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-1.5 ml-1"
+                      >
+                        {t.urlScheme.launchUrlLabel}
+                      </label>
+                      <input
+                        id="launch-url-input"
+                        type="text"
+                        value={launchUrl}
+                        onChange={(e) => setLaunchUrl(e.target.value)}
+                        placeholder={t.urlScheme.launchUrlPlaceholder}
+                        autoComplete="off"
+                        className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 input-transition shadow-xs font-mono"
+                      />
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 ml-1 leading-relaxed">{t.urlScheme.launchUrlHint}</p>
+                    </div>
+                  )}
+                </div>
+
                 {error && (
                   <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
                     <AlertCircle size={18} className="shrink-0" aria-hidden="true" />

@@ -5,7 +5,7 @@ import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
 /**
  * Full-screen privacy overlay displayed when the app enters the background.
  *
- * Mirrors the behaviour of banking / payment apps (e.g. 國泰世華、中信、玉山)
+ * Mirrors the behaviour of financial / transfer apps (e.g. 國泰世華、中信、玉山)
  * that show a branded splash with frosted-glass blur in the OS task-switcher,
  * preventing bystanders from glimpsing sensitive account data.
  *

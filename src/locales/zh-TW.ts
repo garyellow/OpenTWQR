@@ -67,7 +67,7 @@ const zhTW = {
     hideAccount: '隱藏帳號',
     copyAccount: '複製帳號',
     notePrefix: '備註：',
-    safetyReminder: '請於銀行 App 核對帳號及戶名後再轉帳',
+    safetyReminder: '請於轉帳 App 核對帳號及戶名後再轉帳',
     copiedAccount: '已複製帳號',
     copyFailed: '複製失敗',
     fullscreenLabel: '全螢幕 QR Code',
@@ -340,7 +340,7 @@ const zhTW = {
     privacyTitle: '隱私聲明',
     privacyDesc: '所有 QR Code 皆在裝置上產生，帳戶資料不會上傳至任何伺服器。',
     securityTitle: '安全提醒',
-    securityDesc: '轉帳前請於銀行 App 核對收款帳號與戶名，確認無誤再執行。',
+    securityDesc: '轉帳前請於轉帳 App 核對收款帳號與戶名，確認無誤再執行。',
     scamTitle: '防範詐騙',
     scamDesc: '切勿依不明來源帳號轉帳。若被要求代收再轉出，極可能為詐騙手法。',
   },
@@ -409,7 +409,8 @@ const zhTW = {
     selectPaymentApp: '選擇轉帳 App',
     feeInfoTitle: '手續費說明',
     feeInfoSameBank: '同機構轉帳通常免收手續費。',
-    feeInfoCrossBank: '跨行轉帳依各機構規定可能收取手續費（通常為 NT$15），部分機構每月提供免費跨轉次數。',
+    feeInfoCrossBank: '跨機構轉帳依各機構規定可能收取手續費（通常為 NT$15），部分機構每月提供免費跨轉次數。',
+    launchOnly: '僅開啟',
     noPaymentApps: '尚未設定轉帳 App 連動',
     goSetup: '前往設定',
   },
@@ -458,8 +459,15 @@ const zhTW = {
     testOpen: '開啟測試連結',
     testAppHint: '若無法自動開啟，可能是此裝置未安裝對應 App，或 URL 範本有誤。',
 
-    // Intent import
-    modeIntent: 'Intent 匯入',
+    // Same-institution-only
+    sameInstitutionOnlyLabel: '僅限同機構',
+    sameInstitutionOnlyHint: '開啟後，此連動僅在掃描到相同機構的 QR Code 時帶入帳號資訊。跨機構時可用「開啟 URL」單純開啟 App。',
+    launchUrlLabel: '開啟 URL（選填）',
+    launchUrlPlaceholder: '跨機構時僅開啟 App 的連結…',
+    launchUrlHint: '填寫後，跨機構仍會顯示此 App，但不帶入帳號資訊，僅開啟 App。留空則跨機構時不顯示。',
+
+    // Intent parse
+    modeIntent: 'Intent 解析',
     modeManifest: 'Manifest 解析',
     modeManual: '自訂 URL',
     importIntentDesc: '貼上從 Shortcut Maker 複製的 Intent 資訊，自動轉換為 intent:// 連結。支援多行格式與 Intent URI 格式。',
@@ -494,7 +502,7 @@ const zhTW = {
 
     // Intent guide
     guideTitle: '設定指南',
-    guideTabIntent: 'Intent 匯入',
+    guideTabIntent: 'Intent 解析',
     guideTabManifest: 'Manifest 解析',
     guideStep1Title: '開啟 Shortcut Maker',
     guideStep1Desc: '點擊下方按鈕開啟 Shortcut Maker。',
@@ -505,14 +513,14 @@ const zhTW = {
     guideStep3Desc: '在列表中找到目標 App，並尋找含有 Data URI（自訂 URL scheme，例如 myapp://…）的 Activity。只有這類 Activity 才宣告了 CATEGORY_BROWSABLE，才能從 Chrome 直接啟動。主啟動器（Launcher / MAIN）Activity 無法從 Chrome 直接開啟。',
     guideStep4Title: '複製 Activity 資訊',
     guideStep4Desc: '點進 Activity 詳情頁面後，點擊「編輯 Intent」按鈕，再點擊右上角的複製按鈕即可取得完整資訊。',
-    guideNote: '注意：Shortcut Maker 複製的內容並非標準 Intent 格式，貼到「Intent 匯入」頁籤後 OpenTWQR 會自動轉換。提示：只有含有 Data URI（自訂 URL scheme 或 HTTPS App Links）的 Activity 才能從 Chrome 啟動，收款或轉帳功能通常在獨立的深層連結（deep link）Activity 中。',
+    guideNote: '注意：Shortcut Maker 複製的內容並非標準 Intent 格式，貼到「Intent 解析」頁籤後 OpenTWQR 會自動轉換。提示：只有含有 Data URI（自訂 URL scheme 或 HTTPS App Links）的 Activity 才能從 Chrome 啟動，收款或轉帳功能通常在獨立的深層連結（deep link）Activity 中。',
 
     // Manifest guide steps
     guideManifestStep1Title: '安裝並開啟 App Manager',
     guideManifestStep1Desc: '點擊下方按鈕開啟 App Manager。若尚未安裝，將前往 F-Droid 下載頁面（此 App 不在 Google Play 上架）。',
     guideManifestStep1Launch: '開啟 App Manager',
     guideManifestStep2Title: '找到目標 App',
-    guideManifestStep2Desc: '在 App Manager 的 App 清單中，找到要連動的支付 App，點擊進入詳細頁面。',
+    guideManifestStep2Desc: '在 App Manager 的 App 清單中，找到要連動的轉帳 App，點擊進入詳細頁面。',
     guideManifestStep3Title: '查看 Manifest',
     guideManifestStep3Desc: '在 App 詳細頁中，點擊「Manifest」頁籤，即可查看完整的 AndroidManifest.xml 內容。',
     guideManifestStep4Title: '複製並貼上',
@@ -590,7 +598,7 @@ const zhTW = {
     addAccount: '存為我的帳號',
     addAccountDesc: '加入收款帳號清單，方便下次產生 QR Code',
     pay: '前往支付',
-    payDesc: '查看付款資訊，並開啟支付 App 或 QR Code',
+    payDesc: '查看付款資訊，並開啟轉帳 App 或 QR Code',
   },
   /* ─── DangerSection ─────────────────────────────────── */
   danger: {
@@ -609,7 +617,7 @@ const zhTW = {
     next: '下一步',
     getStarted: '開始使用',
     step1Title: '歡迎使用 OpenTWQR',
-    step1Desc: '免費產生 TWQR 個人收款 QR Code，對方用銀行 App 掃碼即可轉帳。',
+    step1Desc: '免費產生 TWQR 個人收款 QR Code，對方用轉帳 App 掃碼即可轉帳。',
     step2Title: '新增你的收款帳戶',
     step2Desc: '先新增一個收款帳戶，之後就能快速產生收款 QR Code。',
     step3Title: '分享與備份',

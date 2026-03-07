@@ -69,7 +69,7 @@ const enUS: Translations = {
     hideAccount: 'Hide account',
     copyAccount: 'Copy account',
     notePrefix: 'Note: ',
-    safetyReminder: 'Verify account & name in banking app before transfer',
+    safetyReminder: 'Verify account & name in transfer app before transfer',
     copiedAccount: 'Account copied',
     copyFailed: 'Copy failed',
     fullscreenLabel: 'Fullscreen QR Code',
@@ -342,7 +342,7 @@ const enUS: Translations = {
     privacyTitle: 'Privacy Notice',
     privacyDesc: 'QR Codes are generated locally. Account data stays on this device only — never uploaded.',
     securityTitle: 'Security',
-    securityDesc: 'Verify recipient account & name in your banking app before transferring.',
+    securityDesc: 'Verify recipient account & name in your transfer app before transferring.',
     scamTitle: 'Fraud Prevention',
     scamDesc: 'Never transfer to unknown accounts. If asked to receive & forward money, it\'s likely fraud.',
   },
@@ -411,7 +411,8 @@ const enUS: Translations = {
     selectPaymentApp: 'Select Transfer App',
     feeInfoTitle: 'Transfer Fee Info',
     feeInfoSameBank: 'Transfers within the same institution are usually free.',
-    feeInfoCrossBank: 'Interbank transfers may be charged a fee (typically NT$15) depending on the institution. Some institutions offer a number of free interbank transfers per month.',
+    feeInfoCrossBank: 'Cross-institution transfers may be charged a fee (typically NT$15) depending on the institution. Some institutions offer a number of free cross-institution transfers per month.',
+    launchOnly: 'Open Only',
     noPaymentApps: 'No transfer app integrations configured',
     goSetup: 'Go to Settings',
   },
@@ -459,8 +460,15 @@ const enUS: Translations = {
     testOpen: 'Open Test Link',
     testAppHint: 'If the app doesn\'t open automatically, the corresponding app may not be installed, or the URL template may be incorrect.',
 
-    // Intent import
-    modeIntent: 'Intent Import',
+    // Same-institution-only
+    sameInstitutionOnlyLabel: 'Same Institution Only',
+    sameInstitutionOnlyHint: 'When enabled, account info is only carried over when the scanned QR matches the same institution. Use "Launch URL" to simply open the app for cross-institution scans.',
+    launchUrlLabel: 'Launch URL (optional)',
+    launchUrlPlaceholder: 'URL to open the app for cross-institution scans…',
+    launchUrlHint: 'If set, the app will still appear for cross-institution scans but without pre-filled account info. Leave empty to hide the app in cross-institution results.',
+
+    // Intent parse
+    modeIntent: 'Intent Parse',
     modeManifest: 'Manifest',
     modeManual: 'Custom URL',
     importIntentDesc: 'Paste the intent info copied from Shortcut Maker to auto-generate an intent:// link. Supports both multi-line and Intent URI formats.',
@@ -495,7 +503,7 @@ const enUS: Translations = {
 
     // Intent guide
     guideTitle: 'Setup Guide',
-    guideTabIntent: 'Intent Import',
+    guideTabIntent: 'Intent Parse',
     guideTabManifest: 'Manifest',
     guideStep1Title: 'Open Shortcut Maker',
     guideStep1Desc: 'Tap the button below to open Shortcut Maker.',
@@ -506,14 +514,14 @@ const enUS: Translations = {
     guideStep3Desc: 'Find your target app in the list. Look for activities that include a Data URI (custom URL scheme, e.g. myapp://…). Only these activities declare CATEGORY_BROWSABLE and can be launched from Chrome. The standard launcher / MAIN activity cannot be opened from Chrome.',
     guideStep4Title: 'Copy the Activity Info',
     guideStep4Desc: 'Inside the Activity details, tap the "Edit Intent" button, then tap the copy button in the top-right corner to get the full info.',
-    guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format. Paste it into the Intent Import tab and OpenTWQR will auto-convert it. Tip: Only activities with a Data URI (custom URL scheme or HTTPS App Links) can be launched from Chrome. Receive-money or transfer screens are usually in a dedicated deep link activity.',
+    guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format. Paste it into the Intent Parse tab and OpenTWQR will auto-convert it. Tip: Only activities with a Data URI (custom URL scheme or HTTPS App Links) can be launched from Chrome. Receive-money or transfer screens are usually in a dedicated deep link activity.',
 
     // Manifest guide steps
     guideManifestStep1Title: 'Install & Open App Manager',
     guideManifestStep1Desc: 'Tap the button below to launch App Manager. If not installed, you\'ll be directed to the F-Droid download page. (Note: App Manager is not on Google Play.)',
     guideManifestStep1Launch: 'Open App Manager',
     guideManifestStep2Title: 'Find Your App',
-    guideManifestStep2Desc: 'In the App Manager app list, find the payment app you want to link and tap it to open its details.',
+    guideManifestStep2Desc: 'In the App Manager app list, find the transfer app you want to link and tap it to open its details.',
     guideManifestStep3Title: 'View the Manifest',
     guideManifestStep3Desc: 'In the app details, tap the "Manifest" tab to view the full AndroidManifest.xml content.',
     guideManifestStep4Title: 'Copy & Paste',
@@ -591,7 +599,7 @@ const enUS: Translations = {
     addAccount: 'Save as My Account',
     addAccountDesc: 'Add to your accounts list for quick QR generation',
     pay: 'Go to Payment',
-    payDesc: 'View payment details and open payment app or QR Code',
+    payDesc: 'View payment details and open transfer app or QR Code',
   },
   /* ─── DangerSection ─────────────────────────────────── */
   danger: {
@@ -610,7 +618,7 @@ const enUS: Translations = {
     next: 'Next',
     getStarted: 'Get Started',
     step1Title: 'Welcome to OpenTWQR',
-    step1Desc: 'Generate free TWQR QR Codes for receiving money. Recipients scan with their banking app to transfer directly to you.',
+    step1Desc: 'Generate free TWQR QR Codes for receiving money. Recipients scan with their transfer app to transfer directly to you.',
     step2Title: 'Add Your Account',
     step2Desc: 'Start by adding a receiving account, then quickly generate payment QR Codes anytime.',
     step3Title: 'Share & Backup',
