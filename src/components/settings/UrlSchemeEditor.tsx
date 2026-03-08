@@ -5,7 +5,7 @@ import { InfoTip } from '../ui/InfoTip';
 import { useUrlSchemeStore, type BankUrlConfig } from '../../stores/useUrlSchemeStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useBanksStore } from '../../stores/useBanksStore';
-import { X, HelpCircle, Link, Building2, ClipboardPaste, Smartphone, ExternalLink, AlertCircle, FileText } from 'lucide-react';
+import { X, Link, Building2, ClipboardPaste, Smartphone, ExternalLink, AlertCircle, FileText } from 'lucide-react';
 import { haptic } from '../../utils/haptics';
 import { parseIntentInput, buildIntentUrl, isAndroid, normalizeIntentUrl, parseManifestXml, type ParsedIntent, type ManifestDeepLink } from '../../utils/urlScheme';
 
@@ -43,7 +43,6 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
   const [urlTemplate, setUrlTemplate] = useState(existingConfig?.urlTemplate || '');
   const [sameInstitutionOnly, setSameInstitutionOnly] = useState(existingConfig?.sameInstitutionOnly ?? false);
   const [launchUrl, setLaunchUrl] = useState(existingConfig?.launchUrl || '');
-  const [showHelp, setShowHelp] = useState(false);
   const [error, setError] = useState('');
 
   // Android input mode: when editing, default to manual to show existing URL
@@ -432,7 +431,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   className="flex items-center justify-between gap-3 w-full px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 active:scale-98 action-transition group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <Smartphone size={16} className="text-zinc-500 dark:text-zinc-400 shrink-0" aria-hidden="true" />
+                    <FileText size={16} className="text-zinc-500 dark:text-zinc-400 shrink-0" aria-hidden="true" />
                     <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 leading-tight">
                       {t.urlScheme.manifestLaunchApp}
                     </p>
@@ -568,22 +567,53 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
             {/* ─── Manual URL template ─────────────────────── */}
             {mode === 'manual' && (
               <div>
-                <div className="flex items-center justify-between mb-2 ml-1">
+                <div className="flex items-center gap-1.5 mb-2 ml-1">
                   <label
                     htmlFor="url-template-input"
                     className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
                   >
                     {t.urlScheme.urlLabel}
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowHelp(!showHelp)}
-                    className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors p-1"
-                    aria-label={t.urlScheme.placeholderHelp}
-                    aria-expanded={showHelp}
-                  >
-                    <HelpCircle size={16} aria-hidden="true" />
-                  </button>
+                  <InfoTip title={t.urlScheme.placeholderHelp} size={12}>
+                    <div className="space-y-1.5 text-xs">
+                      <p className="flex items-baseline gap-2">
+                        <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
+                          {'{account}'}
+                        </code>
+                        <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phAccount}</span>
+                      </p>
+                      <p className="flex items-baseline gap-2">
+                        <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
+                          {'{paddedAccount}'}
+                        </code>
+                        <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phPaddedAccount}</span>
+                      </p>
+                      <p className="flex items-baseline gap-2">
+                        <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
+                          {'{bankCode}'}
+                        </code>
+                        <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phBankCode}</span>
+                      </p>
+                      <p className="flex items-baseline gap-2">
+                        <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
+                          {'{amount}'}
+                        </code>
+                        <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phAmount}</span>
+                      </p>
+                      <p className="flex items-baseline gap-2">
+                        <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
+                          {'{amountCents}'}
+                        </code>
+                        <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phAmountCents}</span>
+                      </p>
+                      <p className="flex items-baseline gap-2">
+                        <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
+                          {'{note}'}
+                        </code>
+                        <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phNote}</span>
+                      </p>
+                    </div>
+                  </InfoTip>
                 </div>
                 <input
                   id="url-template-input"
@@ -594,81 +624,37 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                   autoComplete="off"
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs font-mono"
                 />
-
-                {/* Placeholder help panel */}
-                {showHelp && (
-                  <div className="mt-2.5 p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700/50 text-xs space-y-1.5">
-                    <p className="font-semibold text-zinc-700 dark:text-zinc-300 text-sm mb-2">
-                      {t.urlScheme.placeholderTitle}
-                    </p>
-                    <p className="flex items-baseline gap-2">
-                      <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
-                        {'{account}'}
-                      </code>
-                      <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phAccount}</span>
-                    </p>
-                    <p className="flex items-baseline gap-2">
-                      <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
-                        {'{paddedAccount}'}
-                      </code>
-                      <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phPaddedAccount}</span>
-                    </p>
-                    <p className="flex items-baseline gap-2">
-                      <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
-                        {'{bankCode}'}
-                      </code>
-                      <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phBankCode}</span>
-                    </p>
-                    <p className="flex items-baseline gap-2">
-                      <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
-                        {'{amount}'}
-                      </code>
-                      <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phAmount}</span>
-                    </p>
-                    <p className="flex items-baseline gap-2">
-                      <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
-                        {'{amountCents}'}
-                      </code>
-                      <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phAmountCents}</span>
-                    </p>
-                    <p className="flex items-baseline gap-2">
-                      <code className="bg-zinc-200/80 dark:bg-zinc-700/80 px-1.5 py-0.5 rounded font-mono text-zinc-800 dark:text-zinc-200 shrink-0">
-                        {'{note}'}
-                      </code>
-                      <span className="text-zinc-600 dark:text-zinc-400">{t.urlScheme.phNote}</span>
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
             {/* ─── Same-institution toggle + launch URL + save (shared across all modes) ─── */}
             <div className="space-y-3.5">
               <div className="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 overflow-hidden shadow-xs">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={sameInstitutionOnly}
-                  onClick={() => { haptic(); setSameInstitutionOnly(!sameInstitutionOnly); }}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <Building2 size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
-                    </div>
-                    <div className="text-left min-w-0">
-                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.urlScheme.sameInstitutionOnlyLabel}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">{t.urlScheme.sameInstitutionOnlyHint}</p>
-                    </div>
+                {/* Toggle row — outer div carries hover/transition; only the switch button is interactive */}
+                <div className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <Building2 size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
                   </div>
-                  <div
-                    aria-hidden="true"
-                    className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${sameInstitutionOnly ? '' : 'bg-zinc-300 dark:bg-zinc-600'}`}
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.urlScheme.sameInstitutionOnlyLabel}</span>
+                    <InfoTip
+                      title={t.urlScheme.sameInstitutionOnlyLabel}
+                      content={t.urlScheme.sameInstitutionOnlyHint}
+                      size={12}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={sameInstitutionOnly}
+                    onClick={() => { haptic(); setSameInstitutionOnly(!sameInstitutionOnly); }}
+                    aria-label={t.urlScheme.sameInstitutionOnlyLabel}
+                    className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 dark:focus-visible:ring-offset-zinc-900 ${sameInstitutionOnly ? '' : 'bg-zinc-300 dark:bg-zinc-600'}`}
                     style={sameInstitutionOnly ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
                   >
                     <div className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${sameInstitutionOnly ? 'translate-x-5.25' : 'translate-x-0.75'}`} />
-                  </div>
-                </button>
+                  </button>
+                </div>
 
                 {sameInstitutionOnly && (
                   <div className="px-4 pt-3 pb-4 border-t border-zinc-100 dark:border-zinc-800/50">

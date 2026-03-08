@@ -87,6 +87,7 @@ export const InfoTip = ({
         <AnimatedModal
           onClose={() => setOpen(false)}
           overlayClass="z-60"
+          backdropClass="bg-black/60 dark:bg-black/75 backdrop-blur-sm"
           cardClass="max-w-sm p-6"
           ariaLabelledby="infotip-title"
         >

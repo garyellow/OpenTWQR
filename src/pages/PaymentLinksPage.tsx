@@ -4,7 +4,7 @@ import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { UrlSchemeEditor } from '../components/settings/UrlSchemeEditor';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X, CircleHelp, Smartphone } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X, CircleHelp, Smartphone, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { haptic } from '../utils/haptics';
 import { buildBankUrl, isAndroid } from '../utils/urlScheme';
@@ -626,7 +626,7 @@ export const PaymentLinksPage = () => {
                             backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 8%, transparent)',
                           }}
                         >
-                          <Smartphone size={13} aria-hidden="true" />
+                          <FileText size={13} aria-hidden="true" />
                           {t.urlScheme.guideManifestStep1Launch}
                         </a>
                       </div>
