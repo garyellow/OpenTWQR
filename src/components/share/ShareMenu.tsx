@@ -52,7 +52,7 @@ export const ShareMenu = ({
         role="dialog"
         aria-modal="true"
         aria-label={t.share.menuLabel}
-        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden overscroll-contain motion-reduce:animate-none ${
+        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden overscroll-contain motion-reduce:animate-none ${
           isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'
         }`}
         onAnimationEnd={onAnimationEnd}

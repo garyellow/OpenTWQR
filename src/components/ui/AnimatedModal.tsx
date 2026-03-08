@@ -12,14 +12,6 @@ interface AnimatedModalProps {
   overlayClass?: string;
   /** Additional Tailwind classes on the dialog card (e.g. max-width, padding). */
   cardClass?: string;
-  /**
-   * Tailwind classes for the backdrop overlay.
-   * Default: `bg-black/40 dark:bg-black/60 backdrop-blur-sm`
-   * Use a higher opacity (e.g. `bg-black/60 dark:bg-black/75`) when this
-   * modal is stacked on top of another modal to prevent the underlying card
-   * from showing through the semi-transparent backdrop.
-   */
-  backdropClass?: string;
   ariaLabelledby?: string;
   ariaDescribedby?: string;
   /** When true, backdrop click and Escape are ignored. */
@@ -49,7 +41,6 @@ export const AnimatedModal = ({
   children,
   overlayClass = '',
   cardClass = '',
-  backdropClass = 'bg-black/40 dark:bg-black/60 backdrop-blur-sm',
   ariaLabelledby,
   ariaDescribedby,
   preventClose = false,
@@ -74,7 +65,7 @@ export const AnimatedModal = ({
     <div className={`fixed inset-0 ${overlayClass}`}>
       {/* Backdrop — animated independently; clicks close the modal */}
       <div
-        className={`absolute inset-0 ${backdropClass} motion-reduce:animate-none ${
+        className={`absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${
           isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
         }`}
         onClick={() => !preventClose && requestClose()}
@@ -89,7 +80,7 @@ export const AnimatedModal = ({
           aria-modal="true"
           aria-labelledby={ariaLabelledby}
           aria-describedby={ariaDescribedby}
-          className={`pointer-events-auto w-full bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overscroll-contain motion-reduce:animate-none ${
+          className={`pointer-events-auto w-full bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overscroll-contain motion-reduce:animate-none ${
             isClosing
               ? 'animate-out fade-out zoom-out-95 duration-150'
               : 'animate-in fade-in zoom-in-95 duration-200'

@@ -410,7 +410,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         role="dialog"
         aria-modal="true"
         aria-labelledby="qr-modal-title"
-        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
       >
         {/* Header */}

@@ -5,6 +5,7 @@ import { maskAccount, formatCurrency } from '../../utils/twqr';
 import { BankIcon } from '../accounts/BankIcon';
 import { haptic } from '../../utils/haptics';
 import { isIntentUrl } from '../../utils/urlScheme';
+import { AnimatedModal } from '../ui/AnimatedModal';
 import type { Bank } from '../../types';
 import type { ParsedTWQR } from '../../utils/parseTwqr';
 
@@ -234,54 +235,52 @@ export const ScanRedirectView = ({
 
       {/* Fee info modal */}
       {showFeeInfo && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
-          onClick={() => setShowFeeInfo(false)}
-          role="presentation"
+        <AnimatedModal
+          onClose={() => setShowFeeInfo(false)}
+          overlayClass="z-50"
+          cardClass="max-w-sm p-6"
+          ariaLabelledby="fee-info-title"
         >
-          <div
-            className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 max-w-sm w-full animate-in zoom-in-95 fade-in duration-200"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-labelledby="fee-info-title"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
-                  <CircleAlert size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          {(requestClose) => (
+            <>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
+                    <CircleAlert size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                  </div>
+                  <h2 id="fee-info-title" className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug">
+                    {t.scan.feeInfoTitle}
+                  </h2>
                 </div>
-                <h2 id="fee-info-title" className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug">
-                  {t.scan.feeInfoTitle}
-                </h2>
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  aria-label={t.common.close}
+                  className="p-2.5 -mr-2 -mt-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+              <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <div className="flex items-start gap-2.5">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' }} />
+                  <p>{t.scan.feeInfoSameBank}</p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-600 mt-1.5 shrink-0" />
+                  <p>{t.scan.feeInfoCrossBank}</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() => setShowFeeInfo(false)}
-                aria-label={t.common.close}
-                className="p-2.5 -mr-2 -mt-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                onClick={requestClose}
+                className="w-full py-3.5 mt-5 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
-                <X size={20} aria-hidden="true" />
+                {t.common.understand}
               </button>
-            </div>
-            <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              <div className="flex items-start gap-2.5">
-                <span className="inline-block w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' }} />
-                <p>{t.scan.feeInfoSameBank}</p>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-600 mt-1.5 shrink-0" />
-                <p>{t.scan.feeInfoCrossBank}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowFeeInfo(false)}
-              className="w-full py-3.5 mt-5 rounded-xl font-semibold btn-accent active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-            >
-              {t.common.understand}
-            </button>
-          </div>
-        </div>
+            </>
+          )}
+        </AnimatedModal>
       )}
     </div>
   );
