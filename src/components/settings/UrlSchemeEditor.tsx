@@ -18,12 +18,12 @@ interface UrlSchemeEditorProps {
 }
 
 /**
- * Modal form for adding/editing a bank URL scheme configuration.
+ * Modal form for adding/editing a bank transfer URL configuration.
  *
  * On Android, offers three input modes:
  *   1. Intent Parse — paste from Shortcut Maker to target a specific Activity.
  *   2. Manifest — paste AndroidManifest.xml from App Manager to auto-detect BROWSABLE deep links.
- *   3. Manual URL — free-form URL template with placeholder support.
+ *   3. Manual URL — free-form transfer URL with placeholder support.
  *
  * On non-Android, only the manual URL mode is shown.
  */
@@ -627,7 +627,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
               </div>
             )}
 
-            {/* ─── Same-institution toggle + launch URL + save (shared across all modes) ─── */}
+            {/* ─── Same-institution toggle + fallback URL + save (shared across all modes) ─── */}
             <div className="space-y-3.5">
               <div className="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 overflow-hidden shadow-xs">
                 {/* Toggle row — outer div carries hover/transition; only the switch button is interactive */}
@@ -636,7 +636,12 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                     <Building2 size={18} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.urlScheme.sameInstitutionOnlyLabel}</span>
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.urlScheme.sameInstitutionOnlyLabel}</span>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                        {t.urlScheme.sameInstitutionOnlySummary}
+                      </p>
+                    </div>
                     <InfoTip
                       title={t.urlScheme.sameInstitutionOnlyLabel}
                       content={t.urlScheme.sameInstitutionOnlyHint}

@@ -6,7 +6,10 @@ import { useLocaleStore } from '../../stores/useLocaleStore';
 import type { BankAccount } from '../../types';
 import { isValidAccount, isShortAccount, removeInvisibleChars } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
-import { AlertCircle, TriangleAlert, Globe } from 'lucide-react';
+import { AlertCircle, Globe } from 'lucide-react';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
+
+type PendingConfirmation = 'short-account' | 'duplicate' | null;
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
@@ -23,19 +26,24 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const [iconUrl, setIconUrl] = useState(initialData?.iconUrl || '');
   const [iconError, setIconError] = useState(false);
   const [error, setError] = useState('');
-  const [duplicateWarning, setDuplicateWarning] = useState('');
-  const [shortAccountWarning, setShortAccountWarning] = useState('');
+  const [pendingConfirmation, setPendingConfirmation] = useState<PendingConfirmation>(null);
 
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((state) => state.banks);
   const selectedBank = banks.find((b) => b.code === bankCode);
   const bankUrlPlaceholder = selectedBank?.url || 'https://example.com/icon.png';
 
+  const buildPayload = () => ({
+    bankCode,
+    accountNumber,
+    label: label || undefined,
+    iconUrl: iconUrl.trim() || undefined,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setDuplicateWarning('');
-    setShortAccountWarning('');
+    setPendingConfirmation(null);
 
     if (!bankCode) {
       setError(t.form.selectBank);
@@ -44,8 +52,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
 
     if (!isValidAccount(accountNumber)) {
       if (isShortAccount(accountNumber)) {
-        // Soft warning: shorter than standard but potentially valid (e.g. e-payment)
-        setShortAccountWarning(t.form.shortAccountWarn(accountNumber.length));
+        setPendingConfirmation('short-account');
         return;
       }
       setError(t.form.invalidAccount);
@@ -70,11 +77,11 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
       }
 
       // Same bank + account but different label — ask for confirmation
-      setDuplicateWarning(t.form.duplicateWarn);
+      setPendingConfirmation('duplicate');
       return;
     }
 
-    onSubmit({ bankCode, accountNumber, label: label || undefined, iconUrl: iconUrl.trim() || undefined });
+    onSubmit(buildPayload());
   };
 
   const resolvedIcon = resolveIconSrc(iconUrl);
@@ -90,8 +97,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           onChange={(code) => {
             setBankCode(code);
             setError('');
-            setDuplicateWarning('');
-            setShortAccountWarning('');
+            setPendingConfirmation(null);
           }}
         />
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
@@ -118,8 +124,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           onChange={(e) => {
             setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
             setError('');
-            setDuplicateWarning('');
-            setShortAccountWarning('');
+            setPendingConfirmation(null);
           }}
           aria-invalid={Boolean(error && !isValidAccount(accountNumber))}
           aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
@@ -146,7 +151,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
-            setDuplicateWarning('');
+            setPendingConfirmation(null);
           }}
           className={inputClass}
         />
@@ -206,64 +211,6 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
         </div>
       )}
 
-      {shortAccountWarning && !error && !duplicateWarning && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
-        >
-          <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
-            <TriangleAlert size={18} className="shrink-0" aria-hidden="true" />
-            <span className="font-medium">{shortAccountWarning}</span>
-          </div>
-          <div className="flex gap-2 ml-7.5">
-            <button
-              type="button"
-              onClick={() => setShortAccountWarning('')}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-            >
-              {t.common.cancel}
-            </button>
-            <button
-              type="button"
-              onClick={() => onSubmit({ bankCode, accountNumber, label: label || undefined, iconUrl: iconUrl.trim() || undefined })}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
-            >
-              {t.form.saveShort}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {duplicateWarning && !error && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="flex flex-col gap-3 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 rounded-xl border border-amber-200/50 dark:border-amber-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"
-        >
-          <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
-            <TriangleAlert size={18} className="shrink-0" aria-hidden="true" />
-            <span className="font-medium">{duplicateWarning}</span>
-          </div>
-          <div className="flex gap-2 ml-7.5">
-            <button
-              type="button"
-              onClick={() => setDuplicateWarning('')}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-            >
-              {t.common.cancel}
-            </button>
-            <button
-              type="button"
-              onClick={() => onSubmit({ bankCode, accountNumber, label: label || undefined, iconUrl: iconUrl.trim() || undefined })}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
-            >
-              {t.form.addAnyway}
-            </button>
-          </div>
-        </div>
-      )}
-
       <div className="flex gap-3 pt-4">
         <button
           type="button"
@@ -279,6 +226,28 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
           {t.form.saveAccount}
         </button>
       </div>
+
+      {pendingConfirmation === 'short-account' && (
+        <ConfirmDialog
+          title={t.form.shortAccountConfirmTitle}
+          description={t.form.shortAccountWarn(accountNumber.length)}
+          confirmLabel={t.form.saveShort}
+          onConfirm={() => onSubmit(buildPayload())}
+          onCancel={() => setPendingConfirmation(null)}
+          variant="warning"
+        />
+      )}
+
+      {pendingConfirmation === 'duplicate' && (
+        <ConfirmDialog
+          title={t.form.duplicateConfirmTitle}
+          description={t.form.duplicateWarn}
+          confirmLabel={t.form.addAnyway}
+          onConfirm={() => onSubmit(buildPayload())}
+          onCancel={() => setPendingConfirmation(null)}
+          variant="warning"
+        />
+      )}
     </form>
   );
 };

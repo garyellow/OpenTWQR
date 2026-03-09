@@ -174,12 +174,35 @@ export const PaymentLinksPage = () => {
                         <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm truncate">
                           {bank?.name || config.bankCode}
                         </p>
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                            {config.sameInstitutionOnly ? t.urlScheme.sameInstitutionBadge : t.urlScheme.allInstitutionsBadge}
+                          </span>
+                          {config.launchUrl && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                              {t.urlScheme.launchUrlBadge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-2 font-medium uppercase tracking-wide">
+                          {t.urlScheme.transferUrlLabelShort}
+                        </p>
                         <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5 font-mono">
                           {config.urlTemplate}
                         </p>
-                        {config.sameInstitutionOnly && (
-                          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-medium truncate">
-                            {t.urlScheme.sameInstitutionOnlyLabel}{config.launchUrl ? ` · ${t.scan.launchOnly}` : ''}
+                        {config.launchUrl && (
+                          <>
+                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-2 font-medium uppercase tracking-wide">
+                              {t.urlScheme.launchUrlLabelShort}
+                            </p>
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5 font-mono">
+                              {config.launchUrl}
+                            </p>
+                          </>
+                        )}
+                        {config.sameInstitutionOnly && !config.launchUrl && (
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-2 font-medium truncate">
+                            {t.urlScheme.sameInstitutionNoFallbackHint}
                           </p>
                         )}
                       </div>
@@ -437,10 +460,24 @@ export const PaymentLinksPage = () => {
                 {testUrl && (
                   <div className="px-3.5 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50">
                     <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1.5">
-                      {t.urlScheme.testPreviewLabel}
+                      {t.urlScheme.transferUrlLabel}
                     </p>
                     <p className="font-mono text-xs text-zinc-700 dark:text-zinc-300 break-all">
                       {testUrl}
+                    </p>
+                  </div>
+                )}
+
+                {testingConfig.sameInstitutionOnly && testingConfig.launchUrl && (
+                  <div className="px-3.5 py-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20">
+                    <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-1.5">
+                      {t.urlScheme.launchUrlLabel}
+                    </p>
+                    <p className="font-mono text-xs text-amber-800 dark:text-amber-100 break-all">
+                      {testingConfig.launchUrl}
+                    </p>
+                    <p className="text-[11px] text-amber-700/80 dark:text-amber-200/80 mt-2 leading-relaxed">
+                      {t.urlScheme.testLaunchUrlHint}
                     </p>
                   </div>
                 )}

@@ -107,7 +107,7 @@ export const ScanPage = () => {
     [bank],
   );
 
-  /* ---------- Build all transfer app entries from configured URL schemes ---------- */
+  /* ---------- Build all transfer app entries from configured transfer URLs ---------- */
   const configs = useUrlSchemeStore((s) => s.configs);
   const paymentApps = useMemo<PaymentAppEntry[]>(() => {
     if (!parsed || configs.length === 0) return [];
@@ -118,7 +118,7 @@ export const ScanPage = () => {
       const configBank = banks.find((b) => b.code === config.bankCode);
       const isSameInstitution = config.bankCode === parsed.bankCode;
 
-      // sameInstitutionOnly: cross-institution → use launchUrl if available, otherwise skip
+      // sameInstitutionOnly: cross-institution → use fallback launch URL if available, otherwise skip
       if (config.sameInstitutionOnly && !isSameInstitution) {
         if (config.launchUrl) {
           entries.push({

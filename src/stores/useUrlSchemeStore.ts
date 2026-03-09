@@ -4,11 +4,11 @@ import { idbStorage } from './idbStorage';
 
 export interface BankUrlConfig {
   bankCode: string;
-  /** URL template with placeholders like {account}, {amount}, etc. */
+  /** Primary transfer URL template with placeholders like {account}, {amount}, etc. */
   urlTemplate: string;
-  /** When true, only show this config for same-institution QR codes. */
+  /** When true, only use the transfer URL for same-institution QR codes. */
   sameInstitutionOnly?: boolean;
-  /** Optional URL to simply open the app (no account pre-fill) when cross-institution. */
+  /** Optional fallback URL that only opens the app for cross-institution scans. */
   launchUrl?: string;
 }
 
