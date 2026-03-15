@@ -73,8 +73,9 @@ function App() {
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden') {
         hiddenAtRef.current = Date.now();
-        // Pre-write to IDB so the startup check has a recent timestamp if the app is killed while hidden
-        if (lockTimeout > 0) writeLastActiveTimestamp();
+        // Only persist the timestamp when the session is unlocked — writing
+        // while locked would let a fresh launch auto-unlock without auth.
+        if (lockTimeout > 0 && useAuthStore.getState().isUnlocked) writeLastActiveTimestamp();
       } else if (document.visibilityState === 'visible' && hiddenAtRef.current !== null) {
         const elapsed = Date.now() - hiddenAtRef.current;
         hiddenAtRef.current = null;
@@ -83,7 +84,7 @@ function App() {
     };
 
     const handlePageHide = () => {
-      if (lockTimeout > 0) writeLastActiveTimestamp();
+      if (lockTimeout > 0 && useAuthStore.getState().isUnlocked) writeLastActiveTimestamp();
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
@@ -99,10 +100,10 @@ function App() {
 
   /* ---------- Heartbeat: persist last-active timestamp every 5s ---------- */
   useEffect(() => {
-    if (!authEnabled || lockTimeout === 0) return;
+    if (!authEnabled || lockTimeout === 0 || !authUnlocked) return;
     const id = window.setInterval(() => writeLastActiveTimestamp(), 5_000);
     return () => window.clearInterval(id);
-  }, [authEnabled, lockTimeout]);
+  }, [authEnabled, lockTimeout, authUnlocked]);
 
   /* ---------- On startup: auto-unlock if within lock timeout ---------- */
   const startupCheckedRef = useRef(false);
