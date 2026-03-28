@@ -95,6 +95,24 @@ export const ReceivePage = () => {
     };
   }, [selectedAccount, amount, note]);
 
+  /* ---------- Adjacent card data for carousel ---------- */
+  const adjacentCards = useMemo(() => {
+    if (sortedAccounts.length <= 1) return { prev: undefined, next: undefined };
+    const numAmount = amount ? parseInt(amount, 10) : 0;
+    const prevIndex = (currentAccountIndex - 1 + sortedAccounts.length) % sortedAccounts.length;
+    const nextIndex = (currentAccountIndex + 1) % sortedAccounts.length;
+    const makeCard = (acc: typeof sortedAccounts[0]) => {
+      const b = banks.find((b2) => b2.code === acc.bankCode);
+      return {
+        value: generateTWQR({ bankCode: acc.bankCode, accountNumber: acc.accountNumber, amount: numAmount, note: note || undefined }),
+        bankName: stripCompanySuffix(b?.name || ''),
+        bankCode: acc.bankCode,
+        accountNumber: acc.accountNumber,
+      };
+    };
+    return { prev: makeCard(sortedAccounts[prevIndex]), next: makeCard(sortedAccounts[nextIndex]) };
+  }, [sortedAccounts, currentAccountIndex, banks, amount, note]);
+
   const handleCloseQR = useCallback(() => {
     setShowQR(false);
   }, []);
@@ -476,6 +494,8 @@ export const ReceivePage = () => {
           onSwitchNext={handleSwitchNext}
           accountIndex={currentAccountIndex + 1}
           accountTotal={sortedAccounts.length}
+          prevCard={adjacentCards.prev}
+          nextCard={adjacentCards.next}
         />
       )}
 

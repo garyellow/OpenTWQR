@@ -19,6 +19,14 @@ import type { ShareData, ExpiryOption } from '../../types';
 import { QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
 import { StyledQRCode, type StyledQRCodeHandle, type StyledQRCodeCenterImage } from './StyledQRCode';
 
+/** Data for a pre-rendered adjacent card in the carousel. */
+export interface AdjacentCard {
+  value: string;
+  bankName?: string;
+  bankCode?: string;
+  accountNumber?: string;
+}
+
 interface QRDisplayProps {
   value: string;
   amount?: number;
@@ -49,9 +57,13 @@ interface QRDisplayProps {
   accountIndex?: number;
   /** Total number of accounts. */
   accountTotal?: number;
+  /** Pre-rendered adjacent card data for the carousel (prev panel). */
+  prevCard?: AdjacentCard;
+  /** Pre-rendered adjacent card data for the carousel (next panel). */
+  nextCard?: AdjacentCard;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl, bankUrl, onRescan, title, hideClose = false, onSwitchPrev, onSwitchNext, accountIndex, accountTotal }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl, bankUrl, onRescan, title, hideClose = false, onSwitchPrev, onSwitchNext, accountIndex, accountTotal, prevCard, nextCard }: QRDisplayProps) => {
   const t = useLocaleStore((s) => s.t);
   const storedLogoType = useQRSettingsStore((s) => s.logoType);
   const storedShowAccount = useQRSettingsStore((s) => s.showAccount);
@@ -68,8 +80,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const dotStyle = isSharedView ? 'square' as const : storedDotStyle;
   const eyeStyle = isSharedView ? 'square' as const : storedEyeStyle;
 
-  /** Whether any bank label will be shown BELOW the QR code. */
-  const hasBankLabel = showBankNameSetting && Boolean(bankName) && Boolean(bankCode);
 
   /**
    * Bank icon info — dimensions + optional data URI for export-safe SVG.
@@ -256,9 +266,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   // Whether account paging is available.
   const canSwitch = Boolean(onSwitchPrev && onSwitchNext && accountTotal && accountTotal > 1);
 
-  // Slide direction for the enter animation after account switch.
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
-
   // One-time "peek" hint animation to teach the swipe gesture.
   const [showPeekHint, setShowPeekHint] = useState(false);
   useEffect(() => {
@@ -271,9 +278,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return () => clearTimeout(id);
   }, [canSwitch]);
 
-  // Card-pager gesture (horizontal finger-tracking + snap).
+  // Card-pager gesture — fires after the carousel commit transition ends.
   const handlePagerCommit = useCallback((dir: 'prev' | 'next') => {
-    setSlideDirection(dir === 'next' ? 'left' : 'right');
     if (dir === 'next') onSwitchNext?.();
     else onSwitchPrev?.();
   }, [onSwitchNext, onSwitchPrev]);
@@ -285,12 +291,44 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     if (!canSwitch) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (isFullscreen || shareMenuIsOpen || linkSettingsIsOpen || isEncrypting) return;
-      if (e.key === 'ArrowLeft') { e.preventDefault(); setSlideDirection('right'); onSwitchPrev!(); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); setSlideDirection('left'); onSwitchNext!(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); pager.commitTo('prev'); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); pager.commitTo('next'); }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [canSwitch, onSwitchPrev, onSwitchNext, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, isEncrypting]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- commitTo identity is stable
+  }, [canSwitch, pager.commitTo, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, isEncrypting]);
+
+  // Default center image for adjacent carousel panels (always OpenTWQR logo).
+  const defaultCenterImage: StyledQRCodeCenterImage = useMemo(() => {
+    const logo = QR_CENTER_IMAGE_VERTICAL;
+    return { src: logo.src, width: logo.width, height: logo.height };
+  }, []);
+
+  // Strip transform — drives the 3-panel carousel position.
+  const stripStyle = useMemo((): React.CSSProperties => {
+    if (pager.isDragging) {
+      return {
+        transform: `translateX(calc(-33.333% + ${pager.dragOffset}px))`,
+        willChange: 'transform',
+      };
+    }
+    if (pager.commitDirection) {
+      return {
+        transform: pager.commitDirection === 'next' ? 'translateX(-66.666%)' : 'translateX(0%)',
+        transition: 'transform 250ms ease-out',
+        willChange: 'transform',
+      };
+    }
+    if (pager.phase === 'settling') {
+      return {
+        transform: 'translateX(-33.333%)',
+        transition: 'transform 200ms ease-out',
+        willChange: 'transform',
+      };
+    }
+    return { transform: 'translateX(-33.333%)' };
+  }, [pager.isDragging, pager.dragOffset, pager.commitDirection, pager.phase]);
 
   // Responsive QR size for the modal view
   useEffect(() => {
@@ -439,152 +477,64 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     linkSettingsToggle.close();
   }, [shareData, linkExpiry, linkPassword, linkAction, copyToClipboard, shareViaSystem, showFeedback, linkSettingsToggle, t]);
 
-  /* --- Main modal --- */
-  return (
-    <>
-    <div ref={modalRef} className="fixed inset-0 z-80">
-      {/* Backdrop — animated independently; clicks close the modal */}
-      <div
-        className={`absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${
-          isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
-        }`}
-        onClick={hideClose ? undefined : requestClose}
-        aria-hidden="true"
-      />
+  /* --- Carousel panel renderer --- */
 
-      {/* Card centering — pointer-events-none lets clicks fall through to backdrop */}
-      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 pointer-events-none">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="qr-modal-title"
-        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
-        onAnimationEnd={onAnimationEnd}
-      >
-        {/* Header */}
-        <div className="shrink-0 flex items-center justify-between p-5 pb-3">
-          <h2 id="qr-modal-title" className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            {title ?? t.qr.title}
-          </h2>
-          <div className="flex items-center gap-1">
-            {canSwitch && accountIndex != null && accountTotal != null && (
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  onClick={() => { setSlideDirection('right'); onSwitchPrev?.(); }}
-                  aria-label={t.qr.switchPrev}
-                  className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                >
-                  <ChevronLeft size={16} aria-hidden="true" />
-                </button>
-                {accountTotal <= 7 ? (
-                  <div className="flex items-center gap-1 px-1.5">
-                    {Array.from({ length: accountTotal }, (_, i) => (
-                      <span
-                        key={i}
-                        className={`block rounded-full transition-all duration-200 ${
-                          i + 1 === accountIndex
-                            ? 'w-1.5 h-1.5 bg-zinc-600 dark:bg-zinc-300'
-                            : 'w-1 h-1 bg-zinc-300 dark:bg-zinc-600'
-                        }`}
-                        aria-hidden="true"
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 tabular-nums min-w-[3ch] text-center select-none">
-                    {t.qr.accountPosition(accountIndex, accountTotal)}
-                  </span>
-                )}
-                <span className="sr-only" aria-live="polite">
-                  {t.qr.accountPosition(accountIndex, accountTotal)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => { setSlideDirection('left'); onSwitchNext?.(); }}
-                  aria-label={t.qr.switchNext}
-                  className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                >
-                  <ChevronRight size={16} aria-hidden="true" />
-                </button>
-              </div>
-            )}
-            {!hideClose && (
-              <button
-                type="button"
-                onClick={requestClose}
-                aria-label={t.common.close}
-                className="p-2.5 min-w-11 min-h-11 -mr-2 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <X size={20} aria-hidden="true" />
-              </button>
-            )}
-          </div>
-        </div>
+  const renderPanel = (position: 'prev' | 'current' | 'next') => {
+    const isCurrent = position === 'current';
+    const card = position === 'prev' ? prevCard : position === 'next' ? nextCard : undefined;
+    const panelValue = isCurrent ? value : card!.value;
+    const panelBankName = isCurrent ? bankName : card?.bankName;
+    const panelBankCode = isCurrent ? bankCode : card?.bankCode;
+    const panelAccountNumber = isCurrent ? accountNumber : card?.accountNumber;
+    const panelCenterImage = isCurrent ? centerImageForQR : defaultCenterImage;
+    const panelHasBankLabel = showBankNameSetting && Boolean(panelBankName) && Boolean(panelBankCode);
 
-        {/* QR Code section — scrollable + card-pager gesture area */}
-        <div
-          className="flex-1 overflow-y-auto min-h-0"
-          style={canSwitch ? { touchAction: 'pan-y pinch-zoom' } : undefined}
-          onTouchStart={canSwitch ? pager.handlers.onTouchStart : undefined}
-          onTouchMove={canSwitch ? pager.handlers.onTouchMove : undefined}
-          onTouchEnd={canSwitch ? pager.handlers.onTouchEnd : undefined}
-        >
-          <div
-            className={`flex flex-col items-center px-6 gap-4 py-4 motion-reduce:animate-none ${
-              pager.isDragging || pager.isSettling ? '' :
-              slideDirection === 'left' ? 'pager-slide-left' :
-              slideDirection === 'right' ? 'pager-slide-right' :
-              showPeekHint ? 'pager-peek-hint' : ''
-            }`}
-            style={
-              pager.isDragging ? {
-                transform: `translateX(${pager.dragOffset}px)`,
-                willChange: 'transform',
-              } : pager.isSettling ? {
-                transform: 'translateX(0)',
-                transition: 'transform 200ms ease-out',
-                willChange: 'transform',
-              } : undefined
-            }
-            onAnimationEnd={() => { setSlideDirection(null); setShowPeekHint(false); }}
-            onTransitionEnd={pager.onSettleEnd}
-          >
+    return (
+      <div className="h-full flex flex-col">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex flex-col items-center px-6 gap-4 py-4">
 
-            {/* QR Code card — customName at top inside white card */}
+            {/* QR Code card */}
             <div className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow w-full flex flex-col items-center">
-
-              {/* Custom name — display only (edited on ReceivePage before generating QR) */}
               {customName.trim() && (
                 <p className="text-sm font-semibold text-zinc-800 text-center mb-3">{customName.trim()}</p>
               )}
-
-              {/* QR Code — tappable for fullscreen */}
-              <button
-                type="button"
-                onClick={() => setIsFullscreen(true)}
-                aria-label={t.qr.enlargeQR}
-                className="block p-0 border-0 bg-transparent cursor-zoom-in active:scale-98 transition-transform leading-0"
-              >
-                <StyledQRCode
-                  ref={qrRef}
-                  value={value}
-                  size={qrSize}
-                  dotStyle={dotStyle}
-                  eyeStyle={eyeStyle}
-                  centerImage={centerImageForQR}
-                />
-              </button>
-              {/* Bank name + code below QR */}
-              {hasBankLabel && (
+              {isCurrent ? (
+                <button
+                  type="button"
+                  onClick={() => setIsFullscreen(true)}
+                  aria-label={t.qr.enlargeQR}
+                  className="block p-0 border-0 bg-transparent cursor-zoom-in active:scale-98 transition-transform leading-0"
+                >
+                  <StyledQRCode
+                    ref={qrRef}
+                    value={panelValue}
+                    size={qrSize}
+                    dotStyle={dotStyle}
+                    eyeStyle={eyeStyle}
+                    centerImage={panelCenterImage}
+                  />
+                </button>
+              ) : (
+                <div className="leading-0">
+                  <StyledQRCode
+                    value={panelValue}
+                    size={qrSize}
+                    dotStyle={dotStyle}
+                    eyeStyle={eyeStyle}
+                    centerImage={panelCenterImage}
+                  />
+                </div>
+              )}
+              {panelHasBankLabel && (
                 <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-                  ({bankCode}) {bankName}
+                  ({panelBankCode}) {panelBankName}
                 </p>
               )}
-              {/* Account number below bank name — invisible when hidden to preserve height */}
-              {accountNumber && (
-                <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${accountRevealed ? '' : ' invisible'}`}>
-                  {accountNumber}
+              {panelAccountNumber && (
+                <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${isCurrent && accountRevealed ? '' : ' invisible'}`}>
+                  {panelAccountNumber}
                 </p>
               )}
             </div>
@@ -606,18 +556,18 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
               <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-xs">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    {bankName && bankCode && (
+                    {panelBankName && panelBankCode && (
                       <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">
-                        ({bankCode}) {bankName}
+                        ({panelBankCode}) {panelBankName}
                       </p>
                     )}
-                    {accountNumber && (
+                    {panelAccountNumber && (
                       <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-                        {accountRevealed ? formatAccountDisplay(accountNumber) : maskAccount(accountNumber)}
+                        {isCurrent && accountRevealed ? formatAccountDisplay(panelAccountNumber) : maskAccount(panelAccountNumber)}
                       </p>
                     )}
                   </div>
-                  {accountNumber && (
+                  {isCurrent && panelAccountNumber && (
                     <div className="flex items-center gap-0.5 shrink-0">
                       <button
                         type="button"
@@ -655,8 +605,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
 
         {/* Footer — action buttons */}
         <div className="shrink-0 p-5 pt-5 relative space-y-3">
-          {/* Feedback toast */}
-          {feedback && (
+          {isCurrent && feedback && (
             <div
               role="status"
               aria-live="polite"
@@ -671,8 +620,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             </div>
           )}
 
-          {/* Bank app button — primary action in scan context */}
-          {bankUrl && (
+          {isCurrent && bankUrl && (
             <a
               href={bankUrl}
               {...(isIntentUrl(bankUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
@@ -684,11 +632,11 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             </a>
           )}
 
-          {/* Share button — accent when standalone, secondary when bank button is present */}
           {!isSharedView && (
             <button
               type="button"
-              onClick={() => shareMenu.open()}
+              onClick={isCurrent ? () => shareMenu.open() : undefined}
+              tabIndex={isCurrent ? undefined : -1}
               className={`w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl active:scale-98 action-transition font-semibold focus-visible:outline-hidden focus-visible:ring-2 ${
                 bankUrl
                   ? 'text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100'
@@ -700,8 +648,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             </button>
           )}
 
-          {/* Rescan button — only in scan result context */}
-          {onRescan && (
+          {isCurrent && onRescan && (
             <button
               type="button"
               onClick={() => { haptic(); onRescan(); }}
@@ -710,6 +657,127 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
               <ScanLine size={16} aria-hidden="true" />
               {t.scan.rescan}
             </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  /* --- Main modal --- */
+  return (
+    <>
+    <div ref={modalRef} className="fixed inset-0 z-80">
+      {/* Backdrop — animated independently; clicks close the modal */}
+      <div
+        className={`absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm motion-reduce:animate-none ${
+          isClosing ? 'animate-out fade-out duration-150' : 'animate-in fade-in duration-200'
+        }`}
+        onClick={hideClose ? undefined : requestClose}
+        aria-hidden="true"
+      />
+
+      {/* Card centering — pointer-events-none lets clicks fall through to backdrop */}
+      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="qr-modal-title"
+        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        onAnimationEnd={onAnimationEnd}
+      >
+        {/* Header */}
+        <div className="shrink-0 flex items-center justify-between p-5 pb-3">
+          <h2 id="qr-modal-title" className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+            {title ?? t.qr.title}
+          </h2>
+          <div className="flex items-center gap-1">
+            {canSwitch && accountIndex != null && accountTotal != null && (
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => pager.commitTo('prev')}
+                  aria-label={t.qr.switchPrev}
+                  className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <ChevronLeft size={16} aria-hidden="true" />
+                </button>
+                {accountTotal <= 7 ? (
+                  <div className="flex items-center gap-1 px-1.5">
+                    {Array.from({ length: accountTotal }, (_, i) => (
+                      <span
+                        key={i}
+                        className={`block rounded-full transition-all duration-200 ${
+                          i + 1 === accountIndex
+                            ? 'w-1.5 h-1.5 bg-zinc-600 dark:bg-zinc-300'
+                            : 'w-1 h-1 bg-zinc-300 dark:bg-zinc-600'
+                        }`}
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 tabular-nums min-w-[3ch] text-center select-none">
+                    {t.qr.accountPosition(accountIndex, accountTotal)}
+                  </span>
+                )}
+                <span className="sr-only" aria-live="polite">
+                  {t.qr.accountPosition(accountIndex, accountTotal)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => pager.commitTo('next')}
+                  aria-label={t.qr.switchNext}
+                  className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <ChevronRight size={16} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+            {!hideClose && (
+              <button
+                type="button"
+                onClick={requestClose}
+                aria-label={t.common.close}
+                className="p-2.5 min-w-11 min-h-11 -mr-2 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Card viewport — clips horizontal overflow for the carousel strip */}
+        <div
+          className="flex-1 overflow-hidden min-h-0"
+          style={canSwitch ? { touchAction: 'pan-y pinch-zoom' } : undefined}
+          onTouchStart={canSwitch ? pager.handlers.onTouchStart : undefined}
+          onTouchMove={canSwitch ? pager.handlers.onTouchMove : undefined}
+          onTouchEnd={canSwitch ? pager.handlers.onTouchEnd : undefined}
+        >
+          {canSwitch ? (
+            /* Three-panel carousel strip */
+            <div
+              className={`h-full flex w-[300%] motion-reduce:transition-none! ${showPeekHint ? 'pager-peek-hint' : ''}`}
+              style={stripStyle}
+              onTransitionEnd={pager.onTransitionEnd}
+              onAnimationEnd={() => setShowPeekHint(false)}
+            >
+              {/* Prev panel */}
+              <div className="w-1/3 h-full" inert aria-hidden="true">
+                {prevCard && renderPanel('prev')}
+              </div>
+              {/* Current panel */}
+              <div className="w-1/3 h-full">
+                {renderPanel('current')}
+              </div>
+              {/* Next panel */}
+              <div className="w-1/3 h-full" inert aria-hidden="true">
+                {nextCard && renderPanel('next')}
+              </div>
+            </div>
+          ) : (
+            /* Single panel — no carousel */
+            renderPanel('current')
           )}
         </div>
       </div>
