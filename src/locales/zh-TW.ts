@@ -81,6 +81,9 @@ const zhTW = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
+    switchPrev: '上一個帳戶',
+    switchNext: '下一個帳戶',
+    accountPosition: (current: number, total: number) => `${current} / ${total}`,
   },
 
   /* ─── Share menu ───────────────────────────────────────── */

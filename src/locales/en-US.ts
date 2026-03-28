@@ -83,6 +83,9 @@ const enUS: Translations = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
+    switchPrev: 'Previous account',
+    switchNext: 'Next account',
+    accountPosition: (current: number, total: number) => `${current} / ${total}`,
   },
 
   /* ─── Share menu ───────────────────────────────────────── */

@@ -3,7 +3,8 @@ import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
-import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine } from 'lucide-react';
+import { useSwipeGesture } from '../../hooks/useSwipeGesture';
+import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency, formatAmount, formatAccountDisplay, maskAccount } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
@@ -40,9 +41,17 @@ interface QRDisplayProps {
   /** When true, hides the X close button and disables backdrop-click-to-close.
    *  Used when QRDisplay is the primary scan result view (no underlying content). */
   hideClose?: boolean;
+  /** Callback to switch to the previous account (swipe right / left arrow). */
+  onSwitchPrev?: () => void;
+  /** Callback to switch to the next account (swipe left / right arrow). */
+  onSwitchNext?: () => void;
+  /** 1-based index of the currently displayed account in the sorted list. */
+  accountIndex?: number;
+  /** Total number of accounts. */
+  accountTotal?: number;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl, bankUrl, onRescan, title, hideClose = false }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl, bankUrl, onRescan, title, hideClose = false, onSwitchPrev, onSwitchNext, accountIndex, accountTotal }: QRDisplayProps) => {
   const t = useLocaleStore((s) => s.t);
   const storedLogoType = useQRSettingsStore((s) => s.logoType);
   const storedShowAccount = useQRSettingsStore((s) => s.showAccount);
@@ -244,6 +253,25 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [requestClose, isFullscreen, shareMenuIsOpen, shareMenuClose, linkSettingsIsOpen, linkSettingsClose, isEncrypting]);
 
+  // Left/Right arrow keys — switch accounts (desktop keyboard support)
+  const canSwitch = Boolean(onSwitchPrev && onSwitchNext && accountTotal && accountTotal > 1);
+  useEffect(() => {
+    if (!canSwitch) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isFullscreen || shareMenuIsOpen || linkSettingsIsOpen || isEncrypting) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); onSwitchPrev!(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); onSwitchNext!(); }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [canSwitch, onSwitchPrev, onSwitchNext, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, isEncrypting]);
+
+  // Swipe gesture — switch accounts on horizontal swipe (mobile)
+  const swipe = useSwipeGesture(
+    canSwitch ? onSwitchNext : undefined,   // swipe left → next
+    canSwitch ? onSwitchPrev : undefined,   // swipe right → prev
+  );
+
   // Responsive QR size for the modal view
   useEffect(() => {
     const update = () => {
@@ -412,22 +440,49 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         aria-labelledby="qr-modal-title"
         className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
+        onTouchStart={swipe.onTouchStart}
+        onTouchEnd={swipe.onTouchEnd}
       >
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between p-5 pb-3">
           <h2 id="qr-modal-title" className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
             {title ?? t.qr.title}
           </h2>
-          {!hideClose && (
-            <button
-              type="button"
-              onClick={requestClose}
-              aria-label={t.common.close}
-              className="p-2.5 min-w-11 min-h-11 -mr-2 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-            >
-              <X size={20} aria-hidden="true" />
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {canSwitch && accountIndex != null && accountTotal != null && (
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  onClick={onSwitchPrev}
+                  aria-label={t.qr.switchPrev}
+                  className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <ChevronLeft size={16} aria-hidden="true" />
+                </button>
+                <span className="text-xs text-zinc-400 dark:text-zinc-500 tabular-nums min-w-[3ch] text-center select-none" aria-live="polite">
+                  {t.qr.accountPosition(accountIndex, accountTotal)}
+                </span>
+                <button
+                  type="button"
+                  onClick={onSwitchNext}
+                  aria-label={t.qr.switchNext}
+                  className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <ChevronRight size={16} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+            {!hideClose && (
+              <button
+                type="button"
+                onClick={requestClose}
+                aria-label={t.common.close}
+                className="p-2.5 min-w-11 min-h-11 -mr-2 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* QR Code section — scrollable on small screens */}

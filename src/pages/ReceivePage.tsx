@@ -18,7 +18,7 @@ import { generateId } from '../utils/generateId';
 import { useQRSettingsStore } from '../stores/useQRSettingsStore';
 
 export const ReceivePage = () => {
-  const { accounts, selectedAccountId, addAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
+  const { accounts, selectedAccountId, addAccount, selectAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showMessageInput, setShowMessageInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -45,6 +45,31 @@ export const ReceivePage = () => {
   const bankIconUrl = useMemo(() => {
     return resolveIconSrc(selectedAccount?.iconUrl) ?? resolveIconSrc(bank?.url);
   }, [selectedAccount, bank]);
+
+  /* ---------- Account switching (swipe / keyboard arrows) ---------- */
+  const sortedAccounts = useMemo(
+    () => [...accounts].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
+    [accounts],
+  );
+
+  const currentAccountIndex = useMemo(
+    () => sortedAccounts.findIndex((a) => a.id === selectedAccount?.id),
+    [sortedAccounts, selectedAccount],
+  );
+
+  const handleSwitchPrev = useCallback(() => {
+    if (sortedAccounts.length <= 1) return;
+    const prevIndex = (currentAccountIndex - 1 + sortedAccounts.length) % sortedAccounts.length;
+    selectAccount(sortedAccounts[prevIndex].id);
+    haptic();
+  }, [sortedAccounts, currentAccountIndex, selectAccount]);
+
+  const handleSwitchNext = useCallback(() => {
+    if (sortedAccounts.length <= 1) return;
+    const nextIndex = (currentAccountIndex + 1) % sortedAccounts.length;
+    selectAccount(sortedAccounts[nextIndex].id);
+    haptic();
+  }, [sortedAccounts, currentAccountIndex, selectAccount]);
 
   /* ---------- QR string generation ---------- */
   const qrString = useMemo(() => {
@@ -447,6 +472,10 @@ export const ReceivePage = () => {
           shareData={shareData}
           onClose={handleCloseQR}
           bankIconUrl={bankIconUrl}
+          onSwitchPrev={handleSwitchPrev}
+          onSwitchNext={handleSwitchNext}
+          accountIndex={currentAccountIndex + 1}
+          accountTotal={sortedAccounts.length}
         />
       )}
 
