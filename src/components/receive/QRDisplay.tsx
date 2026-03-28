@@ -3,7 +3,7 @@ import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
-import { useSwipeGesture } from '../../hooks/useSwipeGesture';
+import { useCardPager } from '../../hooks/useCardPager';
 import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency, formatAmount, formatAccountDisplay, maskAccount } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
@@ -253,24 +253,44 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [requestClose, isFullscreen, shareMenuIsOpen, shareMenuClose, linkSettingsIsOpen, linkSettingsClose, isEncrypting]);
 
-  // Left/Right arrow keys — switch accounts (desktop keyboard support)
+  // Whether account paging is available.
   const canSwitch = Boolean(onSwitchPrev && onSwitchNext && accountTotal && accountTotal > 1);
+
+  // Slide direction for the enter animation after account switch.
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
+
+  // One-time "peek" hint animation to teach the swipe gesture.
+  const [showPeekHint, setShowPeekHint] = useState(false);
+  useEffect(() => {
+    if (!canSwitch) return;
+    try { if (sessionStorage.getItem('otwqr-pager-peek')) return; } catch { /* noop */ }
+    const id = setTimeout(() => {
+      setShowPeekHint(true);
+      try { sessionStorage.setItem('otwqr-pager-peek', '1'); } catch { /* noop */ }
+    }, 600);
+    return () => clearTimeout(id);
+  }, [canSwitch]);
+
+  // Card-pager gesture (horizontal finger-tracking + snap).
+  const handlePagerCommit = useCallback((dir: 'prev' | 'next') => {
+    setSlideDirection(dir === 'next' ? 'left' : 'right');
+    if (dir === 'next') onSwitchNext?.();
+    else onSwitchPrev?.();
+  }, [onSwitchNext, onSwitchPrev]);
+
+  const pager = useCardPager(canSwitch ? handlePagerCommit : undefined);
+
+  // Left/Right arrow keys — switch accounts (desktop keyboard support)
   useEffect(() => {
     if (!canSwitch) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (isFullscreen || shareMenuIsOpen || linkSettingsIsOpen || isEncrypting) return;
-      if (e.key === 'ArrowLeft') { e.preventDefault(); onSwitchPrev!(); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); onSwitchNext!(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); setSlideDirection('right'); onSwitchPrev!(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); setSlideDirection('left'); onSwitchNext!(); }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [canSwitch, onSwitchPrev, onSwitchNext, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, isEncrypting]);
-
-  // Swipe gesture — switch accounts on horizontal swipe (mobile)
-  const swipe = useSwipeGesture(
-    canSwitch ? onSwitchNext : undefined,   // swipe left → next
-    canSwitch ? onSwitchPrev : undefined,   // swipe right → prev
-  );
 
   // Responsive QR size for the modal view
   useEffect(() => {
@@ -440,8 +460,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         aria-labelledby="qr-modal-title"
         className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
-        onTouchStart={swipe.onTouchStart}
-        onTouchEnd={swipe.onTouchEnd}
       >
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between p-5 pb-3">
@@ -453,18 +471,37 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
               <div className="flex items-center">
                 <button
                   type="button"
-                  onClick={onSwitchPrev}
+                  onClick={() => { setSlideDirection('right'); onSwitchPrev?.(); }}
                   aria-label={t.qr.switchPrev}
                   className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                 >
                   <ChevronLeft size={16} aria-hidden="true" />
                 </button>
-                <span className="text-xs text-zinc-400 dark:text-zinc-500 tabular-nums min-w-[3ch] text-center select-none" aria-live="polite">
+                {accountTotal <= 7 ? (
+                  <div className="flex items-center gap-1 px-1.5">
+                    {Array.from({ length: accountTotal }, (_, i) => (
+                      <span
+                        key={i}
+                        className={`block rounded-full transition-all duration-200 ${
+                          i + 1 === accountIndex
+                            ? 'w-1.5 h-1.5 bg-zinc-600 dark:bg-zinc-300'
+                            : 'w-1 h-1 bg-zinc-300 dark:bg-zinc-600'
+                        }`}
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 tabular-nums min-w-[3ch] text-center select-none">
+                    {t.qr.accountPosition(accountIndex, accountTotal)}
+                  </span>
+                )}
+                <span className="sr-only" aria-live="polite">
                   {t.qr.accountPosition(accountIndex, accountTotal)}
                 </span>
                 <button
                   type="button"
-                  onClick={onSwitchNext}
+                  onClick={() => { setSlideDirection('left'); onSwitchNext?.(); }}
                   aria-label={t.qr.switchNext}
                   className="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                 >
@@ -485,9 +522,34 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           </div>
         </div>
 
-        {/* QR Code section — scrollable on small screens */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="flex flex-col items-center px-6 gap-4 py-4">
+        {/* QR Code section — scrollable + card-pager gesture area */}
+        <div
+          className="flex-1 overflow-y-auto min-h-0"
+          style={canSwitch ? { touchAction: 'pan-y pinch-zoom' } : undefined}
+          onTouchStart={canSwitch ? pager.handlers.onTouchStart : undefined}
+          onTouchMove={canSwitch ? pager.handlers.onTouchMove : undefined}
+          onTouchEnd={canSwitch ? pager.handlers.onTouchEnd : undefined}
+        >
+          <div
+            className={`flex flex-col items-center px-6 gap-4 py-4 motion-reduce:animate-none ${
+              pager.isDragging || pager.isSettling ? '' :
+              slideDirection === 'left' ? 'pager-slide-left' :
+              slideDirection === 'right' ? 'pager-slide-right' :
+              showPeekHint ? 'pager-peek-hint' : ''
+            }`}
+            style={
+              pager.isDragging ? {
+                transform: `translateX(${pager.dragOffset}px)`,
+                willChange: 'transform',
+              } : pager.isSettling ? {
+                transform: 'translateX(0)',
+                transition: 'transform 200ms ease-out',
+                willChange: 'transform',
+              } : undefined
+            }
+            onAnimationEnd={() => { setSlideDirection(null); setShowPeekHint(false); }}
+            onTransitionEnd={pager.onSettleEnd}
+          >
 
             {/* QR Code card — customName at top inside white card */}
             <div className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow w-full flex flex-col items-center">

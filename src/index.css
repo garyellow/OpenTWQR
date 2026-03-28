@@ -119,6 +119,31 @@ html.accent-animating {
   40%, 60%  { translate:  4px 0; }
 }
 
+/* Card-pager — slide-in animations for account switching in QR modal */
+@keyframes pager-in-left {
+  from { transform: translateX(-30px); opacity: 0.5; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes pager-in-right {
+  from { transform: translateX(30px); opacity: 0.5; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes pager-peek {
+  0%, 100% { transform: translateX(0); }
+  35% { transform: translateX(-12px); }
+  65% { transform: translateX(3px); }
+}
+
+@utility pager-slide-left {
+  animation: pager-in-left 200ms ease-out both;
+}
+@utility pager-slide-right {
+  animation: pager-in-right 200ms ease-out both;
+}
+@utility pager-peek-hint {
+  animation: pager-peek 600ms ease-in-out;
+}
+
 /* animate-scan-line — vertical scanning line animation for QR scanner viewfinder */
 @utility animate-scan-line {
   top: 1rem; /* base position; animation drives translateY for GPU acceleration */
