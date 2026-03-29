@@ -220,7 +220,8 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
 
     // Subsequent updates: call .update() instead of recreating.
     // useLayoutEffect ensures the canvas is repainted BEFORE the browser paints,
-    // which prevents flicker when the carousel strip teleports to a new position.
+    // which keeps off-screen slot preparation from flashing when that slot later
+    // rotates into the centre position.
     useLayoutEffect(() => {
       if (!mountedRef.current || !qrInstanceRef.current) return;
       qrInstanceRef.current.update(buildOpts());

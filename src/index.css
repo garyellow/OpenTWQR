@@ -119,9 +119,9 @@ html.accent-animating {
   40%, 60%  { translate:  4px 0; }
 }
 
-/* Card-pager — peek hint for 3-panel carousel strip.
-   Uses the `translate` individual-transform property so it composes
-   with the inline `transform: translateX(…)` on the strip.  */
+/* Slot-rotation carousel — peek hint for the 3-panel strip.
+  Uses the `translate` individual-transform property so it composes
+  with the inline `transform: translate3d(…)` on the strip.  */
 @keyframes pager-peek {
   0%, 100% { translate: 0; }
   35% { translate: -12px; }

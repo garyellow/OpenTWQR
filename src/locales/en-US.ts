@@ -83,6 +83,8 @@ const enUS: Translations = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
+    switchHintTouch: 'Swipe or use arrows',
+    switchHintDesktop: 'Use arrows or ← → keys',
     switchPrev: 'Previous account',
     switchNext: 'Next account',
     accountPosition: (current: number, total: number) => `${current} / ${total}`,

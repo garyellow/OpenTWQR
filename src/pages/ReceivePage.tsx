@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/receive/AmountInput';
-import { QRDisplay } from '../components/receive/QRDisplay';
+import { QRDisplay, type QRDisplayCard } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars, stripCompanySuffix } from '../utils/twqr';
@@ -35,9 +35,14 @@ export const ReceivePage = () => {
     [accounts, selectedAccountId],
   );
 
+  const bankByCode = useMemo(
+    () => new Map(banks.map((entry) => [entry.code, entry])),
+    [banks],
+  );
+
   const bank = useMemo(() => {
-    return banks.find((b) => b.code === selectedAccount?.bankCode);
-  }, [banks, selectedAccount]);
+    return selectedAccount ? bankByCode.get(selectedAccount.bankCode) : undefined;
+  }, [bankByCode, selectedAccount]);
 
   const bankName = stripCompanySuffix(bank?.name || '');
 
@@ -46,30 +51,11 @@ export const ReceivePage = () => {
     return resolveIconSrc(selectedAccount?.iconUrl) ?? resolveIconSrc(bank?.url);
   }, [selectedAccount, bank]);
 
-  /* ---------- Account switching (swipe / keyboard arrows) ---------- */
+  /* ---------- Sorted account order for QR carousel ---------- */
   const sortedAccounts = useMemo(
     () => [...accounts].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
     [accounts],
   );
-
-  const currentAccountIndex = useMemo(
-    () => sortedAccounts.findIndex((a) => a.id === selectedAccount?.id),
-    [sortedAccounts, selectedAccount],
-  );
-
-  const handleSwitchPrev = useCallback(() => {
-    if (sortedAccounts.length <= 1) return;
-    const prevIndex = (currentAccountIndex - 1 + sortedAccounts.length) % sortedAccounts.length;
-    selectAccount(sortedAccounts[prevIndex].id);
-    haptic();
-  }, [sortedAccounts, currentAccountIndex, selectAccount]);
-
-  const handleSwitchNext = useCallback(() => {
-    if (sortedAccounts.length <= 1) return;
-    const nextIndex = (currentAccountIndex + 1) % sortedAccounts.length;
-    selectAccount(sortedAccounts[nextIndex].id);
-    haptic();
-  }, [sortedAccounts, currentAccountIndex, selectAccount]);
 
   /* ---------- QR string generation ---------- */
   const qrString = useMemo(() => {
@@ -95,23 +81,28 @@ export const ReceivePage = () => {
     };
   }, [selectedAccount, amount, note]);
 
-  /* ---------- Adjacent card data for carousel ---------- */
-  const adjacentCards = useMemo(() => {
-    if (sortedAccounts.length <= 1) return { prev: undefined, next: undefined };
+  /* ---------- Slot-rotation carousel cards ---------- */
+  const carouselCards = useMemo<QRDisplayCard[]>(() => {
     const numAmount = amount ? parseInt(amount, 10) : 0;
-    const prevIndex = (currentAccountIndex - 1 + sortedAccounts.length) % sortedAccounts.length;
-    const nextIndex = (currentAccountIndex + 1) % sortedAccounts.length;
-    const makeCard = (acc: typeof sortedAccounts[0]) => {
-      const b = banks.find((b2) => b2.code === acc.bankCode);
+
+    return sortedAccounts.map((account) => {
+      const accountBank = bankByCode.get(account.bankCode);
       return {
-        value: generateTWQR({ bankCode: acc.bankCode, accountNumber: acc.accountNumber, amount: numAmount, note: note || undefined }),
-        bankName: stripCompanySuffix(b?.name || ''),
-        bankCode: acc.bankCode,
-        accountNumber: acc.accountNumber,
+        id: account.id,
+        value: generateTWQR({ bankCode: account.bankCode, accountNumber: account.accountNumber, amount: numAmount, note: note || undefined }),
+        bankName: stripCompanySuffix(accountBank?.name || ''),
+        bankCode: account.bankCode,
+        accountNumber: account.accountNumber,
+        bankIconUrl: resolveIconSrc(account.iconUrl) ?? resolveIconSrc(accountBank?.url),
+        shareData: {
+          bankCode: account.bankCode,
+          accountNumber: account.accountNumber,
+          amount: numAmount > 0 ? numAmount : undefined,
+          note: note || undefined,
+        },
       };
-    };
-    return { prev: makeCard(sortedAccounts[prevIndex]), next: makeCard(sortedAccounts[nextIndex]) };
-  }, [sortedAccounts, currentAccountIndex, banks, amount, note]);
+    });
+  }, [amount, bankByCode, note, sortedAccounts]);
 
   const handleCloseQR = useCallback(() => {
     setShowQR(false);
@@ -490,12 +481,9 @@ export const ReceivePage = () => {
           shareData={shareData}
           onClose={handleCloseQR}
           bankIconUrl={bankIconUrl}
-          onSwitchPrev={handleSwitchPrev}
-          onSwitchNext={handleSwitchNext}
-          accountIndex={currentAccountIndex + 1}
-          accountTotal={sortedAccounts.length}
-          prevCard={adjacentCards.prev}
-          nextCard={adjacentCards.next}
+          cards={carouselCards}
+          activeCardId={selectedAccount.id}
+          onActiveCardChange={selectAccount}
         />
       )}
 

@@ -81,6 +81,8 @@ const zhTW = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
+    switchHintTouch: '左右滑動或點箭頭',
+    switchHintDesktop: '點箭頭或按 ← → 方向鍵',
     switchPrev: '上一個帳戶',
     switchNext: '下一個帳戶',
     accountPosition: (current: number, total: number) => `${current} / ${total}`,
