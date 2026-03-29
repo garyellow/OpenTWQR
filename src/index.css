@@ -104,6 +104,15 @@ html.accent-animating {
   transition-duration: 150ms;
 }
 
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /*
  * animate-shake — short horizontal shake for "rejected input" feedback.
  * Used by AmountInput when the user exceeds the max amount.
@@ -117,19 +126,6 @@ html.accent-animating {
   20%, 80%  { translate:  2px 0; }
   30%, 50%, 70% { translate: -4px 0; }
   40%, 60%  { translate:  4px 0; }
-}
-
-/* Slot-rotation carousel — peek hint for the 3-panel strip.
-  Uses the `translate` individual-transform property so it composes
-  with the inline `transform: translate3d(…)` on the strip.  */
-@keyframes pager-peek {
-  0%, 100% { translate: 0; }
-  35% { translate: -12px; }
-  65% { translate: 3px; }
-}
-
-@utility pager-peek-hint {
-  animation: pager-peek 600ms ease-in-out;
 }
 
 /* animate-scan-line — vertical scanning line animation for QR scanner viewfinder */
@@ -153,6 +149,8 @@ html.accent-animating {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Shared mobile nav height (60 px) keeps tap targets comfortable on both iPhone and Android. */
+  --bottom-nav-height: 3.75rem;
   /* Accent color system — computed from --accent-hue via JS */
   --accent-hue: 216;
   --accent: oklch(55% 0.15 var(--accent-hue));

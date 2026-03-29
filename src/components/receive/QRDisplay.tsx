@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { flushSync } from 'react-dom';
+import { useEffect, useRef, useState, useCallback, useMemo, useLayoutEffect } from 'react';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
-import { useCarouselGesture } from '../../hooks/useCarouselGesture';
 import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, ChevronLeft, ChevronRight, MoveHorizontal } from 'lucide-react';
 import { formatCurrency, formatAmount, formatAccountDisplay, maskAccount } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
@@ -21,22 +19,6 @@ import { QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
 import { StyledQRCode, type StyledQRCodeHandle, type StyledQRCodeCenterImage } from './StyledQRCode';
 
 const SINGLE_SLOT_ID = 'slot-single' as const;
-const CAROUSEL_SLOT_IDS = ['slot-a', 'slot-b', 'slot-c'] as const;
-const STRIP_CENTER_TRANSFORM = 'translate3d(-33.333%,0px,0px)';
-
-type CarouselSlotId = typeof CAROUSEL_SLOT_IDS[number];
-type RenderSlotId = CarouselSlotId | typeof SINGLE_SLOT_ID;
-type CarouselDirection = 'prev' | 'next';
-
-interface CarouselSlot {
-  slotId: CarouselSlotId;
-  cardIndex: number;
-}
-
-interface CarouselState {
-  activeIndex: number;
-  slots: [CarouselSlot, CarouselSlot, CarouselSlot];
-}
 
 interface LoadedBankIcon {
   url: string;
@@ -58,9 +40,16 @@ export interface QRDisplayCard {
   shareData?: ShareData;
 }
 
-function wrapIndex(index: number, length: number) {
+interface QRRenderSlide {
+  renderKey: string;
+  card: QRDisplayCard;
+  logicalIndex: number;
+  isClone: boolean;
+}
+
+function clampIndex(index: number, length: number) {
   if (length <= 0) return 0;
-  return ((index % length) + length) % length;
+  return Math.min(length - 1, Math.max(0, index));
 }
 
 function findCardIndex(cards: QRDisplayCard[], cardId?: string) {
@@ -68,44 +57,6 @@ function findCardIndex(cards: QRDisplayCard[], cardId?: string) {
   if (!cardId) return 0;
   const found = cards.findIndex((card) => card.id === cardId);
   return found >= 0 ? found : 0;
-}
-
-function buildCarouselState(activeIndex: number, length: number): CarouselState {
-  const safeActiveIndex = wrapIndex(activeIndex, length);
-  return {
-    activeIndex: safeActiveIndex,
-    slots: [
-      { slotId: CAROUSEL_SLOT_IDS[0], cardIndex: wrapIndex(safeActiveIndex - 1, length) },
-      { slotId: CAROUSEL_SLOT_IDS[1], cardIndex: safeActiveIndex },
-      { slotId: CAROUSEL_SLOT_IDS[2], cardIndex: wrapIndex(safeActiveIndex + 1, length) },
-    ],
-  };
-}
-
-function rotateCarouselState(state: CarouselState, direction: CarouselDirection, length: number): CarouselState {
-  const [firstSlot, secondSlot, thirdSlot] = state.slots;
-
-  if (direction === 'next') {
-    const nextActiveIndex = wrapIndex(state.activeIndex + 1, length);
-    return {
-      activeIndex: nextActiveIndex,
-      slots: [
-        { ...secondSlot },
-        { ...thirdSlot },
-        { ...firstSlot, cardIndex: wrapIndex(nextActiveIndex + 1, length) },
-      ],
-    };
-  }
-
-  const nextActiveIndex = wrapIndex(state.activeIndex - 1, length);
-  return {
-    activeIndex: nextActiveIndex,
-    slots: [
-      { ...thirdSlot, cardIndex: wrapIndex(nextActiveIndex - 1, length) },
-      { ...firstSlot },
-      { ...secondSlot },
-    ],
-  };
 }
 
 function fitBankIconSize(naturalWidth: number, naturalHeight: number) {
@@ -165,6 +116,62 @@ async function loadBankIcon(url: string): Promise<LoadedBankIcon | null> {
   return { url, width, height, dataUri };
 }
 
+function prefersReducedMotion() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function buildRenderSlides(cards: QRDisplayCard[]): QRRenderSlide[] {
+  if (cards.length <= 1) {
+    return cards.map((card, logicalIndex) => ({
+      renderKey: `real-${card.id}`,
+      card,
+      logicalIndex,
+      isClone: false,
+    }));
+  }
+
+  const lastLogicalIndex = cards.length - 1;
+
+  return [
+    {
+      renderKey: `clone-head-${cards[lastLogicalIndex].id}`,
+      card: cards[lastLogicalIndex],
+      logicalIndex: lastLogicalIndex,
+      isClone: true,
+    },
+    ...cards.map((card, logicalIndex) => ({
+      renderKey: `real-${card.id}`,
+      card,
+      logicalIndex,
+      isClone: false,
+    })),
+    {
+      renderKey: `clone-tail-${cards[0].id}`,
+      card: cards[0],
+      logicalIndex: 0,
+      isClone: true,
+    },
+  ];
+}
+
+function getNearestRenderIndex(scrollLeft: number, viewportWidth: number, renderSlideCount: number) {
+  if (renderSlideCount <= 1 || viewportWidth <= 0) return 0;
+  return clampIndex(Math.round(scrollLeft / viewportWidth), renderSlideCount);
+}
+
+function getRealRenderIndex(logicalIndex: number, logicalCount: number) {
+  if (logicalCount <= 1) return 0;
+  return clampIndex(logicalIndex, logicalCount) + 1;
+}
+
+function getLoopedRenderIndex(rawRenderIndex: number, logicalCount: number) {
+  if (logicalCount <= 1) return 0;
+  if (rawRenderIndex === 0) return logicalCount;
+  if (rawRenderIndex === logicalCount + 1) return 1;
+  return clampIndex(rawRenderIndex, logicalCount + 2);
+}
+
 interface QRDisplayProps {
   value: string;
   amount?: number;
@@ -187,7 +194,7 @@ interface QRDisplayProps {
   /** When true, hides the X close button and disables backdrop-click-to-close.
    *  Used when QRDisplay is the primary scan result view (no underlying content). */
   hideClose?: boolean;
-  /** Optional full card list for a slot-rotation carousel. */
+  /** Optional full card list for a native scroll-snap carousel. */
   cards?: QRDisplayCard[];
   /** Active card id used to seed / sync the visible carousel state. */
   activeCardId?: string;
@@ -225,31 +232,21 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     }];
   }, [cards, value, bankName, bankCode, accountNumber, bankIconUrl, shareData]);
 
-  const cardIdsSignature = useMemo(
-    () => allCards.map((card) => card.id).join('|'),
-    [allCards],
-  );
-
   const externalActiveIndex = useMemo(
     () => findCardIndex(allCards, activeCardId),
     [allCards, activeCardId],
   );
 
-  const canSwitch = allCards.length > 1;
-  const gesture = useCarouselGesture(canSwitch);
-  const {
-    commitDirection,
-    commitTo,
-    dragOffset,
-    handlers,
-    isDragging,
-    phase,
-    resetAfterTransition,
-  } = gesture;
+  const renderSlides = useMemo(() => buildRenderSlides(allCards), [allCards]);
 
-  const [carousel, setCarousel] = useState<CarouselState>(() => buildCarouselState(externalActiveIndex, allCards.length));
-  const syncedCardIdsSignatureRef = useRef(cardIdsSignature);
-  const pendingExternalActiveIndexRef = useRef<number | null>(null);
+  const canSwitch = allCards.length > 1;
+  const hasExternalSync = canSwitch && activeCardId != null && typeof onActiveCardChange === 'function';
+  const [currentRenderIndex, setCurrentRenderIndex] = useState(() => getRealRenderIndex(externalActiveIndex, allCards.length));
+  const currentRenderIndexRef = useRef(currentRenderIndex);
+
+  useEffect(() => {
+    currentRenderIndexRef.current = currentRenderIndex;
+  }, [currentRenderIndex]);
 
   /**
    * Cache of bank icons converted to data URIs for export-safe QR rendering.
@@ -257,24 +254,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
    */
   const [bankIconCache, setBankIconCache] = useState<BankIconCache>({});
   const loadingBankIconUrlsRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (phase !== 'idle' || isDragging) return;
-
-    if (pendingExternalActiveIndexRef.current != null) {
-      if (externalActiveIndex === pendingExternalActiveIndexRef.current) {
-        pendingExternalActiveIndexRef.current = null;
-      } else {
-        return;
-      }
-    }
-
-    const cardsChanged = syncedCardIdsSignatureRef.current !== cardIdsSignature;
-    if (!cardsChanged && carousel.activeIndex === externalActiveIndex) return;
-
-    syncedCardIdsSignatureRef.current = cardIdsSignature;
-    setCarousel(buildCarouselState(externalActiveIndex, allCards.length));
-  }, [allCards.length, cardIdsSignature, carousel.activeIndex, externalActiveIndex, isDragging, phase]);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const scrollSettleTimerRef = useRef<number | null>(null);
 
   const bankIconUrls = useMemo(() => {
     if (logoType !== 'bank') return [];
@@ -321,23 +302,39 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return { src: logo.src, width: logo.width, height: logo.height };
   }, []);
 
-  const getCardCenterImage = useCallback((card: QRDisplayCard): StyledQRCodeCenterImage | undefined => {
-    if (logoType !== 'bank') return defaultCenterImage;
-    if (!card.bankIconUrl) return undefined;
-    const iconInfo = bankIconCache[card.bankIconUrl];
-    return iconInfo && iconInfo.dataUri
-      ? { src: iconInfo.dataUri, width: iconInfo.width, height: iconInfo.height }
-      : undefined;
-  }, [bankIconCache, defaultCenterImage, logoType]);
+  const centerImagesByCardId = useMemo<Record<string, StyledQRCodeCenterImage | undefined>>(() => {
+    const next: Record<string, StyledQRCodeCenterImage | undefined> = {};
 
-  const currentCard = allCards[carousel.activeIndex] ?? allCards[0];
+    for (const card of allCards) {
+      if (logoType !== 'bank') {
+        next[card.id] = defaultCenterImage;
+        continue;
+      }
+
+      if (!card.bankIconUrl) {
+        next[card.id] = undefined;
+        continue;
+      }
+
+      const iconInfo = bankIconCache[card.bankIconUrl];
+      next[card.id] = iconInfo?.dataUri
+        ? { src: iconInfo.dataUri, width: iconInfo.width, height: iconInfo.height }
+        : undefined;
+    }
+
+    return next;
+  }, [allCards, bankIconCache, defaultCenterImage, logoType]);
+
+  const currentRenderSlide = renderSlides[currentRenderIndex] ?? renderSlides[0];
+  const activeIndex = currentRenderSlide?.logicalIndex ?? 0;
+  const currentCard = currentRenderSlide?.card ?? allCards[0];
   const currentValue = currentCard?.value ?? value;
   const currentBankName = currentCard?.bankName;
   const currentBankCode = currentCard?.bankCode;
   const currentAccountNumber = currentCard?.accountNumber;
   const currentShareData = currentCard?.shareData ?? shareData;
-  const currentCenterImage = currentCard ? getCardCenterImage(currentCard) : defaultCenterImage;
-  const currentPosition = carousel.activeIndex + 1;
+  const currentCenterImage = currentCard ? centerImagesByCardId[currentCard.id] : defaultCenterImage;
+  const currentPosition = activeIndex + 1;
 
   const [qrSize, setQrSize] = useState(() => {
     const vw = typeof window !== 'undefined' ? window.innerWidth : 390;
@@ -364,28 +361,24 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const [accountRevealed, setAccountRevealed] = useState(showAccountSetting);
   const feedbackShowTimerRef = useRef<number | null>(null);
   const feedbackHideTimerRef = useRef<number | null>(null);
-  const qrHandleRef = useRef<Record<RenderSlotId, StyledQRCodeHandle | null>>({
-    [SINGLE_SLOT_ID]: null,
-    'slot-a': null,
-    'slot-b': null,
-    'slot-c': null,
-  });
+  const qrHandleRef = useRef<Record<string, StyledQRCodeHandle | null>>({});
   const modalRef = useRef<HTMLDivElement>(null);
   const [isTouchPrimaryInput, setIsTouchPrimaryInput] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
   });
 
-  const slotRefCallbacks = useMemo<Record<RenderSlotId, (handle: StyledQRCodeHandle | null) => void>>(() => ({
-    [SINGLE_SLOT_ID]: (handle) => { qrHandleRef.current[SINGLE_SLOT_ID] = handle; },
-    'slot-a': (handle) => { qrHandleRef.current['slot-a'] = handle; },
-    'slot-b': (handle) => { qrHandleRef.current['slot-b'] = handle; },
-    'slot-c': (handle) => { qrHandleRef.current['slot-c'] = handle; },
-  }), []);
+  const qrRefCallbacks = useMemo<Record<string, (handle: StyledQRCodeHandle | null) => void>>(() => {
+    const callbacks: Record<string, (handle: StyledQRCodeHandle | null) => void> = {};
 
-  const currentCenterSlotId: RenderSlotId = canSwitch
-    ? (carousel.slots[1]?.slotId ?? SINGLE_SLOT_ID)
-    : SINGLE_SLOT_ID;
+    for (const slide of renderSlides) {
+      callbacks[slide.renderKey] = (handle) => {
+        qrHandleRef.current[slide.renderKey] = handle;
+      };
+    }
+
+    return callbacks;
+  }, [renderSlides]);
 
   /**
    * Returns the underlying QR canvas element for PNG export.
@@ -393,22 +386,24 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
    * is never tainted by cross-origin resources.
    */
   const getExportCanvas = useCallback((): HTMLCanvasElement | null => {
-    return qrHandleRef.current[currentCenterSlotId]?.getCanvas() ?? null;
-  }, [currentCenterSlotId]);
+    return currentRenderSlide ? (qrHandleRef.current[currentRenderSlide.renderKey]?.getCanvas() ?? null) : null;
+  }, [currentRenderSlide]);
+
+  const trimmedCustomName = customName.trim();
 
   /**
    * Labels to include in exported PNG images.
    * Order: customName above QR, bankLine + accountLine below QR.
    */
   const exportLabels = useMemo(() => ({
-    customName: customName.trim() || undefined,
+    customName: trimmedCustomName || undefined,
     bankLine: showBankNameSetting && currentBankName && currentBankCode
       ? `(${currentBankCode}) ${currentBankName}`
       : undefined,
     accountLine: currentAccountNumber
       ? (accountRevealed ? currentAccountNumber : '')
       : undefined,
-  }), [accountRevealed, currentAccountNumber, currentBankCode, currentBankName, customName, showBankNameSetting]);
+  }), [accountRevealed, currentAccountNumber, currentBankCode, currentBankName, showBankNameSetting, trimmedCustomName]);
 
   const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
 
@@ -440,13 +435,115 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     }, 2300);
   }, []);
 
-  // Cleanup both feedback timers on unmount
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (feedbackShowTimerRef.current) window.clearTimeout(feedbackShowTimerRef.current);
       if (feedbackHideTimerRef.current) window.clearTimeout(feedbackHideTimerRef.current);
+      if (scrollSettleTimerRef.current) window.clearTimeout(scrollSettleTimerRef.current);
     };
   }, []);
+
+  const scrollToRenderIndex = useCallback((targetRenderIndex: number, behavior: 'smooth' | 'instant' = 'smooth') => {
+    const viewport = scrollViewportRef.current;
+    if (!viewport || !canSwitch) return;
+
+    const nextRenderIndex = clampIndex(targetRenderIndex, renderSlides.length);
+    const left = viewport.clientWidth * nextRenderIndex;
+
+    if (behavior !== 'smooth' || prefersReducedMotion()) {
+      viewport.scrollLeft = left;
+      return;
+    }
+
+    try {
+      viewport.scrollTo({ left, behavior: 'smooth' });
+    } catch {
+      viewport.scrollLeft = left;
+    }
+  }, [canSwitch, renderSlides.length]);
+
+  const commitLogicalIndex = useCallback((nextLogicalIndex: number) => {
+    const safeIndex = clampIndex(nextLogicalIndex, allCards.length);
+    const nextCardId = allCards[safeIndex]?.id;
+
+    if (hasExternalSync) {
+      if (nextCardId && nextCardId !== activeCardId) {
+        onActiveCardChange?.(nextCardId);
+      }
+    }
+  }, [activeCardId, allCards, hasExternalSync, onActiveCardChange]);
+
+  const syncActiveIndexFromScroll = useCallback(() => {
+    const viewport = scrollViewportRef.current;
+    if (!viewport || !canSwitch) return;
+
+    const rawRenderIndex = getNearestRenderIndex(viewport.scrollLeft, viewport.clientWidth, renderSlides.length);
+    const nextRenderIndex = getLoopedRenderIndex(rawRenderIndex, allCards.length);
+    const nextSlide = renderSlides[nextRenderIndex];
+    if (!nextSlide) return;
+
+    if (nextRenderIndex !== currentRenderIndexRef.current) {
+      setCurrentRenderIndex(nextRenderIndex);
+    }
+
+    commitLogicalIndex(nextSlide.logicalIndex);
+
+    if (nextRenderIndex !== rawRenderIndex) {
+      scrollToRenderIndex(nextRenderIndex, 'instant');
+    }
+  }, [allCards.length, canSwitch, commitLogicalIndex, renderSlides, scrollToRenderIndex]);
+
+  const handleViewportScroll = useCallback(() => {
+    if (!canSwitch) return;
+
+    if (scrollSettleTimerRef.current) {
+      window.clearTimeout(scrollSettleTimerRef.current);
+    }
+
+    scrollSettleTimerRef.current = window.setTimeout(() => {
+      syncActiveIndexFromScroll();
+    }, 160);
+  }, [canSwitch, syncActiveIndexFromScroll]);
+
+  useEffect(() => {
+    const viewport = scrollViewportRef.current;
+    if (!viewport || !canSwitch) return;
+
+    const handleScrollEnd = () => {
+      if (scrollSettleTimerRef.current) {
+        window.clearTimeout(scrollSettleTimerRef.current);
+        scrollSettleTimerRef.current = null;
+      }
+
+      syncActiveIndexFromScroll();
+    };
+
+    viewport.addEventListener('scrollend', handleScrollEnd as EventListener);
+    return () => viewport.removeEventListener('scrollend', handleScrollEnd as EventListener);
+  }, [canSwitch, syncActiveIndexFromScroll]);
+
+  useLayoutEffect(() => {
+    if (!canSwitch) return;
+    const desiredRenderIndex = getRealRenderIndex(externalActiveIndex, allCards.length);
+
+    if (desiredRenderIndex !== currentRenderIndexRef.current) {
+      setCurrentRenderIndex(desiredRenderIndex);
+    }
+
+    scrollToRenderIndex(desiredRenderIndex, 'instant');
+  }, [allCards.length, canSwitch, externalActiveIndex, scrollToRenderIndex]);
+
+  useEffect(() => {
+    if (!canSwitch) return;
+
+    const handleResize = () => {
+      scrollToRenderIndex(currentRenderIndexRef.current, 'instant');
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [canSwitch, scrollToRenderIndex]);
 
   // Escape handler — closes the topmost active layer
   const shareMenuIsOpen = shareMenu.isOpen;
@@ -478,107 +575,46 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return () => media.removeEventListener?.('change', update);
   }, []);
 
-  // One-time "peek" hint animation to teach the swipe gesture.
-  const [showPeekHint, setShowPeekHint] = useState(false);
-  const shouldUsePeekHint = canSwitch && isTouchPrimaryInput;
-
-  useEffect(() => {
-    if (!shouldUsePeekHint) return;
-    try { if (sessionStorage.getItem('otwqr-carousel-peek-v4')) return; } catch { /* noop */ }
-    const id = setTimeout(() => {
-      setShowPeekHint(true);
-      try { sessionStorage.setItem('otwqr-carousel-peek-v4', '1'); } catch { /* noop */ }
-    }, 600);
-    return () => clearTimeout(id);
-  }, [shouldUsePeekHint]);
-
-  const lastCommitHapticRef = useRef<CarouselDirection | null>(null);
-  useEffect(() => {
-    if (phase !== 'committing' || !commitDirection) {
-      lastCommitHapticRef.current = null;
-      return;
-    }
-    if (lastCommitHapticRef.current === commitDirection) return;
-    lastCommitHapticRef.current = commitDirection;
+  const goToRenderIndex = useCallback((targetRenderIndex: number) => {
+    const nextRenderIndex = clampIndex(targetRenderIndex, renderSlides.length);
+    if (nextRenderIndex === currentRenderIndexRef.current) return;
     haptic();
-  }, [commitDirection, phase]);
+    scrollToRenderIndex(nextRenderIndex, 'smooth');
+  }, [renderSlides.length, scrollToRenderIndex]);
+
+  const handleGoPrev = useCallback(() => {
+    if (!canSwitch) return;
+    const targetRenderIndex = currentRenderIndexRef.current <= 1
+      ? 0
+      : currentRenderIndexRef.current - 1;
+    goToRenderIndex(targetRenderIndex);
+  }, [canSwitch, goToRenderIndex]);
+
+  const handleGoNext = useCallback(() => {
+    if (!canSwitch) return;
+    const targetRenderIndex = currentRenderIndexRef.current >= allCards.length
+      ? allCards.length + 1
+      : currentRenderIndexRef.current + 1;
+    goToRenderIndex(targetRenderIndex);
+  }, [allCards.length, canSwitch, goToRenderIndex]);
 
   // Left/Right arrow keys — switch accounts (desktop keyboard support)
   useEffect(() => {
     if (!canSwitch) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (isFullscreen || shareMenuIsOpen || linkSettingsIsOpen || isEncrypting) return;
-      if (e.key === 'ArrowLeft') { e.preventDefault(); commitTo('prev'); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); commitTo('next'); }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleGoPrev();
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleGoNext();
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [canSwitch, commitTo, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, isEncrypting]);
-
-  // Strip transform — drives the 3-panel carousel position.
-  // Uses translate3d so the browser keeps the strip on the compositor, while
-  // stable slot rotation ensures the QR canvas that becomes the new centre was
-  // already rendered off-screen before it is revealed.
-  const stripStyle = useMemo((): React.CSSProperties => {
-    const base: React.CSSProperties = { willChange: 'transform' };
-    if (isDragging) {
-      return {
-        ...base,
-        transform: `translate3d(calc(-33.333% + ${dragOffset}px),0px,0px)`,
-      };
-    }
-    if (commitDirection) {
-      return {
-        ...base,
-        transform: commitDirection === 'next'
-          ? 'translate3d(-66.666%,0px,0px)'
-          : 'translate3d(0%,0px,0px)',
-        transition: 'transform 250ms ease-out',
-      };
-    }
-    if (phase === 'settling') {
-      return {
-        ...base,
-        transform: STRIP_CENTER_TRANSFORM,
-        transition: 'transform 200ms ease-out',
-      };
-    }
-    return { ...base, transform: STRIP_CENTER_TRANSFORM };
-  }, [commitDirection, dragOffset, isDragging, phase]);
-
-  const accountActionShellClass =
-    'flex items-center justify-center p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500';
-  const accountActionButtonClass =
-    `${accountActionShellClass} hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100`;
-  const navButtonClass =
-    'flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-[transform,background-color,color] focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100';
-  const switchHintText = isTouchPrimaryInput ? t.qr.switchHintTouch : t.qr.switchHintDesktop;
-
-  const handleStripTransitionEnd = useCallback((e: React.TransitionEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
-
-    if (phase === 'settling') {
-      flushSync(() => {
-        resetAfterTransition();
-      });
-      return;
-    }
-
-    if (phase !== 'committing' || !commitDirection || allCards.length <= 1) return;
-
-    const nextCarouselState = rotateCarouselState(carousel, commitDirection, allCards.length);
-    const nextCardId = allCards[nextCarouselState.activeIndex]?.id;
-
-    flushSync(() => {
-      setCarousel(nextCarouselState);
-      resetAfterTransition();
-    });
-
-    if (typeof nextCardId === 'string') {
-      pendingExternalActiveIndexRef.current = nextCarouselState.activeIndex;
-      onActiveCardChange?.(nextCardId);
-    }
-  }, [allCards, carousel, commitDirection, onActiveCardChange, phase, resetAfterTransition]);
+  }, [canSwitch, handleGoNext, handleGoPrev, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, isEncrypting]);
 
   // Responsive QR size for the modal view
   useEffect(() => {
@@ -728,49 +764,50 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     linkSettingsToggle.close();
   }, [currentShareData, linkExpiry, linkPassword, linkAction, copyToClipboard, shareViaSystem, showFeedback, linkSettingsToggle, t]);
 
+  const accountActionButtonClass =
+    'flex items-center justify-center p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 disabled:opacity-60 disabled:cursor-default disabled:hover:bg-transparent disabled:dark:hover:bg-transparent';
+  const navButtonClass =
+    'flex min-h-11 min-w-11 items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100';
+  const switchHintText = isTouchPrimaryInput ? t.qr.switchHintTouch : t.qr.switchHintDesktop;
+
   /* --- Carousel panel renderer --- */
 
-  const renderPanel = ({ card, slotId, isCurrent }: { card: QRDisplayCard; slotId: RenderSlotId; isCurrent: boolean; }) => {
+  const renderPanel = ({ slide, renderIndex }: { slide: QRRenderSlide; renderIndex: number; }) => {
+    const { card, renderKey } = slide;
+    const isCurrent = renderIndex === currentRenderIndex;
     const panelHasBankLabel = showBankNameSetting && Boolean(card.bankName) && Boolean(card.bankCode);
-    const panelCenterImage = getCardCenterImage(card);
+    const panelCenterImage = centerImagesByCardId[card.id];
 
     return (
       <div className="h-full overflow-y-auto min-h-0">
         <div className="flex flex-col items-center px-6 gap-4 py-4">
           <div className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow w-full flex flex-col items-center">
-            {customName.trim() && (
-              <p className="text-sm font-semibold text-zinc-800 text-center mb-3">{customName.trim()}</p>
+            {trimmedCustomName && (
+              <p className="text-sm font-semibold text-zinc-800 text-center mb-3">{trimmedCustomName}</p>
             )}
-            {isCurrent ? (
-              <div className="relative leading-0">
-                <button
-                  type="button"
-                  onClick={() => setIsFullscreen(true)}
-                  aria-label={t.qr.enlargeQR}
-                  className="block p-0 border-0 bg-transparent cursor-zoom-in active:scale-98 transition-transform leading-0"
-                >
-                  <StyledQRCode
-                    ref={slotRefCallbacks[slotId]}
-                    value={card.value}
-                    size={qrSize}
-                    dotStyle={dotStyle}
-                    eyeStyle={eyeStyle}
-                    centerImage={panelCenterImage}
-                  />
-                </button>
-              </div>
-            ) : (
-              <div className="leading-0">
+            <div className="relative leading-0">
+              <button
+                type="button"
+                onClick={() => {
+                  if (isCurrent) setIsFullscreen(true);
+                }}
+                aria-label={t.qr.enlargeQR}
+                disabled={!isCurrent}
+                tabIndex={isCurrent ? 0 : -1}
+                className={`block p-0 border-0 bg-transparent leading-0 transition-transform ${
+                  isCurrent ? 'cursor-zoom-in active:scale-98' : 'cursor-default'
+                }`}
+              >
                 <StyledQRCode
-                  ref={slotRefCallbacks[slotId]}
+                  ref={qrRefCallbacks[renderKey]}
                   value={card.value}
                   size={qrSize}
                   dotStyle={dotStyle}
                   eyeStyle={eyeStyle}
                   centerImage={panelCenterImage}
                 />
-              </div>
-            )}
+              </button>
+            </div>
             {panelHasBankLabel && (
               <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
                 ({card.bankCode}) {card.bankName}
@@ -812,42 +849,31 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                 </div>
                 {card.accountNumber && (
                   <div className="flex items-center gap-0.5 shrink-0">
-                    {isCurrent ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={handleToggleReveal}
-                          aria-label={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
-                          aria-pressed={accountRevealed}
-                          title={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
-                          className={accountActionButtonClass}
-                        >
-                          {accountRevealed
-                            ? <Eye size={18} aria-hidden="true" />
-                            : <EyeOff size={18} aria-hidden="true" />}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleCopyAccount}
-                          aria-label={t.qr.copyAccount}
-                          title={t.qr.copyAccount}
-                          className={accountActionButtonClass}
-                        >
-                          <Copy size={18} aria-hidden="true" />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <span aria-hidden="true" className={accountActionShellClass}>
-                          {accountRevealed
-                            ? <Eye size={18} aria-hidden="true" />
-                            : <EyeOff size={18} aria-hidden="true" />}
-                        </span>
-                        <span aria-hidden="true" className={accountActionShellClass}>
-                          <Copy size={18} aria-hidden="true" />
-                        </span>
-                      </>
-                    )}
+                    <button
+                      type="button"
+                      onClick={handleToggleReveal}
+                      aria-label={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
+                      aria-pressed={accountRevealed}
+                      title={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
+                      disabled={!isCurrent}
+                      tabIndex={isCurrent ? 0 : -1}
+                      className={accountActionButtonClass}
+                    >
+                      {accountRevealed
+                        ? <Eye size={18} aria-hidden="true" />
+                        : <EyeOff size={18} aria-hidden="true" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyAccount}
+                      aria-label={t.qr.copyAccount}
+                      title={t.qr.copyAccount}
+                      disabled={!isCurrent}
+                      tabIndex={isCurrent ? 0 : -1}
+                      className={accountActionButtonClass}
+                    >
+                      <Copy size={18} aria-hidden="true" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -948,14 +974,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
       >
-        <div
-          className={`flex-1 flex flex-col min-h-0 ${canSwitch ? 'select-none' : ''}`}
-          style={canSwitch ? { touchAction: 'pan-y pinch-zoom' } : undefined}
-          onTouchStart={canSwitch ? handlers.onTouchStart : undefined}
-          onTouchMove={canSwitch ? handlers.onTouchMove : undefined}
-          onTouchEnd={canSwitch ? handlers.onTouchEnd : undefined}
-          onTouchCancel={canSwitch ? handlers.onTouchCancel : undefined}
-        >
+        <div className={`flex-1 flex flex-col min-h-0 ${canSwitch ? 'select-none' : ''}`}>
           {/* Header */}
           <div className="shrink-0 px-5 pt-5 pb-3">
             <div className="flex items-start justify-between gap-3">
@@ -975,36 +994,30 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             </div>
 
             {canSwitch && (
-              <div className={`mt-3 flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 transition-[background-color,border-color,box-shadow] ${showPeekHint && shouldUsePeekHint ? 'border-zinc-300 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900/70' : 'border-zinc-200/80 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/40'}`}>
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-zinc-200/80 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/40 px-3 py-2.5 transition-[background-color,border-color,box-shadow]">
                 <p
                   id="qr-modal-switch-hint"
-                  className={`flex min-w-0 items-center gap-1.5 text-[11px] font-medium ${showPeekHint && shouldUsePeekHint ? 'text-zinc-700 dark:text-zinc-200' : 'text-zinc-500 dark:text-zinc-400'}`}
+                  className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
                 >
-                  {isTouchPrimaryInput && (
-                    <MoveHorizontal
-                      size={14}
-                      aria-hidden="true"
-                      style={showPeekHint && shouldUsePeekHint ? { color: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
-                    />
-                  )}
+                  {isTouchPrimaryInput && <MoveHorizontal size={14} aria-hidden="true" />}
                   <span className="truncate">{switchHintText}</span>
                 </p>
 
                 <div className="shrink-0 flex items-center gap-1 rounded-full border border-zinc-200/80 bg-white/90 px-1 py-1 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
                   <button
                     type="button"
-                    onClick={() => commitTo('prev')}
+                    onClick={handleGoPrev}
                     aria-label={t.qr.switchPrev}
                     className={navButtonClass}
                   >
                     <ChevronLeft size={16} aria-hidden="true" />
                   </button>
-                  <span className="min-w-[4.5ch] px-1 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 tabular-nums select-none">
+                  <span className="min-w-[5ch] px-1 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 tabular-nums select-none">
                     {t.qr.accountPosition(currentPosition, allCards.length)}
                   </span>
                   <button
                     type="button"
-                    onClick={() => commitTo('next')}
+                    onClick={handleGoNext}
                     aria-label={t.qr.switchNext}
                     className={navButtonClass}
                   >
@@ -1019,35 +1032,40 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             )}
           </div>
 
-          {/* Card viewport — clips horizontal overflow for the carousel strip */}
-          <div className="flex-1 overflow-hidden min-h-0">
+          {/* Card viewport — native scroll-snap keeps DOM order stable, so the
+              visible card never teleports/recycles at the end of the gesture. */}
+          <div className="flex-1 min-h-0 overflow-hidden">
           {canSwitch ? (
-            /* Three-panel carousel strip */
             <div
-              className={`h-full flex w-[300%] motion-reduce:transition-none! ${showPeekHint && shouldUsePeekHint ? 'pager-peek-hint' : ''}`}
-              style={stripStyle}
-              onTransitionEnd={handleStripTransitionEnd}
-              onAnimationEnd={() => setShowPeekHint(false)}
+              ref={scrollViewportRef}
+              className="h-full flex overflow-x-auto overflow-y-hidden scrollbar-none"
+              style={{
+                scrollSnapType: 'x mandatory',
+                overscrollBehaviorX: 'contain',
+                WebkitOverflowScrolling: 'touch',
+              }}
+              onScroll={handleViewportScroll}
             >
-              {carousel.slots.map((slot, slotIndex) => {
-                const card = allCards[slot.cardIndex] ?? currentCard;
-                const isCurrent = slotIndex === 1;
+              {renderSlides.map((slide, renderIndex) => {
+                const isCurrent = renderIndex === currentRenderIndex;
 
                 return (
                   <div
-                    key={slot.slotId}
-                    className="w-1/3 h-full"
+                    key={slide.renderKey}
+                    className="w-full h-full shrink-0"
+                    style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
+                    data-loop-clone={slide.isClone ? 'true' : undefined}
                     inert={!isCurrent}
                     aria-hidden={!isCurrent}
                   >
-                    {renderPanel({ card, slotId: slot.slotId, isCurrent })}
+                    {renderPanel({ slide, renderIndex })}
                   </div>
                 );
               })}
             </div>
           ) : (
             /* Single panel — no carousel */
-            renderPanel({ card: currentCard, slotId: SINGLE_SLOT_ID, isCurrent: true })
+            currentRenderSlide ? renderPanel({ slide: currentRenderSlide, renderIndex: currentRenderIndex }) : null
           )}
           </div>
         </div>
@@ -1099,7 +1117,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         note={note}
         onExit={() => setIsFullscreen(false)}
         qrCenterImage={currentCenterImage}
-        customName={customName.trim() || undefined}
+        customName={trimmedCustomName || undefined}
         showBankName={showBankNameSetting}
         accountNumber={currentAccountNumber}
         bankCode={currentBankCode}
