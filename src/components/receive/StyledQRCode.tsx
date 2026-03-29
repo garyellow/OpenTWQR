@@ -225,8 +225,8 @@ export const StyledQRCode = memo(forwardRef<StyledQRCodeHandle, StyledQRCodeProp
 
     // Subsequent updates: call .update() instead of recreating.
     // useLayoutEffect ensures the canvas is repainted BEFORE the browser paints,
-    // which keeps off-screen slot preparation from flashing when that slot later
-    // rotates into the centre position.
+    // which helps the scroll-snap carousel keep each QR canvas visually stable
+    // as cards move into the active position.
     useLayoutEffect(() => {
       if (!mountedRef.current || !qrInstanceRef.current) return;
       if (lastOptionsSignatureRef.current === optionsSignature) return;

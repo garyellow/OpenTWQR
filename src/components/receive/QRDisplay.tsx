@@ -44,8 +44,9 @@ interface QRRenderSlide {
   renderKey: string;
   card: QRDisplayCard;
   logicalIndex: number;
-  isClone: boolean;
 }
+
+const SCROLL_SETTLE_DELAY_MS = 160;
 
 function clampIndex(index: number, length: number) {
   if (length <= 0) return 0;
@@ -127,7 +128,6 @@ function buildRenderSlides(cards: QRDisplayCard[]): QRRenderSlide[] {
       renderKey: `real-${card.id}`,
       card,
       logicalIndex,
-      isClone: false,
     }));
   }
 
@@ -138,19 +138,16 @@ function buildRenderSlides(cards: QRDisplayCard[]): QRRenderSlide[] {
       renderKey: `clone-head-${cards[lastLogicalIndex].id}`,
       card: cards[lastLogicalIndex],
       logicalIndex: lastLogicalIndex,
-      isClone: true,
     },
     ...cards.map((card, logicalIndex) => ({
       renderKey: `real-${card.id}`,
       card,
       logicalIndex,
-      isClone: false,
     })),
     {
       renderKey: `clone-tail-${cards[0].id}`,
       card: cards[0],
       logicalIndex: 0,
-      isClone: true,
     },
   ];
 }
@@ -244,10 +241,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const [currentRenderIndex, setCurrentRenderIndex] = useState(() => getRealRenderIndex(externalActiveIndex, allCards.length));
   const currentRenderIndexRef = useRef(currentRenderIndex);
 
-  useEffect(() => {
-    currentRenderIndexRef.current = currentRenderIndex;
-  }, [currentRenderIndex]);
-
   /**
    * Cache of bank icons converted to data URIs for export-safe QR rendering.
    * All carousel cards can reuse the same cached asset without re-fetching.
@@ -256,6 +249,18 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const loadingBankIconUrlsRef = useRef<Set<string>>(new Set());
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const scrollSettleTimerRef = useRef<number | null>(null);
+
+  const syncCurrentRenderIndex = useCallback((nextRenderIndex: number) => {
+    currentRenderIndexRef.current = nextRenderIndex;
+    setCurrentRenderIndex(nextRenderIndex);
+  }, []);
+
+  const clearScrollSettleTimer = useCallback(() => {
+    if (scrollSettleTimerRef.current) {
+      window.clearTimeout(scrollSettleTimerRef.current);
+      scrollSettleTimerRef.current = null;
+    }
+  }, []);
 
   const bankIconUrls = useMemo(() => {
     if (logoType !== 'bank') return [];
@@ -440,9 +445,9 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     return () => {
       if (feedbackShowTimerRef.current) window.clearTimeout(feedbackShowTimerRef.current);
       if (feedbackHideTimerRef.current) window.clearTimeout(feedbackHideTimerRef.current);
-      if (scrollSettleTimerRef.current) window.clearTimeout(scrollSettleTimerRef.current);
+      clearScrollSettleTimer();
     };
-  }, []);
+  }, [clearScrollSettleTimer]);
 
   const scrollToRenderIndex = useCallback((targetRenderIndex: number, behavior: 'smooth' | 'instant' = 'smooth') => {
     const viewport = scrollViewportRef.current;
@@ -484,7 +489,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     if (!nextSlide) return;
 
     if (nextRenderIndex !== currentRenderIndexRef.current) {
-      setCurrentRenderIndex(nextRenderIndex);
+      syncCurrentRenderIndex(nextRenderIndex);
     }
 
     commitLogicalIndex(nextSlide.logicalIndex);
@@ -492,47 +497,54 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     if (nextRenderIndex !== rawRenderIndex) {
       scrollToRenderIndex(nextRenderIndex, 'instant');
     }
-  }, [allCards.length, canSwitch, commitLogicalIndex, renderSlides, scrollToRenderIndex]);
+  }, [allCards.length, canSwitch, commitLogicalIndex, renderSlides, scrollToRenderIndex, syncCurrentRenderIndex]);
+
+  const syncVisibleRenderIndexFromScroll = useCallback(() => {
+    const viewport = scrollViewportRef.current;
+    if (!viewport || !canSwitch) return;
+
+    const rawRenderIndex = getNearestRenderIndex(viewport.scrollLeft, viewport.clientWidth, renderSlides.length);
+
+    if (rawRenderIndex !== currentRenderIndexRef.current) {
+      syncCurrentRenderIndex(rawRenderIndex);
+    }
+  }, [canSwitch, renderSlides.length, syncCurrentRenderIndex]);
 
   const handleViewportScroll = useCallback(() => {
     if (!canSwitch) return;
 
-    if (scrollSettleTimerRef.current) {
-      window.clearTimeout(scrollSettleTimerRef.current);
-    }
+    syncVisibleRenderIndexFromScroll();
+
+    clearScrollSettleTimer();
 
     scrollSettleTimerRef.current = window.setTimeout(() => {
       syncActiveIndexFromScroll();
-    }, 160);
-  }, [canSwitch, syncActiveIndexFromScroll]);
+    }, SCROLL_SETTLE_DELAY_MS);
+  }, [canSwitch, clearScrollSettleTimer, syncActiveIndexFromScroll, syncVisibleRenderIndexFromScroll]);
 
   useEffect(() => {
     const viewport = scrollViewportRef.current;
     if (!viewport || !canSwitch) return;
 
     const handleScrollEnd = () => {
-      if (scrollSettleTimerRef.current) {
-        window.clearTimeout(scrollSettleTimerRef.current);
-        scrollSettleTimerRef.current = null;
-      }
-
+      clearScrollSettleTimer();
       syncActiveIndexFromScroll();
     };
 
     viewport.addEventListener('scrollend', handleScrollEnd as EventListener);
     return () => viewport.removeEventListener('scrollend', handleScrollEnd as EventListener);
-  }, [canSwitch, syncActiveIndexFromScroll]);
+  }, [canSwitch, clearScrollSettleTimer, syncActiveIndexFromScroll]);
 
   useLayoutEffect(() => {
     if (!canSwitch) return;
     const desiredRenderIndex = getRealRenderIndex(externalActiveIndex, allCards.length);
 
     if (desiredRenderIndex !== currentRenderIndexRef.current) {
-      setCurrentRenderIndex(desiredRenderIndex);
+      syncCurrentRenderIndex(desiredRenderIndex);
     }
 
     scrollToRenderIndex(desiredRenderIndex, 'instant');
-  }, [allCards.length, canSwitch, externalActiveIndex, scrollToRenderIndex]);
+  }, [allCards.length, canSwitch, externalActiveIndex, scrollToRenderIndex, syncCurrentRenderIndex]);
 
   useEffect(() => {
     if (!canSwitch) return;
@@ -582,21 +594,40 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     scrollToRenderIndex(nextRenderIndex, 'smooth');
   }, [renderSlides.length, scrollToRenderIndex]);
 
+  const normalizeLoopBoundaryForNavigation = useCallback(() => {
+    if (!canSwitch) return currentRenderIndexRef.current;
+
+    const nextRenderIndex = getLoopedRenderIndex(currentRenderIndexRef.current, allCards.length);
+    if (nextRenderIndex === currentRenderIndexRef.current) return nextRenderIndex;
+
+    const nextSlide = renderSlides[nextRenderIndex];
+    if (!nextSlide) return currentRenderIndexRef.current;
+
+    clearScrollSettleTimer();
+    syncCurrentRenderIndex(nextRenderIndex);
+    commitLogicalIndex(nextSlide.logicalIndex);
+    scrollToRenderIndex(nextRenderIndex, 'instant');
+
+    return nextRenderIndex;
+  }, [allCards.length, canSwitch, clearScrollSettleTimer, commitLogicalIndex, renderSlides, scrollToRenderIndex, syncCurrentRenderIndex]);
+
   const handleGoPrev = useCallback(() => {
     if (!canSwitch) return;
-    const targetRenderIndex = currentRenderIndexRef.current <= 1
+    const baseRenderIndex = normalizeLoopBoundaryForNavigation();
+    const targetRenderIndex = baseRenderIndex <= 1
       ? 0
-      : currentRenderIndexRef.current - 1;
+      : baseRenderIndex - 1;
     goToRenderIndex(targetRenderIndex);
-  }, [canSwitch, goToRenderIndex]);
+  }, [canSwitch, goToRenderIndex, normalizeLoopBoundaryForNavigation]);
 
   const handleGoNext = useCallback(() => {
     if (!canSwitch) return;
-    const targetRenderIndex = currentRenderIndexRef.current >= allCards.length
+    const baseRenderIndex = normalizeLoopBoundaryForNavigation();
+    const targetRenderIndex = baseRenderIndex >= allCards.length
       ? allCards.length + 1
-      : currentRenderIndexRef.current + 1;
+      : baseRenderIndex + 1;
     goToRenderIndex(targetRenderIndex);
-  }, [allCards.length, canSwitch, goToRenderIndex]);
+  }, [allCards.length, canSwitch, goToRenderIndex, normalizeLoopBoundaryForNavigation]);
 
   // Left/Right arrow keys — switch accounts (desktop keyboard support)
   useEffect(() => {
@@ -1054,7 +1085,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                     key={slide.renderKey}
                     className="w-full h-full shrink-0"
                     style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
-                    data-loop-clone={slide.isClone ? 'true' : undefined}
                     inert={!isCurrent}
                     aria-hidden={!isCurrent}
                   >
