@@ -12,7 +12,7 @@ import type { ParsedTWQR } from '../../utils/parseTwqr';
 export interface PaymentAppEntry {
   bankCode: string;
   bankName: string;
-  bankUrl: string;
+  appUrl: string;
   bankIconUrl?: string;
   isSameInstitution: boolean;
   /** True when cross-institution + sameInstitutionOnly — opens app without pre-filling data. */
@@ -151,8 +151,8 @@ export const ScanRedirectView = ({
           {sameApps.map((app) => (
             <a
               key={app.bankCode}
-              href={app.bankUrl}
-              {...(isIntentUrl(app.bankUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
+              href={app.appUrl}
+              {...(isIntentUrl(app.appUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
               onClick={() => haptic()}
               className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl btn-accent active:scale-98 action-transition shadow-xs font-semibold text-base focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
             >
@@ -165,8 +165,8 @@ export const ScanRedirectView = ({
           {crossApps.map((app) => (
             <a
               key={app.bankCode}
-              href={app.bankUrl}
-              {...(isIntentUrl(app.bankUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
+              href={app.appUrl}
+              {...(isIntentUrl(app.appUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
               onClick={() => haptic()}
               className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-semibold text-sm text-zinc-700 dark:text-zinc-300 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
                 app.launchOnly

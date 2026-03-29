@@ -21,7 +21,7 @@ export const UrlSchemeSection = () => {
         </h2>
         <InfoTip variant="info" title={t.urlScheme.infoTitle} content={t.urlScheme.infoDesc} size={13} />
       </div>
-      <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden">
+      <div className="app-surface overflow-hidden shadow-xs">
         <Link
           to="/settings/payment-links"
           viewTransition

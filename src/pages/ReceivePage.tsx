@@ -5,17 +5,19 @@ import { QRDisplay, type QRDisplayCard } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars, stripCompanySuffix } from '../utils/twqr';
-import { QrCode, ChevronRight, StickyNote, UserPen, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { QrCode, StickyNote, UserPen, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { OpenTWQRLogo } from '../components/ui/OpenTWQRLogo';
-import { BankIcon } from '../components/accounts/BankIcon';
+import { AccountSelectorCard } from '../components/accounts/AccountSelectorCard';
+import { AccountPickerSheet } from '../components/accounts/AccountPickerSheet';
 import { haptic } from '../utils/haptics';
 import { resolveIconSrc } from '../utils/favicon';
 import { QuickQRModal } from '../components/receive/QuickQRModal';
 import { generateId } from '../utils/generateId';
 import { useQRSettingsStore } from '../stores/useQRSettingsStore';
+import { buildAccountCaption } from '../utils/accountPresentation';
 
 export const ReceivePage = () => {
   const { accounts, selectedAccountId, addAccount, selectAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
@@ -24,6 +26,7 @@ export const ReceivePage = () => {
   const [showQR, setShowQR] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showQuickAccess, setShowQuickAccess] = useState(false);
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
@@ -45,6 +48,8 @@ export const ReceivePage = () => {
   }, [bankByCode, selectedAccount]);
 
   const bankName = stripCompanySuffix(bank?.name || '');
+  const currentAccountTitle = selectedAccount?.label || bankName || t.receive.myAccount;
+  const currentAccountCaption = buildAccountCaption(currentAccountTitle, bankName, selectedAccount?.bankCode);
 
   /** Resolved bank icon URL for QR center logo (when logoType is 'bank'). */
   const bankIconUrl = useMemo(() => {
@@ -55,6 +60,49 @@ export const ReceivePage = () => {
   const sortedAccounts = useMemo(
     () => [...accounts].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
     [accounts],
+  );
+
+  const pickerAccounts = useMemo(
+    () => [...accounts].sort((left, right) => {
+      if (left.id === selectedAccountId) return -1;
+      if (right.id === selectedAccountId) return 1;
+      return left.bankCode.localeCompare(right.bankCode);
+    }),
+    [accounts, selectedAccountId],
+  );
+
+  const accountPickerOptions = useMemo(
+    () => {
+      const titleCounts = new Map<string, number>();
+      const baseOptions = pickerAccounts.map((account) => {
+        const accountBank = bankByCode.get(account.bankCode);
+        const optionBankName = stripCompanySuffix(accountBank?.name || '');
+        const title = account.label || optionBankName || t.receive.myAccount;
+
+        titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
+
+        return {
+          id: account.id,
+          title,
+          accountNumber: account.accountNumber,
+          caption: buildAccountCaption(title, optionBankName, account.bankCode),
+          bankCode: account.bankCode,
+          iconUrl: account.iconUrl,
+          bankUrl: accountBank?.url,
+        };
+      });
+
+      return baseOptions.map((option) => ({
+        id: option.id,
+        title: option.title,
+        subtitle: (titleCounts.get(option.title) ?? 0) > 1 ? maskAccount(option.accountNumber) : undefined,
+        caption: option.caption,
+        bankCode: option.bankCode,
+        iconUrl: option.iconUrl,
+        bankUrl: option.bankUrl,
+      }));
+    },
+    [bankByCode, pickerAccounts, t.receive.myAccount],
   );
 
   /* ---------- QR string generation ---------- */
@@ -89,6 +137,7 @@ export const ReceivePage = () => {
       const accountBank = bankByCode.get(account.bankCode);
       return {
         id: account.id,
+        label: account.label,
         value: generateTWQR({ bankCode: account.bankCode, accountNumber: account.accountNumber, amount: numAmount, note: note || undefined }),
         bankName: stripCompanySuffix(accountBank?.name || ''),
         bankCode: account.bankCode,
@@ -107,6 +156,15 @@ export const ReceivePage = () => {
   const handleCloseQR = useCallback(() => {
     setShowQR(false);
   }, []);
+
+  const handleManageAccounts = useCallback(() => {
+    navigate('/accounts', { viewTransition: true });
+  }, [navigate]);
+
+  const handleManageAccountsFromQR = useCallback(() => {
+    setShowQR(false);
+    navigate('/accounts', { viewTransition: true });
+  }, [navigate]);
 
   /* ---------- Desktop keyboard shortcuts ---------- */
   useEffect(() => {
@@ -238,33 +296,16 @@ export const ReceivePage = () => {
 
         {/* Account selector */}
         <div className="shrink-0 px-6 mb-3">
-          <Link
-            to="/accounts"
-            viewTransition
-            className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 action-transition group active:scale-98 shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
-          >
-            <BankIcon iconUrl={selectedAccount.iconUrl} bankUrl={bank?.url} bankCode={selectedAccount.bankCode} />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-base">
-                {selectedAccount.label || bankName || t.receive.myAccount}
-              </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 tracking-wider">
-                {maskAccount(selectedAccount.accountNumber)}
-              </p>
-              {selectedAccount.label && bankName && (
-                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">
-                  ({selectedAccount.bankCode}) {bankName}
-                </p>
-              )}
-            </div>
-            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
-              <ChevronRight
-                size={18}
-                className="text-zinc-400 dark:text-zinc-500"
-                aria-hidden="true"
-              />
-            </div>
-          </Link>
+          <AccountSelectorCard
+            title={currentAccountTitle}
+            subtitle={maskAccount(selectedAccount.accountNumber)}
+            caption={currentAccountCaption}
+            bankCode={selectedAccount.bankCode}
+            iconUrl={selectedAccount.iconUrl}
+            bankUrl={bank?.url}
+            onClick={() => setShowAccountPicker(true)}
+            buttonLabel={t.accountPicker.openLabel}
+          />
         </div>
 
         {/* Amount input, transaction note & generate button */}
@@ -280,7 +321,7 @@ export const ReceivePage = () => {
 
                 {/* Transaction note & personal message — two rows in a card */}
                 <div className="w-full px-6">
-                  <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs">
+                  <div className="app-surface overflow-hidden shadow-xs">
                     <button
                       type="button"
                       onClick={() => setShowNoteInput(true)}
@@ -484,6 +525,22 @@ export const ReceivePage = () => {
           cards={carouselCards}
           activeCardId={selectedAccount.id}
           onActiveCardChange={selectAccount}
+          onManageAccounts={handleManageAccountsFromQR}
+        />
+      )}
+
+      {showAccountPicker && (
+        <AccountPickerSheet
+          title={t.accountPicker.title}
+          description={t.accountPicker.description}
+          options={accountPickerOptions}
+          selectedId={selectedAccount.id}
+          onSelect={selectAccount}
+          onClose={() => setShowAccountPicker(false)}
+          onManageAccounts={handleManageAccounts}
+          manageLabel={t.accountPicker.manageAccounts}
+          selectedLabel={t.accountPicker.selected}
+          closeLabel={t.common.close}
         />
       )}
 

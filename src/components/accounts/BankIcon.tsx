@@ -3,7 +3,7 @@ import { resolveIconSrc } from '../../utils/favicon';
 
 interface BankIconProps {
   iconUrl?: string;
-  /** Default bank website URL — used as favicon fallback when iconUrl is absent. */
+  /** Official bank website/homepage — used only as favicon fallback when iconUrl is absent. */
   bankUrl?: string;
   bankCode: string;
   size?: 'sm' | 'md';
@@ -14,7 +14,7 @@ interface BankIconProps {
 /**
  * Bank icon with automatic favicon resolution and fallback to bank code text.
  *
- * Resolution order: `iconUrl` → `bankUrl` → text code.
+ * Resolution order: `iconUrl` → `bankUrl` (homepage favicon) → text code.
  *
  * The image fades in after it loads so the component never shows a jarring
  * snap from the blank container to the fully-rendered icon.
@@ -32,7 +32,7 @@ export const BankIcon = ({
   size = 'md',
   className = '',
 }: BankIconProps) => {
-  // Prioritise user-set icon; fall back to bank default URL
+  // Prioritise user-set icon; fall back to the institution homepage favicon.
   const src = resolveIconSrc(iconUrl) ?? resolveIconSrc(bankUrl);
 
   // Track load / error by URL instead of boolean flags so React can derive

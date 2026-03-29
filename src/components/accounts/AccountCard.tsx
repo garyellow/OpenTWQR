@@ -1,8 +1,9 @@
 import type { BankAccount } from '../../types';
-import { Trash2, Pencil, Check } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { maskAccount, stripCompanySuffix } from '../../utils/twqr';
+import { shouldShowSecondaryBankName } from '../../utils/accountPresentation';
 import { BankIcon } from './BankIcon';
 
 interface AccountCardProps {
@@ -25,13 +26,13 @@ export const AccountCard = ({
   const bank = banks.find((b) => b.code === account.bankCode);
   const bankName = stripCompanySuffix(bank?.name || account.bankCode);
   const displayName = account.label || bankName;
-  const showBankSubtitle = Boolean(account.label);
+  const showBankSubtitle = Boolean(account.label) && shouldShowSecondaryBankName(displayName, bankName);
 
   return (
     <article
-      className={`relative min-w-0 p-5 rounded-xl action-transition border ${isSelected
-        ? 'shadow-md'
-        : 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs'
+      className={`relative min-w-0 p-5 rounded-2xl action-transition ${isSelected
+        ? 'border shadow-md'
+        : 'app-surface shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700'
         }`}
       style={isSelected ? {
         backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
@@ -44,26 +45,20 @@ export const AccountCard = ({
         onClick={onSelect}
         aria-pressed={isSelected}
         aria-label={t.accounts.selectAccount(displayName)}
-        className="absolute inset-0 w-full h-full rounded-xl cursor-pointer z-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        className="absolute inset-0 w-full h-full rounded-2xl cursor-pointer z-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       />
 
       {/* Card content */}
       <div className="relative pr-20 pointer-events-none">
         <div className="flex items-center gap-3 mb-1 min-w-0">
-          {isSelected ? (
-            <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 flex items-center justify-center shrink-0">
-              <Check
-                size={16}
-                className="text-zinc-900 dark:text-zinc-100"
-                aria-hidden="true"
-              />
+          <BankIcon iconUrl={account.iconUrl} bankUrl={bank?.url} bankCode={account.bankCode} size="sm" />
+          <div className="min-w-0 flex-1">
+            <div className="min-w-0">
+              <h3 className={`font-semibold truncate text-base ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                {displayName}
+              </h3>
             </div>
-          ) : (
-            <BankIcon iconUrl={account.iconUrl} bankUrl={bank?.url} bankCode={account.bankCode} size="sm" />
-          )}
-          <h3 className={`font-semibold truncate text-base ${isSelected ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'}`}>
-            {displayName}
-          </h3>
+          </div>
         </div>
 
         <p className={`font-mono text-base tracking-wider mt-2 ${isSelected ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-700 dark:text-zinc-300'}`}>

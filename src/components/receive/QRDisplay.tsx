@@ -3,7 +3,7 @@ import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
-import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, ChevronLeft, ChevronRight, MoveHorizontal } from 'lucide-react';
+import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency, formatAmount, formatAccountDisplay, maskAccount } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
@@ -14,9 +14,12 @@ import { useScrollLock } from '../../hooks/useScrollLock';
 import { QRFullscreen } from './QRFullscreen';
 import { ShareMenu } from '../share/ShareMenu';
 import { LinkSettingsDialog } from '../share/LinkSettingsDialog';
+import { AccountSelectorCard } from '../accounts/AccountSelectorCard';
+import { AccountPickerSheet } from '../accounts/AccountPickerSheet';
 import type { ShareData, ExpiryOption } from '../../types';
 import { QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
 import { StyledQRCode, type StyledQRCodeHandle, type StyledQRCodeCenterImage } from './StyledQRCode';
+import { buildAccountCaption } from '../../utils/accountPresentation';
 
 const SINGLE_SLOT_ID = 'slot-single' as const;
 
@@ -32,6 +35,7 @@ type BankIconCache = Record<string, LoadedBankIcon | null>;
 /** Data for a renderable QR card in the carousel. */
 export interface QRDisplayCard {
   id: string;
+  label?: string;
   value: string;
   bankName?: string;
   bankCode?: string;
@@ -182,8 +186,8 @@ interface QRDisplayProps {
   isSharedView?: boolean;
   /** Bank favicon / icon URL for centre logo when logo type is 'bank'. */
   bankIconUrl?: string;
-  /** URL scheme / Universal Link for the payer's bank app (scan result context). */
-  bankUrl?: string;
+  /** Configured transfer-app URL shown only in scan-result context. */
+  transferAppUrl?: string;
   /** When provided, a "重新掃描" button is shown and the modal acts as a scan result view. */
   onRescan?: () => void;
   /** Override the modal header title (defaults to t.qr.title). */
@@ -197,9 +201,11 @@ interface QRDisplayProps {
   activeCardId?: string;
   /** Called after a committed account switch so the parent can stay in sync. */
   onActiveCardChange?: (cardId: string) => void;
+  /** Optional entry point into the dedicated account-management page. */
+  onManageAccounts?: () => void;
 }
 
-export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl, bankUrl, onRescan, title, hideClose = false, cards, activeCardId, onActiveCardChange }: QRDisplayProps) => {
+export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, note, shareData, onClose, isSharedView = false, bankIconUrl, transferAppUrl, onRescan, title, hideClose = false, cards, activeCardId, onActiveCardChange, onManageAccounts }: QRDisplayProps) => {
   const t = useLocaleStore((s) => s.t);
   const storedLogoType = useQRSettingsStore((s) => s.logoType);
   const storedShowAccount = useQRSettingsStore((s) => s.showAccount);
@@ -336,16 +342,19 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const currentValue = currentCard?.value ?? value;
   const currentBankName = currentCard?.bankName;
   const currentBankCode = currentCard?.bankCode;
+  const currentTransferAppUrl = transferAppUrl;
   const currentAccountNumber = currentCard?.accountNumber;
   const currentShareData = currentCard?.shareData ?? shareData;
   const currentCenterImage = currentCard ? centerImagesByCardId[currentCard.id] : defaultCenterImage;
   const currentPosition = activeIndex + 1;
+  const currentAccountTitle = currentCard?.label || currentBankName || t.receive.myAccount;
 
   const [qrSize, setQrSize] = useState(() => {
     const vw = typeof window !== 'undefined' ? window.innerWidth : 390;
     return Math.max(180, Math.min(280, Math.floor(vw * 0.58)));
   });
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
   const shareMenu = useAnimatedToggle();
   const linkSettingsToggle = useAnimatedToggle();
   const [linkAction, setLinkAction] = useState<'copy' | 'share'>('copy');
@@ -364,14 +373,47 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
    * (same padding algorithm), so swapping content never causes layout shifts.
    */
   const [accountRevealed, setAccountRevealed] = useState(showAccountSetting);
+  const currentAccountLiveLabel = t.qr.currentAccountLive(currentAccountTitle, currentPosition, allCards.length);
   const feedbackShowTimerRef = useRef<number | null>(null);
   const feedbackHideTimerRef = useRef<number | null>(null);
   const qrHandleRef = useRef<Record<string, StyledQRCodeHandle | null>>({});
   const modalRef = useRef<HTMLDivElement>(null);
-  const [isTouchPrimaryInput, setIsTouchPrimaryInput] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  });
+
+  const accountPickerOptions = useMemo(() => {
+    const orderedCards = [...allCards].sort((left, right) => {
+      if (left.id === currentCard?.id) return -1;
+      if (right.id === currentCard?.id) return 1;
+      return (left.bankCode ?? '').localeCompare(right.bankCode ?? '');
+    });
+
+    const titleCounts = new Map<string, number>();
+
+    const baseOptions = orderedCards.map((card) => {
+      const title = card.label || card.bankName || t.receive.myAccount;
+
+      titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
+
+      return {
+        id: card.id,
+        title,
+        accountNumber: card.accountNumber,
+        caption: buildAccountCaption(title, card.bankName, card.bankCode),
+        bankCode: card.bankCode ?? '—',
+        iconUrl: card.bankIconUrl,
+      };
+    });
+
+    return baseOptions.map((option) => ({
+      id: option.id,
+      title: option.title,
+      subtitle: option.accountNumber && (titleCounts.get(option.title) ?? 0) > 1
+        ? maskAccount(option.accountNumber)
+        : undefined,
+      caption: option.caption,
+      bankCode: option.bankCode,
+      iconUrl: option.iconUrl,
+    }));
+  }, [allCards, currentCard?.id, t.receive.myAccount]);
 
   const qrRefCallbacks = useMemo<Record<string, (handle: StyledQRCodeHandle | null) => void>>(() => {
     const callbacks: Record<string, (handle: StyledQRCodeHandle | null) => void> = {};
@@ -419,7 +461,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const supportsClipboardWrite = typeof ClipboardItem !== 'undefined' && typeof navigator.clipboard?.write === 'function';
 
   // Focus trap: active only when no sub-overlay is on top
-  useFocusTrap(modalRef, !shareMenu.isOpen && !linkSettingsToggle.isOpen && !isFullscreen);
+  useFocusTrap(modalRef, !shareMenu.isOpen && !linkSettingsToggle.isOpen && !isFullscreen && !showAccountPicker);
   useScrollLock(true);
 
   const showFeedback = useCallback((msg: string) => {
@@ -562,30 +604,21 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const shareMenuClose = shareMenu.close;
   const linkSettingsIsOpen = linkSettingsToggle.isOpen;
   const linkSettingsClose = linkSettingsToggle.close;
+  const accountPickerIsOpen = showAccountPicker;
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (isFullscreen) return; // QRFullscreen has its own Escape handler
       if (isEncrypting) return;
+      if (accountPickerIsOpen) { setShowAccountPicker(false); return; }
       if (linkSettingsIsOpen) { linkSettingsClose(); return; }
       if (shareMenuIsOpen) { shareMenuClose(); return; }
       requestClose();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [requestClose, isFullscreen, shareMenuIsOpen, shareMenuClose, linkSettingsIsOpen, linkSettingsClose, isEncrypting]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const media = window.matchMedia('(hover: none) and (pointer: coarse)');
-    const update = () => setIsTouchPrimaryInput(media.matches);
-
-    update();
-    media.addEventListener?.('change', update);
-    return () => media.removeEventListener?.('change', update);
-  }, []);
+  }, [requestClose, isFullscreen, shareMenuIsOpen, shareMenuClose, linkSettingsIsOpen, linkSettingsClose, isEncrypting, accountPickerIsOpen]);
 
   const goToRenderIndex = useCallback((targetRenderIndex: number) => {
     const nextRenderIndex = clampIndex(targetRenderIndex, renderSlides.length);
@@ -629,11 +662,37 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     goToRenderIndex(targetRenderIndex);
   }, [allCards.length, canSwitch, goToRenderIndex, normalizeLoopBoundaryForNavigation]);
 
+  const handleSelectAccountFromPicker = useCallback((cardId: string) => {
+    const logicalIndex = findCardIndex(allCards, cardId);
+    if (logicalIndex < 0) {
+      setShowAccountPicker(false);
+      return;
+    }
+
+    const targetRenderIndex = canSwitch
+      ? getRealRenderIndex(logicalIndex, allCards.length)
+      : 0;
+
+    setShowAccountPicker(false);
+
+    if (targetRenderIndex === currentRenderIndexRef.current) return;
+
+    if (canSwitch) {
+      goToRenderIndex(targetRenderIndex);
+      return;
+    }
+
+    const nextSlide = renderSlides[targetRenderIndex];
+    if (!nextSlide) return;
+    syncCurrentRenderIndex(targetRenderIndex);
+    commitLogicalIndex(nextSlide.logicalIndex);
+  }, [allCards, canSwitch, commitLogicalIndex, goToRenderIndex, renderSlides, syncCurrentRenderIndex]);
+
   // Left/Right arrow keys — switch accounts (desktop keyboard support)
   useEffect(() => {
     if (!canSwitch) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (isFullscreen || shareMenuIsOpen || linkSettingsIsOpen || isEncrypting) return;
+      if (isFullscreen || shareMenuIsOpen || linkSettingsIsOpen || accountPickerIsOpen || isEncrypting) return;
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         handleGoPrev();
@@ -645,7 +704,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [canSwitch, handleGoNext, handleGoPrev, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, isEncrypting]);
+  }, [canSwitch, handleGoNext, handleGoPrev, isFullscreen, shareMenuIsOpen, linkSettingsIsOpen, accountPickerIsOpen, isEncrypting]);
 
   // Responsive QR size for the modal view
   useEffect(() => {
@@ -796,27 +855,32 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   }, [currentShareData, linkExpiry, linkPassword, linkAction, copyToClipboard, shareViaSystem, showFeedback, linkSettingsToggle, t]);
 
   const accountActionButtonClass =
-    'flex items-center justify-center p-2.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 disabled:opacity-60 disabled:cursor-default disabled:hover:bg-transparent disabled:dark:hover:bg-transparent';
-  const navButtonClass =
-    'flex min-h-11 min-w-11 items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100';
-  const switchHintText = isTouchPrimaryInput ? t.qr.switchHintTouch : t.qr.switchHintDesktop;
+    'flex min-h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/70 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 disabled:opacity-60 disabled:cursor-default disabled:hover:bg-zinc-50 disabled:dark:hover:bg-zinc-900/70';
+  const carouselArrowButtonClass =
+    'pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200/80 bg-white/94 text-zinc-500 shadow-md backdrop-blur-sm hover:text-zinc-900 hover:bg-white dark:border-zinc-700/70 dark:bg-zinc-900/92 dark:text-zinc-300 dark:hover:text-zinc-100 dark:hover:bg-zinc-900 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100';
+  const carouselArrowTop = useMemo(() => {
+    const panelVerticalPadding = 12;
+    const qrCardPadding = 16;
+    const customNameOffset = trimmedCustomName ? 32 : 0;
+
+    return panelVerticalPadding + qrCardPadding + customNameOffset + qrSize / 2;
+  }, [qrSize, trimmedCustomName]);
 
   /* --- Carousel panel renderer --- */
 
   const renderPanel = ({ slide, renderIndex }: { slide: QRRenderSlide; renderIndex: number; }) => {
     const { card, renderKey } = slide;
     const isCurrent = renderIndex === currentRenderIndex;
-    const panelHasBankLabel = showBankNameSetting && Boolean(card.bankName) && Boolean(card.bankCode);
     const panelCenterImage = centerImagesByCardId[card.id];
 
     return (
       <div className="h-full overflow-y-auto min-h-0">
-        <div className="flex flex-col items-center px-6 gap-4 py-4">
-          <div className="bg-white p-5 rounded-xl shadow-xs border border-zinc-100 dark:border-zinc-800 hover:shadow-md transition-shadow w-full flex flex-col items-center">
+        <div className="flex flex-col items-center px-6 gap-3 py-3">
+          <div className="w-full flex flex-col items-center rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-xs transition-shadow hover:shadow-md dark:border-zinc-800/70">
             {trimmedCustomName && (
               <p className="text-sm font-semibold text-zinc-800 text-center mb-3">{trimmedCustomName}</p>
             )}
-            <div className="relative leading-0">
+            <div className="mx-auto w-fit leading-0">
               <button
                 type="button"
                 onClick={() => {
@@ -839,16 +903,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                 />
               </button>
             </div>
-            {panelHasBankLabel && (
-              <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-                ({card.bankCode}) {card.bankName}
-              </p>
-            )}
-            {card.accountNumber && (
-              <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${isCurrent && accountRevealed ? '' : ' invisible'}`}>
-                {card.accountNumber}
-              </p>
-            )}
           </div>
 
           <div className="space-y-2.5 w-full">
@@ -864,51 +918,6 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                 {t.amount.payerEnter}
               </div>
             )}
-            <div className="w-full bg-white dark:bg-zinc-900/50 rounded-xl px-4 py-3 border border-zinc-200 dark:border-zinc-800 shadow-xs">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  {card.bankName && card.bankCode && (
-                    <p className="text-zinc-800 dark:text-zinc-200 font-semibold text-sm mb-0.5">
-                      ({card.bankCode}) {card.bankName}
-                    </p>
-                  )}
-                  {card.accountNumber && (
-                    <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-                      {isCurrent && accountRevealed ? formatAccountDisplay(card.accountNumber) : maskAccount(card.accountNumber)}
-                    </p>
-                  )}
-                </div>
-                {card.accountNumber && (
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <button
-                      type="button"
-                      onClick={handleToggleReveal}
-                      aria-label={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
-                      aria-pressed={accountRevealed}
-                      title={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
-                      disabled={!isCurrent}
-                      tabIndex={isCurrent ? 0 : -1}
-                      className={accountActionButtonClass}
-                    >
-                      {accountRevealed
-                        ? <Eye size={18} aria-hidden="true" />
-                        : <EyeOff size={18} aria-hidden="true" />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopyAccount}
-                      aria-label={t.qr.copyAccount}
-                      title={t.qr.copyAccount}
-                      disabled={!isCurrent}
-                      tabIndex={isCurrent ? 0 : -1}
-                      className={accountActionButtonClass}
-                    >
-                      <Copy size={18} aria-hidden="true" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
             {note && (
               <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">{t.qr.notePrefix}{note}</p>
             )}
@@ -919,7 +928,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
     );
   };
 
-  const showStaticFooter = Boolean(bankUrl || !isSharedView || onRescan || feedback);
+  const showStaticFooter = Boolean(currentTransferAppUrl || !isSharedView || onRescan || feedback);
 
   const renderStaticFooter = () => {
     if (!showStaticFooter) return null;
@@ -941,10 +950,49 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           </div>
         )}
 
-        {bankUrl && (
+        <AccountSelectorCard
+          title={currentCard?.label || currentBankName || t.receive.myAccount}
+          subtitle={currentAccountNumber ? (accountRevealed ? formatAccountDisplay(currentAccountNumber) : maskAccount(currentAccountNumber)) : undefined}
+          caption={buildAccountCaption(currentCard?.label || currentBankName || t.receive.myAccount, currentBankName, currentBankCode)}
+          bankCode={currentBankCode ?? '—'}
+          iconUrl={currentCard?.bankIconUrl}
+          onClick={() => setShowAccountPicker(true)}
+          buttonLabel={t.accountPicker.openLabel}
+          compact
+        />
+
+        {currentAccountNumber && (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleToggleReveal}
+              aria-label={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
+              aria-pressed={accountRevealed}
+              title={accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}
+              className={accountActionButtonClass}
+            >
+              {accountRevealed
+                ? <Eye size={18} aria-hidden="true" />
+                : <EyeOff size={18} aria-hidden="true" />}
+              <span className="truncate">{accountRevealed ? t.qr.hideAccount : t.qr.revealAccount}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleCopyAccount}
+              aria-label={t.qr.copyAccount}
+              title={t.qr.copyAccount}
+              className={accountActionButtonClass}
+            >
+              <Copy size={18} aria-hidden="true" />
+              <span className="truncate">{t.qr.copyAccount}</span>
+            </button>
+          </div>
+        )}
+
+        {currentTransferAppUrl && (
           <a
-            href={bankUrl}
-            {...(isIntentUrl(bankUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
+            href={currentTransferAppUrl}
+            {...(isIntentUrl(currentTransferAppUrl) ? { target: '_blank', rel: 'noreferrer' } : {})}
             onClick={() => haptic()}
             className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl btn-accent active:scale-98 action-transition shadow-xs font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
@@ -958,7 +1006,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             type="button"
             onClick={() => shareMenu.open()}
             className={`w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl active:scale-98 action-transition font-semibold focus-visible:outline-hidden focus-visible:ring-2 ${
-              bankUrl
+              currentTransferAppUrl
                 ? 'text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100'
                 : 'btn-accent shadow-xs focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950'
             }`}
@@ -1001,17 +1049,25 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         role="dialog"
         aria-modal="true"
         aria-labelledby="qr-modal-title"
-        aria-describedby={canSwitch ? 'qr-modal-switch-hint' : undefined}
-        className={`pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        className={`pointer-events-auto app-modal-shell w-full max-w-sm bg-white dark:bg-zinc-900 shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
       >
         <div className={`flex-1 flex flex-col min-h-0 ${canSwitch ? 'select-none' : ''}`}>
           {/* Header */}
           <div className="shrink-0 px-5 pt-5 pb-3">
             <div className="flex items-start justify-between gap-3">
-              <h2 id="qr-modal-title" className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                {title ?? t.qr.title}
-              </h2>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  <h2 id="qr-modal-title" className="truncate text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    {title ?? t.qr.title}
+                  </h2>
+                  {canSwitch && (
+                    <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {currentPosition}/{allCards.length}
+                    </span>
+                  )}
+                </div>
+              </div>
               {!hideClose && (
                 <button
                   type="button"
@@ -1023,49 +1079,46 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
                 </button>
               )}
             </div>
-
-            {canSwitch && (
-              <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-zinc-200/80 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/40 px-3 py-2.5 transition-[background-color,border-color,box-shadow]">
-                <p
-                  id="qr-modal-switch-hint"
-                  className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
-                >
-                  {isTouchPrimaryInput && <MoveHorizontal size={14} aria-hidden="true" />}
-                  <span className="truncate">{switchHintText}</span>
-                </p>
-
-                <div className="shrink-0 flex items-center gap-1 rounded-full border border-zinc-200/80 bg-white/90 px-1 py-1 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-                  <button
-                    type="button"
-                    onClick={handleGoPrev}
-                    aria-label={t.qr.switchPrev}
-                    className={navButtonClass}
-                  >
-                    <ChevronLeft size={16} aria-hidden="true" />
-                  </button>
-                  <span className="min-w-[5ch] px-1 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 tabular-nums select-none">
-                    {t.qr.accountPosition(currentPosition, allCards.length)}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleGoNext}
-                    aria-label={t.qr.switchNext}
-                    className={navButtonClass}
-                  >
-                    <ChevronRight size={16} aria-hidden="true" />
-                  </button>
-                </div>
-
-                <span className="sr-only" aria-live="polite">
-                  {t.qr.accountPosition(currentPosition, allCards.length)}
-                </span>
-              </div>
-            )}
           </div>
+
+          <span className="sr-only" aria-live="polite">
+            {currentAccountLiveLabel}
+          </span>
 
           {/* Card viewport — native scroll-snap keeps DOM order stable, so the
               visible card never teleports/recycles at the end of the gesture. */}
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="relative flex-1 min-h-0 overflow-hidden">
+          {canSwitch && (
+            <>
+              <div
+                className="pointer-events-none absolute left-2 z-10 -translate-y-1/2 sm:left-3"
+                style={{ top: carouselArrowTop }}
+              >
+                <button
+                  type="button"
+                  onClick={handleGoPrev}
+                  aria-label={t.qr.switchPrev}
+                  className={carouselArrowButtonClass}
+                >
+                  <ChevronLeft size={18} aria-hidden="true" />
+                </button>
+              </div>
+
+              <div
+                className="pointer-events-none absolute right-2 z-10 -translate-y-1/2 sm:right-3"
+                style={{ top: carouselArrowTop }}
+              >
+                <button
+                  type="button"
+                  onClick={handleGoNext}
+                  aria-label={t.qr.switchNext}
+                  className={carouselArrowButtonClass}
+                >
+                  <ChevronRight size={18} aria-hidden="true" />
+                </button>
+              </div>
+            </>
+          )}
           {canSwitch ? (
             <div
               ref={scrollViewportRef}
@@ -1135,6 +1188,21 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         setPassword={setLinkPassword}
         isEncrypting={isEncrypting}
         onConfirm={handleLinkConfirm}
+      />
+    )}
+
+    {showAccountPicker && (
+      <AccountPickerSheet
+        title={t.accountPicker.title}
+        description={t.accountPicker.description}
+        options={accountPickerOptions}
+        selectedId={currentCard?.id ?? allCards[0]?.id ?? ''}
+        onSelect={handleSelectAccountFromPicker}
+        onClose={() => setShowAccountPicker(false)}
+        onManageAccounts={onManageAccounts}
+        manageLabel={t.accountPicker.manageAccounts}
+        selectedLabel={t.accountPicker.selected}
+        closeLabel={t.common.close}
       />
     )}
 

@@ -19,9 +19,9 @@ import { Copy, Check, ScanLine, ExternalLink } from 'lucide-react';
  *
  * 0. scanning=false (preloadedResult from Share Target) → jump to state 2–4
  * 1. scanning=true  → camera active
- * 2. scanning=false, parsed, bankUrl, showQR=false → ScanRedirectView
- * 3. scanning=false, parsed, bankUrl, showQR=true  → QRDisplay overlay (X → back to redirect)
- * 4. scanning=false, parsed, !bankUrl              → QRDisplay directly (hideClose, only rescan)
+ * 2. scanning=false, parsed, transferAppUrl, showQR=false → ScanRedirectView
+ * 3. scanning=false, parsed, transferAppUrl, showQR=true  → QRDisplay overlay (X → back to redirect)
+ * 4. scanning=false, parsed, !transferAppUrl              → QRDisplay directly (hideClose, only rescan)
  * 5. scanning=false, !parsed                       → raw result card
  *
  * Module-level state cache: persists scan result across tab navigations so
@@ -124,7 +124,7 @@ export const ScanPage = () => {
           entries.push({
             bankCode: config.bankCode,
             bankName: configBank?.name || config.bankCode,
-            bankUrl: config.launchUrl,
+            appUrl: config.launchUrl,
             bankIconUrl: configBank?.url ? resolveIconSrc(configBank.url) : undefined,
             isSameInstitution: false,
             launchOnly: true,
@@ -144,7 +144,7 @@ export const ScanPage = () => {
       entries.push({
         bankCode: config.bankCode,
         bankName: configBank?.name || config.bankCode,
-        bankUrl: url,
+        appUrl: url,
         bankIconUrl: configBank?.url ? resolveIconSrc(configBank.url) : undefined,
         isSameInstitution,
       });
@@ -173,7 +173,7 @@ export const ScanPage = () => {
   }, [scanResult]);
 
   /* ---------- Shared QRDisplay props ---------- */
-  const bankUrl = hasPaymentApps ? paymentApps[0].bankUrl : undefined;
+  const transferAppUrl = hasPaymentApps ? paymentApps[0].appUrl : undefined;
   const qrDisplayProps = parsed && qrString ? {
     value: qrString,
     amount: parsed.amount,
@@ -291,7 +291,7 @@ export const ScanPage = () => {
             <QRDisplay
               {...qrDisplayProps}
               onClose={() => setShowQR(false)}
-              bankUrl={bankUrl}
+              transferAppUrl={transferAppUrl}
             />
           )}
 

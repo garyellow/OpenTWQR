@@ -11,7 +11,7 @@ const zhTW = {
     skipToMain: '跳至主要內容',
     goHome: '前往首頁',
     understand: '了解',
-    loading: '載入中',
+    loading: '載入中…',
     or: '或',
     expand: '展開',
     collapse: '收合',
@@ -25,7 +25,6 @@ const zhTW = {
     importAccounts: '匯入帳戶',
     emptyHint: '新增帳戶後即可開始產生收款 QR Code。',
     loadSample: '載入範例帳戶',
-    loadSampleDesc: '先體驗看看，之後可在帳戶管理中刪除',
     loadSampleHint: '資料為展示用途，非真實帳號，可隨時刪除',
     sampleLabel: '範例',
     generateQR: '產生 QR Code',
@@ -81,11 +80,9 @@ const zhTW = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
-    switchHintTouch: '左右滑動或點箭頭',
-    switchHintDesktop: '點箭頭或按 ← → 方向鍵',
     switchPrev: '上一個帳戶',
     switchNext: '下一個帳戶',
-    accountPosition: (current: number, total: number) => `${current} / ${total}`,
+    currentAccountLive: (name: string, current: number, total: number) => `${name}，第 ${current} / ${total} 個帳戶`,
   },
 
   /* ─── Share menu ───────────────────────────────────────── */
@@ -134,6 +131,10 @@ const zhTW = {
     addLabel: '新增帳戶',
     emptyTitle: '尚無帳戶',
     emptyHint: '新增收款帳戶即可開始透過 OpenTWQR 收款。',
+    currentTitle: '目前收款帳戶',
+    currentDesc: '收款頁與收款 QR Code 會預設使用這個帳戶。',
+    listTitle: '已儲存帳戶',
+    listDesc: '點一下即可切換預設收款帳戶，也可以直接在這裡編輯或刪除。',
     selectAccount: (name: string) => `選擇 ${name} 帳戶`,
     editAccount: '編輯帳戶',
     deleteAccount: '刪除帳戶',
@@ -175,6 +176,14 @@ const zhTW = {
     searchLabel: '搜尋機構名稱或代碼',
     found: (count: number) => `找到 ${count} 間機構`,
     noResult: (q: string) => `找不到「${q}」的搜尋結果`,
+  },
+
+  accountPicker: {
+    title: '選擇收款帳戶',
+    description: '切換帳戶時，轉帳金額、交易備註與個人訊息都會保留。',
+    manageAccounts: '管理帳戶',
+    selected: '目前使用',
+    openLabel: '選擇其他帳戶',
   },
 
   /* ─── SettingsPage ─────────────────────────────────────── */
@@ -230,9 +239,9 @@ const zhTW = {
     lockTimeoutLabel: '背景鎖定時間',
     lockTimeoutOptions: {
       0: '立即',
-      10_000: '10 秒',
-      60_000: '1 分',
-      300_000: '5 分',
+      30_000: '30 秒',
+      180_000: '3 分',
+      600_000: '10 分',
       3_600_000: '1 小時',
     } as Record<number, string>,
     /* Privacy blur */

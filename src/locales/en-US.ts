@@ -13,7 +13,7 @@ const enUS: Translations = {
     skipToMain: 'Skip to main content',
     goHome: 'Go to Home',
     understand: 'Got it',
-    loading: 'Loading',
+    loading: 'Loading…',
     or: 'or',
     expand: 'Expand',
     collapse: 'Collapse',
@@ -27,7 +27,6 @@ const enUS: Translations = {
     importAccounts: 'Import Accounts',
     emptyHint: 'Add an account to start generating QR Codes.',
     loadSample: 'Load Sample Accounts',
-    loadSampleDesc: 'Try it out first — delete them later in Accounts',
     loadSampleHint: 'For demo only — not real accounts. Delete anytime.',
     sampleLabel: 'Sample',
     generateQR: 'Generate QR',
@@ -83,11 +82,9 @@ const enUS: Translations = {
       if (bankName) s += ` — ${bankName}`;
       return s;
     },
-    switchHintTouch: 'Swipe or use arrows',
-    switchHintDesktop: 'Use arrows or ← → keys',
     switchPrev: 'Previous account',
     switchNext: 'Next account',
-    accountPosition: (current: number, total: number) => `${current} / ${total}`,
+    currentAccountLive: (name: string, current: number, total: number) => `${name}, ${current} of ${total}`,
   },
 
   /* ─── Share menu ───────────────────────────────────────── */
@@ -136,6 +133,10 @@ const enUS: Translations = {
     addLabel: 'Add account',
     emptyTitle: 'No Accounts',
     emptyHint: 'Add an account to start receiving payments via OpenTWQR.',
+    currentTitle: 'Current Receiving Account',
+    currentDesc: 'The Receive page and Payment QR use this account by default.',
+    listTitle: 'Saved Accounts',
+    listDesc: 'Tap to switch the default receiving account, or edit and delete accounts here.',
     selectAccount: (name: string) => `Select ${name}`,
     editAccount: 'Edit account',
     deleteAccount: 'Delete account',
@@ -177,6 +178,14 @@ const enUS: Translations = {
     searchLabel: 'Search institution name or code',
     found: (count: number) => `${count} institution${count !== 1 ? 's' : ''} found`,
     noResult: (q: string) => `No results for "${q}"`,
+  },
+
+  accountPicker: {
+    title: 'Choose Receiving Account',
+    description: 'Switch accounts without changing the amount, note, or personal message.',
+    manageAccounts: 'Manage Accounts',
+    selected: 'Current',
+    openLabel: 'Choose another account',
   },
 
   /* ─── SettingsPage ─────────────────────────────────────── */
@@ -232,9 +241,9 @@ const enUS: Translations = {
     lockTimeoutLabel: 'Lock timeout',
     lockTimeoutOptions: {
       0: 'Instant',
-      10_000: '10s',
-      60_000: '1m',
-      300_000: '5m',
+      30_000: '30s',
+      180_000: '3m',
+      600_000: '10m',
       3_600_000: '1h',
     } as Record<number, string>,
     /* Privacy blur */
@@ -274,7 +283,7 @@ const enUS: Translations = {
     catAccounts: 'Accounts',
     catAccountsDesc: (n: number) => `${n} account${n !== 1 ? 's' : ''}`,
     catStyle: 'Style',
-    catStyleAccent: 'Accent Colour',
+    catStyleAccent: 'Accent Color',
     catStyleQR: 'QR Code Style',
     catPreferences: 'Preferences',
     catPrefsMode: 'Appearance Mode',
@@ -326,7 +335,7 @@ const enUS: Translations = {
     confirmImport: 'Confirm Import',
     catAccounts: 'Accounts',
     catStyle: 'Style',
-    catStyleAccent: 'Accent Colour',
+    catStyleAccent: 'Accent Color',
     catStyleQR: 'QR Code Style',
     catPreferences: 'Preferences',
     catPrefsMode: 'Appearance Mode',

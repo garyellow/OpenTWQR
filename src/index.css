@@ -86,6 +86,31 @@ html.accent-animating {
   --tw-ring-color: light-dark(var(--accent), var(--accent-dark));
 }
 
+/* Shared surface geometry — keeps cards, grouped settings panels, and overlays
+ * on a small, predictable radius scale:
+ *   - app-surface: primary in-page containers and cards
+ *   - app-surface-strong: slightly denser surfaces used in account pickers/selectors
+ *   - app-modal-shell: floating overlays and dialogs */
+@utility app-surface {
+  border-radius: 1.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: light-dark(rgb(228 228 231 / 0.7), rgb(39 39 42 / 0.78));
+  background-color: light-dark(rgb(255 255 255 / 0.98), rgb(24 24 27 / 0.6));
+}
+
+@utility app-surface-strong {
+  border-radius: 1.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: light-dark(rgb(228 228 231 / 0.82), rgb(39 39 42 / 0.9));
+  background-color: light-dark(rgb(255 255 255 / 0.98), rgb(24 24 27 / 0.78));
+}
+
+@utility app-modal-shell {
+  border-radius: 1.75rem;
+}
+
 /* action-transition — Restricts transitions to visual properties only
  * (transform, bg, color, etc.) instead of `transition-all`, avoiding
  * expensive layout recalculations on every interaction. */

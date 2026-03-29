@@ -32,7 +32,7 @@ export const ShareMenu = ({
   const t = useLocaleStore((s) => s.t);
 
   const itemClass =
-    'w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 action-transition text-left active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950';
+    'w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-800 action-transition text-left active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950';
 
   return (
     <div className="fixed inset-0 z-85">
@@ -52,7 +52,7 @@ export const ShareMenu = ({
         role="dialog"
         aria-modal="true"
         aria-label={t.share.menuLabel}
-        className={`pointer-events-auto relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden overscroll-contain motion-reduce:animate-none ${
+        className={`pointer-events-auto app-modal-shell relative w-full max-w-sm bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden overscroll-contain motion-reduce:animate-none ${
           isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'
         }`}
         onAnimationEnd={onAnimationEnd}
@@ -119,7 +119,7 @@ export const ShareMenu = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-3 rounded-xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+            className="w-full py-3 rounded-2xl text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
             {t.common.cancel}
           </button>
