@@ -2,16 +2,24 @@ import { useRef, useState, useCallback } from 'react';
 
 type PagerPhase = 'idle' | 'settling' | 'committing';
 
+/** Centre of the 3-panel strip. */
+const CENTER = 'translate3d(-33.333%,0px,0px)';
+
 /**
  * Horizontal three-panel card-pager hook.
  *
- * Designed for a 3-panel strip layout where `translateX(-33.333%)`
+ * Designed for a 3-panel strip layout where `translate3d(-33.333%,0,0)`
  * centres the middle panel.  During a drag the offset follows the
  * finger (dampened).  When the touch releases past the threshold,
  * `phase` becomes `'committing'` and `commitDirection` indicates the
- * target panel.  The caller animates the strip to the edge; once the
- * CSS transition finishes, `onTransitionEnd` fires `onCommit` and
- * resets to idle.
+ * target panel.
+ *
+ * When the CSS commit-transition finishes, the hook performs a
+ * *DOM-level teleport*: it directly sets `transition:none` and snaps
+ * the strip back to centre, then forces a synchronous reflow so the
+ * browser commits the new position *before* React re-renders with the
+ * updated data.  This eliminates the 1-2 frame flicker that would
+ * otherwise occur when React updates the centre panel's content.
  *
  * `commitTo` allows programmatic navigation (chevron buttons,
  * keyboard arrows) that bypasses touch input.
@@ -94,23 +102,65 @@ export function useCardPager(
     setPhase('committing');
   }, [phase]);
 
-  /** Attach to the strip's `onTransitionEnd`. */
-  const onTransitionEnd = useCallback(() => {
-    if (phase === 'settling') {
-      setPhase('idle');
-    } else if (phase === 'committing' && commitDirection) {
-      onCommit?.(commitDirection);
-      setCommitDirection(null);
-      setPhase('idle');
-    }
-  }, [phase, commitDirection, onCommit]);
+  /**
+   * Attach to the strip's `onTransitionEnd`.
+   *
+   * Filters out bubbled events from child elements (e.g. button
+   * hover transitions) and non-transform transitions.
+   *
+   * On commit-end, performs a *DOM-level teleport*:
+   * 1. Set `transition:none` + snap the strip to centre via `e.currentTarget`
+   * 2. Force a synchronous reflow so the browser commits the new position
+   * 3. Fire `onCommit` (parent updates data) + reset local state
+   *
+   * React's reconciler then re-renders with the idle `stripStyle`, which
+   * sets the same centre transform and clears the `transition:none` we set
+   * (because the idle style has no `transition` key and React removes any
+   * inline property it had previously managed).
+   */
+  const handleTransitionEnd = useCallback(
+    (e: React.TransitionEvent<HTMLDivElement>) => {
+      // Only react to the strip's own transform transition.
+      if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
+
+      if (phase === 'settling') {
+        setPhase('idle');
+        return;
+      }
+
+      if (phase === 'committing' && commitDirection) {
+        const strip = e.currentTarget;
+
+        // ── DOM-level teleport ──────────────────────────────
+        // Snap the strip back to centre WITHOUT any CSS transition
+        // so the browser composites the centred position before
+        // React re-renders with updated panel data.
+        strip.style.transition = 'none';
+        strip.style.transform = CENTER;
+        // Force a synchronous reflow — the browser must commit the
+        // above style changes before we proceed.
+        void strip.offsetHeight;
+
+        // Fire the parent callback (e.g. selectAccount) and reset.
+        // React will re-render synchronously (React 19 batching) and apply
+        // the idle stripStyle — which includes the correct centre transform.
+        // React's reconciler will also clear the 'transition: none' we set
+        // above (because the idle stripStyle has no transition key and React
+        // removes props it previously managed).  No rAF cleanup needed.
+        onCommit?.(commitDirection);
+        setCommitDirection(null);
+        setPhase('idle');
+      }
+    },
+    [phase, commitDirection, onCommit],
+  );
 
   return {
     dragOffset,
     isDragging,
     phase,
     commitDirection,
-    onTransitionEnd,
+    handleTransitionEnd,
     commitTo,
     handlers: { onTouchStart, onTouchMove, onTouchEnd },
   };

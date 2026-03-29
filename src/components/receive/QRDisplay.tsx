@@ -306,28 +306,34 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   }, []);
 
   // Strip transform — drives the 3-panel carousel position.
+  // Uses translate3d for guaranteed GPU compositing, and keeps
+  // will-change: transform at all times to avoid compositor-layer
+  // creation/destruction flicker.
   const stripStyle = useMemo((): React.CSSProperties => {
+    const base: React.CSSProperties = { willChange: 'transform' };
     if (pager.isDragging) {
       return {
-        transform: `translateX(calc(-33.333% + ${pager.dragOffset}px))`,
-        willChange: 'transform',
+        ...base,
+        transform: `translate3d(calc(-33.333% + ${pager.dragOffset}px),0px,0px)`,
       };
     }
     if (pager.commitDirection) {
       return {
-        transform: pager.commitDirection === 'next' ? 'translateX(-66.666%)' : 'translateX(0%)',
+        ...base,
+        transform: pager.commitDirection === 'next'
+          ? 'translate3d(-66.666%,0px,0px)'
+          : 'translate3d(0%,0px,0px)',
         transition: 'transform 250ms ease-out',
-        willChange: 'transform',
       };
     }
     if (pager.phase === 'settling') {
       return {
-        transform: 'translateX(-33.333%)',
+        ...base,
+        transform: 'translate3d(-33.333%,0px,0px)',
         transition: 'transform 200ms ease-out',
-        willChange: 'transform',
       };
     }
-    return { transform: 'translateX(-33.333%)' };
+    return { ...base, transform: 'translate3d(-33.333%,0px,0px)' };
   }, [pager.isDragging, pager.dragOffset, pager.commitDirection, pager.phase]);
 
   // Responsive QR size for the modal view
@@ -759,7 +765,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
             <div
               className={`h-full flex w-[300%] motion-reduce:transition-none! ${showPeekHint ? 'pager-peek-hint' : ''}`}
               style={stripStyle}
-              onTransitionEnd={pager.onTransitionEnd}
+              onTransitionEnd={pager.handleTransitionEnd}
               onAnimationEnd={() => setShowPeekHint(false)}
             >
               {/* Prev panel */}

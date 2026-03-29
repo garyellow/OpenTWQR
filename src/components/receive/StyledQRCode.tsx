@@ -11,7 +11,7 @@
  * and then scaled back to cssSize via CSS, giving sharp output on Retina / HiDPI
  * displays without any change to external layout measurements.
  */
-import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
 import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../../types';
 import type { Options, DotType, CornerSquareType, CornerDotType } from 'qr-code-styling';
 
@@ -219,7 +219,9 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
     }, []);
 
     // Subsequent updates: call .update() instead of recreating.
-    useEffect(() => {
+    // useLayoutEffect ensures the canvas is repainted BEFORE the browser paints,
+    // which prevents flicker when the carousel strip teleports to a new position.
+    useLayoutEffect(() => {
       if (!mountedRef.current || !qrInstanceRef.current) return;
       qrInstanceRef.current.update(buildOpts());
       // Re-apply CSS override after update (qr-code-styling resets style on update).
