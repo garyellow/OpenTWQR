@@ -17,7 +17,7 @@ import { resolveIconSrc } from '../utils/favicon';
 import { QuickQRModal } from '../components/receive/QuickQRModal';
 import { generateId } from '../utils/generateId';
 import { useQRSettingsStore } from '../stores/useQRSettingsStore';
-import { buildAccountCaption } from '../utils/accountPresentation';
+import { formatBankCaption } from '../utils/accountPresentation';
 
 export const ReceivePage = () => {
   const { accounts, selectedAccountId, addAccount, selectAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
@@ -49,7 +49,7 @@ export const ReceivePage = () => {
 
   const bankName = stripCompanySuffix(bank?.name || '');
   const currentAccountTitle = selectedAccount?.label || bankName || t.receive.myAccount;
-  const currentAccountCaption = buildAccountCaption(currentAccountTitle, bankName, selectedAccount?.bankCode);
+  const currentAccountCaption = formatBankCaption(bankName, selectedAccount?.bankCode);
 
   /** Resolved bank icon URL for QR center logo (when logoType is 'bank'). */
   const bankIconUrl = useMemo(() => {
@@ -85,7 +85,7 @@ export const ReceivePage = () => {
           id: account.id,
           title,
           accountNumber: account.accountNumber,
-          caption: buildAccountCaption(title, optionBankName, account.bankCode),
+          caption: formatBankCaption(optionBankName, account.bankCode),
           bankCode: account.bankCode,
           iconUrl: account.iconUrl,
           bankUrl: accountBank?.url,

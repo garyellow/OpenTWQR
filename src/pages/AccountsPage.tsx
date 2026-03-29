@@ -13,7 +13,7 @@ import type { BankAccount } from '../types';
 import { generateId } from '../utils/generateId';
 import { haptic } from '../utils/haptics';
 import { maskAccount, stripCompanySuffix } from '../utils/twqr';
-import { buildAccountCaption } from '../utils/accountPresentation';
+import { formatBankCaption } from '../utils/accountPresentation';
 
 export const AccountsPage = () => {
   const { accounts, addAccount, removeAccount, updateAccount, selectAccount, selectedAccountId } =
@@ -73,7 +73,7 @@ export const AccountsPage = () => {
   const selectedBank = selectedAccount ? bankByCode.get(selectedAccount.bankCode) : undefined;
   const selectedBankName = stripCompanySuffix(selectedBank?.name || '');
   const selectedAccountTitle = selectedAccount?.label || selectedBankName || t.receive.myAccount;
-  const selectedAccountCaption = buildAccountCaption(selectedAccountTitle, selectedBankName, selectedAccount?.bankCode);
+  const selectedAccountCaption = formatBankCaption(selectedBankName, selectedAccount?.bankCode);
 
   /** Selecting an account updates the default receiving account in place. */
   const handleSelect = useCallback((id: string) => {

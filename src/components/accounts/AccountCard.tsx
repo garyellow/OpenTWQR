@@ -3,7 +3,6 @@ import { Trash2, Pencil } from 'lucide-react';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { maskAccount, stripCompanySuffix } from '../../utils/twqr';
-import { shouldShowSecondaryBankName } from '../../utils/accountPresentation';
 import { BankIcon } from './BankIcon';
 
 interface AccountCardProps {
@@ -24,9 +23,8 @@ export const AccountCard = ({
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((state) => state.banks);
   const bank = banks.find((b) => b.code === account.bankCode);
-  const bankName = stripCompanySuffix(bank?.name || account.bankCode);
-  const displayName = account.label || bankName;
-  const showBankSubtitle = Boolean(account.label) && shouldShowSecondaryBankName(displayName, bankName);
+  const bankName = stripCompanySuffix(bank?.name || '');
+  const displayName = account.label || bankName || account.bankCode;
 
   return (
     <article
@@ -65,8 +63,8 @@ export const AccountCard = ({
           {maskAccount(account.accountNumber)}
         </p>
 
-        <div className={`flex items-center gap-2 mt-2 ${isSelected ? 'text-white/60 dark:text-zinc-900/60' : 'text-zinc-500 dark:text-zinc-400'}`}>
-          {showBankSubtitle && (
+        <div className={`flex items-center gap-2 mt-2 min-w-0 ${isSelected ? 'text-white/60 dark:text-zinc-900/60' : 'text-zinc-500 dark:text-zinc-400'}`}>
+          {bankName && (
             <span className="text-sm truncate">
               {bankName}
             </span>

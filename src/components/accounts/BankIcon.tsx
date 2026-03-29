@@ -42,26 +42,26 @@ export const BankIcon = ({
 
   const showImage = Boolean(src && src !== erroredSrc);
   const imgReady = loadedSrc === src;
+  const iconPixelSize = size === 'sm' ? 32 : 48;
 
-  const containerClass = size === 'sm'
-    ? 'max-w-8 max-h-8 min-w-6 min-h-6 text-xs'
-    : 'max-w-12 max-h-12 min-w-8 min-h-8 text-sm';
-  const fallbackSizeClass = size === 'sm' ? 'w-8 h-8' : 'w-12 h-12';
+  const containerClass = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-12 h-12 text-sm';
   const radiusClass = size === 'sm' ? 'rounded-lg' : 'rounded-xl';
   const bgClass = 'bg-zinc-50 dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700/50';
   const textClass = 'text-zinc-700 dark:text-zinc-300';
 
   return (
     <div
-      className={`${showImage ? containerClass : fallbackSizeClass} ${radiusClass} flex items-center justify-center font-semibold border shrink-0 overflow-hidden ${bgClass} ${className}`}
+      className={`${containerClass} ${radiusClass} flex items-center justify-center font-semibold border shrink-0 overflow-hidden ${bgClass} ${className}`}
     >
       {showImage ? (
         <img
           src={src}
           alt=""
+          width={iconPixelSize}
+          height={iconPixelSize}
           onError={() => setErroredSrc(src!)}
           onLoad={() => setLoadedSrc(src!)}
-          className={`max-w-full max-h-full object-contain p-1 transition-opacity duration-200 ${imgReady ? 'opacity-100' : 'opacity-0'}`}
+          className={`h-full w-full object-contain p-1 transition-opacity duration-200 ${imgReady ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
           referrerPolicy="no-referrer"
         />

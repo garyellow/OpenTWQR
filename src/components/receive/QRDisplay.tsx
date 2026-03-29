@@ -19,7 +19,7 @@ import { AccountPickerSheet } from '../accounts/AccountPickerSheet';
 import type { ShareData, ExpiryOption } from '../../types';
 import { QR_CENTER_IMAGE_VERTICAL } from '../../utils/qrLabel';
 import { StyledQRCode, type StyledQRCodeHandle, type StyledQRCodeCenterImage } from './StyledQRCode';
-import { buildAccountCaption } from '../../utils/accountPresentation';
+import { formatBankCaption } from '../../utils/accountPresentation';
 
 const SINGLE_SLOT_ID = 'slot-single' as const;
 
@@ -397,7 +397,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         id: card.id,
         title,
         accountNumber: card.accountNumber,
-        caption: buildAccountCaption(title, card.bankName, card.bankCode),
+        caption: formatBankCaption(card.bankName, card.bankCode),
         bankCode: card.bankCode ?? '—',
         iconUrl: card.bankIconUrl,
       };
@@ -953,7 +953,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         <AccountSelectorCard
           title={currentCard?.label || currentBankName || t.receive.myAccount}
           subtitle={currentAccountNumber ? (accountRevealed ? formatAccountDisplay(currentAccountNumber) : maskAccount(currentAccountNumber)) : undefined}
-          caption={buildAccountCaption(currentCard?.label || currentBankName || t.receive.myAccount, currentBankName, currentBankCode)}
+          caption={formatBankCaption(currentBankName, currentBankCode)}
           bankCode={currentBankCode ?? '—'}
           iconUrl={currentCard?.bankIconUrl}
           onClick={() => setShowAccountPicker(true)}
