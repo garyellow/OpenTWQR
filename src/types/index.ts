@@ -1,7 +1,7 @@
 export interface Bank {
   code: string;
   name: string;
-  /** Default official website URL (from Banking Bureau or FSC open data). */
+  /** Official institution website/homepage (used for favicon fallback, not transfer deep links). */
   url?: string;
 }
 

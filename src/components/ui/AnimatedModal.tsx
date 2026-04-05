@@ -80,7 +80,7 @@ export const AnimatedModal = ({
           aria-modal="true"
           aria-labelledby={ariaLabelledby}
           aria-describedby={ariaDescribedby}
-          className={`pointer-events-auto w-full bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overscroll-contain motion-reduce:animate-none ${
+          className={`pointer-events-auto w-full bg-white dark:bg-zinc-900 app-modal-shell shadow-2xl overscroll-contain motion-reduce:animate-none ${
             isClosing
               ? 'animate-out fade-out zoom-out-95 duration-150'
               : 'animate-in fade-in zoom-in-95 duration-200'

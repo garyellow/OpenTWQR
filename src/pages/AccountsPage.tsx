@@ -2,17 +2,23 @@ import { useState, useCallback, useMemo } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { AccountCard } from '../components/accounts/AccountCard';
+import { AccountSelectorCard } from '../components/accounts/AccountSelectorCard';
 import { AccountForm } from '../components/accounts/AccountForm';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { Plus, Wallet, Trash2, Download } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ImportDialog } from '../components/settings/ImportDialog';
+import { useBanksStore } from '../stores/useBanksStore';
 import type { BankAccount } from '../types';
 import { generateId } from '../utils/generateId';
+import { haptic } from '../utils/haptics';
+import { maskAccount, stripCompanySuffix } from '../utils/twqr';
+import { formatBankCaption } from '../utils/accountPresentation';
 
 export const AccountsPage = () => {
   const { accounts, addAccount, removeAccount, updateAccount, selectAccount, selectedAccountId } =
     useAppStore();
+  const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,21 +60,45 @@ export const AccountsPage = () => {
     navigate('/', { viewTransition: true });
   }, [addAccount, navigate]);
 
-  /** Selecting an account always navigates back to the receive page. */
+  const bankByCode = useMemo(
+    () => new Map(banks.map((entry) => [entry.code, entry])),
+    [banks],
+  );
+
+  const selectedAccount = useMemo(
+    () => accounts.find((account) => account.id === selectedAccountId) || accounts[0],
+    [accounts, selectedAccountId],
+  );
+
+  const selectedBank = selectedAccount ? bankByCode.get(selectedAccount.bankCode) : undefined;
+  const selectedBankName = stripCompanySuffix(selectedBank?.name || '');
+  const selectedAccountTitle = selectedAccount?.label || selectedBankName || t.receive.myAccount;
+  const selectedAccountCaption = formatBankCaption(selectedBankName, selectedAccount?.bankCode);
+
+  /** Selecting an account updates the default receiving account in place. */
   const handleSelect = useCallback((id: string) => {
+    if (id === selectedAccountId) return;
+    haptic();
     selectAccount(id);
-    navigate('/', { viewTransition: true });
-  }, [selectAccount, navigate]);
+  }, [selectAccount, selectedAccountId]);
 
   const sortedAccounts = useMemo(
-    () => [...accounts].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
+    () => [...accounts].sort((left, right) => {
+      const codeCompare = left.bankCode.localeCompare(right.bankCode);
+      if (codeCompare !== 0) return codeCompare;
+
+      const labelCompare = (left.label || '').localeCompare(right.label || '');
+      if (labelCompare !== 0) return labelCompare;
+
+      return left.accountNumber.localeCompare(right.accountNumber);
+    }),
     [accounts],
   );
 
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
   return (
-    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
       <a
         href="#accounts-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -135,24 +165,60 @@ export const AccountsPage = () => {
           </div>
         ) : (
           <div className="space-y-8 pb-24">
-            <div className="grid gap-4">
-              {sortedAccounts.map((account) => (
-                <AccountCard
-                  key={account.id}
-                  account={account}
-                  isSelected={selectedAccountId === account.id}
-                  onSelect={() => handleSelect(account.id)}
-                  onDelete={(e) => {
-                    e.stopPropagation();
-                    setDeletingId(account.id);
-                  }}
-                  onEdit={(e) => {
-                    e.stopPropagation();
-                    setEditingId(account.id);
-                  }}
+            {selectedAccount && (
+              <section className="space-y-3">
+                <div className="space-y-1">
+                  <h2 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+                    {t.accounts.currentTitle}
+                  </h2>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 text-pretty">
+                    {t.accounts.currentDesc}
+                  </p>
+                </div>
+
+                <AccountSelectorCard
+                  title={selectedAccountTitle}
+                  subtitle={maskAccount(selectedAccount.accountNumber)}
+                  caption={selectedAccountCaption}
+                  bankCode={selectedAccount.bankCode}
+                  iconUrl={selectedAccount.iconUrl}
+                  bankUrl={selectedBank?.url}
+                  showDisclosure={false}
                 />
-              ))}
-            </div>
+              </section>
+            )}
+
+            {sortedAccounts.length > 0 && (
+              <section className="space-y-3">
+                <div className="space-y-1">
+                  <h2 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+                    {t.accounts.listTitle}
+                  </h2>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 text-pretty">
+                    {t.accounts.listDesc}
+                  </p>
+                </div>
+
+                <div className="grid gap-4">
+                  {sortedAccounts.map((account) => (
+                    <AccountCard
+                      key={account.id}
+                      account={account}
+                      isSelected={selectedAccountId === account.id}
+                      onSelect={() => handleSelect(account.id)}
+                      onDelete={(e) => {
+                        e.stopPropagation();
+                        setDeletingId(account.id);
+                      }}
+                      onEdit={(e) => {
+                        e.stopPropagation();
+                        setEditingId(account.id);
+                      }}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </main>

@@ -42,7 +42,7 @@ export const BackupSection = () => {
         </InfoTip>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+      <div className="app-surface overflow-hidden shadow-xs divide-y divide-zinc-100 dark:divide-zinc-800/50">
         <button
           type="button"
           onClick={() => setShowExport(true)}

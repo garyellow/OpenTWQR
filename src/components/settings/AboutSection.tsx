@@ -92,7 +92,7 @@ export const AboutSection = () => {
       <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider px-1 mb-3">
         {t.about.sectionTitle}
       </h2>
-      <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+      <div className="app-surface overflow-hidden shadow-xs divide-y divide-zinc-100 dark:divide-zinc-800/50">
         <a
           href="https://ko-fi.com/garyellow"
           target="_blank"

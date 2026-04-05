@@ -25,7 +25,7 @@ export const BottomNav = () => {
       className="fixed bottom-0 inset-x-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-200/50 dark:border-zinc-800/50 px-safe"
       aria-label={t.nav.ariaLabel}
     >
-      <div className="max-w-lg mx-auto flex items-center justify-around h-14">
+      <div className="max-w-lg mx-auto flex items-center justify-around gap-1.5 h-[var(--bottom-nav-height)] px-2">
         {tabs.map(({ path, icon: Icon, labelKey }) => (
           <NavLink
             key={path}
@@ -33,12 +33,21 @@ export const BottomNav = () => {
             end={path === '/'}
             onClick={() => haptic()}
             title={labels[labelKey]}
-            className="flex flex-col items-center justify-center gap-0.5 min-w-16 py-1.5 rounded-xl transition-colors"
+            className={({ isActive }) => `flex flex-1 max-w-24 min-h-11 min-w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-3 py-1.5 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 active:scale-95 ${
+              isActive
+                ? 'shadow-xs'
+                : 'hover:bg-zinc-100/80 dark:hover:bg-zinc-800/70'
+            }`}
+            style={({ isActive }) => isActive
+              ? {
+                  backgroundColor: 'light-dark(var(--accent-light), var(--accent-dark-light))',
+                }
+              : undefined}
           >
             {({ isActive }) => (
               <>
                 <Icon
-                  size={22}
+                  size={21}
                   className={isActive ? '' : 'text-zinc-400 dark:text-zinc-500'}
                   style={
                     isActive
@@ -64,7 +73,7 @@ export const BottomNav = () => {
           </NavLink>
         ))}
       </div>
-      {/* Safe area spacer for iOS */}
+      {/* Safe area spacer for devices with bottom insets / gesture bars */}
       <div className="pb-safe" />
     </nav>
   );

@@ -46,7 +46,7 @@ export const DangerSection = () => {
       <h2 className="text-xs font-semibold text-red-500 dark:text-red-400 uppercase tracking-wider px-1 mb-3">
         {t.danger.sectionTitle}
       </h2>
-      <div className="bg-white dark:bg-zinc-900/50 rounded-xl border border-red-200/50 dark:border-red-800/30 shadow-xs overflow-hidden">
+      <div className="rounded-2xl bg-white dark:bg-zinc-900/50 border border-red-200/50 dark:border-red-800/30 shadow-xs overflow-hidden">
         <button
           type="button"
           onClick={() => setShowConfirm(true)}

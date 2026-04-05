@@ -19,7 +19,7 @@ import { OpenTWQRLogo } from '../ui/OpenTWQRLogo';
  * - `will-change: backdrop-filter, opacity` keeps the compositing layer
  *   warm so the GPU is ready to apply the filter instantly on show.
  * - `backdrop-saturate-160` boosts the vibrancy of the blurred colours,
- *   matching the iOS / macOS frosted-glass aesthetic (`blur` + `saturate`).
+ *   matching the polished frosted-glass look common in modern mobile OSes.
  * - Centres the coloured OpenTWQR SVG logo as the sole visual element —
  *   clean, branded, and recognisable in the task switcher thumbnail.
  * - The overlay is kept hidden via `visibility: hidden` (not `display: none`)

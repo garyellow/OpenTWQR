@@ -11,7 +11,7 @@
  * and then scaled back to cssSize via CSS, giving sharp output on Retina / HiDPI
  * displays without any change to external layout measurements.
  */
-import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
 import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../../types';
 import type { Options, DotType, CornerSquareType, CornerDotType } from 'qr-code-styling';
 
@@ -152,7 +152,7 @@ function fixCanvasCSS(container: HTMLDivElement, cssSize: number) {
   canvas.style.height = `${cssSize}px`;
 }
 
-export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
+export const StyledQRCode = memo(forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
   (
     {
       value,
@@ -169,6 +169,7 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const qrInstanceRef = useRef<any>(null);
     const mountedRef = useRef(false);
+    const lastOptionsSignatureRef = useRef<string | null>(null);
 
     /** Expose the underlying canvas element for PNG export. */
     useImperativeHandle(
@@ -186,10 +187,13 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
       () => buildOptions(value, size, getPhysicalSize(size), dotStyle, eyeStyle, centerImage),
       [value, size, dotStyle, eyeStyle, centerImage],
     );
+    const optionsSignature = `${value}::${size}::${dotStyle}::${eyeStyle}::${centerImage?.src ?? ''}::${centerImage?.width ?? 0}::${centerImage?.height ?? 0}`;
 
     // Keep refs so async callbacks always read the latest values.
     const buildOptsRef = useRef(buildOpts);
     buildOptsRef.current = buildOpts;
+    const optionsSignatureRef = useRef(optionsSignature);
+    optionsSignatureRef.current = optionsSignature;
     const sizeRef = useRef(size);
     sizeRef.current = size;
 
@@ -210,6 +214,7 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
         qr.append(containerRef.current);
         // Override the canvas CSS to display at cssSize while rendering at physicalSize.
         fixCanvasCSS(containerRef.current, sizeRef.current);
+        lastOptionsSignatureRef.current = optionsSignatureRef.current;
         mountedRef.current = true;
       })();
 
@@ -219,12 +224,18 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
     }, []);
 
     // Subsequent updates: call .update() instead of recreating.
-    useEffect(() => {
+    // useLayoutEffect ensures the canvas is repainted BEFORE the browser paints,
+    // which helps the scroll-snap carousel keep each QR canvas visually stable
+    // as cards move into the active position.
+    useLayoutEffect(() => {
       if (!mountedRef.current || !qrInstanceRef.current) return;
+      if (lastOptionsSignatureRef.current === optionsSignature) return;
+
+      lastOptionsSignatureRef.current = optionsSignature;
       qrInstanceRef.current.update(buildOpts());
       // Re-apply CSS override after update (qr-code-styling resets style on update).
       if (containerRef.current) fixCanvasCSS(containerRef.current, size);
-    }, [buildOpts, size]);
+    }, [buildOpts, optionsSignature, size]);
 
     return (
       <div
@@ -234,6 +245,6 @@ export const StyledQRCode = forwardRef<StyledQRCodeHandle, StyledQRCodeProps>(
       />
     );
   },
-);
+));
 
 StyledQRCode.displayName = 'StyledQRCode';

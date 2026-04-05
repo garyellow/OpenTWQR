@@ -70,7 +70,9 @@ const normalizeName = (name) =>
   name.replace(/\s+/g, ' ').replace(/\u3000/g, ' ').trim();
 
 /**
- * Ensure a URL uses HTTPS. Normalise to origin only (strip paths, query strings).
+ * Ensure an official website URL uses HTTPS. Normalise to origin only
+ * (strip paths, query strings) because the app only needs the homepage as a
+ * stable favicon/source reference, not a navigation deep link.
  * CSP restricts img-src to https: only, so HTTP URLs are upgraded.
  */
 const ensureHttps = (rawUrl) => {
@@ -133,7 +135,8 @@ const fetchBankingBureauPage = async (type, page) => {
    *     <a href="URL" target="_blank" ...>
    *
    * We extract code + name from the link, then the first http(s) URL
-   * from the furl_con block that follows.
+   * from the furl_con block that follows. This URL is the institution's
+   * official website/homepage, not a transfer-app deep link.
    */
   const entries = [];
   const entryPattern =
@@ -252,11 +255,11 @@ const parseFiscBanks = (xml) => {
   return banks.sort((a, b) => Number(a.code) - Number(b.code));
 };
 
-/* ── FSC CSV parser (fallback: bank codes → website URLs) ── */
+/* ── FSC CSV parser (fallback: bank codes → official website URLs) ── */
 
 /**
  * Parse the FSC "金融機構基本資料" CSV and extract head-office rows
- * (where 機構代號 is empty) to get the mapping: 總機構代號 → 金融機構網址.
+ * (where 機構代號 is empty) to get the mapping: 總機構代號 → 金融機構官方網站.
  */
 const parseFscUrls = (csvText) => {
   const urlMap = new Map();

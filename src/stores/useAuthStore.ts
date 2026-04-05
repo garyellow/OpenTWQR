@@ -31,9 +31,9 @@ interface AuthState {
 /** Available lock timeout presets (milliseconds). */
 export const LOCK_TIMEOUT_OPTIONS = [
   { value: 0 },
-  { value: 10_000 },
-  { value: 60_000 },
-  { value: 300_000 },
+  { value: 30_000 },
+  { value: 180_000 },
+  { value: 600_000 },
   { value: 3_600_000 },
 ] as const;
 
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       isEnabled: false,
       credentialId: null,
-      lockTimeout: 10_000,
+      lockTimeout: 30_000,
       privacyBlurEnabled: true,
       isHydrated: false,
       isUnlocked: false,
@@ -74,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'opentwqr-auth',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => idbStorage),
       partialize: (state) => ({
         isEnabled: state.isEnabled,
@@ -82,14 +82,13 @@ export const useAuthStore = create<AuthState>()(
         lockTimeout: state.lockTimeout,
         privacyBlurEnabled: state.privacyBlurEnabled,
       }),
-      migrate: (persisted, fromVersion) => {
+      migrate: (persisted) => {
         const state = persisted as Partial<AuthState>;
-        if (fromVersion < 2) {
-          // The 30s option was removed. Reset any stale value to the default (10s).
-          const validValues = LOCK_TIMEOUT_OPTIONS.map((o) => o.value as number);
-          if (state.lockTimeout !== undefined && !validValues.includes(state.lockTimeout)) {
-            state.lockTimeout = 10_000;
-          }
+        // If migrating from older versions, ensure lockTimeout is one of the
+        // current valid presets. If not, reset to the new default (30s).
+        const validValues = LOCK_TIMEOUT_OPTIONS.map((o) => o.value as number);
+        if (state.lockTimeout !== undefined && !validValues.includes(state.lockTimeout)) {
+          state.lockTimeout = 30_000;
         }
         return state;
       },
