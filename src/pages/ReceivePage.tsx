@@ -189,14 +189,14 @@ export const ReceivePage = () => {
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-app-screen flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
         <div className="w-24 h-24 rounded-2xl flex items-center justify-center border shadow-xs"
           style={{
-            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 10%, transparent)',
-            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 15%, transparent)',
+            backgroundColor: 'var(--ca-10)',
+            borderColor: 'var(--ca-15)',
           }}
         >
-          <QrCode size={48} style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }} aria-hidden="true" />
+          <QrCode size={48} style={{ color: 'var(--ca)' }} aria-hidden="true" />
         </div>
         <div className="text-center space-y-4">
           <h1>
@@ -269,7 +269,7 @@ export const ReceivePage = () => {
 
   /* ---------- Main layout ---------- */
   return (
-    <div className="h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
+    <div className="h-app-screen flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
       <a
         href="#receive-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"

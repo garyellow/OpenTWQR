@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import { execSync } from 'node:child_process'
 import react from '@vitejs/plugin-react'
@@ -174,14 +175,21 @@ export default defineConfig({
     }),
   ],
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         // Split heavy vendor libraries into separate chunks so the browser
         // can cache them independently from application code.
-        manualChunks: {
-          'vendor-router': ['react-router-dom'],
+        manualChunks(id) {
+          if (id.includes('react-router-dom') || id.includes('react-router')) {
+            return 'vendor-router'
+          }
         },
       },
     },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
   },
 })

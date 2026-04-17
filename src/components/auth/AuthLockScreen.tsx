@@ -41,15 +41,15 @@ export const AuthLockScreen = () => {
   }, [credentialId, isAuthenticating, unlock, t.auth.authFailed]);
 
   return (
-    <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-app-screen flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
       {/* Lock icon with accent colour */}
       <div className="w-24 h-24 rounded-2xl flex items-center justify-center border shadow-xs"
         style={{
-          backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 10%, transparent)',
-          borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 20%, transparent)',
+          backgroundColor: 'var(--ca-10)',
+          borderColor: 'var(--ca-20)',
         }}
       >
-        <Lock size={48} style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }} aria-hidden="true" />
+        <Lock size={48} style={{ color: 'var(--ca)' }} aria-hidden="true" />
       </div>
 
       {/* Headline */}

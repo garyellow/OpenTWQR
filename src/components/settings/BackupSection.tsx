@@ -6,7 +6,7 @@ import { InfoTip } from '../ui/InfoTip';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 
 const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  (navigator.userAgent.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
 const isStandalone = () =>
   window.matchMedia('(display-mode: standalone)').matches ||

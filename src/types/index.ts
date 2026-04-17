@@ -50,4 +50,5 @@ export type ParseShareResult =
   | { status: 'need-password' }
   | { status: 'wrong-password' }
   | { status: 'expired' }
+  | { status: 'unsupported-browser' }
   | { status: 'invalid' };

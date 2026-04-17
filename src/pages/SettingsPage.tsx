@@ -11,7 +11,7 @@ export const SettingsPage = () => {
   const t = useLocaleStore((s) => s.t);
 
   return (
-    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
+    <div className="min-h-app-screen flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
       <a
         href="#settings-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"

@@ -51,7 +51,8 @@ export function parseTWQR(qrString: string): ParsedTWQR | null {
 
     // D1 is amount in cents (amount × 100 per TWQR spec)
     const d1 = params.get('D1');
-    const amount = d1 ? Math.round(parseInt(d1, 10) / 100) : 0;
+    const rawAmount = d1 ? parseInt(d1, 10) : 0;
+    const amount = Number.isNaN(rawAmount) ? 0 : Math.round(rawAmount / 100);
 
     const note = params.get('D9') || undefined;
 

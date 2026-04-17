@@ -97,7 +97,7 @@ export const AccountPickerSheet = ({
           aria-modal="true"
           aria-labelledby="account-picker-title"
           aria-describedby={description ? 'account-picker-description' : undefined}
-          className={`pointer-events-auto w-full max-w-md overflow-hidden rounded-[28px] border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 motion-reduce:animate-none ${
+          className={`pointer-events-auto w-full max-w-md overflow-hidden app-modal-shell border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 motion-reduce:animate-none ${
             isClosing
               ? 'animate-out fade-out slide-out-to-bottom-4 duration-150'
               : 'animate-in fade-in slide-in-from-bottom-4 duration-200'
@@ -133,7 +133,7 @@ export const AccountPickerSheet = ({
             </button>
           </div>
 
-          <div className="max-h-[min(28rem,70svh)] overflow-y-auto overscroll-contain px-3 pb-3">
+          <div className="max-h-app-sheet overflow-y-auto overscroll-contain px-3 pb-3">
             <div className="space-y-2">
               {options.map((option) => {
                 const isSelected = option.id === selectedId;

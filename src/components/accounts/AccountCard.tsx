@@ -33,8 +33,8 @@ export const AccountCard = ({
         : 'app-surface shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700'
         }`}
       style={isSelected ? {
-        backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
-        borderColor: 'light-dark(var(--accent), var(--accent-dark))',
+        backgroundColor: 'var(--ca)',
+        borderColor: 'var(--ca)',
       } : undefined}
     >
       {/* Full-card tap target */}

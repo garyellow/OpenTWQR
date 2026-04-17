@@ -51,6 +51,10 @@ export const AboutSection = () => {
       const reg = await navigator.serviceWorker?.getRegistration();
       if (!reg) {
         setCheckState('error');
+        if (resetTimerRef.current !== null) {
+          window.clearTimeout(resetTimerRef.current);
+        }
+        resetTimerRef.current = window.setTimeout(() => setCheckState('idle'), 3000);
         return;
       }
 

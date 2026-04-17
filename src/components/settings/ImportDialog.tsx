@@ -179,6 +179,9 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
         case 'wrong-password':
           setError(t.importDialog.wrongPassword);
           break;
+        case 'unsupported-browser':
+          setError(t.importDialog.unsupportedBrowser);
+          break;
         case 'invalid':
           setError(t.importDialog.invalidString);
           break;
@@ -369,7 +372,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
     <AnimatedModal
       onClose={onClose}
       overlayClass="z-50"
-      cardClass="max-w-md max-h-[90svh] overflow-y-auto"
+      cardClass="max-w-md max-h-app-90 overflow-y-auto"
       ariaLabelledby="import-title"
     >
       {(requestClose) => (
@@ -484,8 +487,8 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                           : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
                       }`}
                       style={includeAccounts ? {
-                        backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
-                        borderColor: 'light-dark(var(--accent), var(--accent-dark))',
+                        backgroundColor: 'var(--ca)',
+                        borderColor: 'var(--ca)',
                       } : undefined}
                     >
                       {includeAccounts && <Check size={12} className="text-white dark:text-zinc-900" aria-hidden="true" />}
@@ -519,7 +522,7 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                       </div>
 
                       {/* Candidate list */}
-                      <div className="space-y-2 mb-4 max-h-[30svh] overflow-y-auto -mx-1 px-1">
+                      <div className="space-y-2 mb-4 max-h-app-30 overflow-y-auto -mx-1 px-1">
                         {candidates.map((c, i) => (
                           <div
                             key={`${c.original.bankCode}-${c.original.accountNumber}-${i}`}
@@ -548,8 +551,8 @@ export const ImportDialog = ({ onClose, initialText = '' }: ImportDialogProps) =
                                   : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
                               }`}
                               style={c.checked ? {
-                                backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
-                                borderColor: 'light-dark(var(--accent), var(--accent-dark))',
+                                backgroundColor: 'var(--ca)',
+                                borderColor: 'var(--ca)',
                               } : undefined}
                             >
                               {c.checked && <Check size={12} className="text-white dark:text-zinc-900" aria-hidden="true" />}
@@ -844,8 +847,8 @@ function ImportCheckboxIcon({ checked, indeterminate }: { checked: boolean; inde
         active ? 'border-transparent' : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
       }`}
       style={active ? {
-        backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
-        borderColor: 'light-dark(var(--accent), var(--accent-dark))',
+        backgroundColor: 'var(--ca)',
+        borderColor: 'var(--ca)',
       } : undefined}
     >
       {checked && <Check size={12} className="text-white dark:text-zinc-900" aria-hidden="true" />}

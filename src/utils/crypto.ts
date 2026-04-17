@@ -14,6 +14,25 @@ export const IV_LEN = 12;
 export const SALT_LEN = 16;
 export const KEY_LEN = 32;
 
+export class WebCryptoUnavailableError extends Error {
+  constructor() {
+    super('Web Crypto API is unavailable in this browser context');
+    this.name = 'WebCryptoUnavailableError';
+  }
+}
+
+export const hasWebCrypto = (): boolean => (
+  typeof globalThis.crypto !== 'undefined' &&
+  typeof globalThis.crypto.subtle !== 'undefined'
+);
+
+export const requireSubtleCrypto = (): SubtleCrypto => {
+  if (!hasWebCrypto()) {
+    throw new WebCryptoUnavailableError();
+  }
+  return globalThis.crypto.subtle;
+};
+
 /* ------------------------------------------------------------------ */
 /*  Base64url helpers                                                  */
 /* ------------------------------------------------------------------ */
@@ -48,14 +67,15 @@ export const deriveKeyFromPassword = async (
   password: string,
   salt: Uint8Array<ArrayBuffer>,
 ): Promise<CryptoKey> => {
-  const keyMaterial = await crypto.subtle.importKey(
+  const subtle = requireSubtleCrypto();
+  const keyMaterial = await subtle.importKey(
     'raw',
     new TextEncoder().encode(password),
     'PBKDF2',
     false,
     ['deriveKey'],
   );
-  return crypto.subtle.deriveKey(
+  return subtle.deriveKey(
     { name: 'PBKDF2', salt: asBuffer(salt), iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },

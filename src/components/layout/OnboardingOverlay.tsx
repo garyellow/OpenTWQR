@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { QrCode, UserPlus, Share2 } from 'lucide-react';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -26,11 +26,13 @@ export const OnboardingOverlay = () => {
   });
   const [step, setStep] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
+  const settledRef = useRef(false);
 
   useScrollLock(show);
 
   const markDone = useCallback(() => {
     try { localStorage.setItem(ONBOARDING_KEY, '1'); } catch { /* noop */ }
+    settledRef.current = false;
     setIsExiting(true);
   }, []);
 
@@ -43,7 +45,22 @@ export const OnboardingOverlay = () => {
   }, [step, markDone]);
 
   const handleAnimationEnd = useCallback(() => {
-    if (isExiting) setShow(false);
+    if (!isExiting || settledRef.current) return;
+    settledRef.current = true;
+    setShow(false);
+  }, [isExiting]);
+
+  // Safety fallback: close overlay even if animationend never fires
+  // (e.g. prefers-reduced-motion, Chrome throttling, or tab backgrounding).
+  // 400 ms > exit animation duration (300 ms) to avoid truncating the animation.
+  useEffect(() => {
+    if (!isExiting) return;
+    const id = setTimeout(() => {
+      if (settledRef.current) return;
+      settledRef.current = true;
+      setShow(false);
+    }, 400);
+    return () => clearTimeout(id);
   }, [isExiting]);
 
   if (!show) return null;
@@ -92,7 +109,7 @@ export const OnboardingOverlay = () => {
                   ? 'w-8'
                   : 'w-2 bg-zinc-200 dark:bg-zinc-700'
               }`}
-              style={i === step ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+              style={i === step ? { backgroundColor: 'var(--ca)' } : undefined}
             />
           ))}
         </div>

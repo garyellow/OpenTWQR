@@ -20,8 +20,9 @@
 
 /*
  * Typed CSS custom properties for accent colours.
- * Declaring syntax:'<color>' + inherits:true lets the browser interpolate
- * them as colours, enabling smooth transitions when the hue changes.
+ * Keep the core palette in OKLCH so accent ramps stay perceptually
+ * consistent on modern browsers and installed PWAs, while @property still
+ * allows smooth interpolation where supported.
  */
 @property --accent            { syntax: '<color>'; inherits: true; initial-value: oklch(55% 0.15 216); }
 @property --accent-hover      { syntax: '<color>'; inherits: true; initial-value: oklch(48% 0.15 216); }
@@ -60,30 +61,71 @@ html.accent-animating {
   padding-right: env(safe-area-inset-right);
 }
 
+@utility min-h-app-screen {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+@utility h-app-screen {
+  height: 100vh;
+  height: 100svh;
+}
+
+@utility max-h-app-90 {
+  max-height: 90vh;
+  max-height: 90svh;
+}
+
+@utility max-h-app-30 {
+  max-height: 30vh;
+  max-height: 30svh;
+}
+
+@utility max-h-app-sheet {
+  max-height: min(28rem, 70vh);
+  max-height: min(28rem, 70svh);
+}
+
+@utility max-h-app-modal {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+}
+
+@utility max-h-app-modal-tight {
+  max-height: calc(100vh - 2.5rem);
+  max-height: calc(100svh - 2.5rem);
+}
+
 /* btn-accent — Primary CTA with user's accent colour.
  * Light: L=55% + white (WCAG AA 4.5:1), Dark: L=75% + dark (WCAG AA 7:1). */
 .btn-accent {
-  background-color: light-dark(var(--accent), var(--accent-dark));
-  color: light-dark(#fff, #18181b);
+  background-color: var(--ca);
+  color: #fff;
+}
+html.dark .btn-accent {
+  color: #18181b;
 }
 .btn-accent:hover {
-  background-color: light-dark(var(--accent-hover), var(--accent-dark-hover));
+  background-color: var(--ca-hover);
 }
 .btn-accent:focus-visible {
-  --tw-ring-color: light-dark(var(--accent), var(--accent-dark));
+  --tw-ring-color: var(--ca);
 }
 
 /* chip-accent — Selected state for radio-chip / toggle elements.
  * :hover deepens accent, :focus-visible sets accent ring for keyboard visibility. */
 .chip-accent {
-  background-color: light-dark(var(--accent), var(--accent-dark));
-  color: light-dark(#fff, #18181b);
+  background-color: var(--ca);
+  color: #fff;
+}
+html.dark .chip-accent {
+  color: #18181b;
 }
 .chip-accent:hover {
-  background-color: light-dark(var(--accent-hover), var(--accent-dark-hover));
+  background-color: var(--ca-hover);
 }
 .chip-accent:focus-visible {
-  --tw-ring-color: light-dark(var(--accent), var(--accent-dark));
+  --tw-ring-color: var(--ca);
 }
 
 /* Shared surface geometry — keeps cards, grouped settings panels, and overlays
@@ -95,16 +137,26 @@ html.accent-animating {
   border-radius: 1.5rem;
   border-width: 1px;
   border-style: solid;
-  border-color: light-dark(rgb(228 228 231 / 0.7), rgb(39 39 42 / 0.78));
-  background-color: light-dark(rgb(255 255 255 / 0.98), rgb(24 24 27 / 0.6));
+  border-color: rgb(228 228 231 / 0.7);
+  background-color: rgb(255 255 255 / 0.98);
+}
+
+:is(html.dark) .app-surface {
+  border-color: rgb(39 39 42 / 0.78);
+  background-color: rgb(24 24 27 / 0.6);
 }
 
 @utility app-surface-strong {
   border-radius: 1.5rem;
   border-width: 1px;
   border-style: solid;
-  border-color: light-dark(rgb(228 228 231 / 0.82), rgb(39 39 42 / 0.9));
-  background-color: light-dark(rgb(255 255 255 / 0.98), rgb(24 24 27 / 0.78));
+  border-color: rgb(228 228 231 / 0.82);
+  background-color: rgb(255 255 255 / 0.98);
+}
+
+:is(html.dark) .app-surface-strong {
+  border-color: rgb(39 39 42 / 0.9);
+  background-color: rgb(24 24 27 / 0.78);
 }
 
 @utility app-modal-shell {
@@ -178,14 +230,56 @@ html.accent-animating {
   --bottom-nav-height: 3.75rem;
   /* Accent color system — computed from --accent-hue via JS */
   --accent-hue: 216;
-  --accent: oklch(55% 0.15 var(--accent-hue));
-  --accent-hover: oklch(48% 0.15 var(--accent-hue));
-  --accent-light: oklch(95% 0.04 var(--accent-hue));
-  --accent-subtle: oklch(90% 0.06 var(--accent-hue));
-  --accent-dark: oklch(75% 0.12 var(--accent-hue));
-  --accent-dark-hover: oklch(80% 0.12 var(--accent-hue));
-  --accent-dark-light: oklch(25% 0.04 var(--accent-hue));
+  --accent:             oklch(55% 0.15 var(--accent-hue));
+  --accent-hover:       oklch(48% 0.15 var(--accent-hue));
+  --accent-light:       oklch(95% 0.04 var(--accent-hue));
+  --accent-subtle:      oklch(90% 0.06 var(--accent-hue));
+  --accent-dark:        oklch(75% 0.12 var(--accent-hue));
+  --accent-dark-hover:  oklch(80% 0.12 var(--accent-hue));
+  --accent-dark-light:  oklch(25% 0.04 var(--accent-hue));
   --accent-dark-subtle: oklch(30% 0.06 var(--accent-hue));
+
+  --accent-08:      oklch(55% 0.15 var(--accent-hue) / 0.08);
+  --accent-10:      oklch(55% 0.15 var(--accent-hue) / 0.10);
+  --accent-12:      oklch(55% 0.15 var(--accent-hue) / 0.12);
+  --accent-15:      oklch(55% 0.15 var(--accent-hue) / 0.15);
+  --accent-20:      oklch(55% 0.15 var(--accent-hue) / 0.20);
+  --accent-30:      oklch(55% 0.15 var(--accent-hue) / 0.30);
+  --accent-dark-08: oklch(75% 0.12 var(--accent-hue) / 0.08);
+  --accent-dark-10: oklch(75% 0.12 var(--accent-hue) / 0.10);
+  --accent-dark-12: oklch(75% 0.12 var(--accent-hue) / 0.12);
+  --accent-dark-15: oklch(75% 0.12 var(--accent-hue) / 0.15);
+  --accent-dark-20: oklch(75% 0.12 var(--accent-hue) / 0.20);
+  --accent-dark-30: oklch(75% 0.12 var(--accent-hue) / 0.30);
+
+  /*
+   * Pre-resolved accent aliases — resolved via .dark cascade so we
+   * never need light-dark() in inline styles. All TSX code should reference
+   * these --ca-* vars instead of using light-dark() directly.
+   */
+  --ca:       var(--accent);
+  --ca-hover: var(--accent-hover);
+  --ca-light: var(--accent-light);
+  --ca-subtle: var(--accent-subtle);
+  --ca-08:    var(--accent-08);
+  --ca-10:    var(--accent-10);
+  --ca-12:    var(--accent-12);
+  --ca-15:    var(--accent-15);
+  --ca-20:    var(--accent-20);
+  --ca-30:    var(--accent-30);
+}
+
+html.dark {
+  --ca:       var(--accent-dark);
+  --ca-hover: var(--accent-dark-hover);
+  --ca-light: var(--accent-dark-light);
+  --ca-subtle: var(--accent-dark-subtle);
+  --ca-08:    var(--accent-dark-08);
+  --ca-10:    var(--accent-dark-10);
+  --ca-12:    var(--accent-dark-12);
+  --ca-15:    var(--accent-dark-15);
+  --ca-20:    var(--accent-dark-20);
+  --ca-30:    var(--accent-dark-30);
 }
 
 html:not(.dark) {
@@ -199,6 +293,7 @@ html.dark {
 body {
   margin: 0;
   min-width: 320px;
+  min-height: 100vh;
   min-height: 100svh;
   background-color: #ffffff;
   color: #18181b;

@@ -18,8 +18,11 @@ export const useAnimatedToggle = () => {
   const [isClosing, setIsClosing] = useState(false);
   const timerRef = useRef<number | null>(null);
   const onClosedRef = useRef<(() => void) | null>(null);
+  const settledRef = useRef(false);
 
   const finalise = useCallback(() => {
+    if (settledRef.current) return;
+    settledRef.current = true;
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -37,6 +40,7 @@ export const useAnimatedToggle = () => {
       timerRef.current = null;
     }
     onClosedRef.current = null;
+    settledRef.current = false;
     setIsClosing(false);
     setIsOpen(true);
   }, []);

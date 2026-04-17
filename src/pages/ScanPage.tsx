@@ -194,7 +194,7 @@ export const ScanPage = () => {
 
   /* ---------- Layout ---------- */
   return (
-    <div className="h-svh flex flex-col bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
+    <div className="h-app-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
       {!scanning && (
         <a
           href="#scan-main"

@@ -69,7 +69,7 @@ export const PaymentLinksPage = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-safe">
+    <div className="min-h-app-screen flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-safe">
       <a
         href="#payment-links-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -124,8 +124,14 @@ export const PaymentLinksPage = () => {
         {configs.length === 0 ? (
           /* Empty state — mirrors AccountsPage */
           <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
-            <div className="w-24 h-24 rounded-2xl bg-white dark:bg-zinc-900 text-zinc-300 dark:text-zinc-700 border border-zinc-200/50 dark:border-zinc-800/50 flex items-center justify-center shadow-xs">
-              <Link2 size={48} aria-hidden="true" />
+            <div
+              className="w-24 h-24 rounded-2xl border flex items-center justify-center shadow-xs"
+              style={{
+                backgroundColor: 'var(--ca-10)',
+                borderColor: 'var(--ca-15)',
+              }}
+            >
+              <Link2 size={48} style={{ color: 'var(--ca)' }} aria-hidden="true" />
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">
@@ -162,11 +168,11 @@ export const PaymentLinksPage = () => {
                     >
                       <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 12%, transparent)' }}
+                        style={{ backgroundColor: 'var(--ca-12)' }}
                       >
                         <Link2
                           size={18}
-                          style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+                          style={{ color: 'var(--ca)' }}
                           aria-hidden="true"
                         />
                       </div>
@@ -321,7 +327,7 @@ export const PaymentLinksPage = () => {
         <AnimatedModal
           onClose={() => setTestingBankCode(null)}
           overlayClass="z-60"
-          cardClass="max-w-sm max-h-[90svh] overflow-y-auto"
+          cardClass="max-w-sm max-h-app-90 overflow-y-auto"
           ariaLabelledby="payment-link-test-title"
           ariaDescribedby="payment-link-test-desc"
         >
@@ -529,7 +535,7 @@ export const PaymentLinksPage = () => {
         <AnimatedModal
           onClose={() => { setShowGuide(false); setGuideTab('intent'); }}
           overlayClass="z-60"
-          cardClass="max-w-sm max-h-[90svh] overflow-y-auto"
+          cardClass="max-w-sm max-h-app-90 overflow-y-auto"
           ariaLabelledby="payment-link-guide-title"
         >
           {(requestClose) => (
@@ -539,9 +545,9 @@ export const PaymentLinksPage = () => {
                 <div className="flex items-center gap-2.5">
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 12%, transparent)' }}
+                    style={{ backgroundColor: 'var(--ca-12)' }}
                   >
-                    <CircleHelp size={18} style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }} aria-hidden="true" />
+                    <CircleHelp size={18} style={{ color: 'var(--ca)' }} aria-hidden="true" />
                   </div>
                   <h2
                     id="payment-link-guide-title"
@@ -597,9 +603,9 @@ export const PaymentLinksPage = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"
                           style={{
-                            color: 'light-dark(var(--accent), var(--accent-dark))',
-                            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 30%, transparent)',
-                            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 8%, transparent)',
+                            color: 'var(--ca)',
+                            borderColor: 'var(--ca-30)',
+                            backgroundColor: 'var(--ca-08)',
                           }}
                         >
                           <Smartphone size={13} aria-hidden="true" />
@@ -658,9 +664,9 @@ export const PaymentLinksPage = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors"
                           style={{
-                            color: 'light-dark(var(--accent), var(--accent-dark))',
-                            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 30%, transparent)',
-                            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 8%, transparent)',
+                            color: 'var(--ca)',
+                            borderColor: 'var(--ca-30)',
+                            backgroundColor: 'var(--ca-08)',
                           }}
                         >
                           <FileText size={13} aria-hidden="true" />

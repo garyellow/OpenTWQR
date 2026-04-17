@@ -121,6 +121,7 @@ const zhTW = {
     creating: '建立連結中…',
     copyLinkAction: '複製連結',
     shareLinkAction: '分享連結',
+    unsupportedBrowser: '受保護的分享連結需要較新的加密支援，請改用已安裝的 OpenTWQR App 或較新的瀏覽器。',
     createFailed: '建立連結失敗',
   },
 
@@ -304,6 +305,7 @@ const zhTW = {
     shared: '已分享',
     copyFailed: '複製失敗',
     shareFailed: '分享失敗',
+    unsupportedBrowser: '加密備份需要較新的加密支援，請改用已安裝的 OpenTWQR App 或較新的瀏覽器。',
     exportFailed: '匯出失敗',
   },
 
@@ -318,6 +320,7 @@ const zhTW = {
     emptyInput: '請貼上備份字串',
     invalidString: '無效的備份字串',
     wrongPassword: '密碼錯誤',
+    unsupportedBrowser: '這份備份需要較新的加密支援才能開啟，請改用已安裝的 OpenTWQR App 或較新的瀏覽器。',
     importError: '匯入失敗，字串可能已損壞',
     importing: '匯入中…',
     import: '匯入',
@@ -511,10 +514,10 @@ const zhTW = {
 
     // Manifest import
     manifestLaunchApp: '開啟 App Manager',
-    manifestDesc: '貼上從 App Manager 複製的 AndroidManifest.xml 內容，自動解析可用的深層連結（Deep Link）。僅含有 BROWSABLE 的 Activity 才能從網頁開啟。App Manager 可透過 F-Droid 免費下載。',
+    manifestDesc: '貼上從 App Manager 複製的 AndroidManifest.xml 內容，自動解析 OpenTWQR 可開啟的深層連結（Deep Link）。僅支援含有 BROWSABLE 的 Activity。App Manager 可透過 F-Droid 免費下載。',
     manifestPasteLabel: '貼上 AndroidManifest.xml',
     manifestPastePlaceholder: '<?xml version="1.0" encoding="utf-8"?>\n<manifest package="com.example.app">\n  <application>\n    <activity android:name="...">\n      <intent-filter>...</intent-filter>\n    </activity>\n  </application>\n</manifest>',
-    manifestParseError: '找不到可用的深層連結。請確認貼上的內容為完整的 AndroidManifest.xml，且 App 有宣告含 BROWSABLE 的 Intent Filter。',
+    manifestParseError: '找不到 OpenTWQR 可用的深層連結。請確認貼上的內容為完整的 AndroidManifest.xml，且 App 有宣告含 BROWSABLE 的 Intent Filter。',
     manifestResultTitle: '找到的深層連結',
     errorParseManifestFirst: '請先貼上並解析 AndroidManifest.xml',
 
@@ -533,10 +536,10 @@ const zhTW = {
     guideStep2Title: '進入 App 列表',
     guideStep2Desc: '點擊「Activity」、「Inner Link」或其他相關區塊，進入 App 列表頁面。',
     guideStep3Title: '選擇 App 與 Activity',
-    guideStep3Desc: '在列表中找到目標 App，並尋找含有 Data URI（自訂 URL scheme，例如 myapp://…）的 Activity。只有這類 Activity 才宣告了 CATEGORY_BROWSABLE，才能從 Chrome 直接啟動。主啟動器（Launcher / MAIN）Activity 無法從 Chrome 直接開啟。',
+    guideStep3Desc: '在列表中找到目標 App，並尋找含有 Data URI（自訂 URL scheme，例如 myapp://…）的 Activity。只有這類 Activity 才宣告了 CATEGORY_BROWSABLE，才能從 OpenTWQR 啟動。一般的主啟動器（Launcher / MAIN）Activity 在這裡不會生效。',
     guideStep4Title: '複製 Activity 資訊',
     guideStep4Desc: '點進 Activity 詳情頁面後，點擊「編輯 Intent」按鈕，再點擊右上角的複製按鈕即可取得完整資訊。',
-    guideNote: '注意：Shortcut Maker 複製的內容並非標準 Intent 格式，貼到「Intent 解析」頁籤後 OpenTWQR 會自動轉換。提示：只有含有 Data URI（自訂 URL scheme 或 HTTPS App Links）的 Activity 才能從 Chrome 啟動，收款或轉帳功能通常在獨立的深層連結（deep link）Activity 中。',
+    guideNote: '注意：Shortcut Maker 複製的內容並非標準 Intent 格式，貼到「Intent 解析」頁籤後 OpenTWQR 會自動轉換。提示：只有含有 Data URI（自訂 URL scheme 或 HTTPS App Links）的 Activity 才能從 OpenTWQR 啟動，收款或轉帳功能通常位於獨立的深層連結（deep link）Activity。',
 
     // Manifest guide steps
     guideManifestStep1Title: '安裝並開啟 App Manager',
@@ -548,7 +551,7 @@ const zhTW = {
     guideManifestStep3Desc: '在 App 詳細頁中，點擊「Manifest」頁籤，即可查看完整的 AndroidManifest.xml 內容。',
     guideManifestStep4Title: '複製並貼上',
     guideManifestStep4Desc: '點擊 Manifest 頁面右上角的複製或分享按鈕，複製全部 XML 內容。回到 OpenTWQR 後，在「Manifest 解析」頁籤貼上即可自動解析。',
-    guideManifestNote: '只有宣告 CATEGORY_BROWSABLE 的 Activity 才能從網頁開啟。若解析後找不到深層連結，代表該 App 沒有宣告對應的 deep link，此方法無法使用。',
+    guideManifestNote: '只有宣告 CATEGORY_BROWSABLE 的 Activity 才能從 OpenTWQR 開啟。若解析後找不到深層連結，代表該 App 可能不支援這種整合方式。',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */
@@ -570,6 +573,8 @@ const zhTW = {
     unlock: '解鎖',
     expiredTitle: '連結已過期',
     expiredDesc: '此收款連結已超過有效期限，無法繼續使用。',
+    unsupportedTitle: '無法開啟此連結',
+    unsupportedDesc: '這個連結需要較新的加密支援，請改用已安裝的 OpenTWQR App 或較新的瀏覽器開啟。',
     invalidTitle: '連結無效',
     invalidDesc: '此收款連結無法解析，可能已損壞或格式不正確。',
   },

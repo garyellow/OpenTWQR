@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Download, X, Share } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 import { useLocation } from 'react-router-dom';
@@ -14,16 +14,32 @@ export const InstallPrompt = () => {
   const { canShow, platform, promptInstall, dismiss } = useInstallPrompt();
   const location = useLocation();
   const [isExiting, setIsExiting] = useState(false);
+  const settledRef = useRef(false);
 
   const handleDismiss = useCallback(() => {
+    settledRef.current = false;
     setIsExiting(true);
   }, []);
 
   const handleAnimationEnd = useCallback(() => {
-    if (isExiting) {
+    if (!isExiting || settledRef.current) return;
+    settledRef.current = true;
+    dismiss();
+    setIsExiting(false);
+  }, [isExiting, dismiss]);
+
+  // Safety fallback: dismiss even if animationend never fires
+  // (e.g. prefers-reduced-motion, Chrome throttling, or tab backgrounding).
+  // 400 ms > exit animation duration (300 ms) to avoid truncating the animation.
+  useEffect(() => {
+    if (!isExiting) return;
+    const id = setTimeout(() => {
+      if (settledRef.current) return;
+      settledRef.current = true;
       dismiss();
       setIsExiting(false);
-    }
+    }, 400);
+    return () => clearTimeout(id);
   }, [isExiting, dismiss]);
 
   // Don't show on shared payment pages — those are for payers, not the app owner

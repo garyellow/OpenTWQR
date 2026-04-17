@@ -123,6 +123,7 @@ const enUS: Translations = {
     creating: 'Creating link…',
     copyLinkAction: 'Copy Link',
     shareLinkAction: 'Share Link',
+    unsupportedBrowser: 'Protected share links need modern encryption support. Try the installed OpenTWQR app or a current browser.',
     createFailed: 'Failed to create link',
   },
 
@@ -306,6 +307,7 @@ const enUS: Translations = {
     shared: 'Shared',
     copyFailed: 'Copy failed',
     shareFailed: 'Share failed',
+    unsupportedBrowser: 'Encrypted backups need modern encryption support. Try the installed OpenTWQR app or a current browser.',
     exportFailed: 'Export failed',
   },
 
@@ -320,6 +322,7 @@ const enUS: Translations = {
     emptyInput: 'Paste a backup string',
     invalidString: 'Invalid backup string',
     wrongPassword: 'Wrong password',
+    unsupportedBrowser: 'This backup needs modern encryption support to open. Try the installed OpenTWQR app or a current browser.',
     importError: 'Import failed, string may be corrupted',
     importing: 'Importing…',
     import: 'Import',
@@ -512,10 +515,10 @@ const enUS: Translations = {
 
     // Manifest import
     manifestLaunchApp: 'Open App Manager',
-    manifestDesc: 'Paste the AndroidManifest.xml content from App Manager to automatically extract available deep links. Only activities with BROWSABLE can be launched from the web. App Manager is available for free on F-Droid.',
+    manifestDesc: 'Paste the AndroidManifest.xml content from App Manager to extract deep links that OpenTWQR can launch. Only activities with BROWSABLE intent filters are supported. App Manager is available for free on F-Droid.',
     manifestPasteLabel: 'Paste AndroidManifest.xml',
     manifestPastePlaceholder: '<?xml version="1.0" encoding="utf-8"?>\n<manifest package="com.example.app">\n  <application>\n    <activity android:name="...">\n      <intent-filter>...</intent-filter>\n    </activity>\n  </application>\n</manifest>',
-    manifestParseError: 'No usable deep links found. Please ensure the content is a complete AndroidManifest.xml and the app declares BROWSABLE intent filters.',
+    manifestParseError: 'No usable deep links found. Please ensure the content is a complete AndroidManifest.xml and the app declares BROWSABLE intent filters that OpenTWQR can launch.',
     manifestResultTitle: 'Deep links found',
     errorParseManifestFirst: 'Please paste and parse the AndroidManifest.xml first',
 
@@ -534,10 +537,10 @@ const enUS: Translations = {
     guideStep2Title: 'Enter the App List',
     guideStep2Desc: 'Tap "Activity", "Inner Link", or any other relevant section to open the app list.',
     guideStep3Title: 'Select an App & Activity',
-    guideStep3Desc: 'Find your target app in the list. Look for activities that include a Data URI (custom URL scheme, e.g. myapp://…). Only these activities declare CATEGORY_BROWSABLE and can be launched from Chrome. The standard launcher / MAIN activity cannot be opened from Chrome.',
+    guideStep3Desc: 'Find your target app in the list. Look for activities that include a Data URI (custom URL scheme, e.g. myapp://…). Only these activities declare CATEGORY_BROWSABLE and can be launched from OpenTWQR. Standard launcher / MAIN activities won’t work here.',
     guideStep4Title: 'Copy the Activity Info',
     guideStep4Desc: 'Inside the Activity details, tap the "Edit Intent" button, then tap the copy button in the top-right corner to get the full info.',
-    guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format. Paste it into the Intent Parse tab and OpenTWQR will auto-convert it. Tip: Only activities with a Data URI (custom URL scheme or HTTPS App Links) can be launched from Chrome. Receive-money or transfer screens are usually in a dedicated deep link activity.',
+    guideNote: 'Note: The data copied from Shortcut Maker is not a standard Intent format. Paste it into the Intent Parse tab and OpenTWQR will auto-convert it. Tip: Only activities with a Data URI (custom URL scheme or HTTPS App Links) can be launched from OpenTWQR. Receive-money or transfer screens usually live in a dedicated deep-link activity.',
 
     // Manifest guide steps
     guideManifestStep1Title: 'Install & Open App Manager',
@@ -549,7 +552,7 @@ const enUS: Translations = {
     guideManifestStep3Desc: 'In the app details, tap the "Manifest" tab to view the full AndroidManifest.xml content.',
     guideManifestStep4Title: 'Copy & Paste',
     guideManifestStep4Desc: 'Tap the copy or share button in the top-right corner of the Manifest view to copy all XML content. Then return to OpenTWQR and paste it into the Manifest tab.',
-    guideManifestNote: 'Only activities declaring CATEGORY_BROWSABLE can be opened from the web. If no deep links are found after parsing, the app may not support this type of integration.',
+    guideManifestNote: 'Only activities declaring CATEGORY_BROWSABLE can be launched from OpenTWQR. If no deep links are found after parsing, the app may not support this type of integration.',
   },
 
   /* ─── AuthLockScreen ───────────────────────────────────── */
@@ -571,6 +574,8 @@ const enUS: Translations = {
     unlock: 'Unlock',
     expiredTitle: 'Link Expired',
     expiredDesc: 'This payment link has expired and can no longer be used.',
+    unsupportedTitle: 'This Link Can’t Be Opened Here',
+    unsupportedDesc: 'This link needs modern encryption support. Try opening it in the installed OpenTWQR app or a current browser.',
     invalidTitle: 'Invalid Link',
     invalidDesc: 'This payment link could not be parsed. It may be corrupted or malformed.',
   },

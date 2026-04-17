@@ -98,7 +98,7 @@ export const AccountsPage = () => {
   const deletingAccount = deletingId ? accounts.find((a) => a.id === deletingId) : null;
 
   return (
-    <div className="min-h-svh flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
+    <div className="min-h-app-screen flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom))]">
       <a
         href="#accounts-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-60 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-zinc-100 dark:focus:bg-zinc-900 focus:text-zinc-900 dark:focus:text-white"
@@ -228,7 +228,7 @@ export const AccountsPage = () => {
         <AnimatedModal
           onClose={closeFormModal}
           overlayClass="z-50"
-          cardClass="max-w-lg max-h-[90svh] overflow-y-auto"
+          cardClass="max-w-lg max-h-app-90 overflow-y-auto"
           ariaLabelledby="account-form-title"
         >
           {(requestClose) => (

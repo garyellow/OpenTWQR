@@ -128,7 +128,11 @@ export const ExportDialog = ({ onClose }: ExportDialogProps) => {
       setResult(res.data);
       haptic();
     } else {
-      setError(t.exportDialog.exportFailed);
+      setError(
+        res.error === 'unsupported-browser'
+          ? t.exportDialog.unsupportedBrowser
+          : t.exportDialog.exportFailed,
+      );
     }
     setIsExporting(false);
   }, [
@@ -171,7 +175,7 @@ export const ExportDialog = ({ onClose }: ExportDialogProps) => {
     <AnimatedModal
       onClose={onClose}
       overlayClass="z-50"
-      cardClass="max-w-md max-h-[90svh] overflow-y-auto"
+      cardClass="max-w-md max-h-app-90 overflow-y-auto"
       ariaLabelledby="export-title"
     >
       {(requestClose) => (
@@ -418,8 +422,8 @@ function CheckboxIcon({ checked, indeterminate }: { checked: boolean; indetermin
         active ? 'border-transparent' : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
       }`}
       style={active ? {
-        backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
-        borderColor: 'light-dark(var(--accent), var(--accent-dark))',
+        backgroundColor: 'var(--ca)',
+        borderColor: 'var(--ca)',
       } : undefined}
     >
       {checked && <Check size={12} className="text-white dark:text-zinc-900" aria-hidden="true" />}
@@ -438,9 +442,9 @@ function CategoryCheckbox({ checked, onChange, label, description }: {
 }) {
   return (
     <div
-      role="button"
+      role="checkbox"
       tabIndex={0}
-      aria-pressed={checked}
+      aria-checked={checked}
       onClick={onChange}
       onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onChange(); } }}
       className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-colors ${
@@ -473,9 +477,9 @@ function ExpandableCategory({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
       <div
-        role="button"
+        role="checkbox"
         tabIndex={0}
-        aria-pressed={anyChecked}
+        aria-checked={allChecked ? true : anyChecked ? 'mixed' : false}
         onClick={onToggleAll}
         onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onToggleAll(); } }}
         className={`flex items-center gap-3 p-3 cursor-pointer select-none transition-colors ${
@@ -516,9 +520,9 @@ function SubCategoryCheckbox({ checked, onChange, label }: {
 }) {
   return (
     <div
-      role="button"
+      role="checkbox"
       tabIndex={0}
-      aria-pressed={checked}
+      aria-checked={checked}
       onClick={onChange}
       onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onChange(); } }}
       className={`flex items-center gap-3 p-2.5 cursor-pointer select-none transition-colors ${

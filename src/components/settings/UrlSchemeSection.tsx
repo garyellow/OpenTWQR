@@ -29,11 +29,11 @@ export const UrlSchemeSection = () => {
         >
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 12%, transparent)' }}
+            style={{ backgroundColor: 'var(--ca-12)' }}
           >
             <Link2
               size={18}
-              style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+              style={{ color: 'var(--ca)' }}
               aria-hidden="true"
             />
           </div>
@@ -50,8 +50,8 @@ export const UrlSchemeSection = () => {
               <span
                 className="text-xs font-semibold px-2 py-0.5 rounded-full"
                 style={{
-                  backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 12%, transparent)',
-                  color: 'light-dark(var(--accent), var(--accent-dark))',
+                  backgroundColor: 'var(--ca-12)',
+                  color: 'var(--ca)',
                 }}
               >
                 {t.urlScheme.configCount(configCount)}

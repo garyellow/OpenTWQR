@@ -5,7 +5,7 @@ export const PageLoader = () => {
   const t = useLocaleStore((s) => s.t);
   return (
     <div
-      className="min-h-svh flex items-center justify-center bg-zinc-50 dark:bg-zinc-950"
+      className="min-h-app-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950"
       role="status"
       aria-label={t.common.loading}
     >

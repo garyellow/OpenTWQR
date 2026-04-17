@@ -1,9 +1,10 @@
 import type { ShareData, ShareOptions, ParseShareResult } from '../types';
-import { isValidAccount } from './twqr';
 import {
   toBase64Url,
   fromBase64Url,
   deriveKeyFromPassword,
+  requireSubtleCrypto,
+  WebCryptoUnavailableError,
   IV_LEN,
   SALT_LEN,
   KEY_LEN,
@@ -20,7 +21,8 @@ const aesEncrypt = async (
   iv: Uint8Array<ArrayBuffer>,
   plaintext: Uint8Array<ArrayBuffer>,
 ): Promise<Uint8Array<ArrayBuffer>> => {
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
+  const subtle = requireSubtleCrypto();
+  const ct = await subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
   return new Uint8Array(ct);
 };
 
@@ -30,7 +32,8 @@ const aesDecrypt = async (
   ciphertext: Uint8Array<ArrayBuffer>,
 ): Promise<Uint8Array<ArrayBuffer> | null> => {
   try {
-    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+    const subtle = requireSubtleCrypto();
+    const pt = await subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
     return new Uint8Array(pt);
   } catch {
     return null;
@@ -56,6 +59,8 @@ export const buildShareUrl = async (
   data: ShareData,
   options: ShareOptions,
 ): Promise<string> => {
+  const subtle = requireSubtleCrypto();
+  const webCrypto = globalThis.crypto;
   const payload: Record<string, string | number> = {
     b: data.bankCode,
     a: data.accountNumber,
@@ -70,15 +75,15 @@ export const buildShareUrl = async (
   const hasPassword = options.password.length > 0;
 
   // Generate random AES-256 key
-  const key = await crypto.subtle.generateKey(
+  const key = await subtle.generateKey(
     { name: 'AES-GCM', length: 256 },
     true,
     ['encrypt', 'decrypt'],
   );
-  const rawKey = new Uint8Array(await crypto.subtle.exportKey('raw', key));
+  const rawKey = new Uint8Array(await subtle.exportKey('raw', key));
 
   // Encrypt payload
-  const iv = crypto.getRandomValues(new Uint8Array(IV_LEN));
+  const iv = webCrypto.getRandomValues(new Uint8Array(IV_LEN));
   const ciphertext = await aesEncrypt(key, iv, json);
 
   const flags = hasPassword ? 0x01 : 0x00;
@@ -86,9 +91,9 @@ export const buildShareUrl = async (
   let fragmentBytes: Uint8Array;
 
   if (hasPassword) {
-    const salt = crypto.getRandomValues(new Uint8Array(SALT_LEN));
+    const salt = webCrypto.getRandomValues(new Uint8Array(SALT_LEN));
     const pwdKey = await deriveKeyFromPassword(options.password, salt);
-    const iv2 = crypto.getRandomValues(new Uint8Array(IV_LEN));
+    const iv2 = webCrypto.getRandomValues(new Uint8Array(IV_LEN));
     const encryptedKey = await aesEncrypt(pwdKey, iv2, rawKey);
 
     pathBytes = new Uint8Array(2 + IV_LEN + SALT_LEN + ciphertext.length);
@@ -125,6 +130,7 @@ export const parseShareUrl = async (
   password?: string,
 ): Promise<ParseShareResult> => {
   try {
+    const subtle = requireSubtleCrypto();
     if (!pathData || !fragment) return { status: 'invalid' };
 
     const pathBytes = fromBase64Url(pathData);
@@ -160,7 +166,7 @@ export const parseShareUrl = async (
 
     if (rawKey.length !== KEY_LEN) return { status: 'invalid' };
 
-    const key = await crypto.subtle.importKey(
+    const key = await subtle.importKey(
       'raw',
       rawKey,
       { name: 'AES-GCM' },
@@ -171,7 +177,7 @@ export const parseShareUrl = async (
     if (!plaintext) return { status: 'invalid' };
 
     const parsed = JSON.parse(new TextDecoder().decode(plaintext));
-    if (typeof parsed.b !== 'string' || typeof parsed.a !== 'string' || !isValidAccount(parsed.a)) {
+    if (typeof parsed.b !== 'string' || typeof parsed.a !== 'string' || !/^\d{1,16}$/.test(parsed.a)) {
       return { status: 'invalid' };
     }
 
@@ -191,7 +197,10 @@ export const parseShareUrl = async (
         note: typeof parsed.n === 'string' ? parsed.n : undefined,
       },
     };
-  } catch {
+  } catch (err) {
+    if (err instanceof WebCryptoUnavailableError) {
+      return { status: 'unsupported-browser' };
+    }
     return { status: 'invalid' };
   }
 };

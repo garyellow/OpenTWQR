@@ -4,6 +4,7 @@ import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useDelayedClose } from '../../hooks/useDelayedClose';
 import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { X, Share2, Check, Eye, EyeOff, Copy, ExternalLink, ScanLine, ChevronLeft, ChevronRight } from 'lucide-react';
+import { WebCryptoUnavailableError } from '../../utils/crypto';
 import { formatCurrency, formatAmount, formatAccountDisplay, maskAccount } from '../../utils/twqr';
 import { buildShareUrl } from '../../utils/share';
 import { canvasToBlob, downloadBlob } from '../../utils/qrImage';
@@ -110,7 +111,7 @@ function loadImageDimensions(src: string) {
 }
 
 async function loadBankIcon(url: string): Promise<LoadedBankIcon | null> {
-  const response = await fetch(url);
+  const response = await fetch(url, { referrerPolicy: 'no-referrer' });
   if (!response.ok) throw new Error(`Failed to fetch bank icon: ${response.status}`);
 
   const blob = await response.blob();
@@ -847,8 +848,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       } else {
         await shareViaSystem(url);
       }
-    } catch {
-      showFeedback(t.linkSettings.createFailed);
+    } catch (err) {
+      showFeedback(
+        err instanceof WebCryptoUnavailableError
+          ? t.linkSettings.unsupportedBrowser
+          : t.linkSettings.createFailed,
+      );
     }
     setIsEncrypting(false);
     linkSettingsToggle.close();
@@ -908,7 +913,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
           <div className="space-y-2.5 w-full">
             {amount != null && amount > 0 ? (
               <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-2xl font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>NT$</span>
+                <span className="text-2xl font-semibold" style={{ color: 'var(--ca)' }}>NT$</span>
                 <span className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatAmount(amount)}
                 </span>
@@ -1049,7 +1054,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         role="dialog"
         aria-modal="true"
         aria-labelledby="qr-modal-title"
-        className={`pointer-events-auto app-modal-shell w-full max-w-sm bg-white dark:bg-zinc-900 shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-2rem)] motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
+        className={`pointer-events-auto app-modal-shell w-full max-w-sm bg-white dark:bg-zinc-900 shadow-2xl flex flex-col overflow-hidden max-h-app-modal motion-reduce:animate-none ${isClosing ? 'animate-out fade-out zoom-out-95 duration-150' : 'animate-in fade-in zoom-in-95 duration-200'}`}
         onAnimationEnd={onAnimationEnd}
       >
         <div className={`flex-1 flex flex-col min-h-0 ${canSwitch ? 'select-none' : ''}`}>

@@ -63,7 +63,7 @@ export const SharedPage = () => {
   if (result === null) {
     return (
       <div
-        className="min-h-svh flex items-center justify-center bg-zinc-50 dark:bg-zinc-950"
+        className="min-h-app-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950"
         role="status"
         aria-label={t.common.loading}
       >
@@ -75,7 +75,7 @@ export const SharedPage = () => {
   /* Need password */
   if (result.status === 'need-password' || result.status === 'wrong-password') {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-app-screen flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
         <div className="w-24 h-24 rounded-2xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs">
           <Lock size={48} className="text-zinc-300 dark:text-zinc-600" aria-hidden="true" />
         </div>
@@ -135,7 +135,7 @@ export const SharedPage = () => {
   /* Expired */
   if (result.status === 'expired') {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-app-screen flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
         <div className="w-24 h-24 rounded-2xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs">
           <Clock size={48} className="text-zinc-300 dark:text-zinc-600" aria-hidden="true" />
         </div>
@@ -158,10 +158,36 @@ export const SharedPage = () => {
     );
   }
 
+  /* Unsupported browser */
+  if (result.status === 'unsupported-browser') {
+    return (
+      <div className="min-h-app-screen flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
+        <div className="w-24 h-24 rounded-2xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs">
+          <Unlink size={48} className="text-zinc-300 dark:text-zinc-600" aria-hidden="true" />
+        </div>
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 text-balance">
+            {t.shared.unsupportedTitle}
+          </h1>
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-65 mx-auto leading-relaxed text-lg text-pretty">
+            {t.shared.unsupportedDesc}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/', { viewTransition: true })}
+          className="w-full max-w-xs py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        >
+          {t.common.goHome}
+        </button>
+      </div>
+    );
+  }
+
   /* Invalid */
   if (result.status === 'invalid' || !shareData || !qrString) {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-app-screen flex flex-col items-center justify-center p-8 gap-6 bg-zinc-50 dark:bg-zinc-950">
         <div className="w-24 h-24 rounded-2xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs">
           <Unlink size={48} className="text-zinc-300 dark:text-zinc-600" aria-hidden="true" />
         </div>

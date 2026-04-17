@@ -69,7 +69,7 @@ export const QRCodeSection = () => {
     <div
       aria-hidden="true"
       className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${checked ? '' : 'bg-zinc-300 dark:bg-zinc-600'}`}
-      style={checked ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+      style={checked ? { backgroundColor: 'var(--ca)' } : undefined}
     >
       <div className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${checked ? 'translate-x-5.25' : 'translate-x-0.75'}`} />
     </div>
@@ -274,7 +274,7 @@ export const QRCodeSection = () => {
                             ? 'border-transparent text-white'
                             : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
                         }`}
-                        style={dotStyle === style ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                        style={dotStyle === style ? { backgroundColor: 'var(--ca)' } : undefined}
                       >
                         {style === 'square' ? t.qrSettings.dotStyleSquare
                           : style === 'rounded' ? t.qrSettings.dotStyleRounded
@@ -299,7 +299,7 @@ export const QRCodeSection = () => {
                             ? 'border-transparent text-white'
                             : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
                         }`}
-                        style={eyeStyle === style ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                        style={eyeStyle === style ? { backgroundColor: 'var(--ca)' } : undefined}
                       >
                         {style === 'square' ? t.qrSettings.eyeStyleSquare : t.qrSettings.eyeStyleRounded}
                       </button>

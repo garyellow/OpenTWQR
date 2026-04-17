@@ -39,9 +39,11 @@ import {
   toBase64Url,
   fromBase64Url,
   deriveKeyFromPassword,
+  requireSubtleCrypto,
   IV_LEN,
   SALT_LEN,
   KEY_LEN,
+  WebCryptoUnavailableError,
 } from './crypto';
 
 /* ------------------------------------------------------------------ */
@@ -99,7 +101,7 @@ export interface ExportOptions {
 
 export type ExportResult =
   | { ok: true; data: string }
-  | { ok: false; error: 'encrypt-failed' | 'empty' };
+  | { ok: false; error: 'encrypt-failed' | 'empty' | 'unsupported-browser' };
 
 /**
  * Encrypt selected categories into a compact, copy-pasteable string.
@@ -112,6 +114,8 @@ export const exportBackup = async (
   password: string,
 ): Promise<ExportResult> => {
   try {
+    const subtle = requireSubtleCrypto();
+    const webCrypto = globalThis.crypto;
     const hasAccounts = options.accounts && options.accounts.length > 0;
     const hasStyle = options.style && Object.keys(options.style).length > 0;
     const hasPreferences = options.preferences && Object.keys(options.preferences).length > 0;
@@ -132,28 +136,28 @@ export const exportBackup = async (
 
     const json = new TextEncoder().encode(JSON.stringify(payload));
     const hasPassword = password.length > 0;
-    const iv = crypto.getRandomValues(new Uint8Array(IV_LEN));
+    const iv = webCrypto.getRandomValues(new Uint8Array(IV_LEN));
 
     let key: CryptoKey;
     let salt: Uint8Array<ArrayBuffer> | null = null;
     let rawKeyBytes: Uint8Array<ArrayBuffer> | null = null;
 
     if (hasPassword) {
-      salt = crypto.getRandomValues(new Uint8Array(SALT_LEN));
+      salt = webCrypto.getRandomValues(new Uint8Array(SALT_LEN));
       key = await deriveKeyFromPassword(password, salt);
     } else {
       // Generate random key; will be embedded in output for self-contained decoding
-      const generatedKey = await crypto.subtle.generateKey(
+      const generatedKey = await subtle.generateKey(
         { name: 'AES-GCM', length: 256 },
         true,
         ['encrypt'],
       );
-      rawKeyBytes = new Uint8Array(await crypto.subtle.exportKey('raw', generatedKey));
+      rawKeyBytes = new Uint8Array(await subtle.exportKey('raw', generatedKey));
       key = generatedKey;
     }
 
     const ciphertext = new Uint8Array(
-      await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, json),
+      await subtle.encrypt({ name: 'AES-GCM', iv }, key, json),
     );
 
     const flags = hasPassword ? 0x01 : 0x00;
@@ -178,7 +182,10 @@ export const exportBackup = async (
     }
 
     return { ok: true, data: PREFIX + toBase64Url(binaryPayload) };
-  } catch {
+  } catch (err) {
+    if (err instanceof WebCryptoUnavailableError) {
+      return { ok: false, error: 'unsupported-browser' };
+    }
     return { ok: false, error: 'encrypt-failed' as const };
   }
 };
@@ -189,7 +196,7 @@ export const exportBackup = async (
 
 export type ImportResult =
   | { ok: true; accounts?: BankAccount[]; style?: BackupStyle; preferences?: BackupPreferences; paymentLinks?: BankUrlConfig[] }
-  | { ok: false; error: 'invalid' | 'need-password' | 'wrong-password' | 'decrypt-error' };
+  | { ok: false; error: 'invalid' | 'need-password' | 'wrong-password' | 'decrypt-error' | 'unsupported-browser' };
 
 /**
  * Decrypt and parse a backup string.
@@ -202,6 +209,7 @@ export const importBackup = async (
   password?: string,
 ): Promise<ImportResult> => {
   try {
+    const subtle = requireSubtleCrypto();
     const trimmed = input.trim();
     if (!trimmed.startsWith(PREFIX)) {
       return { ok: false, error: 'invalid' };
@@ -245,7 +253,7 @@ export const importBackup = async (
       const rawKey = bytes.slice(bytes.length - KEY_LEN);
       ciphertext = bytes.slice(2 + IV_LEN, bytes.length - KEY_LEN);
 
-      key = await crypto.subtle.importKey(
+      key = await subtle.importKey(
         'raw',
         rawKey,
         { name: 'AES-GCM' },
@@ -256,7 +264,7 @@ export const importBackup = async (
 
     let plaintext: ArrayBuffer;
     try {
-      plaintext = await crypto.subtle.decrypt(
+      plaintext = await subtle.decrypt(
         { name: 'AES-GCM', iv },
         key,
         ciphertext,
@@ -283,7 +291,7 @@ export const importBackup = async (
           typeof (acc as Record<string, unknown>).bankCode === 'string' &&
           typeof (acc as Record<string, unknown>).accountNumber === 'string' &&
           /^\d{3}$/.test((acc as Record<string, unknown>).bankCode as string) &&
-          /^\d{10,16}$/.test((acc as Record<string, unknown>).accountNumber as string)
+          /^\d{1,16}$/.test((acc as Record<string, unknown>).accountNumber as string)
         ) {
           const a = acc as Record<string, unknown>;
           items.push({
@@ -319,7 +327,10 @@ export const importBackup = async (
       ...(validPreferences ? { preferences: validPreferences } : {}),
       ...(validPaymentLinks ? { paymentLinks: validPaymentLinks } : {}),
     };
-  } catch {
+  } catch (err) {
+    if (err instanceof WebCryptoUnavailableError) {
+      return { ok: false, error: 'unsupported-browser' };
+    }
     return { ok: false, error: 'invalid' };
   }
 };
@@ -442,9 +453,12 @@ function validatePaymentLinks(raw: unknown): BankUrlConfig[] | undefined {
       typeof (c as Record<string, unknown>).urlTemplate === 'string' &&
       /^\d{3}$/.test((c as Record<string, unknown>).bankCode as string)
     ) {
+      const template = (c as Record<string, unknown>).urlTemplate as string;
+      // Block dangerous URL schemes that could execute code
+      if (/^\s*(javascript|data|vbscript):/i.test(template)) continue;
       const entry: BankUrlConfig = {
         bankCode: (c as Record<string, unknown>).bankCode as string,
-        urlTemplate: (c as Record<string, unknown>).urlTemplate as string,
+        urlTemplate: template,
       };
       if ((c as Record<string, unknown>).sameInstitutionOnly === true) {
         entry.sameInstitutionOnly = true;

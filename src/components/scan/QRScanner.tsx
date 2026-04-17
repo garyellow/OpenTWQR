@@ -129,7 +129,7 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
     const newState = !torchOn;
     track.applyConstraints({
       advanced: [{ torch: newState } as MediaTrackConstraintSet],
-    });
+    }).catch(() => { /* torch not supported */ });
     setTorchOn(newState);
   }, [torchOn]);
 
@@ -142,15 +142,19 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
       try {
         const bitmap = await createImageBitmap(file);
 
-        if (typeof BarcodeDetector !== 'undefined') {
-          const detector = new BarcodeDetector({ formats: ['qr_code'] });
-          const results = await detector.detect(bitmap);
-          if (results.length > 0 && results[0].rawValue) {
-            onScan(results[0].rawValue);
-            return;
+        try {
+          if (typeof BarcodeDetector !== 'undefined') {
+            const detector = new BarcodeDetector({ formats: ['qr_code'] });
+            const results = await detector.detect(bitmap);
+            if (results.length > 0 && results[0].rawValue) {
+              onScan(results[0].rawValue);
+              return;
+            }
           }
+          setError('no-qr-found');
+        } finally {
+          bitmap.close();
         }
-        setError('no-qr-found');
       } catch {
         setError('decode-failed');
       }
@@ -168,13 +172,13 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center border shadow-xs"
           style={{
-            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 10%, transparent)',
-            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 15%, transparent)',
+            backgroundColor: 'var(--ca-10)',
+            borderColor: 'var(--ca-15)',
           }}
         >
           <CameraOff
             size={36}
-            style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+            style={{ color: 'var(--ca)' }}
             aria-hidden="true"
           />
         </div>
@@ -207,13 +211,13 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center border shadow-xs"
           style={{
-            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 10%, transparent)',
-            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 15%, transparent)',
+            backgroundColor: 'var(--ca-10)',
+            borderColor: 'var(--ca-15)',
           }}
         >
           <CameraOff
             size={36}
-            style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+            style={{ color: 'var(--ca)' }}
             aria-hidden="true"
           />
         </div>
@@ -242,13 +246,13 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center border shadow-xs"
           style={{
-            backgroundColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 10%, transparent)',
-            borderColor: 'color-mix(in oklch, light-dark(var(--accent), var(--accent-dark)) 15%, transparent)',
+            backgroundColor: 'var(--ca-10)',
+            borderColor: 'var(--ca-15)',
           }}
         >
           <AlertCircle
             size={36}
-            style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+            style={{ color: 'var(--ca)' }}
             aria-hidden="true"
           />
         </div>
@@ -305,26 +309,26 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
           {/* Corner brackets */}
           <div
             className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] rounded-tl-xl"
-            style={{ borderColor: 'light-dark(var(--accent), var(--accent-dark))' }}
+            style={{ borderColor: 'var(--ca)' }}
           />
           <div
             className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] rounded-tr-xl"
-            style={{ borderColor: 'light-dark(var(--accent), var(--accent-dark))' }}
+            style={{ borderColor: 'var(--ca)' }}
           />
           <div
             className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] rounded-bl-xl"
-            style={{ borderColor: 'light-dark(var(--accent), var(--accent-dark))' }}
+            style={{ borderColor: 'var(--ca)' }}
           />
           <div
             className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] rounded-br-xl"
-            style={{ borderColor: 'light-dark(var(--accent), var(--accent-dark))' }}
+            style={{ borderColor: 'var(--ca)' }}
           />
 
           {/* Animated scan line */}
           <div
             className="absolute inset-x-4 h-0.5 rounded-full animate-scan-line"
             style={{
-              backgroundColor: 'light-dark(var(--accent), var(--accent-dark))',
+              backgroundColor: 'var(--ca)',
               opacity: 0.8,
             }}
           />

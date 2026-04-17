@@ -85,7 +85,7 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
           onAnimationEnd={() => setIsShaking(false)}
         >
           <div className="flex items-baseline gap-1">
-            <span className="text-[2rem] font-semibold" style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}>
+            <span className="text-[2rem] font-semibold" style={{ color: 'var(--ca)' }}>
               NT$
             </span>
             <span

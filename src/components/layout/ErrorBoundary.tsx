@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
     const { t } = useLocaleStore.getState();
 
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center p-8 gap-8 bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-app-screen flex flex-col items-center justify-center p-8 gap-8 bg-zinc-50 dark:bg-zinc-950">
         <div className="w-24 h-24 rounded-2xl flex items-center justify-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 shadow-xs">
           <RefreshCw size={48} className="text-zinc-300 dark:text-zinc-600" aria-hidden="true" />
         </div>

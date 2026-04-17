@@ -197,7 +197,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
     <AnimatedModal
       onClose={onClose}
       overlayClass="z-50"
-      cardClass="max-w-lg max-h-[90svh] overflow-y-auto"
+      cardClass="max-w-lg max-h-app-90 overflow-y-auto"
       ariaLabelledby="url-scheme-editor-title"
     >
       {(requestClose) => {
@@ -655,7 +655,7 @@ export const UrlSchemeEditor = ({ bankCode: initialBankCode, onClose }: UrlSchem
                     onClick={() => { haptic(); setSameInstitutionOnly(!sameInstitutionOnly); }}
                     aria-label={t.urlScheme.sameInstitutionOnlyLabel}
                     className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 dark:focus-visible:ring-offset-zinc-900 ${sameInstitutionOnly ? '' : 'bg-zinc-300 dark:bg-zinc-600'}`}
-                    style={sameInstitutionOnly ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                    style={sameInstitutionOnly ? { backgroundColor: 'var(--ca)' } : undefined}
                   >
                     <div className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${sameInstitutionOnly ? 'translate-x-5.25' : 'translate-x-0.75'}`} />
                   </button>

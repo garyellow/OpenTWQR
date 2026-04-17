@@ -263,7 +263,7 @@ export const ScanRedirectView = ({
               </div>
               <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                 <div className="flex items-start gap-2.5">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' }} />
+                  <span className="inline-block w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: 'var(--ca)' }} />
                   <p>{t.scan.feeInfoSameBank}</p>
                 </div>
                 <div className="flex items-start gap-2.5">

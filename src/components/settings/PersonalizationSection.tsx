@@ -149,12 +149,12 @@ export const PersonalizationSection = () => {
             <div className="flex items-center gap-3">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: 'light-dark(var(--accent-light), var(--accent-dark-light))' }}
+                style={{ backgroundColor: 'var(--ca-light)' }}
               >
                 <Palette
                   size={18}
                   aria-hidden="true"
-                  style={{ color: 'light-dark(var(--accent), var(--accent-dark))' }}
+                  style={{ color: 'var(--ca)' }}
                 />
               </div>
               <div className="text-left">
@@ -170,7 +170,7 @@ export const PersonalizationSection = () => {
               className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
                 accentEnabled ? '' : 'bg-zinc-300 dark:bg-zinc-600'
               }`}
-              style={accentEnabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+              style={accentEnabled ? { backgroundColor: 'var(--ca)' } : undefined}
             >
               <div
                 className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${
@@ -286,7 +286,7 @@ export const PersonalizationSection = () => {
                   className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
                     authEnabled ? '' : 'bg-zinc-300 dark:bg-zinc-600'
                   }`}
-                  style={authEnabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+                  style={authEnabled ? { backgroundColor: 'var(--ca)' } : undefined}
                 >
                   <div
                     className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${
@@ -374,7 +374,7 @@ export const PersonalizationSection = () => {
             className={`relative shrink-0 w-11 h-6.5 rounded-full transition-colors duration-200 ${
               privacyBlurEnabled ? '' : 'bg-zinc-300 dark:bg-zinc-600'
             }`}
-            style={privacyBlurEnabled ? { backgroundColor: 'light-dark(var(--accent), var(--accent-dark))' } : undefined}
+            style={privacyBlurEnabled ? { backgroundColor: 'var(--ca)' } : undefined}
           >
             <div
               className={`absolute top-0.75 w-5 h-5 bg-white rounded-full shadow-xs transition-transform duration-200 ${

@@ -4,7 +4,7 @@ import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/safeStorage';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
-/** Default OKLCH hue for the accent color (OpenTWQR brand blue #008BBA). */
+/** Default OKLCH hue for the accent color (OpenTWQR brand blue family). */
 const DEFAULT_HUE = 216;
 
 /** Predefined accent hue presets — 7 colours in spectral order, centred on brand blue. */
@@ -61,6 +61,19 @@ export const applyAccentHue = (hue: number, animate = false) => {
   root.style.setProperty('--accent-dark-hover', `oklch(80% 0.12 ${hue})`);
   root.style.setProperty('--accent-dark-light', `oklch(25% 0.04 ${hue})`);
   root.style.setProperty('--accent-dark-subtle', `oklch(30% 0.06 ${hue})`);
+
+  root.style.setProperty('--accent-08', `oklch(55% 0.15 ${hue} / 0.08)`);
+  root.style.setProperty('--accent-10', `oklch(55% 0.15 ${hue} / 0.10)`);
+  root.style.setProperty('--accent-12', `oklch(55% 0.15 ${hue} / 0.12)`);
+  root.style.setProperty('--accent-15', `oklch(55% 0.15 ${hue} / 0.15)`);
+  root.style.setProperty('--accent-20', `oklch(55% 0.15 ${hue} / 0.20)`);
+  root.style.setProperty('--accent-30', `oklch(55% 0.15 ${hue} / 0.30)`);
+  root.style.setProperty('--accent-dark-08', `oklch(75% 0.12 ${hue} / 0.08)`);
+  root.style.setProperty('--accent-dark-10', `oklch(75% 0.12 ${hue} / 0.10)`);
+  root.style.setProperty('--accent-dark-12', `oklch(75% 0.12 ${hue} / 0.12)`);
+  root.style.setProperty('--accent-dark-15', `oklch(75% 0.12 ${hue} / 0.15)`);
+  root.style.setProperty('--accent-dark-20', `oklch(75% 0.12 ${hue} / 0.20)`);
+  root.style.setProperty('--accent-dark-30', `oklch(75% 0.12 ${hue} / 0.30)`);
 };
 
 export const applyTheme = (mode: ThemeMode) => {

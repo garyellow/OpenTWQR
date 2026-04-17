@@ -85,7 +85,7 @@ export const SharePage = () => {
 
   if (contentType === 'otwqr') {
     return (
-      <div className="min-h-svh flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-safe pb-safe">
+      <div className="min-h-app-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-safe pb-safe">
         <ImportDialog onClose={() => navigate('/', { replace: true })} initialText={sharedText} />
       </div>
     );
@@ -117,7 +117,7 @@ export const SharePage = () => {
   };
 
   return (
-    <div className="min-h-svh flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-safe pb-safe p-5">
+    <div className="min-h-app-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-safe pb-safe p-5">
       <div className="w-full max-w-sm space-y-4">
         {/* Bank info preview */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-lg p-6">
