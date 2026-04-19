@@ -175,11 +175,11 @@ export default defineConfig({
     }),
   ],
   build: {
-    rolldownOptions: {
+    rollupOptions: {
       output: {
         // Split heavy vendor libraries into separate chunks so the browser
         // can cache them independently from application code.
-        manualChunks(id) {
+        manualChunks(id: string) {
           if (id.includes('react-router-dom') || id.includes('react-router')) {
             return 'vendor-router'
           }
