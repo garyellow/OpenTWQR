@@ -46,7 +46,7 @@ export const AccountPickerSheet = ({
   selectedLabel,
   closeLabel,
 }: AccountPickerSheetProps) => {
-  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose, { historyBack: true });
   const sheetRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -66,14 +66,12 @@ export const AccountPickerSheet = ({
 
   const handleManageAccounts = () => {
     haptic();
-    requestClose();
-    onManageAccounts?.();
+    requestClose(() => onManageAccounts?.());
   };
 
   const handleSelect = (id: string) => {
     haptic();
-    onSelect(id);
-    requestClose();
+    requestClose(() => onSelect(id));
   };
 
   const handleSheetAnimationEnd = (event: AnimationEvent<HTMLDivElement>) => {

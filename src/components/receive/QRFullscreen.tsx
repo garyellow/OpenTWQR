@@ -39,7 +39,7 @@ interface QRFullscreenProps {
 export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterImage, customName, showBankName, accountNumber, bankCode, showAccount, accountRevealed = false, dotStyle = 'square', eyeStyle = 'square' }: QRFullscreenProps) => {
   const t = useLocaleStore((s) => s.t);
   const ref = useRef<HTMLDivElement>(null);
-  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onExit, { historyBack: true });
   const [qrSize, setQrSize] = useState(() =>
     Math.min(320, Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.75)),
   );

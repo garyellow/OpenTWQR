@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { useDelayedClose } from '../../hooks/useDelayedClose';
+import { useDelayedClose, type DelayedCloseRequest } from '../../hooks/useDelayedClose';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
@@ -7,7 +7,7 @@ interface AnimatedModalProps {
   /** Called after the exit animation completes to remove the modal from the tree. */
   onClose: () => void;
   /** Render prop — receives `requestClose` to trigger the animated close. */
-  children: (requestClose: () => void) => React.ReactNode;
+  children: (requestClose: DelayedCloseRequest) => React.ReactNode;
   /** Additional Tailwind classes on the fixed overlay (e.g. z-index). */
   overlayClass?: string;
   /** Additional Tailwind classes on the dialog card (e.g. max-width, padding). */
@@ -20,6 +20,10 @@ interface AnimatedModalProps {
   scrollLock?: boolean;
   /** Ref to the element receiving initial focus. */
   initialFocusRef?: React.RefObject<HTMLElement | null>;
+  /** When true, browser Back / swipe-back closes this modal before leaving the page. */
+  historyBack?: boolean;
+  /** When true, keyboard focus trap is disabled (use when a sibling overlay is on top). */
+  disableFocusTrap?: boolean;
 }
 
 /**
@@ -46,12 +50,16 @@ export const AnimatedModal = ({
   preventClose = false,
   scrollLock = true,
   initialFocusRef,
+  historyBack = true,
+  disableFocusTrap = false,
 }: AnimatedModalProps) => {
-  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose, {
+    historyBack: historyBack && !preventClose,
+  });
   const cardRef = useRef<HTMLDivElement>(null);
 
   useScrollLock(scrollLock);
-  useFocusTrap(cardRef, true, initialFocusRef);
+  useFocusTrap(cardRef, !disableFocusTrap, initialFocusRef);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

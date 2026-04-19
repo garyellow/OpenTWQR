@@ -8,6 +8,7 @@ import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, 
 import { useNavigate } from 'react-router-dom';
 import { haptic } from '../utils/haptics';
 import { buildBankUrl, isAndroid } from '../utils/urlScheme';
+import { useHistoryDismissState } from '../hooks/useHistoryDismissState';
 
 /**
  * Full-page management screen for transfer app integrations.
@@ -32,6 +33,12 @@ export const PaymentLinksPage = () => {
   const [showGuide, setShowGuide] = useState(false);
   const [guideTab, setGuideTab] = useState<'intent' | 'manifest'>('intent');
   const android = useMemo(() => isAndroid(), []);
+  const requestReturnToSettings = useHistoryDismissState({
+    active: true,
+    onDismiss: () => {
+      navigate('/settings', { replace: true, viewTransition: true });
+    },
+  });
 
   const sortedConfigs = useMemo(
     () => [...configs].sort((a, b) => a.bankCode.localeCompare(b.bankCode)),
@@ -65,8 +72,8 @@ export const PaymentLinksPage = () => {
   }, [testingConfig, testBankCode, testAccount, testAmount, testNote]);
 
   const goBack = useCallback(() => {
-    navigate('/settings', { viewTransition: true });
-  }, [navigate]);
+    requestReturnToSettings();
+  }, [requestReturnToSettings]);
 
   return (
     <div className="min-h-app-screen flex flex-col px-safe bg-zinc-50 dark:bg-zinc-950 pb-safe">

@@ -73,7 +73,7 @@ export const ConfirmDialog = ({
             </button>
             <button
               type="button"
-              onClick={onConfirm}
+              onClick={() => requestClose(() => onConfirm())}
               className={`flex-1 py-4 rounded-xl font-semibold action-transition active:scale-98 shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${CONFIRM_BUTTONS[variant]}`}
             >
               {confirmLabel}

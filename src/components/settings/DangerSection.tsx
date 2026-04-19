@@ -93,7 +93,7 @@ export const DangerSection = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={handleReset}
+                  onClick={() => requestClose(() => handleReset())}
                   className="flex-1 py-3.5 rounded-xl font-semibold text-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                 >
                   {t.danger.resetConfirm}

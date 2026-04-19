@@ -13,6 +13,7 @@ import { haptic } from '../utils/haptics';
 import { resolveIconSrc } from '../utils/favicon';
 import { buildBankUrl } from '../utils/urlScheme';
 import { Copy, Check, ScanLine, ExternalLink } from 'lucide-react';
+import { useHistoryDismissState } from '../hooks/useHistoryDismissState';
 
 /**
  * ScanPage state machine:
@@ -78,13 +79,22 @@ export const ScanPage = () => {
     setShowQR(false);
   }, []);
 
-  const handleRescan = useCallback(() => {
+  const resetToScanner = useCallback(() => {
     _cachedScanResult = null;
     _cachedScanning = true;
     setScanResult(null);
     setScanning(true);
     setShowQR(false);
   }, []);
+
+  const requestDismissResult = useHistoryDismissState({
+    active: !scanning,
+    onDismiss: resetToScanner,
+  });
+
+  const handleRescan = useCallback(() => {
+    requestDismissResult();
+  }, [requestDismissResult]);
 
   /* ---------- QR Data for QRDisplay ---------- */
   const qrString = useMemo(() => {

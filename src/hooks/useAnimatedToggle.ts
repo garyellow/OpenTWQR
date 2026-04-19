@@ -1,4 +1,17 @@
 import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'react';
+import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
+
+interface UseAnimatedToggleOptions {
+  /** When true, browser Back / swipe-back closes this layer before leaving the page. */
+  historyBack?: boolean;
+}
+
+type ClosePhase = 'idle' | 'closing-ui' | 'closing-history' | 'awaiting-history-pop';
+
+export interface AnimatedToggleClose {
+  (): void;
+  (onClosed: () => void): void;
+}
 
 /**
  * Manages visibility + closing animation state for overlays.
@@ -13,61 +26,153 @@ import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'r
  *   //  `onAnimationEnd` handler fires or the safety timeout elapses.
  *   // Optionally run a callback after unmount: `close(() => doSomething())`.
  */
-export const useAnimatedToggle = () => {
+export const useAnimatedToggle = (options: UseAnimatedToggleOptions = {}) => {
+  const { historyBack = false } = options;
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const timerRef = useRef<number | null>(null);
+  const animationFallbackTimerRef = useRef<number | null>(null);
+  const popFallbackTimerRef = useRef<number | null>(null);
   const onClosedRef = useRef<(() => void) | null>(null);
   const settledRef = useRef(false);
+  const isOpenRef = useRef(false);
+  const isClosingRef = useRef(false);
+  const closePhaseRef = useRef<ClosePhase>('idle');
+  const historyLayerTokenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    isClosingRef.current = isClosing;
+  }, [isClosing]);
+
+  const clearFallbackTimers = useCallback(() => {
+    if (animationFallbackTimerRef.current !== null) {
+      window.clearTimeout(animationFallbackTimerRef.current);
+      animationFallbackTimerRef.current = null;
+    }
+
+    if (popFallbackTimerRef.current !== null) {
+      window.clearTimeout(popFallbackTimerRef.current);
+      popFallbackTimerRef.current = null;
+    }
+  }, []);
 
   const finalise = useCallback(() => {
     if (settledRef.current) return;
     settledRef.current = true;
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearFallbackTimers();
+    isOpenRef.current = false;
+    isClosingRef.current = false;
     setIsOpen(false);
     setIsClosing(false);
+    closePhaseRef.current = 'idle';
     const cb = onClosedRef.current;
     onClosedRef.current = null;
     cb?.();
-  }, []);
+  }, [clearFallbackTimers]);
+
+  const settleCloseAfterAnimation = useCallback(() => {
+    if (!isClosingRef.current) return;
+
+    if (!historyBack || !historyLayerTokenRef.current) {
+      finalise();
+      return;
+    }
+
+    if (closePhaseRef.current === 'closing-history') {
+      finalise();
+      return;
+    }
+
+    if (closePhaseRef.current === 'closing-ui') {
+      closePhaseRef.current = 'awaiting-history-pop';
+      popFallbackTimerRef.current = window.setTimeout(() => {
+        finalise();
+      }, 180);
+      window.history.back();
+    }
+  }, [finalise, historyBack]);
 
   const open = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearFallbackTimers();
     onClosedRef.current = null;
     settledRef.current = false;
+    closePhaseRef.current = 'idle';
+    isOpenRef.current = true;
+    isClosingRef.current = false;
     setIsClosing(false);
     setIsOpen(true);
-  }, []);
+  }, [clearFallbackTimers]);
 
-  const close = useCallback(
+  const close = useCallback<AnimatedToggleClose>(
     (onClosed?: () => void) => {
       onClosedRef.current = onClosed ?? null;
+      if (!isOpenRef.current || isClosingRef.current) return;
+
+      settledRef.current = false;
+      closePhaseRef.current = 'closing-ui';
+      isClosingRef.current = true;
       setIsClosing(true);
       // Safety fallback if animationend never fires.
-      timerRef.current = window.setTimeout(finalise, 200);
+      animationFallbackTimerRef.current = window.setTimeout(settleCloseAfterAnimation, 200);
     },
-    [finalise],
+    [settleCloseAfterAnimation],
   );
 
   /** Attach to the overlay's `onAnimationEnd` to finalise close. */
   const onAnimationEnd = useCallback((e: AnimationEvent) => {
     // Ignore events bubbling up from child element animations
     if (e.currentTarget !== e.target) return;
-    if (!isClosing) return;
-    finalise();
-  }, [isClosing, finalise]);
+    settleCloseAfterAnimation();
+  }, [settleCloseAfterAnimation]);
+
+  useEffect(() => {
+    if (!historyBack || !isOpen) return;
+
+    const historyLayerToken = createHistoryLayerToken('animated-toggle');
+    historyLayerTokenRef.current = historyLayerToken;
+    pushHistoryLayer(historyLayerToken);
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (historyStateHasLayer(event.state, historyLayerToken)) return;
+
+      if (closePhaseRef.current === 'awaiting-history-pop') {
+        finalise();
+        return;
+      }
+
+      if (closePhaseRef.current === 'closing-ui') {
+        closePhaseRef.current = 'closing-history';
+        return;
+      }
+
+      if (isClosingRef.current) return;
+
+      settledRef.current = false;
+      closePhaseRef.current = 'closing-history';
+      isClosingRef.current = true;
+      setIsClosing(true);
+
+      animationFallbackTimerRef.current = window.setTimeout(() => {
+        settleCloseAfterAnimation();
+      }, 200);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      historyLayerTokenRef.current = null;
+      window.removeEventListener('popstate', handlePopState);
+      clearFallbackTimers();
+    };
+  }, [clearFallbackTimers, finalise, historyBack, isOpen, settleCloseAfterAnimation]);
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      clearFallbackTimers();
     };
-  }, []);
+  }, [clearFallbackTimers]);
 
   return { isOpen, isClosing, open, close, onAnimationEnd } as const;
 };

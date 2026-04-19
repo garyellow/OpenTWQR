@@ -1,4 +1,17 @@
 import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'react';
+import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
+
+interface UseDelayedCloseOptions {
+  /** When true, browser Back / swipe-back closes this layer before leaving the page. */
+  historyBack?: boolean;
+}
+
+type ClosePhase = 'idle' | 'closing-ui' | 'closing-history' | 'awaiting-history-pop';
+
+export interface DelayedCloseRequest {
+  (): void;
+  (onClosed: () => void): void;
+}
 
 /**
  * Adds a short "closing" phase before the consumer's `onClose` is called,
@@ -18,17 +31,83 @@ import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'r
  *   // Apply `animate-out` classes when `isClosing === true`.
  *   // Attach `onAnimationEnd` to the **overlay** element.
  */
-export const useDelayedClose = (onClose: () => void) => {
+export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOptions = {}) => {
+  const { historyBack = false } = options;
   const [isClosing, setIsClosing] = useState(false);
   const onCloseRef = useRef(onClose);
+  const onClosedRef = useRef<(() => void) | null>(null);
   const settledRef = useRef(false);
+  const isClosingRef = useRef(false);
+  const closePhaseRef = useRef<ClosePhase>('idle');
+  const animationFallbackTimerRef = useRef<number | null>(null);
+  const popFallbackTimerRef = useRef<number | null>(null);
+  const historyLayerTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  const requestClose = useCallback(() => {
+  useEffect(() => {
+    isClosingRef.current = isClosing;
+  }, [isClosing]);
+
+  const clearFallbackTimers = useCallback(() => {
+    if (animationFallbackTimerRef.current !== null) {
+      window.clearTimeout(animationFallbackTimerRef.current);
+      animationFallbackTimerRef.current = null;
+    }
+
+    if (popFallbackTimerRef.current !== null) {
+      window.clearTimeout(popFallbackTimerRef.current);
+      popFallbackTimerRef.current = null;
+    }
+  }, []);
+
+  const finaliseClose = useCallback(() => {
+    if (settledRef.current) return;
+
+    settledRef.current = true;
+    clearFallbackTimers();
+    isClosingRef.current = false;
+    setIsClosing(false);
+    closePhaseRef.current = 'idle';
+
+    const onClosed = onClosedRef.current;
+    onClosedRef.current = null;
+
+    onCloseRef.current();
+    onClosed?.();
+  }, [clearFallbackTimers]);
+
+  const settleCloseAfterAnimation = useCallback(() => {
+    if (!isClosingRef.current) return;
+
+    if (!historyBack || !historyLayerTokenRef.current) {
+      finaliseClose();
+      return;
+    }
+
+    if (closePhaseRef.current === 'closing-history') {
+      finaliseClose();
+      return;
+    }
+
+    if (closePhaseRef.current === 'closing-ui') {
+      closePhaseRef.current = 'awaiting-history-pop';
+      popFallbackTimerRef.current = window.setTimeout(() => {
+        finaliseClose();
+      }, 180);
+      window.history.back();
+    }
+  }, [finaliseClose, historyBack]);
+
+  const requestClose = useCallback<DelayedCloseRequest>((onClosed?: () => void) => {
+    if (onClosed) onClosedRef.current = onClosed;
+    if (isClosingRef.current) return;
+
     settledRef.current = false;
+    closePhaseRef.current = 'closing-ui';
+    isClosingRef.current = true;
     setIsClosing(true);
   }, []);
 
@@ -36,23 +115,61 @@ export const useDelayedClose = (onClose: () => void) => {
   const handleAnimationEnd = useCallback((e: AnimationEvent) => {
     // Ignore events bubbling up from child element animations
     if (e.currentTarget !== e.target) return;
-    if (!isClosing) return;
-    if (settledRef.current) return;
-    settledRef.current = true;
-    onCloseRef.current();
-  }, [isClosing]);
+    settleCloseAfterAnimation();
+  }, [settleCloseAfterAnimation]);
 
   // Safety fallback: if the animationend event never fires (e.g.
-  // prefers-reduced-motion or animation-duration: 0), close after 200 ms.
+  // prefers-reduced-motion or animation-duration: 0), settle after 200 ms.
   useEffect(() => {
     if (!isClosing) return;
-    const id = setTimeout(() => {
-      if (settledRef.current) return;
-      settledRef.current = true;
-      onCloseRef.current();
+
+    animationFallbackTimerRef.current = window.setTimeout(() => {
+      settleCloseAfterAnimation();
     }, 200);
-    return () => clearTimeout(id);
-  }, [isClosing]);
+
+    return () => {
+      if (animationFallbackTimerRef.current !== null) {
+        window.clearTimeout(animationFallbackTimerRef.current);
+        animationFallbackTimerRef.current = null;
+      }
+    };
+  }, [isClosing, settleCloseAfterAnimation]);
+
+  useEffect(() => {
+    if (!historyBack) return;
+
+    const historyLayerToken = createHistoryLayerToken('delayed-close');
+    historyLayerTokenRef.current = historyLayerToken;
+    pushHistoryLayer(historyLayerToken);
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (historyStateHasLayer(event.state, historyLayerToken)) return;
+
+      if (closePhaseRef.current === 'awaiting-history-pop') {
+        finaliseClose();
+        return;
+      }
+
+      if (closePhaseRef.current === 'closing-ui') {
+        closePhaseRef.current = 'closing-history';
+        return;
+      }
+
+      if (isClosingRef.current) return;
+
+      settledRef.current = false;
+      closePhaseRef.current = 'closing-history';
+      isClosingRef.current = true;
+      setIsClosing(true);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      historyLayerTokenRef.current = null;
+      window.removeEventListener('popstate', handlePopState);
+      clearFallbackTimers();
+    };
+  }, [clearFallbackTimers, finaliseClose, historyBack]);
 
   return { isClosing, requestClose, onAnimationEnd: handleAnimationEnd };
 };

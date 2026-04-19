@@ -356,8 +356,8 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAccountPicker, setShowAccountPicker] = useState(false);
-  const shareMenu = useAnimatedToggle();
-  const linkSettingsToggle = useAnimatedToggle();
+  const shareMenu = useAnimatedToggle({ historyBack: true });
+  const linkSettingsToggle = useAnimatedToggle({ historyBack: true });
   const [linkAction, setLinkAction] = useState<'copy' | 'share'>('copy');
   const [linkExpiry, setLinkExpiry] = useState<ExpiryOption>(0);
   const [linkPassword, setLinkPassword] = useState('');
@@ -453,7 +453,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       : undefined,
   }), [accountRevealed, currentAccountNumber, currentBankCode, currentBankName, showBankNameSetting, trimmedCustomName]);
 
-  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(onClose, { historyBack: true });
 
   /** `navigator.share` is only available in secure contexts (HTTPS / PWA). */
   const supportsNativeShare = typeof navigator.share === 'function';
@@ -612,7 +612,7 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
       if (e.key !== 'Escape') return;
       if (isFullscreen) return; // QRFullscreen has its own Escape handler
       if (isEncrypting) return;
-      if (accountPickerIsOpen) { setShowAccountPicker(false); return; }
+      if (accountPickerIsOpen) return;
       if (linkSettingsIsOpen) { linkSettingsClose(); return; }
       if (shareMenuIsOpen) { shareMenuClose(); return; }
       requestClose();
@@ -666,15 +666,12 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
   const handleSelectAccountFromPicker = useCallback((cardId: string) => {
     const logicalIndex = findCardIndex(allCards, cardId);
     if (logicalIndex < 0) {
-      setShowAccountPicker(false);
       return;
     }
 
     const targetRenderIndex = canSwitch
       ? getRealRenderIndex(logicalIndex, allCards.length)
       : 0;
-
-    setShowAccountPicker(false);
 
     if (targetRenderIndex === currentRenderIndexRef.current) return;
 
@@ -1024,7 +1021,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         {onRescan && (
           <button
             type="button"
-            onClick={() => { haptic(); onRescan(); }}
+            onClick={() => {
+              haptic();
+              requestClose(() => onRescan());
+            }}
             className="w-full flex items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors py-2 text-sm font-medium rounded-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
           >
             <ScanLine size={16} aria-hidden="true" />
@@ -1204,7 +1204,10 @@ export const QRDisplay = ({ value, amount, bankName, accountNumber, bankCode, no
         selectedId={currentCard?.id ?? allCards[0]?.id ?? ''}
         onSelect={handleSelectAccountFromPicker}
         onClose={() => setShowAccountPicker(false)}
-        onManageAccounts={onManageAccounts}
+        onManageAccounts={onManageAccounts ? () => {
+          setShowAccountPicker(false);
+          requestClose(() => onManageAccounts());
+        } : undefined}
         manageLabel={t.accountPicker.manageAccounts}
         selectedLabel={t.accountPicker.selected}
         closeLabel={t.common.close}

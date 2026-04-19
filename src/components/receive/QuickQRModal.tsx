@@ -110,6 +110,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
         overlayClass="z-50"
         cardClass="max-w-sm"
         ariaLabelledby="quick-qr-title"
+        disableFocusTrap={showQR}
       >
         {(requestClose) => (
           <div className="p-6 space-y-5">

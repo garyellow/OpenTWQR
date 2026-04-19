@@ -162,7 +162,6 @@ export const ReceivePage = () => {
   }, [navigate]);
 
   const handleManageAccountsFromQR = useCallback(() => {
-    setShowQR(false);
     navigate('/accounts', { viewTransition: true });
   }, [navigate]);
 

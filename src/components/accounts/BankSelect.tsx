@@ -1,8 +1,9 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Search, X, ChevronDown, Building2 } from 'lucide-react';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useAnimatedToggle } from '../../hooks/useAnimatedToggle';
 import { stripCompanySuffix } from '../../utils/twqr';
 
 interface BankSelectProps {
@@ -17,13 +18,12 @@ interface BankSelectProps {
  * so it never shows a ghost frame when used inside another modal.
  */
 export const BankSelect = ({ value, onChange }: BankSelectProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
+  const panelToggle = useAnimatedToggle({ historyBack: true });
 
   const selectedBank = useMemo(() => banks.find((b) => b.code === value), [banks, value]);
 
@@ -37,39 +37,32 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
     );
   }, [banks, search]);
 
-  const open = () => {
+  const open = useCallback(() => {
     setSearch('');
-    setIsClosing(false);
-    setIsOpen(true);
-  };
+    panelToggle.open();
+  }, [panelToggle]);
 
-  const requestClose = () => setIsClosing(true);
-
-  const handleAnimationEnd = () => {
-    if (isClosing) {
-      setIsOpen(false);
-      setIsClosing(false);
-      setSearch('');
-    }
-  };
+  const requestClose = useCallback(() => {
+    panelToggle.close(() => setSearch(''));
+  }, [panelToggle]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!panelToggle.isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') requestClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen]);
+  }, [panelToggle.isOpen, requestClose]);
 
   useEffect(() => {
-    if (isOpen && !isClosing) {
+    if (panelToggle.isOpen && !panelToggle.isClosing) {
       const id = window.setTimeout(() => inputRef.current?.focus(), 50);
       return () => window.clearTimeout(id);
     }
-  }, [isOpen, isClosing]);
+  }, [panelToggle.isClosing, panelToggle.isOpen]);
 
-  useFocusTrap(panelRef, isOpen && !isClosing);
+  useFocusTrap(panelRef, panelToggle.isOpen && !panelToggle.isClosing);
 
   return (
     <>
@@ -86,7 +79,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           type="button"
           onClick={open}
           aria-haspopup="dialog"
-          aria-expanded={isOpen}
+          aria-expanded={panelToggle.isOpen}
           className="w-full flex items-center justify-between px-4 py-4 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 action-transition shadow-xs group focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
         >
           <div className="flex items-center gap-3 min-w-0">
@@ -115,18 +108,18 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
       </div>
 
       {/* Full-screen solid panel — solid bg prevents ghost frames from parent modals */}
-      {isOpen && (
+      {panelToggle.isOpen && (
         <div
           ref={panelRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="bank-panel-title"
           className={`fixed inset-0 z-200 bg-white dark:bg-zinc-900 flex flex-col motion-reduce:animate-none ${
-            isClosing
+            panelToggle.isClosing
               ? 'animate-out slide-out-to-bottom-4 fade-out duration-200'
               : 'animate-in slide-in-from-bottom-4 fade-in duration-200'
           }`}
-          onAnimationEnd={handleAnimationEnd}
+          onAnimationEnd={panelToggle.onAnimationEnd}
         >
           {/* Header */}
           <div className="p-5 pt-[max(1.25rem,env(safe-area-inset-top))] border-b border-zinc-100 dark:border-zinc-800/50 flex flex-col gap-4 shrink-0">

@@ -56,7 +56,6 @@ export const AccountsPage = () => {
 
   const handleAdd = useCallback((data: Omit<BankAccount, 'id'>) => {
     addAccount({ id: generateId(), ...data });
-    setIsAdding(false);
     navigate('/', { viewTransition: true });
   }, [addAccount, navigate]);
 
@@ -254,7 +253,9 @@ export const AccountsPage = () => {
                         updateAccount(editingId, data);
                         requestClose();
                       }
-                    : handleAdd
+                    : (data) => {
+                        requestClose(() => handleAdd(data));
+                      }
                 }
                 onCancel={requestClose}
               />

@@ -31,6 +31,7 @@ export const BottomNav = () => {
             key={path}
             to={path}
             end={path === '/'}
+            replace
             onClick={() => haptic()}
             title={labels[labelKey]}
             className={({ isActive }) => `flex flex-1 max-w-24 min-h-11 min-w-18 flex-col items-center justify-center gap-0.5 rounded-2xl px-3 py-1.5 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 active:scale-95 ${
