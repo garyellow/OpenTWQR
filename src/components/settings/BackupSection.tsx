@@ -1,7 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Download, Upload } from 'lucide-react';
-import { ExportDialog } from './ExportDialog';
-import { ImportDialog } from './ImportDialog';
+import { Link } from 'react-router-dom';
 import { InfoTip } from '../ui/InfoTip';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 
@@ -18,8 +17,6 @@ const isStandalone = () =>
  * chooses what to include (accounts, settings, or both) in the dialog itself.
  */
 export const BackupSection = () => {
-  const [showExport, setShowExport] = useState(false);
-  const [showImport, setShowImport] = useState(false);
   const t = useLocaleStore((s) => s.t);
 
   /** Show the iOS-specific warning only on iOS Safari, not in standalone mode. */
@@ -43,9 +40,10 @@ export const BackupSection = () => {
       </div>
 
       <div className="app-surface overflow-hidden shadow-xs divide-y divide-zinc-100 dark:divide-zinc-800/50">
-        <button
-          type="button"
-          onClick={() => setShowExport(true)}
+        <Link
+          to="/settings/backup/export"
+          state={{ fallbackTo: '/settings' }}
+          viewTransition
           className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
           <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center">
@@ -57,11 +55,12 @@ export const BackupSection = () => {
               {t.backup.exportDesc}
             </p>
           </div>
-        </button>
+        </Link>
 
-        <button
-          type="button"
-          onClick={() => setShowImport(true)}
+        <Link
+          to="/settings/backup/import"
+          state={{ fallbackTo: '/settings' }}
+          viewTransition
           className="w-full flex items-center gap-3 p-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
           <div className="w-9 h-9 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 flex items-center justify-center">
@@ -73,11 +72,8 @@ export const BackupSection = () => {
               {t.backup.importDesc}
             </p>
           </div>
-        </button>
+        </Link>
       </div>
-
-      {showExport && <ExportDialog onClose={() => setShowExport(false)} />}
-      {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
     </div>
   );
 };

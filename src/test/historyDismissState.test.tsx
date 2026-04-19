@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { flushSync } from 'react-dom';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useHistoryDismissState } from '../hooks/useHistoryDismissState';
@@ -33,6 +34,22 @@ describe('useHistoryDismissState', () => {
     render(<Harness />);
 
     fireEvent.click(screen.getByRole('button', { name: 'open' }));
+    expect(screen.getByTestId('state')).toHaveTextContent('open');
+
+    act(() => {
+      window.dispatchEvent(new PopStateEvent('popstate', { state: { root: true } }));
+    });
+
+    expect(screen.getByTestId('state')).toHaveTextContent('closed');
+  });
+
+  it('captures a back event fired immediately after activation', async () => {
+    render(<Harness />);
+
+    flushSync(() => {
+      fireEvent.click(screen.getByRole('button', { name: 'open' }));
+    });
+
     expect(screen.getByTestId('state')).toHaveTextContent('open');
 
     act(() => {

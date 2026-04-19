@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'react';
+import { useState, useCallback, useEffect, useLayoutEffect, useRef, type AnimationEvent } from 'react';
 import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
 
 interface UseAnimatedToggleOptions {
@@ -128,7 +128,7 @@ export const useAnimatedToggle = (options: UseAnimatedToggleOptions = {}) => {
     settleCloseAfterAnimation();
   }, [settleCloseAfterAnimation]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!historyBack || !isOpen) return;
 
     const historyLayerToken = createHistoryLayerToken('animated-toggle');

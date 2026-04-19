@@ -1,5 +1,4 @@
 import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
-import { ImportDialog } from '../components/settings/ImportDialog';
 import { parseTWQR, isTWQR } from '../utils/parseTwqr';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
@@ -33,7 +32,7 @@ function isOwnShareUrl(value: string): boolean {
 /**
  * Web Share Target landing page — `/share?text=<shared-text>`.
  * Routes shared content to the appropriate handler based on content type:
- *  - OTWQR backup string      → ImportDialog
+ *  - OTWQR backup string      → Import task page
  *  - TWQR QR code string      → disambiguation (save account vs. pay)
  *  - OpenTWQR share URL       → redirect to /s/:data#fragment (SharedPage)
  *  - Otherwise                → redirect home
@@ -84,11 +83,7 @@ export const SharePage = () => {
   }
 
   if (contentType === 'otwqr') {
-    return (
-      <div className="min-h-app-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-safe pb-safe">
-        <ImportDialog onClose={() => navigate('/', { replace: true })} initialText={sharedText} />
-      </div>
-    );
+    return <Navigate to="/import" replace state={{ initialText: sharedText }} />;
   }
 
   const parsed = parseTWQR(sharedText);
@@ -99,11 +94,12 @@ export const SharePage = () => {
 
   const handleAddAccount = () => {
     haptic();
-    navigate('/accounts', {
+    navigate('/accounts/new', {
       replace: true,
+      viewTransition: true,
       state: {
-        autoAdd: true,
         prefill: { bankCode: parsed.bankCode, accountNumber: parsed.accountNumber },
+        fallbackTo: '/',
       },
     });
   };

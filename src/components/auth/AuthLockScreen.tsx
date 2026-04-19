@@ -64,9 +64,9 @@ export const AuthLockScreen = () => {
 
       {/* Error */}
       {error && (
-        <div role="alert" className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm">
-          <AlertCircle size={16} aria-hidden="true" />
-          <span>{error}</span>
+        <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
+          <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+          <span className="font-medium">{error}</span>
         </div>
       )}
 

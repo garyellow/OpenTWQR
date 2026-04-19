@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, type AnimationEvent } from 'react';
+import { useState, useCallback, useEffect, useLayoutEffect, useRef, type AnimationEvent } from 'react';
 import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
 
 interface UseDelayedCloseOptions {
@@ -135,7 +135,7 @@ export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOpt
     };
   }, [isClosing, settleCloseAfterAnimation]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!historyBack) return;
 
     const historyLayerToken = createHistoryLayerToken('delayed-close');

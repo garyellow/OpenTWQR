@@ -1,4 +1,5 @@
 import { CircleAlert, TriangleAlert } from 'lucide-react';
+import { useRef } from 'react';
 import { AnimatedModal } from './AnimatedModal';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 
@@ -43,10 +44,18 @@ export const ConfirmDialog = ({
 }: ConfirmDialogProps) => {
   const t = useLocaleStore((s) => s.t);
   const Icon = ICONS[variant];
+  const confirmingRef = useRef(false);
 
   return (
     <AnimatedModal
-      onClose={onCancel}
+      onClose={() => {
+        if (confirmingRef.current) {
+          confirmingRef.current = false;
+          return;
+        }
+
+        onCancel();
+      }}
       overlayClass="z-60"
       cardClass="max-w-sm p-6"
       ariaLabelledby="confirm-dialog-title"
@@ -73,7 +82,10 @@ export const ConfirmDialog = ({
             </button>
             <button
               type="button"
-              onClick={() => requestClose(() => onConfirm())}
+              onClick={() => {
+                confirmingRef.current = true;
+                requestClose(() => onConfirm());
+              }}
               className={`flex-1 py-4 rounded-xl font-semibold action-transition active:scale-98 shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${CONFIRM_BUTTONS[variant]}`}
             >
               {confirmLabel}

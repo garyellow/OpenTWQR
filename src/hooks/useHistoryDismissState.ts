@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
 
 interface UseHistoryDismissStateOptions {
@@ -45,7 +45,7 @@ export const useHistoryDismissState = ({ active, onDismiss }: UseHistoryDismissS
     window.history.back();
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!active) return;
 
     const historyLayerToken = createHistoryLayerToken('state-dismiss');

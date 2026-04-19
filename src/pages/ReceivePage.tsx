@@ -3,7 +3,6 @@ import { useAppStore } from '../stores/useAppStore';
 import { AmountInput } from '../components/receive/AmountInput';
 import { QRDisplay, type QRDisplayCard } from '../components/receive/QRDisplay';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
-import { ImportDialog } from '../components/settings/ImportDialog';
 import { generateTWQR, maskAccount, removeInvisibleChars, stripCompanySuffix } from '../utils/twqr';
 import { QrCode, StickyNote, UserPen, X, Download, Zap, BookOpen, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,13 +17,13 @@ import { QuickQRModal } from '../components/receive/QuickQRModal';
 import { generateId } from '../utils/generateId';
 import { useQRSettingsStore } from '../stores/useQRSettingsStore';
 import { formatBankCaption } from '../utils/accountPresentation';
+import { shouldAutoFocusTextInput } from '../utils/shouldAutoFocusTextInput';
 
 export const ReceivePage = () => {
   const { accounts, selectedAccountId, addAccount, selectAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showMessageInput, setShowMessageInput] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [showImport, setShowImport] = useState(false);
   const [showQuickAccess, setShowQuickAccess] = useState(false);
   const [showAccountPicker, setShowAccountPicker] = useState(false);
   const banks = useBanksStore((state) => state.banks);
@@ -32,6 +31,7 @@ export const ReceivePage = () => {
   const navigate = useNavigate();
   const customName = useQRSettingsStore((s) => s.customName);
   const setCustomName = useQRSettingsStore((s) => s.setCustomName);
+  const allowAutoFocus = useMemo(() => shouldAutoFocusTextInput(), []);
 
   const selectedAccount = useMemo(
     () => accounts.find((a) => a.id === selectedAccountId) || accounts[0],
@@ -174,7 +174,7 @@ export const ReceivePage = () => {
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
       // Enter — generate / show QR Code
-      if (e.key === 'Enter' && !showQR && !showNoteInput && !showMessageInput && !showImport) {
+      if (e.key === 'Enter' && !showQR && !showNoteInput && !showMessageInput && !showQuickAccess && !showAccountPicker) {
         e.preventDefault();
         haptic();
         setShowQR(true);
@@ -183,7 +183,7 @@ export const ReceivePage = () => {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [accounts.length, showQR, showNoteInput, showMessageInput, showImport]);
+  }, [accounts.length, showQR, showNoteInput, showMessageInput, showQuickAccess, showAccountPicker]);
 
   /* ---------- Empty state ---------- */
   if (accounts.length === 0) {
@@ -208,7 +208,7 @@ export const ReceivePage = () => {
         <div className="w-full max-w-72 space-y-3 mt-4">
           <button
             type="button"
-            onClick={() => navigate('/accounts', { viewTransition: true, state: { autoAdd: true } })}
+            onClick={() => navigate('/accounts/new', { viewTransition: true, state: { fallbackTo: '/' } })}
             className="w-full flex items-center justify-center gap-2 py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
             <Plus size={20} aria-hidden="true" />
@@ -216,7 +216,10 @@ export const ReceivePage = () => {
           </button>
           <button
             type="button"
-            onClick={() => setShowImport(true)}
+            onClick={() => {
+              haptic();
+              navigate('/settings/backup/import', { viewTransition: true, state: { fallbackTo: '/' } });
+            }}
             className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 text-lg"
           >
             <Download size={20} aria-hidden="true" />
@@ -260,7 +263,6 @@ export const ReceivePage = () => {
             {t.receive.loadSampleHint}
           </p>
         </div>
-        {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
         {showQuickAccess && <QuickQRModal onClose={() => setShowQuickAccess(false)} />}
       </div>
     );
@@ -393,6 +395,7 @@ export const ReceivePage = () => {
                 <input
                   type="text"
                   id="note-modal-input"
+                  name="transactionNote"
                   aria-label={t.receive.noteLabel}
                   value={note}
                   onChange={(e) => setNote(removeInvisibleChars(e.target.value).slice(0, 19))}
@@ -403,7 +406,7 @@ export const ReceivePage = () => {
                     }
                   }}
                   placeholder={t.receive.notePlaceholder}
-                  autoFocus
+                  autoFocus={allowAutoFocus}
                   autoComplete="off"
                   maxLength={19}
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs"
@@ -465,6 +468,7 @@ export const ReceivePage = () => {
                 <input
                   type="text"
                   id="message-modal-input"
+                  name="personalMessage"
                   aria-label={t.receive.messageTitle}
                   value={customName}
                   onChange={(e) => setCustomName(removeInvisibleChars(e.target.value).slice(0, 20))}
@@ -475,7 +479,7 @@ export const ReceivePage = () => {
                     }
                   }}
                   placeholder={t.receive.messagePlaceholder}
-                  autoFocus
+                  autoFocus={allowAutoFocus}
                   autoComplete="off"
                   maxLength={20}
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs"

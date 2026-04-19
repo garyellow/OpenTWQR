@@ -3,61 +3,25 @@ import { useAppStore } from '../stores/useAppStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { AccountCard } from '../components/accounts/AccountCard';
 import { AccountSelectorCard } from '../components/accounts/AccountSelectorCard';
-import { AccountForm } from '../components/accounts/AccountForm';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { Plus, Wallet, Trash2, Download } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ImportDialog } from '../components/settings/ImportDialog';
+import { useNavigate } from 'react-router-dom';
 import { useBanksStore } from '../stores/useBanksStore';
-import type { BankAccount } from '../types';
-import { generateId } from '../utils/generateId';
 import { haptic } from '../utils/haptics';
 import { maskAccount, stripCompanySuffix } from '../utils/twqr';
 import { formatBankCaption } from '../utils/accountPresentation';
 
 export const AccountsPage = () => {
-  const { accounts, addAccount, removeAccount, updateAccount, selectAccount, selectedAccountId } =
+  const { accounts, removeAccount, selectAccount, selectedAccountId } =
     useAppStore();
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Read navigation state once — both isAdding and prefillData draw from the same
-  // location snapshot, so we cast it once here rather than repeating inside each initializer.
-  type LocationState = { autoAdd?: boolean; prefill?: { bankCode: string; accountNumber: string } } | null;
-  const locationState = location.state as LocationState;
-
-  /* Auto-open add form when navigated with autoAdd state (e.g. from empty ReceivePage
-     or Web Share Target). Derive initial value from location.state so no effect / setState is needed. */
-  const [isAdding, setIsAdding] = useState(() => {
-    if (locationState?.autoAdd) {
-      // Clear only the user state; preserve React Router's internal keys (key, idx)
-      const hs = window.history.state;
-      window.history.replaceState(hs ? { ...hs, usr: undefined } : {}, '');
-      return true;
-    }
-    return false;
-  });
-  /** Pre-fill bankCode/accountNumber when arriving from Web Share Target disambiguation. */
-  const prefillData = locationState?.prefill ?? null;
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [showImport, setShowImport] = useState(false);
-
-  const closeFormModal = useCallback(() => {
-    setIsAdding(false);
-    setEditingId(null);
-  }, []);
 
   const closeDeleteModal = useCallback(() => {
     setDeletingId(null);
   }, []);
-
-  const handleAdd = useCallback((data: Omit<BankAccount, 'id'>) => {
-    addAccount({ id: generateId(), ...data });
-    navigate('/', { viewTransition: true });
-  }, [addAccount, navigate]);
 
   const bankByCode = useMemo(
     () => new Map(banks.map((entry) => [entry.code, entry])),
@@ -112,7 +76,10 @@ export const AccountsPage = () => {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => setShowImport(true)}
+              onClick={() => {
+                haptic();
+                navigate('/settings/backup/import', { viewTransition: true, state: { fallbackTo: '/accounts' } });
+              }}
               aria-label={t.accounts.importLabel}
               className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
@@ -120,7 +87,10 @@ export const AccountsPage = () => {
             </button>
             <button
               type="button"
-              onClick={() => setIsAdding(true)}
+              onClick={() => {
+                haptic();
+                navigate('/accounts/new', { viewTransition: true, state: { fallbackTo: '/accounts' } });
+              }}
               aria-label={t.accounts.addLabel}
               className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
             >
@@ -146,7 +116,10 @@ export const AccountsPage = () => {
             <div className="w-full max-w-72 space-y-3 mt-4">
               <button
                 type="button"
-                onClick={() => setIsAdding(true)}
+                onClick={() => {
+                  haptic();
+                  navigate('/accounts/new', { viewTransition: true });
+                }}
                 className="w-full flex items-center justify-center gap-2 py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 <Plus size={20} aria-hidden="true" />
@@ -154,7 +127,10 @@ export const AccountsPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setShowImport(true)}
+                onClick={() => {
+                  haptic();
+                  navigate('/settings/backup/import', { viewTransition: true, state: { fallbackTo: '/accounts' } });
+                }}
                 className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
               >
                 <Download size={20} aria-hidden="true" />
@@ -211,7 +187,8 @@ export const AccountsPage = () => {
                       }}
                       onEdit={(e) => {
                         e.stopPropagation();
-                        setEditingId(account.id);
+                        haptic();
+                        navigate(`/accounts/${account.id}/edit`, { viewTransition: true, state: { fallbackTo: '/accounts' } });
                       }}
                     />
                   ))}
@@ -221,48 +198,6 @@ export const AccountsPage = () => {
           </div>
         )}
       </main>
-
-      {/* ---------- Add / Edit Form Modal ---------- */}
-      {(isAdding || editingId) && (
-        <AnimatedModal
-          onClose={closeFormModal}
-          overlayClass="z-50"
-          cardClass="max-w-lg max-h-app-90 overflow-y-auto"
-          ariaLabelledby="account-form-title"
-        >
-          {(requestClose) => (
-            <div className="p-6 sm:p-8">
-              <h2
-                id="account-form-title"
-                className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-8 text-center"
-              >
-                {editingId ? t.accounts.editTitle : t.accounts.addTitle}
-              </h2>
-              <AccountForm
-                initialData={
-                  editingId
-                    ? accounts.find((a) => a.id === editingId)
-                    : prefillData
-                      ? { bankCode: prefillData.bankCode, accountNumber: prefillData.accountNumber }
-                      : undefined
-                }
-                editingId={editingId ?? undefined}
-                onSubmit={
-                  editingId
-                    ? (data) => {
-                        updateAccount(editingId, data);
-                        requestClose();
-                      }
-                    : (data) => {
-                        requestClose(() => handleAdd(data));
-                      }
-                }
-                onCancel={requestClose}
-              />
-            </div>
-          )}
-        </AnimatedModal>
-      )}
 
       {/* ---------- Delete Confirmation ---------- */}
       {deletingAccount && (
@@ -313,8 +248,6 @@ export const AccountsPage = () => {
           )}
         </AnimatedModal>
       )}
-
-      {showImport && <ImportDialog onClose={() => setShowImport(false)} />}
     </div>
   );
 };

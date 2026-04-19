@@ -18,8 +18,17 @@ const ReceivePage = lazy(() =>
 const AccountsPage = lazy(() =>
   import('./pages/AccountsPage').then((m) => ({ default: m.AccountsPage })),
 );
+const AccountTaskPage = lazy(() =>
+  import('./pages/AccountTaskPage').then((m) => ({ default: m.AccountTaskPage })),
+);
 const SettingsPage = lazy(() =>
   import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
+const ImportTaskPage = lazy(() =>
+  import('./pages/ImportTaskPage').then((m) => ({ default: m.ImportTaskPage })),
+);
+const ExportTaskPage = lazy(() =>
+  import('./pages/ExportTaskPage').then((m) => ({ default: m.ExportTaskPage })),
 );
 const ScanPage = lazy(() =>
   import('./pages/ScanPage').then((m) => ({ default: m.ScanPage })),
@@ -32,6 +41,9 @@ const SharePage = lazy(() =>
 );
 const PaymentLinksPage = lazy(() =>
   import('./pages/PaymentLinksPage').then((m) => ({ default: m.PaymentLinksPage })),
+);
+const PaymentLinkTaskPage = lazy(() =>
+  import('./pages/PaymentLinkTaskPage').then((m) => ({ default: m.PaymentLinkTaskPage })),
 );
 
 /** Routes that host the bottom tab bar — floating overlays are restricted to these
@@ -166,10 +178,16 @@ function App() {
               <Route path="/accounts" element={<AccountsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
+            <Route path="/accounts/new" element={<AccountTaskPage />} />
+            <Route path="/accounts/:accountId/edit" element={<AccountTaskPage />} />
+            <Route path="/settings/backup/import" element={<ImportTaskPage />} />
+            <Route path="/settings/backup/export" element={<ExportTaskPage />} />
             <Route path="/s/:data" element={<SharedPage />} />
             <Route path="/share" element={<SharePage />} />
-            <Route path="/import" element={<SharePage />} />
+            <Route path="/import" element={<ImportTaskPage />} />
             <Route path="/settings/payment-links" element={<PaymentLinksPage />} />
+            <Route path="/settings/payment-links/new" element={<PaymentLinkTaskPage />} />
+            <Route path="/settings/payment-links/:bankCode/edit" element={<PaymentLinkTaskPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { QrCode, Save, X } from 'lucide-react';
+import { QrCode, Save, X, AlertCircle } from 'lucide-react';
 import { BankSelect } from '../accounts/BankSelect';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { QRDisplay } from './QRDisplay';
@@ -200,9 +200,10 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
 
             {/* Error */}
             {error && (
-              <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium" role="alert">
-                {error}
-              </p>
+              <div role="alert" aria-live="polite" className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none">
+                <AlertCircle size={18} className="shrink-0" aria-hidden="true" />
+                <span className="font-medium">{error}</span>
+              </div>
             )}
 
             {/* Actions */}

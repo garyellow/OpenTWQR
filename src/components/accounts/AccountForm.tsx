@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BankSelect } from './BankSelect';
 import { useAppStore } from '../../stores/useAppStore';
 import { useBanksStore } from '../../stores/useBanksStore';
@@ -17,9 +17,10 @@ interface AccountFormProps {
   editingId?: string;
   onSubmit: (data: Omit<BankAccount, 'id'>) => void;
   onCancel: () => void;
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
-export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: AccountFormProps) => {
+export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirtyChange }: AccountFormProps) => {
   const [bankCode, setBankCode] = useState(initialData?.bankCode || '');
   const [accountNumber, setAccountNumber] = useState(initialData?.accountNumber || '');
   const [label, setLabel] = useState(initialData?.label || '');
@@ -32,6 +33,20 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel }: Acco
   const banks = useBanksStore((state) => state.banks);
   const selectedBank = banks.find((b) => b.code === bankCode);
   const bankUrlPlaceholder = selectedBank?.url || 'https://example.com/icon.png';
+  const initialValues = useMemo(() => ({
+    bankCode: initialData?.bankCode || '',
+    accountNumber: initialData?.accountNumber || '',
+    label: initialData?.label || '',
+    iconUrl: initialData?.iconUrl || '',
+  }), [initialData?.accountNumber, initialData?.bankCode, initialData?.iconUrl, initialData?.label]);
+  const isDirty = bankCode !== initialValues.bankCode
+    || accountNumber !== initialValues.accountNumber
+    || label !== initialValues.label
+    || iconUrl !== initialValues.iconUrl;
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const buildPayload = () => ({
     bankCode,

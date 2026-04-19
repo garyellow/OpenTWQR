@@ -2,7 +2,6 @@ import { useState, useCallback, useMemo } from 'react';
 import { useUrlSchemeStore } from '../stores/useUrlSchemeStore';
 import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
-import { UrlSchemeEditor } from '../components/settings/UrlSchemeEditor';
 import { AnimatedModal } from '../components/ui/AnimatedModal';
 import { ArrowLeft, Plus, Link2, ChevronRight, Trash2, FlaskConical, Building2, X, CircleHelp, Smartphone, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -22,8 +21,6 @@ export const PaymentLinksPage = () => {
   const removeConfig = useUrlSchemeStore((s) => s.removeConfig);
   const banks = useBanksStore((s) => s.banks);
 
-  const [editingBankCode, setEditingBankCode] = useState<string | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
   const [deletingBankCode, setDeletingBankCode] = useState<string | null>(null);
   const [testingBankCode, setTestingBankCode] = useState<string | null>(null);
   const [testBankCode, setTestBankCode] = useState('');
@@ -115,7 +112,13 @@ export const PaymentLinksPage = () => {
             )}
             <button
               type="button"
-              onClick={() => setIsAdding(true)}
+              onClick={() => {
+                haptic();
+                navigate('/settings/payment-links/new', {
+                  viewTransition: true,
+                  state: { fallbackTo: '/settings/payment-links' },
+                });
+              }}
               aria-label={t.urlScheme.addLabel}
               title={t.urlScheme.addBank}
               className="p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors"
@@ -150,7 +153,13 @@ export const PaymentLinksPage = () => {
             </div>
             <button
               type="button"
-              onClick={() => setIsAdding(true)}
+              onClick={() => {
+                haptic();
+                navigate('/settings/payment-links/new', {
+                  viewTransition: true,
+                  state: { fallbackTo: '/settings/payment-links' },
+                });
+              }}
               className="w-full max-w-72 py-4 btn-accent font-semibold rounded-xl active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 mt-4"
             >
               {t.urlScheme.addBank}
@@ -169,7 +178,10 @@ export const PaymentLinksPage = () => {
                       type="button"
                       onClick={() => {
                         haptic();
-                        setEditingBankCode(config.bankCode);
+                        navigate(`/settings/payment-links/${config.bankCode}/edit`, {
+                          viewTransition: true,
+                          state: { fallbackTo: '/settings/payment-links' },
+                        });
                       }}
                       className="flex-1 flex items-center gap-3 p-4 min-w-0 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                     >
@@ -260,17 +272,6 @@ export const PaymentLinksPage = () => {
           </div>
         )}
       </main>
-
-      {/* Editor modal */}
-      {(isAdding || editingBankCode) && (
-        <UrlSchemeEditor
-          bankCode={editingBankCode || undefined}
-          onClose={() => {
-            setIsAdding(false);
-            setEditingBankCode(null);
-          }}
-        />
-      )}
 
       {/* Delete confirmation modal — mirrors AccountsPage pattern */}
       {deletingConfig && (

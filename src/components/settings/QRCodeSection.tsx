@@ -1,10 +1,11 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { QrCode, UserPen, Landmark, X, CreditCard, ChevronRight, Shapes } from 'lucide-react';
 import { useQRSettingsStore } from '../../stores/useQRSettingsStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { haptic } from '../../utils/haptics';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import type { QRDotStyle, QREyeStyle } from '../../types';
+import { shouldAutoFocusTextInput } from '../../utils/shouldAutoFocusTextInput';
 
 /**
  * QR Code display settings — rendered as a single row in PersonalizationSection.
@@ -34,6 +35,7 @@ export const QRCodeSection = () => {
   const [showStyleModal, setShowStyleModal] = useState(false);
   const [draftName, setDraftName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const allowAutoFocus = useMemo(() => shouldAutoFocusTextInput(), []);
 
   /** Summary label of current dot + eye style, used as description in the settings row. */
   const dotStyleLabel = dotStyle === 'square' ? t.qrSettings.dotStyleSquare
@@ -327,7 +329,7 @@ export const QRCodeSection = () => {
           overlayClass="z-[60]"
           cardClass="max-w-sm p-6"
           ariaLabelledby="custom-name-modal-title"
-          initialFocusRef={inputRef}
+          initialFocusRef={allowAutoFocus ? inputRef : undefined}
         >
           {(requestClose) => (
             <>
@@ -348,6 +350,7 @@ export const QRCodeSection = () => {
                 <input
                   ref={inputRef}
                   type="text"
+                  name="qrCustomName"
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
                   onKeyDown={(e) => {
@@ -357,7 +360,6 @@ export const QRCodeSection = () => {
                     }
                   }}
                   placeholder={t.qrSettings.customNamePlaceholder}
-                  autoFocus
                   autoComplete="off"
                   maxLength={20}
                   className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 pr-14 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs"

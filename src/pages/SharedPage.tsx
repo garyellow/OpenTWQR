@@ -7,6 +7,7 @@ import { useBanksStore } from '../stores/useBanksStore';
 import { useLocaleStore } from '../stores/useLocaleStore';
 import { Unlink, Lock, Clock } from 'lucide-react';
 import type { ParseShareResult } from '../types';
+import { shouldAutoFocusTextInput } from '../utils/shouldAutoFocusTextInput';
 
 export const SharedPage = () => {
   const { data } = useParams<{ data: string }>();
@@ -17,6 +18,7 @@ export const SharedPage = () => {
   const [result, setResult] = useState<ParseShareResult | null>(null);
   const [password, setPassword] = useState('');
   const [isDecrypting, setIsDecrypting] = useState(false);
+  const allowAutoFocus = useMemo(() => shouldAutoFocusTextInput(), []);
 
   const fragment = useMemo(() => {
     const hash = window.location.hash;
@@ -90,6 +92,7 @@ export const SharedPage = () => {
         <div className="w-full max-w-xs space-y-3">
           <input
             type="password"
+            name="sharedPassword"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => {
@@ -98,7 +101,7 @@ export const SharedPage = () => {
             placeholder={t.shared.passwordPlaceholder}
             aria-label={t.shared.passwordLabel}
             aria-describedby={result.status === 'wrong-password' ? 'shared-pw-error' : undefined}
-            autoFocus
+            autoFocus={allowAutoFocus}
             autoComplete="off"
             className="w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs text-center"
           />
