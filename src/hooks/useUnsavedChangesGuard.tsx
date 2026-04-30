@@ -48,6 +48,16 @@ export const useUnsavedChangesGuard = ({
   const t = useLocaleStore((s) => s.t);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const [pendingBrowserBack, setPendingBrowserBack] = useState(false);
+  const [prevWhen, setPrevWhen] = useState(when);
+
+  if (prevWhen !== when) {
+    setPrevWhen(when);
+    if (!when) {
+      proceedingRef.current = false;
+      setPendingAction(null);
+      setPendingBrowserBack(false);
+    }
+  }
 
   const whenRef = useRef(when);
   const historyLayerTokenRef = useRef<string>(createHistoryLayerToken('unsaved-changes'));
@@ -67,14 +77,6 @@ export const useUnsavedChangesGuard = ({
       event.returnValue = '';
     }, [when]),
   );
-
-  useEffect(() => {
-    if (when) return;
-
-    proceedingRef.current = false;
-    setPendingAction(null);
-    setPendingBrowserBack(false);
-  }, [when]);
 
   useEffect(() => {
     const token = historyLayerTokenRef.current;
