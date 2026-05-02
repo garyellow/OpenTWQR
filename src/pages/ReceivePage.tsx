@@ -20,7 +20,14 @@ import { formatBankCaption } from '../utils/accountPresentation';
 import { shouldAutoFocusTextInput } from '../utils/shouldAutoFocusTextInput';
 
 export const ReceivePage = () => {
-  const { accounts, selectedAccountId, addAccount, selectAccount, receiveAmount: amount, receiveNote: note, setReceiveAmount: setAmount, setReceiveNote: setNote } = useAppStore();
+  const accounts = useAppStore((s) => s.accounts);
+  const selectedAccountId = useAppStore((s) => s.selectedAccountId);
+  const addAccount = useAppStore((s) => s.addAccount);
+  const selectAccount = useAppStore((s) => s.selectAccount);
+  const amount = useAppStore((s) => s.receiveAmount);
+  const note = useAppStore((s) => s.receiveNote);
+  const setAmount = useAppStore((s) => s.setReceiveAmount);
+  const setNote = useAppStore((s) => s.setReceiveNote);
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showMessageInput, setShowMessageInput] = useState(false);
   const [showQR, setShowQR] = useState(false);

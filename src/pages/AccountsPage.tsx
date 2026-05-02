@@ -12,8 +12,10 @@ import { maskAccount, stripCompanySuffix } from '../utils/twqr';
 import { formatBankCaption } from '../utils/accountPresentation';
 
 export const AccountsPage = () => {
-  const { accounts, removeAccount, selectAccount, selectedAccountId } =
-    useAppStore();
+  const accounts = useAppStore((s) => s.accounts);
+  const removeAccount = useAppStore((s) => s.removeAccount);
+  const selectAccount = useAppStore((s) => s.selectAccount);
+  const selectedAccountId = useAppStore((s) => s.selectedAccountId);
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
   const navigate = useNavigate();

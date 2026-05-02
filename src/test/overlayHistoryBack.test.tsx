@@ -28,6 +28,21 @@ const DelayedCloseHarness = () => {
   );
 };
 
+const DirectRequestCloseHarness = () => {
+  const [open, setOpen] = useState(true);
+  const { isClosing, requestClose, onAnimationEnd } = useDelayedClose(() => setOpen(false));
+
+  if (!open) return <div>closed</div>;
+
+  return (
+    <div role="dialog" data-state={isClosing ? 'closing' : 'open'} onAnimationEnd={onAnimationEnd}>
+      <button type="button" onClick={requestClose}>
+        close directly
+      </button>
+    </div>
+  );
+};
+
 const AnimatedToggleHarness = () => {
   const toggle = useAnimatedToggle({ historyBack: true });
 
@@ -66,6 +81,24 @@ describe('overlay history back registration', () => {
     act(() => {
       window.dispatchEvent(new PopStateEvent('popstate', { state: { root: true } }));
     });
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'closing');
+    });
+
+    act(() => {
+      screen.getByRole('dialog').dispatchEvent(new Event('animationend', { bubbles: true }));
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it('ignores React click events passed to requestClose as callback arguments', async () => {
+    render(<DirectRequestCloseHarness />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'close directly' }));
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'closing');

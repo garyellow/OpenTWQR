@@ -1,18 +1,22 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Download, X, Share } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
-import { useLocation } from 'react-router-dom';
 import { useLocaleStore } from '../../stores/useLocaleStore';
+
+interface InstallPromptProps {
+  /** Controls visibility without unmounting, so captured browser install events are retained. */
+  enabled?: boolean;
+}
 
 /**
  * Bottom banner prompting PWA install. Chromium: triggers native install dialog.
  * iOS: shows manual Add to Home Screen steps. Respects 30-day dismiss cooldown.
- * Hidden in standalone mode and on /s/ pages.
+ * Visibility is controlled by the app shell so it never covers task pages,
+ * shared payment pages, or the app-lock screen.
  */
-export const InstallPrompt = () => {
+export const InstallPrompt = ({ enabled = true }: InstallPromptProps) => {
   const t = useLocaleStore((s) => s.t);
   const { canShow, platform, promptInstall, dismiss } = useInstallPrompt();
-  const location = useLocation();
   const [isExiting, setIsExiting] = useState(false);
   const settledRef = useRef(false);
 
@@ -42,9 +46,9 @@ export const InstallPrompt = () => {
     return () => clearTimeout(id);
   }, [isExiting, dismiss]);
 
-  // Don't show on shared payment pages — those are for payers, not the app owner
   // Keep rendering while exiting so the slide-out animation can complete
-  if ((!canShow && !isExiting) || !platform || location.pathname.startsWith('/s/')) return null;
+  if (!enabled && !isExiting) return null;
+  if ((!canShow && !isExiting) || !platform) return null;
 
   return (
     <div
@@ -63,7 +67,7 @@ export const InstallPrompt = () => {
           type="button"
           onClick={handleDismiss}
           aria-label={t.install.dismiss}
-          className="absolute top-3 right-3 p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          className="absolute top-3 right-3 p-2.5 min-w-11 min-h-11 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
         >
           <X size={16} aria-hidden="true" />
         </button>

@@ -28,6 +28,7 @@ interface BanksState {
 }
 
 const BANKS_JSON_PATH = `${import.meta.env.BASE_URL}data/banks.latest.json`;
+const BANK_REFRESH_COOLDOWN_MS = 60 * 60 * 1000;
 
 const FALLBACK_BANKS = [...BANKS].sort((left, right) => Number(left.code) - Number(right.code));
 
@@ -78,8 +79,12 @@ export const useBanksStore = create<BanksState>()(
       lastSyncedAt: null,
       isRefreshing: false,
       refreshBanks: async () => {
-        if (get().isRefreshing) return;
+        const state = get();
+        if (state.isRefreshing) return;
         if (!navigator.onLine) return;
+
+        const lastSyncedAt = toTimestamp(state.lastSyncedAt ?? undefined);
+        if (lastSyncedAt > 0 && Date.now() - lastSyncedAt < BANK_REFRESH_COOLDOWN_MS) return;
 
         set({ isRefreshing: true });
 

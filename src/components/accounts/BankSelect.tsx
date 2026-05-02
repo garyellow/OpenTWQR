@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback, type Ref } from 'react';
 import { Search, X, ChevronDown, Building2 } from 'lucide-react';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -9,6 +9,9 @@ import { stripCompanySuffix } from '../../utils/twqr';
 interface BankSelectProps {
   value: string;
   onChange: (code: string) => void;
+  triggerRef?: Ref<HTMLButtonElement>;
+  ariaInvalid?: boolean;
+  ariaDescribedBy?: string;
 }
 
 /**
@@ -17,13 +20,13 @@ interface BankSelectProps {
  * Uses a solid-background fixed overlay (not a semi-transparent backdrop modal)
  * so it never shows a ghost frame when used inside another modal.
  */
-export const BankSelect = ({ value, onChange }: BankSelectProps) => {
+export const BankSelect = ({ value, onChange, triggerRef, ariaInvalid = false, ariaDescribedBy }: BankSelectProps) => {
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const banks = useBanksStore((state) => state.banks);
   const t = useLocaleStore((s) => s.t);
-  const panelToggle = useAnimatedToggle({ historyBack: true });
+  const panelToggle = useAnimatedToggle();
 
   const selectedBank = useMemo(() => banks.find((b) => b.code === value), [banks, value]);
 
@@ -42,8 +45,11 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
     panelToggle.open();
   }, [panelToggle]);
 
-  const requestClose = useCallback(() => {
-    panelToggle.close(() => setSearch(''));
+  const requestClose = useCallback((afterClose?: () => void) => {
+    panelToggle.close(() => {
+      setSearch('');
+      afterClose?.();
+    });
   }, [panelToggle]);
 
   useEffect(() => {
@@ -75,11 +81,15 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
           {t.form.bankLabel}
         </label>
         <button
+          ref={triggerRef}
           id="bank-select-trigger"
           type="button"
           onClick={open}
           aria-haspopup="dialog"
           aria-expanded={panelToggle.isOpen}
+          aria-invalid={ariaInvalid || undefined}
+          aria-errormessage={ariaInvalid ? ariaDescribedBy : undefined}
+          aria-describedby={!ariaInvalid ? ariaDescribedBy : undefined}
           className="w-full flex items-center justify-between px-4 py-4 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 action-transition shadow-xs group focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100"
         >
           <div className="flex items-center gap-3 min-w-0">
@@ -132,7 +142,7 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
               </h2>
               <button
                 type="button"
-                onClick={requestClose}
+                onClick={() => requestClose()}
                 aria-label={t.common.close}
                 className="p-2.5 -mr-2 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
@@ -179,10 +189,9 @@ export const BankSelect = ({ value, onChange }: BankSelectProps) => {
                   key={bank.code}
                   type="button"
                   onClick={() => {
-                    onChange(bank.code);
-                    requestClose();
+                    requestClose(() => onChange(bank.code));
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900 ${
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl action-transition active:scale-98 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900 [content-visibility:auto] [contain-intrinsic-size:auto_52px] ${
                     value === bank.code
                       ? 'chip-accent shadow-xs'
                       : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'

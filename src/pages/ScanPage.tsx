@@ -65,6 +65,11 @@ export const ScanPage = () => {
   /** When true, QRDisplay is shown as overlay on top of ScanRedirectView. */
   const [showQR, setShowQR] = useState(false);
 
+  const bankByCode = useMemo(
+    () => new Map(banks.map((bankEntry) => [bankEntry.code, bankEntry])),
+    [banks],
+  );
+
   const parsed = useMemo(() => {
     if (!scanResult) return null;
     return parseTWQR(scanResult);
@@ -108,8 +113,8 @@ export const ScanPage = () => {
   }, [parsed]);
 
   const bank = useMemo(
-    () => (parsed ? banks.find((b) => b.code === parsed.bankCode) : null),
-    [banks, parsed],
+    () => (parsed ? bankByCode.get(parsed.bankCode) ?? null : null),
+    [bankByCode, parsed],
   );
 
   const bankIconUrl = useMemo(
@@ -125,7 +130,7 @@ export const ScanPage = () => {
     const entries: PaymentAppEntry[] = [];
 
     for (const config of configs) {
-      const configBank = banks.find((b) => b.code === config.bankCode);
+      const configBank = bankByCode.get(config.bankCode);
       const isSameInstitution = config.bankCode === parsed.bankCode;
 
       // sameInstitutionOnly: cross-institution → use fallback launch URL if available, otherwise skip
@@ -165,7 +170,7 @@ export const ScanPage = () => {
       if (a.isSameInstitution !== b.isSameInstitution) return a.isSameInstitution ? -1 : 1;
       return a.bankCode.localeCompare(b.bankCode);
     });
-  }, [configs, parsed, banks]);
+  }, [configs, parsed, bankByCode]);
 
   const hasPaymentApps = paymentApps.length > 0;
 

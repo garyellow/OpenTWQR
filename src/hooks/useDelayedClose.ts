@@ -11,6 +11,7 @@ type ClosePhase = 'idle' | 'closing-ui' | 'closing-history' | 'awaiting-history-
 export interface DelayedCloseRequest {
   (): void;
   (onClosed: () => void): void;
+  (event: unknown): void;
 }
 
 /**
@@ -93,6 +94,11 @@ export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOpt
     }
 
     if (closePhaseRef.current === 'closing-ui') {
+      if (!historyStateHasLayer(window.history.state, historyLayerTokenRef.current)) {
+        finaliseClose();
+        return;
+      }
+
       closePhaseRef.current = 'awaiting-history-pop';
       popFallbackTimerRef.current = window.setTimeout(() => {
         finaliseClose();
@@ -101,8 +107,10 @@ export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOpt
     }
   }, [finaliseClose, historyBack]);
 
-  const requestClose = useCallback<DelayedCloseRequest>((onClosed?: () => void) => {
-    if (onClosed) onClosedRef.current = onClosed;
+  const requestClose = useCallback<DelayedCloseRequest>((onClosed?: unknown) => {
+    // Some call sites intentionally use `onClick={requestClose}`. React then
+    // passes the click event as the first argument; only store real callbacks.
+    if (typeof onClosed === 'function') onClosedRef.current = onClosed as () => void;
     if (isClosingRef.current) return;
 
     settledRef.current = false;

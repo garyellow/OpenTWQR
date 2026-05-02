@@ -18,7 +18,13 @@ const LOCALE_MAP: Record<Locale, Translations> = {
  * and 'zh-TW' as the ultimate fallback.
  */
 const detectLocale = (): Locale => {
-  const langs = navigator.languages ?? [navigator.language];
+  if (typeof navigator === 'undefined') return 'zh-TW';
+
+  const langs = [
+    ...(Array.isArray(navigator.languages) ? navigator.languages : []),
+    navigator.language,
+  ].filter((lang): lang is string => typeof lang === 'string' && lang.length > 0);
+
   for (const lang of langs) {
     const l = lang.toLowerCase();
     if (l.startsWith('en')) return 'en-US';
@@ -55,6 +61,11 @@ const safeLocalStorage: Storage = {
 const resolveLocale = (userLocale: Locale | null): Locale =>
   userLocale ?? detectLocale();
 
+const applyDocumentLocale = (locale: Locale) => {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = locale;
+};
+
 export const useLocaleStore = create<LocaleState>()(
   persist(
     (set, get) => {
@@ -66,13 +77,13 @@ export const useLocaleStore = create<LocaleState>()(
         setLocale: (locale) => {
           const resolved = resolveLocale(locale);
           set({ userLocale: locale, locale: resolved, t: LOCALE_MAP[resolved] });
-          document.documentElement.lang = resolved;
+          applyDocumentLocale(resolved);
         },
         toggle: () => {
           const current = get().locale;
           const next: Locale = current === 'zh-TW' ? 'en-US' : 'zh-TW';
           set({ userLocale: next, locale: next, t: LOCALE_MAP[next] });
-          document.documentElement.lang = next;
+          applyDocumentLocale(next);
         },
       };
     },
@@ -87,7 +98,7 @@ export const useLocaleStore = create<LocaleState>()(
           const resolved = resolveLocale(state.userLocale);
           state.locale = resolved;
           state.t = LOCALE_MAP[resolved];
-          document.documentElement.lang = resolved;
+          applyDocumentLocale(resolved);
         }
       },
     },

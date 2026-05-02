@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useId } from 'react';
 import { QrCode, UserPlus, Share2 } from 'lucide-react';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const ONBOARDING_KEY = 'opentwqr-onboarding-done';
 
@@ -27,8 +28,12 @@ export const OnboardingOverlay = () => {
   const [step, setStep] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const settledRef = useRef(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const primaryActionRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
 
   useScrollLock(show);
+  useFocusTrap(dialogRef, show && !isExiting, primaryActionRef);
 
   const markDone = useCallback(() => {
     try { localStorage.setItem(ONBOARDING_KEY, '1'); } catch { /* noop */ }
@@ -49,6 +54,10 @@ export const OnboardingOverlay = () => {
     settledRef.current = true;
     setShow(false);
   }, [isExiting]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') markDone();
+  }, [markDone]);
 
   // Safety fallback: close overlay even if animationend never fires
   // (e.g. prefers-reduced-motion, Chrome throttling, or tab backgrounding).
@@ -77,10 +86,15 @@ export const OnboardingOverlay = () => {
 
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
       className={`fixed inset-0 z-100 flex items-center justify-center bg-white dark:bg-zinc-950 motion-reduce:animate-none ${
         isExiting ? 'animate-out fade-out duration-300' : 'animate-in fade-in duration-300'
       }`}
       onAnimationEnd={handleAnimationEnd}
+      onKeyDown={handleKeyDown}
     >
       <div className="w-full max-w-sm mx-auto px-8 flex flex-col items-center text-center">
         {/* Icon */}
@@ -92,7 +106,7 @@ export const OnboardingOverlay = () => {
         </div>
 
         {/* Title & description */}
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-3">
+        <h1 id={titleId} className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-3">
           {stepTexts[step].title}
         </h1>
         <p className="text-base text-zinc-500 dark:text-zinc-400 leading-relaxed mb-10 text-pretty">
@@ -117,6 +131,7 @@ export const OnboardingOverlay = () => {
         {/* Actions */}
         <div className="w-full space-y-3">
           <button
+            ref={primaryActionRef}
             type="button"
             onClick={handleNext}
             className="w-full py-4 btn-accent font-semibold rounded-xl text-lg active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
@@ -127,7 +142,7 @@ export const OnboardingOverlay = () => {
             <button
               type="button"
               onClick={markDone}
-              className="w-full py-3 font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 active:scale-98 action-transition focus-visible:outline-hidden rounded-xl"
+              className="w-full py-3 font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 active:scale-98 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 rounded-xl"
             >
               {t.onboarding.skip}
             </button>

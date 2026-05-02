@@ -193,7 +193,7 @@ function App() {
         </Suspense>
       )}
       <ReloadPrompt />
-      <InstallPrompt />
+      <InstallPrompt enabled={showOverlayUI} />
       {showOverlayUI && <OnboardingOverlay />}
       <PrivacyScreen />
     </>

@@ -469,6 +469,7 @@ export const ImportTaskContent = ({
                   type="button"
                   role="checkbox"
                   aria-checked={includeAccounts}
+                  aria-label={t.importDialog.catAccounts}
                   onClick={() => setIncludeAccounts(!includeAccounts)}
                   className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
                     includeAccounts
@@ -513,18 +514,7 @@ export const ImportTaskContent = ({
                     {candidates.map((candidate, index) => (
                       <div
                         key={`${candidate.original.bankCode}-${candidate.original.accountNumber}-${index}`}
-                        role="button"
-                        tabIndex={0}
-                        aria-pressed={candidate.checked}
-                        aria-label={t.importDialog.selectLabel(candidate.checked, getBankName(candidate.original.bankCode))}
-                        onClick={() => toggleCandidate(index)}
-                        onKeyDown={(event) => {
-                          if (event.key === ' ' || event.key === 'Enter') {
-                            event.preventDefault();
-                            toggleCandidate(index);
-                          }
-                        }}
-                        className={`flex items-start gap-3 p-3 rounded-xl border transition-colors cursor-pointer select-none ${
+                        className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
                           candidate.checked
                             ? 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800'
                             : 'bg-zinc-50 dark:bg-zinc-900/20 border-zinc-100 dark:border-zinc-800/50 opacity-60'
@@ -535,19 +525,23 @@ export const ImportTaskContent = ({
                           role="checkbox"
                           aria-checked={candidate.checked}
                           aria-label={t.importDialog.selectLabel(candidate.checked, getBankName(candidate.original.bankCode))}
-                          onClick={(event) => event.stopPropagation()}
-                          tabIndex={-1}
-                          className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
-                            candidate.checked
-                              ? 'border-transparent'
-                              : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
-                          }`}
-                          style={candidate.checked ? {
-                            backgroundColor: 'var(--ca)',
-                            borderColor: 'var(--ca)',
-                          } : undefined}
+                          onClick={() => toggleCandidate(index)}
+                          className="-ml-1 -mt-1 flex h-11 w-11 shrink-0 items-start justify-center rounded-lg pt-1.5 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                         >
-                          {candidate.checked && <Check size={12} className="text-white dark:text-zinc-900" aria-hidden="true" />}
+                          <span
+                            aria-hidden="true"
+                            className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                              candidate.checked
+                                ? 'border-transparent'
+                                : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
+                            }`}
+                            style={candidate.checked ? {
+                              backgroundColor: 'var(--ca)',
+                              borderColor: 'var(--ca)',
+                            } : undefined}
+                          >
+                            {candidate.checked && <Check size={12} className="text-white dark:text-zinc-900" aria-hidden="true" />}
+                          </span>
                         </button>
 
                         <div className="flex-1 min-w-0">
@@ -608,33 +602,28 @@ export const ImportTaskContent = ({
           {importedStyle && (
             <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
               <div
-                role="button"
-                tabIndex={0}
-                aria-pressed={!!anyStyleSelected}
-                onClick={() => setStyleSelection({ accent: !allStyleSelected, qr: !allStyleSelected })}
-                onKeyDown={(event) => {
-                  if (event.key === ' ' || event.key === 'Enter') {
-                    event.preventDefault();
-                    setStyleSelection({ accent: !allStyleSelected, qr: !allStyleSelected });
-                  }
-                }}
-                className={`flex items-center gap-3 p-3 cursor-pointer select-none transition-colors ${
+                className={`flex items-center transition-colors ${
                   anyStyleSelected
                     ? 'bg-white dark:bg-zinc-900/50'
                     : 'bg-zinc-50 dark:bg-zinc-900/20 opacity-60'
                 }`}
               >
-                <ImportCheckboxIcon checked={!!allStyleSelected} indeterminate={!!anyStyleSelected && !allStyleSelected} />
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.importDialog.catStyle}</span>
-                </div>
                 <button
                   type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setStyleExpanded(!styleExpanded);
-                  }}
-                  className="p-1 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                  role="checkbox"
+                  aria-checked={allStyleSelected ? true : anyStyleSelected ? 'mixed' : false}
+                  onClick={() => setStyleSelection({ accent: !allStyleSelected, qr: !allStyleSelected })}
+                  className="flex flex-1 items-center gap-3 p-3 text-left select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <ImportCheckboxIcon checked={!!allStyleSelected} indeterminate={!!anyStyleSelected && !allStyleSelected} />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.importDialog.catStyle}</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStyleExpanded(!styleExpanded)}
+                  className="mr-2 p-1 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                   aria-label={styleExpanded ? t.common.collapse : t.common.expand}
                 >
                   {styleExpanded ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
@@ -664,33 +653,28 @@ export const ImportTaskContent = ({
           {importedPreferences && (
             <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
               <div
-                role="button"
-                tabIndex={0}
-                aria-pressed={!!anyPrefsSelected}
-                onClick={() => setPrefsSelection({ mode: !allPrefsSelected, locale: !allPrefsSelected })}
-                onKeyDown={(event) => {
-                  if (event.key === ' ' || event.key === 'Enter') {
-                    event.preventDefault();
-                    setPrefsSelection({ mode: !allPrefsSelected, locale: !allPrefsSelected });
-                  }
-                }}
-                className={`flex items-center gap-3 p-3 cursor-pointer select-none transition-colors ${
+                className={`flex items-center transition-colors ${
                   anyPrefsSelected
                     ? 'bg-white dark:bg-zinc-900/50'
                     : 'bg-zinc-50 dark:bg-zinc-900/20 opacity-60'
                 }`}
               >
-                <ImportCheckboxIcon checked={!!allPrefsSelected} indeterminate={!!anyPrefsSelected && !allPrefsSelected} />
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.importDialog.catPreferences}</span>
-                </div>
                 <button
                   type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setPrefsExpanded(!prefsExpanded);
-                  }}
-                  className="p-1 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                  role="checkbox"
+                  aria-checked={allPrefsSelected ? true : anyPrefsSelected ? 'mixed' : false}
+                  onClick={() => setPrefsSelection({ mode: !allPrefsSelected, locale: !allPrefsSelected })}
+                  className="flex flex-1 items-center gap-3 p-3 text-left select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                >
+                  <ImportCheckboxIcon checked={!!allPrefsSelected} indeterminate={!!anyPrefsSelected && !allPrefsSelected} />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.importDialog.catPreferences}</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrefsExpanded(!prefsExpanded)}
+                  className="mr-2 p-1 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                   aria-label={prefsExpanded ? t.common.collapse : t.common.expand}
                 >
                   {prefsExpanded ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
@@ -719,18 +703,12 @@ export const ImportTaskContent = ({
 
           {importedPaymentLinks && importedPaymentLinks.length > 0 && (
             <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-              <div
-                role="button"
-                tabIndex={0}
-                aria-pressed={includePaymentLinks}
+              <button
+                type="button"
+                role="checkbox"
+                aria-checked={includePaymentLinks}
                 onClick={() => setIncludePaymentLinks(!includePaymentLinks)}
-                onKeyDown={(event) => {
-                  if (event.key === ' ' || event.key === 'Enter') {
-                    event.preventDefault();
-                    setIncludePaymentLinks(!includePaymentLinks);
-                  }
-                }}
-                className={`flex items-center gap-3 p-3 cursor-pointer select-none transition-colors ${
+                className={`w-full flex items-center gap-3 p-3 text-left select-none transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
                   includePaymentLinks
                     ? 'bg-white dark:bg-zinc-900/50'
                     : 'bg-zinc-50 dark:bg-zinc-900/20 opacity-60'
@@ -740,7 +718,7 @@ export const ImportTaskContent = ({
                 <span className="flex-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
                   {t.importDialog.catPaymentLinks(importedPaymentLinks.length)}
                 </span>
-              </div>
+              </button>
 
               {includePaymentLinks && conflictingLinks.length > 0 && (
                 <div className="border-t border-zinc-100 dark:border-zinc-800/50">
@@ -846,6 +824,7 @@ function ImportCheckboxIcon({ checked, indeterminate }: { checked: boolean; inde
   const active = checked || indeterminate;
   return (
     <span
+      aria-hidden="true"
       className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
         active ? 'border-transparent' : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
       }`}
@@ -868,21 +847,15 @@ function ImportSubCheckbox({ checked, onChange, label }: {
   label: string;
 }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      aria-pressed={checked}
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
       onClick={onChange}
-      onKeyDown={(event) => {
-        if (event.key === ' ' || event.key === 'Enter') {
-          event.preventDefault();
-          onChange();
-        }
-      }}
-      className={`flex items-center gap-3 p-2.5 cursor-pointer select-none transition-colors ${checked ? '' : 'opacity-50'}`}
+      className={`w-full flex items-center gap-3 p-2.5 text-left select-none transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${checked ? '' : 'opacity-50'}`}
     >
       <ImportCheckboxIcon checked={checked} />
       <span className="text-sm text-zinc-700 dark:text-zinc-300">{label}</span>
-    </div>
+    </button>
   );
 }

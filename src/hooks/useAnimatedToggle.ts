@@ -87,6 +87,11 @@ export const useAnimatedToggle = (options: UseAnimatedToggleOptions = {}) => {
     }
 
     if (closePhaseRef.current === 'closing-ui') {
+      if (!historyStateHasLayer(window.history.state, historyLayerTokenRef.current)) {
+        finalise();
+        return;
+      }
+
       closePhaseRef.current = 'awaiting-history-pop';
       popFallbackTimerRef.current = window.setTimeout(() => {
         finalise();

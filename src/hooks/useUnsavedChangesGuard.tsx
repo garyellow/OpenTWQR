@@ -2,22 +2,7 @@ import { useBeforeUnload } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useLocaleStore } from '../stores/useLocaleStore';
-import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer, readHistoryLayers } from '../utils/historyLayers';
-
-function buildStateWithoutLayer(state: unknown, layerToken: string) {
-  const layers = readHistoryLayers(state).filter((layer) => layer !== layerToken);
-
-  if (typeof state === 'object' && state !== null) {
-    return {
-      ...state,
-      __otwqrHistoryLayers: layers,
-    };
-  }
-
-  return {
-    __otwqrHistoryLayers: layers,
-  };
-}
+import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
 
 interface UseUnsavedChangesGuardOptions {
   when: boolean;
@@ -48,25 +33,31 @@ export const useUnsavedChangesGuard = ({
   const t = useLocaleStore((s) => s.t);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const [pendingBrowserBack, setPendingBrowserBack] = useState(false);
-  const [prevWhen, setPrevWhen] = useState(when);
-
-  if (prevWhen !== when) {
-    setPrevWhen(when);
-    if (!when) {
-      proceedingRef.current = false;
-      setPendingAction(null);
-      setPendingBrowserBack(false);
-    }
-  }
-
   const whenRef = useRef(when);
   const historyLayerTokenRef = useRef<string>(createHistoryLayerToken('unsaved-changes'));
   const pendingActionAfterLayerPopRef = useRef<(() => void) | null>(null);
+  const pendingLayerPopFallbackTimerRef = useRef<number | null>(null);
   const suppressNextPopRef = useRef(false);
   const proceedingRef = useRef(false);
 
+  const clearLayerPopFallbackTimer = useCallback(() => {
+    if (pendingLayerPopFallbackTimerRef.current === null) return;
+
+    window.clearTimeout(pendingLayerPopFallbackTimerRef.current);
+    pendingLayerPopFallbackTimerRef.current = null;
+  }, []);
+
   useEffect(() => {
     whenRef.current = when;
+    if (when) return;
+
+    proceedingRef.current = false;
+    const cleanupTimer = window.setTimeout(() => {
+      setPendingAction(null);
+      setPendingBrowserBack(false);
+    }, 0);
+
+    return () => window.clearTimeout(cleanupTimer);
   }, [when]);
 
   useBeforeUnload(
@@ -91,18 +82,21 @@ export const useUnsavedChangesGuard = ({
 
     if (historyStateHasLayer(window.history.state, token)) {
       pendingActionAfterLayerPopRef.current = action;
-      const fallbackState = buildStateWithoutLayer(window.history.state, token);
       window.history.back();
-      window.setTimeout(() => {
+
+      clearLayerPopFallbackTimer();
+      pendingLayerPopFallbackTimerRef.current = window.setTimeout(() => {
+        pendingLayerPopFallbackTimerRef.current = null;
         if (pendingActionAfterLayerPopRef.current !== action) return;
 
-        window.dispatchEvent(new PopStateEvent('popstate', { state: fallbackState }));
-      }, 0);
+        pendingActionAfterLayerPopRef.current = null;
+        action();
+      }, 100);
       return;
     }
 
     action();
-  }, []);
+  }, [clearLayerPopFallbackTimer]);
 
   useEffect(() => {
     const token = historyLayerTokenRef.current;
@@ -118,6 +112,7 @@ export const useUnsavedChangesGuard = ({
       const pendingActionAfterLayerPop = pendingActionAfterLayerPopRef.current;
       if (pendingActionAfterLayerPop) {
         pendingActionAfterLayerPopRef.current = null;
+        clearLayerPopFallbackTimer();
         window.setTimeout(() => {
           pendingActionAfterLayerPop();
         }, 0);
@@ -135,7 +130,7 @@ export const useUnsavedChangesGuard = ({
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [clearLayerPopFallbackTimer]);
 
   const confirmNavigation = useCallback((action: () => void) => {
     if (!when) {
@@ -183,7 +178,7 @@ export const useUnsavedChangesGuard = ({
     });
   }, [pendingAction, pendingBrowserBack, runProceedingAction, scheduleConfirmedLeave]);
 
-  const confirmationDialog = (pendingBrowserBack || pendingAction) ? (
+  const confirmationDialog = when && (pendingBrowserBack || pendingAction) ? (
     <ConfirmDialog
       title={title ?? t.common.discardChangesTitle}
       description={description ?? t.common.discardChangesDesc}

@@ -357,7 +357,7 @@ export const ExportTaskContent = ({ onCancel, onComplete, onDirtyChange }: Expor
           name="backupResult"
           value={result}
           rows={6}
-          className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-xs font-mono text-zinc-700 dark:text-zinc-300 break-all resize-none focus-visible:outline-hidden"
+          className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 text-xs font-mono text-zinc-700 dark:text-zinc-300 break-all resize-none focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
           onClick={(event) => (event.target as HTMLTextAreaElement).select()}
         />
       </div>
@@ -415,6 +415,7 @@ function CheckboxIcon({ checked, indeterminate }: { checked: boolean; indetermin
   const active = checked || indeterminate;
   return (
     <span
+      aria-hidden="true"
       className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
         active ? 'border-transparent' : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
       }`}
@@ -438,18 +439,12 @@ function CategoryCheckbox({ checked, onChange, label, description }: {
   description?: string;
 }) {
   return (
-    <div
+    <button
+      type="button"
       role="checkbox"
-      tabIndex={0}
       aria-checked={checked}
       onClick={onChange}
-      onKeyDown={(event) => {
-        if (event.key === ' ' || event.key === 'Enter') {
-          event.preventDefault();
-          onChange();
-        }
-      }}
-      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-colors ${
+      className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left select-none transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${
         checked
           ? 'bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800'
           : 'bg-zinc-50 dark:bg-zinc-900/20 border-zinc-100 dark:border-zinc-800/50 opacity-60'
@@ -460,7 +455,7 @@ function CategoryCheckbox({ checked, onChange, label, description }: {
         <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{label}</span>
         {description && <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>}
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -486,33 +481,30 @@ function ExpandableCategory({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
       <div
-        role="checkbox"
-        tabIndex={0}
-        aria-checked={allChecked ? true : anyChecked ? 'mixed' : false}
-        onClick={onToggleAll}
-        onKeyDown={(event) => {
-          if (event.key === ' ' || event.key === 'Enter') {
-            event.preventDefault();
-            onToggleAll();
-          }
-        }}
-        className={`flex items-center gap-3 p-3 cursor-pointer select-none transition-colors ${
+        className={`flex items-center transition-colors ${
           anyChecked
             ? 'bg-white dark:bg-zinc-900/50'
             : 'bg-zinc-50 dark:bg-zinc-900/20 opacity-60'
         }`}
       >
-        <CheckboxIcon checked={allChecked} indeterminate={anyChecked && !allChecked} />
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{label}</span>
-        </div>
         <button
           type="button"
-          onClick={(event) => {
-            event.stopPropagation();
+          role="checkbox"
+          aria-checked={allChecked ? true : anyChecked ? 'mixed' : false}
+          onClick={onToggleAll}
+          className="flex flex-1 items-center gap-3 p-3 text-left select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+        >
+          <CheckboxIcon checked={allChecked} indeterminate={anyChecked && !allChecked} />
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{label}</span>
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
             onToggleExpand();
           }}
-          className="p-1 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+          className="mr-2 p-1 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
           aria-label={expanded ? (expandLabel.collapse ?? 'Collapse') : (expandLabel.expand ?? 'Expand')}
         >
           {expanded
@@ -536,21 +528,15 @@ function SubCategoryCheckbox({ checked, onChange, label }: {
   label: string;
 }) {
   return (
-    <div
+    <button
+      type="button"
       role="checkbox"
-      tabIndex={0}
       aria-checked={checked}
       onClick={onChange}
-      onKeyDown={(event) => {
-        if (event.key === ' ' || event.key === 'Enter') {
-          event.preventDefault();
-          onChange();
-        }
-      }}
-      className={`flex items-center gap-3 p-2.5 cursor-pointer select-none transition-colors ${checked ? '' : 'opacity-50'}`}
+      className={`w-full flex items-center gap-3 p-2.5 text-left select-none transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 ${checked ? '' : 'opacity-50'}`}
     >
       <CheckboxIcon checked={checked} />
       <span className="text-sm text-zinc-700 dark:text-zinc-300">{label}</span>
-    </div>
+    </button>
   );
 }

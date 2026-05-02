@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BankSelect } from './BankSelect';
 import { useAppStore } from '../../stores/useAppStore';
 import { useBanksStore } from '../../stores/useBanksStore';
@@ -10,6 +10,7 @@ import { AlertCircle, Globe } from 'lucide-react';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 type PendingConfirmation = 'short-account' | 'duplicate' | null;
+type ErrorTarget = 'bank' | 'account' | null;
 
 interface AccountFormProps {
   initialData?: Partial<BankAccount>;
@@ -27,7 +28,10 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
   const [iconUrl, setIconUrl] = useState(initialData?.iconUrl || '');
   const [iconError, setIconError] = useState(false);
   const [error, setError] = useState('');
+  const [errorTarget, setErrorTarget] = useState<ErrorTarget>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<PendingConfirmation>(null);
+  const bankTriggerRef = useRef<HTMLButtonElement>(null);
+  const accountInputRef = useRef<HTMLInputElement>(null);
 
   const t = useLocaleStore((s) => s.t);
   const banks = useBanksStore((state) => state.banks);
@@ -55,13 +59,20 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
     iconUrl: iconUrl.trim() || undefined,
   });
 
+  const clearError = () => {
+    setError('');
+    setErrorTarget(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    clearError();
     setPendingConfirmation(null);
 
     if (!bankCode) {
       setError(t.form.selectBank);
+      setErrorTarget('bank');
+      bankTriggerRef.current?.focus({ preventScroll: true });
       return;
     }
 
@@ -71,6 +82,8 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
         return;
       }
       setError(t.form.invalidAccount);
+      setErrorTarget('account');
+      accountInputRef.current?.focus({ preventScroll: true });
       return;
     }
 
@@ -88,6 +101,8 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
 
       if (exactMatch) {
         setError(t.form.duplicateExact);
+        setErrorTarget('account');
+        accountInputRef.current?.focus({ preventScroll: true });
         return;
       }
 
@@ -100,6 +115,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
   };
 
   const resolvedIcon = resolveIconSrc(iconUrl);
+  const formErrorId = 'form-error';
 
   const inputClass =
     'w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-4 text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:border-zinc-900 dark:focus-visible:border-zinc-100 input-transition shadow-xs';
@@ -111,9 +127,12 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
           value={bankCode}
           onChange={(code) => {
             setBankCode(code);
-            setError('');
+            clearError();
             setPendingConfirmation(null);
           }}
+          triggerRef={bankTriggerRef}
+          ariaInvalid={errorTarget === 'bank'}
+          ariaDescribedBy={errorTarget === 'bank' ? formErrorId : undefined}
         />
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
           {t.form.bankHint}
@@ -128,6 +147,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
           {t.form.accountLabel}
         </label>
         <input
+          ref={accountInputRef}
           id="account-number"
           name="accountNumber"
           type="tel"
@@ -138,11 +158,11 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
           value={accountNumber}
           onChange={(e) => {
             setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
-            setError('');
+            clearError();
             setPendingConfirmation(null);
           }}
-          aria-invalid={Boolean(error && !isValidAccount(accountNumber))}
-          aria-describedby={error && !isValidAccount(accountNumber) ? 'form-error' : undefined}
+          aria-invalid={errorTarget === 'account'}
+          aria-errormessage={errorTarget === 'account' ? formErrorId : undefined}
           className={`${inputClass} text-lg font-mono tracking-widest`}
         />
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-2 ml-1">
@@ -216,7 +236,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
 
       {error && (
         <div
-          id="form-error"
+          id={formErrorId}
           role="alert"
           aria-live="polite"
           className="flex items-center gap-3 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-4 py-3.5 rounded-xl border border-red-200/50 dark:border-red-500/20 text-sm animate-in slide-in-from-top-2 duration-200 motion-reduce:animate-none"

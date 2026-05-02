@@ -13,6 +13,7 @@
  */
 import { memo, useEffect, useLayoutEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
 import type { QRDotStyle, QREyeStyle, QRErrorLevel } from '../../types';
+import type QRCodeStyling from 'qr-code-styling';
 import type { Options, DotType, CornerSquareType, CornerDotType } from 'qr-code-styling';
 
 // ─── Type mappings ────────────────────────────────────────────
@@ -166,8 +167,7 @@ export const StyledQRCode = memo(forwardRef<StyledQRCodeHandle, StyledQRCodeProp
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     // Store the qr-code-styling instance so we can call .update() on it.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const qrInstanceRef = useRef<any>(null);
+    const qrInstanceRef = useRef<QRCodeStyling | null>(null);
     const mountedRef = useRef(false);
     const lastOptionsSignatureRef = useRef<string | null>(null);
 

@@ -21,7 +21,9 @@ export const AccountTaskPage = () => {
   const { accountId } = useParams<{ accountId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const { accounts, addAccount, updateAccount } = useAppStore();
+  const accounts = useAppStore((s) => s.accounts);
+  const addAccount = useAppStore((s) => s.addAccount);
+  const updateAccount = useAppStore((s) => s.updateAccount);
   const t = useLocaleStore((s) => s.t);
   const [isDirty, setIsDirty] = useState(false);
   const [exitTo, setExitTo] = useState<string | null>(null);

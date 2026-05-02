@@ -6,8 +6,25 @@ const FOCUSABLE_SELECTOR = [
   'input:not([disabled])',
   'select:not([disabled])',
   'textarea:not([disabled])',
+  'summary',
+  'iframe',
+  'audio[controls]',
+  'video[controls]',
+  '[contenteditable="true"]',
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
+
+function getFocusableElements(container: HTMLElement) {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter((element) => {
+    if (element.closest('[inert]')) return false;
+    if (element.closest('[hidden]')) return false;
+    if (element.getAttribute('aria-hidden') === 'true') return false;
+    if (element.tabIndex < 0) return false;
+    const style = window.getComputedStyle(element);
+    if (style.display === 'none' || style.visibility === 'hidden') return false;
+    return true;
+  });
+}
 
 /**
  * Trap keyboard focus inside a container element.
@@ -43,10 +60,10 @@ export const useFocusTrap = (
       if (container.contains(document.activeElement)) return;
 
       if (initialFocusRef?.current) {
-        initialFocusRef.current.focus();
+        initialFocusRef.current.focus({ preventScroll: true });
       } else {
-        const first = container.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-        first?.focus();
+        const [first] = getFocusableElements(container);
+        first?.focus({ preventScroll: true });
       }
     };
 
@@ -56,9 +73,7 @@ export const useFocusTrap = (
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
 
-      const focusable = Array.from(
-        container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-      );
+      const focusable = getFocusableElements(container);
       if (focusable.length === 0) {
         e.preventDefault();
         return;
@@ -87,7 +102,9 @@ export const useFocusTrap = (
       container.removeEventListener('keydown', onKeyDown);
 
       // Restore focus to the previously-focused element.
-      previousFocusRef.current?.focus();
+      if (previousFocusRef.current?.isConnected) {
+        previousFocusRef.current.focus({ preventScroll: true });
+      }
       previousFocusRef.current = null;
     };
   }, [active, containerRef, initialFocusRef]);

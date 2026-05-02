@@ -18,6 +18,19 @@ describe('historyLayers', () => {
     expect(historyStateHasLayer(window.history.state, 'modal-1')).toBe(true);
   });
 
+  it('increments React Router history indexes for synthetic entries', () => {
+    window.history.replaceState({ idx: 1, key: 'route', usr: { fallbackTo: '/' } }, '', '/accounts/new');
+
+    pushHistoryLayer('modal-1');
+
+    expect(window.history.state).toMatchObject({
+      idx: 2,
+      key: 'route',
+      usr: { fallbackTo: '/' },
+    });
+    expect(readHistoryLayers(window.history.state)).toEqual(['modal-1']);
+  });
+
   it('appends nested layers in order', () => {
     pushHistoryLayer('modal-1');
     pushHistoryLayer('sheet-2');

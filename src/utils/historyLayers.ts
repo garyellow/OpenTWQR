@@ -6,10 +6,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function buildStateWithLayers(state: unknown, layers: string[]) {
   if (isRecord(state)) {
-    return {
+    const nextState: Record<string, unknown> = {
       ...state,
       [HISTORY_LAYER_STACK_KEY]: layers,
     };
+
+    if (typeof state.idx === 'number') {
+      nextState.idx = state.idx + 1;
+    }
+
+    return nextState;
   }
 
   return {

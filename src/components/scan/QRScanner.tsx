@@ -7,6 +7,8 @@ interface QRScannerProps {
   active: boolean;
 }
 
+const SCAN_INTERVAL_MS = 120;
+
 /**
  * Camera-based QR code scanner using the native BarcodeDetector API.
  * Falls back to image upload for unsupported browsers.
@@ -16,6 +18,7 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
   const streamRef = useRef<MediaStream | null>(null);
   const scanningRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scanTimerRef = useRef<number | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [hasTorch, setHasTorch] = useState(false);
@@ -26,9 +29,16 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
 
   const hasBarcodeDetector = typeof BarcodeDetector !== 'undefined';
 
+  const clearScheduledScan = useCallback(() => {
+    if (scanTimerRef.current === null) return;
+    window.clearTimeout(scanTimerRef.current);
+    scanTimerRef.current = null;
+  }, []);
+
   /* ---------- Stop camera stream ---------- */
   const stopStream = useCallback(() => {
     scanningRef.current = false;
+    clearScheduledScan();
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -36,7 +46,7 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-  }, []);
+  }, [clearScheduledScan]);
 
   /* ---------- Camera lifecycle effect ---------- */
   useEffect(() => {
@@ -69,8 +79,9 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
         // Check torch capability
         const track = stream.getVideoTracks()[0];
         const caps = track.getCapabilities?.() as Record<string, unknown> | undefined;
-        if (!cancelled && caps && 'torch' in caps) {
-          setHasTorch(true);
+        if (!cancelled) {
+          setHasTorch(Boolean(caps && 'torch' in caps));
+          setTorchOn(false);
         }
 
         // Start BarcodeDetector scan loop
@@ -91,9 +102,12 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
             // Frame not ready or detection error — continue scanning
           }
 
-          if (scanningRef.current && !cancelled) {
-            requestAnimationFrame(scan);
-          }
+          if (!scanningRef.current || cancelled) return;
+
+          scanTimerRef.current = window.setTimeout(() => {
+            scanTimerRef.current = null;
+            if (scanningRef.current && !cancelled) requestAnimationFrame(scan);
+          }, SCAN_INTERVAL_MS);
         };
 
         requestAnimationFrame(scan);
@@ -190,14 +204,14 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
             {!hasBarcodeDetector ? t.scan.unsupportedDesc : t.scan.noCameraDesc}
           </p>
         </div>
-        <label className="inline-flex items-center gap-2 px-6 py-3.5 btn-accent rounded-xl font-semibold cursor-pointer active:scale-98 action-transition shadow-xs">
+        <label className="inline-flex items-center gap-2 px-6 py-3.5 btn-accent rounded-xl font-semibold cursor-pointer active:scale-98 action-transition shadow-xs focus-within:outline-hidden focus-within:ring-2 focus-within:ring-offset-2 dark:focus-within:ring-offset-zinc-950">
           <ImagePlus size={20} aria-hidden="true" />
           {t.scan.uploadImage}
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            className="hidden"
+            className="sr-only"
             onChange={handleFileUpload}
           />
         </label>
@@ -229,13 +243,26 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
             {t.scan.permissionDesc}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleRetry}
-          className="px-6 py-3.5 btn-accent rounded-xl font-semibold active:scale-98 action-transition shadow-xs"
-        >
-          {t.scan.retry}
-        </button>
+        <div className="flex flex-col items-center gap-3">
+          <button
+            type="button"
+            onClick={handleRetry}
+            className="px-6 py-3.5 btn-accent rounded-xl font-semibold active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+          >
+            {t.scan.retry}
+          </button>
+          <label className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold cursor-pointer text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-within:outline-hidden focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100 focus-within:ring-offset-2 dark:focus-within:ring-offset-zinc-950">
+            <ImagePlus size={20} aria-hidden="true" />
+            {t.scan.uploadImage}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handleFileUpload}
+            />
+          </label>
+        </div>
       </div>
     );
   }
@@ -268,18 +295,18 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
           <button
             type="button"
             onClick={handleRetry}
-            className="px-6 py-3.5 btn-accent rounded-xl font-semibold active:scale-98 action-transition shadow-xs"
+            className="px-6 py-3.5 btn-accent rounded-xl font-semibold active:scale-98 action-transition shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
           >
             {t.scan.retry}
           </button>
-          <label className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold cursor-pointer text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition">
+          <label className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold cursor-pointer text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-98 action-transition focus-within:outline-hidden focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100 focus-within:ring-offset-2 dark:focus-within:ring-offset-zinc-950">
             <ImagePlus size={20} aria-hidden="true" />
             {t.scan.uploadImage}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              className="hidden"
+              className="sr-only"
               onChange={handleFileUpload}
             />
           </label>
@@ -348,20 +375,20 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
           <button
             type="button"
             onClick={toggleTorch}
-            className="p-3.5 rounded-full bg-black/40 text-white backdrop-blur-md border border-white/10 active:scale-95 action-transition"
+            className="p-3.5 rounded-full bg-black/40 text-white backdrop-blur-md border border-white/10 active:scale-95 action-transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/80"
             aria-label={torchOn ? t.scan.torchOff : t.scan.torchOn}
           >
             {torchOn ? <ZapOff size={22} aria-hidden="true" /> : <Zap size={22} aria-hidden="true" />}
           </button>
         )}
-        <label className="p-3.5 rounded-full bg-black/40 text-white backdrop-blur-md border border-white/10 cursor-pointer active:scale-95 action-transition">
+        <label className="p-3.5 rounded-full bg-black/40 text-white backdrop-blur-md border border-white/10 cursor-pointer active:scale-95 action-transition focus-within:outline-hidden focus-within:ring-2 focus-within:ring-white/80">
           <ImagePlus size={22} aria-hidden="true" />
           <span className="sr-only">{t.scan.uploadImage}</span>
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            className="hidden"
+            className="sr-only"
             onChange={handleFileUpload}
           />
         </label>
@@ -373,7 +400,7 @@ export const QRScanner = ({ onScan, active }: QRScannerProps) => {
           <button
             type="button"
             onClick={() => setError(null)}
-            className="bg-red-500/90 text-white px-4 py-2.5 rounded-xl text-sm font-medium backdrop-blur-sm shadow-lg"
+            className="bg-red-500/90 text-white px-4 py-2.5 rounded-xl text-sm font-medium backdrop-blur-sm shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/80"
           >
             {error === 'no-qr-found' ? t.scan.noQRFound : t.scan.decodeFailed}
           </button>
