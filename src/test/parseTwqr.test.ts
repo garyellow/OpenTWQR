@@ -51,6 +51,30 @@ describe('parseTWQR', () => {
     expect(result?.bankCode).toBe('812');
   });
 
+  it('handles lowercase TWQRP scheme', () => {
+    const qr = VALID_QR.replace('TWQRP://', 'twqrp://');
+    const result = parseTWQR(qr);
+    expect(result?.bankCode).toBe('812');
+  });
+
+  it('returns null when D5 is not a 3-digit bank code', () => {
+    const qr = 'TWQRP://xn--gmqw5ax42ad01c/158/02/V1?D5=81A&D6=0000001234567890';
+    expect(parseTWQR(qr)).toBeNull();
+  });
+
+  it('returns null when D6 is not a 16-digit padded account', () => {
+    const qr = 'TWQRP://xn--gmqw5ax42ad01c/158/02/V1?D5=812&D6=00000012345ABC90';
+    expect(parseTWQR(qr)).toBeNull();
+  });
+
+  it('ignores negative or partially numeric D1 values', () => {
+    const negative = 'TWQRP://xn--gmqw5ax42ad01c/158/02/V1?D5=812&D6=0000001234567890&D1=-100';
+    const partial = 'TWQRP://xn--gmqw5ax42ad01c/158/02/V1?D5=812&D6=0000001234567890&D1=100abc';
+
+    expect(parseTWQR(negative)?.amount).toBe(0);
+    expect(parseTWQR(partial)?.amount).toBe(0);
+  });
+
   it('returns null for empty string', () => {
     expect(parseTWQR('')).toBeNull();
   });
@@ -74,6 +98,10 @@ describe('parseTWQR', () => {
 describe('isTWQR', () => {
   it('returns true for valid TWQR prefix', () => {
     expect(isTWQR('TWQRP://xn--gmqw5ax42ad01c/158/02/V1?D5=812')).toBe(true);
+  });
+
+  it('returns true for lowercase TWQR prefix', () => {
+    expect(isTWQR('twqrp://xn--gmqw5ax42ad01c/158/02/V1?D5=812')).toBe(true);
   });
 
   it('returns true for URL-encoded TWQR', () => {

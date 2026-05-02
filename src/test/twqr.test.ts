@@ -9,6 +9,7 @@ import {
   formatAccountDisplay,
   removeInvisibleChars,
   stripCompanySuffix,
+  normalizeAccountNumber,
 } from '../utils/twqr';
 
 describe('generateTWQR', () => {
@@ -50,6 +51,15 @@ describe('generateTWQR', () => {
       amount: 0,
     });
     expect(result).toContain('D6=0000000000000123');
+  });
+
+  it('normalizes pasted account number before padding', () => {
+    const result = generateTWQR({
+      bankCode: '812',
+      accountNumber: '\uFEFF00-123 456 7890',
+      amount: 0,
+    });
+    expect(result).toContain('D6=0000001234567890');
   });
 
   it('includes note when provided', () => {
@@ -156,6 +166,16 @@ describe('removeInvisibleChars', () => {
 
   it('keeps normal text', () => {
     expect(removeInvisibleChars('hello world')).toBe('hello world');
+  });
+});
+
+describe('normalizeAccountNumber', () => {
+  it('removes invisible chars, non-digits, and leading zero padding', () => {
+    expect(normalizeAccountNumber('\uFEFF00-123 456 7890')).toBe('1234567890');
+  });
+
+  it('caps normalized account numbers to 16 digits', () => {
+    expect(normalizeAccountNumber('12345678901234567890')).toBe('1234567890123456');
   });
 });
 

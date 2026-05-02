@@ -3,6 +3,8 @@ import { Delete, X } from 'lucide-react';
 import { haptic } from '../../utils/haptics';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 
+const AMOUNT_FORMATTER = new Intl.NumberFormat('zh-TW');
+
 interface AmountInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -67,8 +69,8 @@ export const AmountInput = ({ value, onChange, maxAmount = 2_000_000 }: AmountIn
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleDigit, handleBackspace, handleClear]);
 
-  const formattedAmount = value ? new Intl.NumberFormat().format(parseInt(value, 10)) : '';
-  const formattedMax = new Intl.NumberFormat().format(maxAmount);
+  const formattedAmount = value ? AMOUNT_FORMATTER.format(parseInt(value, 10)) : '';
+  const formattedMax = AMOUNT_FORMATTER.format(maxAmount);
 
   const digitBtnClass =
     'h-14 [@media(max-height:720px)]:h-11 rounded-xl text-2xl font-medium text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700 action-transition flex items-center justify-center';

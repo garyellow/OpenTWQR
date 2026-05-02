@@ -2,10 +2,22 @@ import type { TWQRParams } from '../types';
 
 const BASE_URI = 'TWQRP://xn--gmqw5ax42ad01c/158/02/V1';
 
+const TWD_CURRENCY_FORMATTER = new Intl.NumberFormat('zh-TW', {
+  style: 'currency',
+  currency: 'TWD',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+const TWD_AMOUNT_FORMATTER = new Intl.NumberFormat('zh-TW', {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
 export const generateTWQR = (params: TWQRParams): string => {
   const { bankCode, accountNumber, amount, note } = params;
 
-  const d6_paddedAccount = accountNumber.padStart(16, '0');
+  const d6_paddedAccount = normalizeAccountNumber(accountNumber).padStart(16, '0');
   const d10_currency = '901';
 
   const queryParams = new URLSearchParams();
@@ -43,22 +55,14 @@ export const isShortAccount = (account: string): boolean => {
 };
 
 export const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('zh-TW', {
-    style: 'currency',
-    currency: 'TWD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return TWD_CURRENCY_FORMATTER.format(amount);
 };
 
 /**
  * 格式化金額數字部分（不含貨幣符號），用於獨立渲染數字。
  */
 export const formatAmount = (amount: number): string => {
-  return new Intl.NumberFormat('zh-TW', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return TWD_AMOUNT_FORMATTER.format(amount);
 };
 
 /**
@@ -94,6 +98,14 @@ export const removeInvisibleChars = (str: string): string => {
   // eslint-disable-next-line no-control-regex
   return str.replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\uFEFF]/g, '');
 };
+
+/**
+ * Canonical account-number input used across forms, duplicate detection, and
+ * QR generation.  It removes invisible/control characters, keeps digits only,
+ * strips leading zero padding used by TWQR D6, and caps to the TWQR max length.
+ */
+export const normalizeAccountNumber = (account: string): string =>
+  removeInvisibleChars(account).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16);
 
 /**
  * Strip the legal entity suffix「股份有限公司」from the end of a bank name.

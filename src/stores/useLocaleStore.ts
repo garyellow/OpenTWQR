@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/safeStorage';
+import { safeLocalStorage } from '../utils/safeStorage';
 import zhTW from '../locales/zh-TW';
 import enUS from '../locales/en-US';
 import type { Translations } from '../locales/zh-TW';
@@ -45,18 +45,6 @@ interface LocaleState {
   /** Toggle between zh-TW and en-US. */
   toggle: () => void;
 }
-
-/**
- * Safe localStorage adapter (same as useThemeStore).
- */
-const safeLocalStorage: Storage = {
-  get length() { try { return localStorage.length; } catch { return 0; } },
-  key(index) { try { return localStorage.key(index); } catch { return null; } },
-  clear() { try { localStorage.clear(); } catch { /* noop */ } },
-  getItem: (key) => safeGetItem(key),
-  setItem: (key, value) => { safeSetItem(key, value); },
-  removeItem: (key) => { safeRemoveItem(key); },
-};
 
 const resolveLocale = (userLocale: Locale | null): Locale =>
   userLocale ?? detectLocale();

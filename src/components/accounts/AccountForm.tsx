@@ -4,7 +4,7 @@ import { useAppStore } from '../../stores/useAppStore';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
 import type { BankAccount } from '../../types';
-import { isValidAccount, isShortAccount, removeInvisibleChars } from '../../utils/twqr';
+import { isValidAccount, isShortAccount, normalizeAccountNumber } from '../../utils/twqr';
 import { resolveIconSrc } from '../../utils/favicon';
 import { AlertCircle, Globe } from 'lucide-react';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -89,12 +89,12 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
 
     const state = useAppStore.getState();
     if (state.isDuplicate(bankCode, accountNumber, editingId)) {
-      const num = accountNumber.replace(/^0+/, '');
+      const num = normalizeAccountNumber(accountNumber);
       const newLabel = label || '';
       const exactMatch = state.accounts.some(
         (a) =>
           a.bankCode === bankCode &&
-          a.accountNumber.replace(/^0+/, '') === num &&
+          normalizeAccountNumber(a.accountNumber) === num &&
           a.id !== editingId &&
           (a.label || '') === newLabel,
       );
@@ -157,7 +157,7 @@ export const AccountForm = ({ initialData, editingId, onSubmit, onCancel, onDirt
           placeholder={t.form.accountPlaceholder}
           value={accountNumber}
           onChange={(e) => {
-            setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
+            setAccountNumber(normalizeAccountNumber(e.target.value));
             clearError();
             setPendingConfirmation(null);
           }}

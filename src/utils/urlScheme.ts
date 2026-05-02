@@ -77,6 +77,12 @@ function inferExtraType(value: string): IntentExtra['type'] {
  */
 const EXTRA_TYPE_PREFIXES = new Set(['S', 'B', 'b', 'c', 'd', 'f', 'i', 'l', 's']);
 
+const getXmlAttr = (attrs: string, name: string): string | undefined => {
+  const escapedName = name.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+  const match = attrs.match(new RegExp(`\\b${escapedName}\\s*=\\s*(["'])(.*?)\\1`, 'i'));
+  return match?.[2];
+};
+
 /* ─── Multi-line format parser ───────────────────────────── */
 
 /**
@@ -404,8 +410,8 @@ export function parseManifestXml(xml: string): ManifestDeepLink[] {
   const results: ManifestDeepLink[] = [];
 
   // Extract package name from <manifest package="...">
-  const pkgMatch = xml.match(/<manifest\b[^>]*\bpackage\s*=\s*"([^"]+)"/i);
-  const packageName = pkgMatch?.[1] || undefined;
+  const manifestMatch = xml.match(/<manifest\b[^>]*>/i);
+  const packageName = manifestMatch ? getXmlAttr(manifestMatch[0], 'package') : undefined;
 
   // Use regex-based approach for robustness (no DOMParser dependency for XML namespaces)
   // Match each <activity ...>...</activity> block (non-greedy, supports self-closing)
@@ -417,9 +423,8 @@ export function parseManifestXml(xml: string): ManifestDeepLink[] {
     const actBody = actMatch[2];
 
     // Extract activity name
-    const nameMatch = actAttrs.match(/android:name\s*=\s*"([^"]+)"/);
-    if (!nameMatch) continue;
-    const activityName = nameMatch[1];
+    const activityName = getXmlAttr(actAttrs, 'android:name');
+    if (!activityName) continue;
 
     // Find all intent-filter blocks within this activity
     const filterRegex = /<intent-filter\b[^>]*>([\s\S]*?)<\/intent-filter>/gi;
@@ -429,10 +434,10 @@ export function parseManifestXml(xml: string): ManifestDeepLink[] {
       const filterBody = filterMatch[1];
 
       // Check for ACTION_VIEW
-      if (!/android:name\s*=\s*"android\.intent\.action\.VIEW"/i.test(filterBody)) continue;
+      if (!/android:name\s*=\s*(["'])android\.intent\.action\.VIEW\1/i.test(filterBody)) continue;
 
       // Check for CATEGORY_BROWSABLE
-      if (!/android:name\s*=\s*"android\.intent\.category\.BROWSABLE"/i.test(filterBody)) continue;
+      if (!/android:name\s*=\s*(["'])android\.intent\.category\.BROWSABLE\1/i.test(filterBody)) continue;
 
       // Extract all <data> elements — handle / and special chars inside quoted attribute values
       const dataRegex = /<data\s+((?:[^"'>]|"[^"]*"|'[^']*')*)\/?\s*>/gi;
@@ -447,17 +452,16 @@ export function parseManifestXml(xml: string): ManifestDeepLink[] {
       while ((dataMatch = dataRegex.exec(filterBody)) !== null) {
         const attrs = dataMatch[1];
 
-        const schemeMatch = attrs.match(/android:scheme\s*=\s*"([^"]+)"/);
-        if (schemeMatch && !schemes.includes(schemeMatch[1])) schemes.push(schemeMatch[1]);
+        const scheme = getXmlAttr(attrs, 'android:scheme');
+        if (scheme && !schemes.includes(scheme)) schemes.push(scheme);
 
-        const hostMatch = attrs.match(/android:host\s*=\s*"([^"]+)"/);
-        if (hostMatch && !hosts.includes(hostMatch[1])) hosts.push(hostMatch[1]);
+        const host = getXmlAttr(attrs, 'android:host');
+        if (host && !hosts.includes(host)) hosts.push(host);
 
         // Prefer pathPrefix > path > pathPattern
-        const pathPrefixMatch = attrs.match(/android:pathPrefix\s*=\s*"([^"]+)"/);
-        const pathExactMatch = attrs.match(/android:path\s*=\s*"([^"]+)"/);
-        const pathPatternMatch = attrs.match(/android:pathPattern\s*=\s*"([^"]+)"/);
-        const p = pathPrefixMatch?.[1] || pathExactMatch?.[1] || pathPatternMatch?.[1];
+        const p = getXmlAttr(attrs, 'android:pathPrefix')
+          || getXmlAttr(attrs, 'android:path')
+          || getXmlAttr(attrs, 'android:pathPattern');
         if (p && !paths.includes(p)) paths.push(p);
       }
 

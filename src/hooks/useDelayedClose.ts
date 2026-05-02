@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useLayoutEffect, useRef, type AnimationEvent } from 'react';
 import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
+import { prefersReducedMotion } from '../utils/motion';
 
 interface UseDelayedCloseOptions {
   /** When true, browser Back / swipe-back closes this layer before leaving the page. */
@@ -117,7 +118,8 @@ export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOpt
     closePhaseRef.current = 'closing-ui';
     isClosingRef.current = true;
     setIsClosing(true);
-  }, []);
+    if (prefersReducedMotion()) settleCloseAfterAnimation();
+  }, [settleCloseAfterAnimation]);
 
   /** Attach to the overlay's `onAnimationEnd` to finalise close. */
   const handleAnimationEnd = useCallback((e: AnimationEvent) => {
@@ -130,6 +132,11 @@ export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOpt
   // prefers-reduced-motion or animation-duration: 0), settle after 200 ms.
   useEffect(() => {
     if (!isClosing) return;
+
+    if (prefersReducedMotion()) {
+      settleCloseAfterAnimation();
+      return;
+    }
 
     animationFallbackTimerRef.current = window.setTimeout(() => {
       settleCloseAfterAnimation();
@@ -169,6 +176,8 @@ export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOpt
       closePhaseRef.current = 'closing-history';
       isClosingRef.current = true;
       setIsClosing(true);
+
+      if (prefersReducedMotion()) settleCloseAfterAnimation();
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -177,7 +186,7 @@ export const useDelayedClose = (onClose: () => void, options: UseDelayedCloseOpt
       window.removeEventListener('popstate', handlePopState);
       clearFallbackTimers();
     };
-  }, [clearFallbackTimers, finaliseClose, historyBack]);
+  }, [clearFallbackTimers, finaliseClose, historyBack, settleCloseAfterAnimation]);
 
   return { isClosing, requestClose, onAnimationEnd: handleAnimationEnd };
 };

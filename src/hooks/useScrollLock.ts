@@ -17,7 +17,9 @@ import { useEffect } from 'react';
 
 let lockCount = 0;
 let savedScrollY = 0;
-let savedCssText = '';
+const LOCKED_BODY_STYLE_PROPERTIES = ['overflow', 'position', 'top', 'left', 'right', 'paddingRight'] as const;
+type LockedBodyStyleProperty = (typeof LOCKED_BODY_STYLE_PROPERTIES)[number];
+let savedBodyStyle: Record<LockedBodyStyleProperty, string> | null = null;
 
 export const useScrollLock = (active: boolean) => {
   useEffect(() => {
@@ -26,7 +28,13 @@ export const useScrollLock = (active: boolean) => {
     lockCount++;
     if (lockCount === 1) {
       savedScrollY = window.scrollY;
-      savedCssText = document.body.style.cssText;
+      savedBodyStyle = LOCKED_BODY_STYLE_PROPERTIES.reduce(
+        (styles, property) => {
+          styles[property] = document.body.style[property];
+          return styles;
+        },
+        {} as Record<LockedBodyStyleProperty, string>,
+      );
 
       // Compensate for scrollbar disappearing (desktop only; mobile overlay
       // scrollbars have zero width so this is a no-op there).
@@ -46,9 +54,14 @@ export const useScrollLock = (active: boolean) => {
     }
 
     return () => {
-      lockCount--;
+      lockCount = Math.max(0, lockCount - 1);
       if (lockCount === 0) {
-        document.body.style.cssText = savedCssText;
+        if (savedBodyStyle) {
+          for (const property of LOCKED_BODY_STYLE_PROPERTIES) {
+            document.body.style[property] = savedBodyStyle[property];
+          }
+          savedBodyStyle = null;
+        }
         window.scrollTo(0, savedScrollY);
       }
     };

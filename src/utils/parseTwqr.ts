@@ -13,6 +13,11 @@ export interface ParsedTWQR {
   note?: string;
 }
 
+const TWQRP_PREFIX_RE = /^TWQRP:\/\//i;
+const BANK_CODE_RE = /^\d{3}$/;
+const PADDED_ACCOUNT_RE = /^\d{16}$/;
+const NON_NEGATIVE_INTEGER_RE = /^\d+$/;
+
 /**
  * Parse a TWQR protocol string into structured payment data.
  * Returns `null` if the string is not a valid TWQR format.
@@ -33,11 +38,11 @@ export function parseTWQR(qrString: string): ParsedTWQR | null {
     }
   }
 
-  if (!decoded.startsWith('TWQRP://')) return null;
+  if (!TWQRP_PREFIX_RE.test(decoded)) return null;
 
   try {
     // Replace custom TWQRP:// scheme with https:// so URL constructor can parse it
-    const urlString = decoded.replace('TWQRP://', 'https://');
+    const urlString = decoded.replace(TWQRP_PREFIX_RE, 'https://');
     const url = new URL(urlString);
     const params = url.searchParams;
 
@@ -45,14 +50,15 @@ export function parseTWQR(qrString: string): ParsedTWQR | null {
     const paddedAccount = params.get('D6');
 
     if (!bankCode || !paddedAccount) return null;
+    if (!BANK_CODE_RE.test(bankCode) || !PADDED_ACCOUNT_RE.test(paddedAccount)) return null;
 
     // Strip leading zeros from the 16-char padded account
     const accountNumber = paddedAccount.replace(/^0+/, '') || '0';
 
     // D1 is amount in cents (amount × 100 per TWQR spec)
     const d1 = params.get('D1');
-    const rawAmount = d1 ? parseInt(d1, 10) : 0;
-    const amount = Number.isNaN(rawAmount) ? 0 : Math.round(rawAmount / 100);
+    const rawAmount = d1 && NON_NEGATIVE_INTEGER_RE.test(d1) ? Number(d1) : 0;
+    const amount = Number.isSafeInteger(rawAmount) ? Math.round(rawAmount / 100) : 0;
 
     const note = params.get('D9') || undefined;
 
@@ -65,11 +71,11 @@ export function parseTWQR(qrString: string): ParsedTWQR | null {
 /** Check if a string looks like a TWQR code (raw or URL-encoded). */
 export function isTWQR(value: string): boolean {
   if (typeof value !== 'string') return false;
-  if (value.startsWith('TWQRP://')) return true;
+  if (TWQRP_PREFIX_RE.test(value)) return true;
   // Also accept URL-encoded variant (TWQRP%3A%2F%2F...)
   if (value.includes('%')) {
     try {
-      return decodeURIComponent(value).startsWith('TWQRP://');
+      return TWQRP_PREFIX_RE.test(decodeURIComponent(value));
     } catch {
       return false;
     }

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { BankAccount } from '../types';
 import { idbStorage } from './idbStorage';
+import { normalizeAccountNumber } from '../utils/twqr';
 
 interface AppState {
   accounts: BankAccount[];
@@ -64,9 +65,9 @@ export const useAppStore = create<AppState>()(
       setReceiveAmount: (amount) => set({ receiveAmount: amount }),
       setReceiveNote: (note) => set({ receiveNote: note }),
       isDuplicate: (bankCode, accountNumber, excludeId) => {
-        const num = accountNumber.replace(/^0+/, '');
+        const num = normalizeAccountNumber(accountNumber);
         return get().accounts.some(
-          (a) => a.bankCode === bankCode && a.accountNumber.replace(/^0+/, '') === num && a.id !== excludeId,
+          (a) => a.bankCode === bankCode && normalizeAccountNumber(a.accountNumber) === num && a.id !== excludeId,
         );
       },
     }),

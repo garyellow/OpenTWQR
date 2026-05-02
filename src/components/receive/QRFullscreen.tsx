@@ -104,55 +104,57 @@ export const QRFullscreen = ({ value, amount, bankName, note, onExit, qrCenterIm
       onClick={requestClose}
       onAnimationEnd={onAnimationEnd}
     >
-      <div className="bg-white p-8 rounded-2xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
-        {/* Custom name inside white card, above QR */}
-        {customName && (
-          <p className="text-sm font-semibold text-zinc-800 text-center mb-4">{customName}</p>
-        )}
-        <StyledQRCode
-          value={value}
-          size={qrSize}
-          dotStyle={dotStyle}
-          eyeStyle={eyeStyle}
-          centerImage={qrCenterImage}
-        />
-        {/* Bank name + code below QR inside white card */}
-        {showBankName && bankName && bankCode && (
-          <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
-            ({bankCode}) {bankName}
-          </p>
-        )}
-        {/* Account number — invisible when hidden to preserve height */}
-        {showAccount && accountNumber && (
-          <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${accountRevealed ? '' : ' invisible'}`}>
-            {accountNumber}
-          </p>
-        )}
-      </div>
+      <div className="flex flex-col items-center cursor-default" onClick={(event) => event.stopPropagation()}>
+        <div className="bg-white p-8 rounded-2xl shadow-[0_0_80px_rgba(255,255,255,0.08)]">
+          {/* Custom name inside white card, above QR */}
+          {customName && (
+            <p className="text-sm font-semibold text-zinc-800 text-center mb-4">{customName}</p>
+          )}
+          <StyledQRCode
+            value={value}
+            size={qrSize}
+            dotStyle={dotStyle}
+            eyeStyle={eyeStyle}
+            centerImage={qrCenterImage}
+          />
+          {/* Bank name + code below QR inside white card */}
+          {showBankName && bankName && bankCode && (
+            <p className="text-xs text-zinc-400 text-center mt-1.5 leading-tight">
+              ({bankCode}) {bankName}
+            </p>
+          )}
+          {/* Account number — invisible when hidden to preserve height */}
+          {showAccount && accountNumber && (
+            <p className={`font-mono text-xs text-zinc-400 text-center mt-0.5 leading-tight${accountRevealed ? '' : ' invisible'}`}>
+              {accountNumber}
+            </p>
+          )}
+        </div>
 
-      {/* Info below QR card */}
-      <div className="mt-8 text-center space-y-2">
-        {amount != null && amount > 0 ? (
-          <div className="flex items-baseline justify-center gap-0.5">
-            <span className="text-xl font-semibold" style={{ color: 'var(--accent-dark)' }}>NT$</span>
-            <span className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {formatAmount(amount)}
-            </span>
-          </div>
-        ) : (
-          <p className="text-lg font-medium text-white/50">{t.amount.payerEnter}</p>
-        )}
-        {note && <p className="text-white/50 text-xs">{t.qr.notePrefix}{note}</p>}
-      </div>
+        {/* Info below QR card */}
+        <div className="mt-8 text-center space-y-2">
+          {amount != null && amount > 0 ? (
+            <div className="flex items-baseline justify-center gap-0.5">
+              <span className="text-xl font-semibold" style={{ color: 'var(--accent-dark)' }}>NT$</span>
+              <span className="text-3xl font-bold text-white/90" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {formatAmount(amount)}
+              </span>
+            </div>
+          ) : (
+            <p className="text-lg font-medium text-white/50">{t.amount.payerEnter}</p>
+          )}
+          {note && <p className="text-white/50 text-xs">{t.qr.notePrefix}{note}</p>}
+        </div>
 
-      <button
-        type="button"
-        onClick={requestClose}
-        aria-label={t.qr.fullscreenClose}
-        className="mt-10 text-white/60 text-xs transition-opacity hover:text-white/80"
-      >
-        {t.qr.fullscreenHint}
-      </button>
+        <button
+          type="button"
+          onClick={requestClose}
+          aria-label={t.qr.fullscreenClose}
+          className="mt-10 text-white/60 text-xs transition-opacity hover:text-white/80"
+        >
+          {t.qr.fullscreenHint}
+        </button>
+      </div>
     </div>
   );
 };

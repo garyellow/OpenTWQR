@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/safeStorage';
+import { safeLocalStorage } from '../utils/safeStorage';
 import type { QRDotStyle, QREyeStyle } from '../types';
 
 export type QRLogoType = 'opentwqr' | 'bank';
@@ -25,20 +25,6 @@ interface QRSettingsState {
   setDotStyle: (style: QRDotStyle) => void;
   setEyeStyle: (style: QREyeStyle) => void;
 }
-
-/**
- * Safe localStorage adapter — mirrors the pattern in useThemeStore.
- * Uses localStorage (synchronous) so QR settings are available immediately
- * without async hydration. Not sensitive data, so localStorage is fine.
- */
-const safeLocalStorage: Storage = {
-  get length() { try { return localStorage.length; } catch { return 0; } },
-  key(index) { try { return localStorage.key(index); } catch { return null; } },
-  clear() { try { localStorage.clear(); } catch { /* noop */ } },
-  getItem: (key) => safeGetItem(key),
-  setItem: (key, value) => { safeSetItem(key, value); },
-  removeItem: (key) => { safeRemoveItem(key); },
-};
 
 export const useQRSettingsStore = create<QRSettingsState>()(
   persist(

@@ -32,3 +32,40 @@ export const safeRemoveItem = (key: string): boolean => {
     return false;
   }
 };
+
+/**
+ * Zustand-compatible synchronous localStorage adapter.
+ *
+ * Use this for non-sensitive preferences that must hydrate immediately (theme,
+ * locale, visual QR settings). Sensitive data should keep using IndexedDB.
+ */
+export const safeLocalStorage: Storage = {
+  get length() {
+    try {
+      return localStorage.length;
+    } catch {
+      return 0;
+    }
+  },
+  key(index) {
+    try {
+      return localStorage.key(index);
+    } catch {
+      return null;
+    }
+  },
+  clear() {
+    try {
+      localStorage.clear();
+    } catch {
+      /* noop */
+    }
+  },
+  getItem: (key) => safeGetItem(key),
+  setItem: (key, value) => {
+    safeSetItem(key, value);
+  },
+  removeItem: (key) => {
+    safeRemoveItem(key);
+  },
+};

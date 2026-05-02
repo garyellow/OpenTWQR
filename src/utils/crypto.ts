@@ -10,6 +10,7 @@
 /* ------------------------------------------------------------------ */
 
 const PBKDF2_ITERATIONS = 600_000;
+const BASE64_CHUNK_SIZE = 0x8000;
 export const IV_LEN = 12;
 export const SALT_LEN = 16;
 export const KEY_LEN = 32;
@@ -39,7 +40,9 @@ export const requireSubtleCrypto = (): SubtleCrypto => {
 
 export const toBase64Url = (buf: Uint8Array): string => {
   let binary = '';
-  for (const b of buf) binary += String.fromCharCode(b);
+  for (let i = 0; i < buf.length; i += BASE64_CHUNK_SIZE) {
+    binary += String.fromCharCode(...buf.subarray(i, i + BASE64_CHUNK_SIZE));
+  }
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 };
 

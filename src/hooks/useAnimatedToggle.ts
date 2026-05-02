@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useLayoutEffect, useRef, type AnimationEvent } from 'react';
 import { createHistoryLayerToken, historyStateHasLayer, pushHistoryLayer } from '../utils/historyLayers';
+import { prefersReducedMotion } from '../utils/motion';
 
 interface UseAnimatedToggleOptions {
   /** When true, browser Back / swipe-back closes this layer before leaving the page. */
@@ -120,6 +121,10 @@ export const useAnimatedToggle = (options: UseAnimatedToggleOptions = {}) => {
       closePhaseRef.current = 'closing-ui';
       isClosingRef.current = true;
       setIsClosing(true);
+      if (prefersReducedMotion()) {
+        settleCloseAfterAnimation();
+        return;
+      }
       // Safety fallback if animationend never fires.
       animationFallbackTimerRef.current = window.setTimeout(settleCloseAfterAnimation, 200);
     },
@@ -159,6 +164,11 @@ export const useAnimatedToggle = (options: UseAnimatedToggleOptions = {}) => {
       closePhaseRef.current = 'closing-history';
       isClosingRef.current = true;
       setIsClosing(true);
+
+      if (prefersReducedMotion()) {
+        settleCloseAfterAnimation();
+        return;
+      }
 
       animationFallbackTimerRef.current = window.setTimeout(() => {
         settleCloseAfterAnimation();

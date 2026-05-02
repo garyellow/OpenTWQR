@@ -3,7 +3,7 @@ import { QrCode, Save, X, AlertCircle } from 'lucide-react';
 import { BankSelect } from '../accounts/BankSelect';
 import { AnimatedModal } from '../ui/AnimatedModal';
 import { QRDisplay } from './QRDisplay';
-import { generateTWQR, isValidAccount, removeInvisibleChars, stripCompanySuffix } from '../../utils/twqr';
+import { generateTWQR, isValidAccount, normalizeAccountNumber, stripCompanySuffix } from '../../utils/twqr';
 import { useBanksStore } from '../../stores/useBanksStore';
 import { useAppStore } from '../../stores/useAppStore';
 import { useLocaleStore } from '../../stores/useLocaleStore';
@@ -155,7 +155,7 @@ export const QuickQRModal = ({ onClose }: QuickQRModalProps) => {
                 autoComplete="off"
                 value={accountNumber}
                 onChange={(e) => {
-                  setAccountNumber(removeInvisibleChars(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 16));
+                  setAccountNumber(normalizeAccountNumber(e.target.value));
                   setError('');
                   setSaved(false);
                   setHasGenerated(false);
