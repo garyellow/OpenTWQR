@@ -2,7 +2,7 @@
 
 # OpenTWQR
 
-[![Deploy](https://img.shields.io/github/deployments/garyellow/OpenTWQR/github-pages?label=deploy&logo=github)](https://pay.garyellow.app)
+[![Deploy](https://img.shields.io/github/deployments/garyellow/OpenTWQR/github-pages?label=deploy&logo=github)](https://pay.garyellow.dev)
 [![License](https://img.shields.io/github/license/garyellow/OpenTWQR)](./LICENSE)
 [![Fork](https://img.shields.io/github/forks/garyellow/OpenTWQR?style=flat&logo=github&logoColor=white)](https://github.com/garyellow/OpenTWQR/fork)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20the%20developer-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/garyellow)
@@ -55,7 +55,7 @@ Completely free, open source, no sign-up required — account data is stored onl
 
 <br />
 
-<a href="https://pay.garyellow.app"><strong>Try it now →</strong></a>
+<a href="https://pay.garyellow.dev"><strong>Try it now →</strong></a>
 
 </div>
 
